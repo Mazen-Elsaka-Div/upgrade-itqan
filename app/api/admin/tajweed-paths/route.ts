@@ -3,7 +3,7 @@ import { getSession, requireRole } from "@/lib/auth"
 import { query } from "@/lib/db"
 import { seedDefaultStages, SUBJECTS, type Subject } from "@/lib/tajweed-paths"
 
-const ADMIN_ROLES = ["admin", "student_supervisor", "reciter_supervisor"] as const
+const ADMIN_ROLES = ["admin", "student_supervisor", "reciter_supervisor", "teacher", "academy_admin"] as const
 
 export const dynamic = "force-dynamic"
 
