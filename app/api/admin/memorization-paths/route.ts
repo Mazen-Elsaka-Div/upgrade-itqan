@@ -15,7 +15,6 @@ export async function GET(req: NextRequest) {
     if (!requireRole(session, [...ADMIN_ROLES])) {
       return NextResponse.json({ error: "غير مصرح" }, { status: 403 })
     }
-
     const { searchParams } = new URL(req.url)
     const includeStats = searchParams.get("include_stats") === "1"
 
