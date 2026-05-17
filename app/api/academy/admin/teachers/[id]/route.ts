@@ -10,7 +10,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const { id } = await params
   try {
     const body = await req.json()
-    const { name, email, gender, is_active } = body
+    const { name, email, gender, is_active, reapply_blocked } = body
 
     const result = await query(`
       UPDATE users SET 
@@ -18,14 +18,16 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         email = COALESCE($2, email),
         gender = COALESCE($3, gender),
         is_active = CASE WHEN $4::boolean IS NOT NULL THEN $4 ELSE is_active END,
+        reapply_blocked = CASE WHEN $5::boolean IS NOT NULL THEN $5 ELSE reapply_blocked END,
         updated_at = NOW()
-      WHERE id = $5 AND role = 'teacher'
-      RETURNING id, name, email, role, gender, is_active, created_at
+      WHERE id = $6 AND role = 'teacher'
+      RETURNING id, name, email, role, gender, is_active, reapply_blocked, created_at
     `, [
-      name || null, 
-      email ? email.toLowerCase().trim() : null, 
-      gender || null, 
-      is_active !== undefined ? is_active : null, 
+      name || null,
+      email ? email.toLowerCase().trim() : null,
+      gender || null,
+      is_active !== undefined ? is_active : null,
+      reapply_blocked !== undefined ? reapply_blocked : null,
       id
     ])
 
@@ -46,12 +48,6 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   }
   const { id } = await params
   try {
-    // Hard delete the user row. Most teacher-related tables reference users(id)
-    // with ON DELETE CASCADE (teacher_applications, sessions, enrollments, …),
-    // so they get cleaned up automatically. The only ON DELETE RESTRICT FK is
-    // courses.teacher_id — if the teacher still owns courses, the DELETE will
-    // fail with Postgres error code 23503 and we surface that to the admin so
-    // they can reassign or archive the courses first.
     const result = await query<{ id: string }>(
       `DELETE FROM users WHERE id = $1 AND role = 'teacher' RETURNING id`,
       [id]

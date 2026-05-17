@@ -25,24 +25,41 @@ export async function GET(req: NextRequest) {
         u.gender,
         u.is_active,
         u.approval_status,
+        u.reapply_blocked,
         u.created_at,
         COUNT(DISTINCT c.id)::int AS courses_count,
         COUNT(DISTINCT e.student_id)::int AS total_students,
         latest_app.status AS application_status,
         latest_app.rejection_reason,
-        latest_app.app_created_at AS submitted_at
+        latest_app.app_submitted_at AS submitted_at,
+        rejection_stats.rejection_count,
+        rejection_stats.last_rejected_at,
+        rejection_stats.rejection_dates
       FROM users u
       LEFT JOIN courses c ON u.id = c.teacher_id
       LEFT JOIN enrollments e ON c.id = e.course_id AND e.status = 'active'
       LEFT JOIN LATERAL (
-        SELECT ta.status, ta.rejection_reason, ta.created_at AS app_created_at
+        SELECT ta.status, ta.rejection_reason,
+               COALESCE(ta.submitted_at, ta.created_at) AS app_submitted_at
         FROM teacher_applications ta
         WHERE ta.user_id = u.id
         ORDER BY ta.created_at DESC
         LIMIT 1
       ) latest_app ON TRUE
+      LEFT JOIN LATERAL (
+        SELECT
+          COUNT(*)::int AS rejection_count,
+          MAX(COALESCE(ta2.rejected_at, ta2.reviewed_at)) AS last_rejected_at,
+          JSON_AGG(
+            COALESCE(ta2.rejected_at, ta2.reviewed_at)
+            ORDER BY COALESCE(ta2.rejected_at, ta2.reviewed_at) DESC
+          ) FILTER (WHERE COALESCE(ta2.rejected_at, ta2.reviewed_at) IS NOT NULL) AS rejection_dates
+        FROM teacher_applications ta2
+        WHERE ta2.user_id = u.id AND ta2.status = 'rejected'
+      ) rejection_stats ON TRUE
       WHERE u.role = 'teacher'
-      GROUP BY u.id, latest_app.status, latest_app.rejection_reason, latest_app.app_created_at
+      GROUP BY u.id, latest_app.status, latest_app.rejection_reason, latest_app.app_submitted_at,
+               rejection_stats.rejection_count, rejection_stats.last_rejected_at, rejection_stats.rejection_dates
       ORDER BY u.created_at DESC
     `)
     return NextResponse.json({ data: rows })
