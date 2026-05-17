@@ -5,6 +5,8 @@ import { seedDefaultStages, SUBJECTS, type Subject } from "@/lib/tajweed-paths"
 
 const ADMIN_ROLES = ["admin", "student_supervisor", "reciter_supervisor"] as const
 
+export const dynamic = "force-dynamic"
+
 // GET /api/admin/tajweed-paths
 export async function GET(req: NextRequest) {
   try {

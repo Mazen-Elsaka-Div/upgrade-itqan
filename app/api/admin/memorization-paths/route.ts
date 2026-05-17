@@ -5,6 +5,8 @@ import { generatePathUnits, isValidUnitType, type PathDirection } from "@/lib/me
 
 const ADMIN_ROLES = ["admin", "student_supervisor", "reciter_supervisor"] as const
 
+export const dynamic = "force-dynamic"
+
 // GET /api/admin/memorization-paths
 //   ?include_stats=1 → also returns enrollment counts + completion rate per path
 export async function GET(req: NextRequest) {
