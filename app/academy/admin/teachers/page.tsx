@@ -123,10 +123,22 @@ export default function AdminTeachersPage() {
     try {
       const url = editItem ? `/api/academy/admin/teachers/${editItem.id}` : '/api/academy/admin/teachers'
       const method = editItem ? 'PATCH' : 'POST'
-      const body = editItem ? { name: form.name, gender: form.gender, approval_status: form.approval_status || undefined, is_active: form.is_active } : form
+      const body = editItem
+        ? { name: form.name, gender: form.gender, approval_status: form.approval_status || undefined, is_active: form.is_active }
+        : form
       const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
-      if (res.ok) { setShowModal(false); fetchTeachers() }
-      else { const err = await res.json().catch(() => ({})); alert(err.error || 'حدث خطأ') }
+      if (res.ok) {
+        const json = await res.json().catch(() => null)
+        if (editItem && json?.data) {
+          setTeachers(prev => prev.map(t => t.id === editItem.id ? { ...t, ...json.data } : t))
+        } else {
+          fetchTeachers()
+        }
+        setShowModal(false)
+      } else {
+        const err = await res.json().catch(() => ({}))
+        alert(err.error || 'حدث خطأ')
+      }
     } finally { setSaving(false) }
   }
 
@@ -416,7 +428,7 @@ export default function AdminTeachersPage() {
                 <>
                   <div>
                     <label className="text-sm font-bold block mb-1.5">حالة الموافقة</label>
-                    <select value={form.approval_status} onChange={e => setForm({ ...form, approval_status: e.target.value })}
+                    <select value={form.approval_status} onChange={e => setForm(prev => ({ ...prev, approval_status: e.target.value }))}
                       className="w-full px-3 py-2.5 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-emerald-500">
                       <option value="pending_approval">بانتظار الموافقة</option>
                       <option value="approved">مقبول</option>
@@ -425,7 +437,7 @@ export default function AdminTeachersPage() {
                   </div>
                   <div className="flex items-center gap-3">
                     <label className="text-sm font-bold">الحالة</label>
-                    <button type="button" onClick={() => setForm({ ...form, is_active: !form.is_active })}
+                    <button type="button" onClick={() => setForm(prev => ({ ...prev, is_active: !prev.is_active }))}
                       className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                         form.is_active ? 'bg-emerald-600' : 'bg-gray-300 dark:bg-gray-600'
                       }`}>
