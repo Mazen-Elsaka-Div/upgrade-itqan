@@ -118,11 +118,11 @@ export async function POST(req: NextRequest) {
     const salt = await bcrypt.genSalt(10)
     const password_hash = await bcrypt.hash(password, salt)
 
-    // Create user with teacher role
+    // Create user with teacher role – auto-approve since an admin is adding them
     const result = await query(`
-      INSERT INTO users (name, email, password_hash, role, gender, is_active, has_academy_access, created_at)
-      VALUES ($1, $2, $3, 'teacher', $4, true, true, NOW())
-      RETURNING id, name, email, role, gender, is_active, has_academy_access, created_at
+      INSERT INTO users (name, email, password_hash, role, gender, is_active, has_academy_access, approval_status, created_at)
+      VALUES ($1, $2, $3, 'teacher', $4, true, true, 'approved', NOW())
+      RETURNING id, name, email, role, gender, is_active, has_academy_access, approval_status, created_at
     `, [name, email.toLowerCase().trim(), password_hash, gender || 'male'])
 
     // Save specialization if provided
