@@ -10,7 +10,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const { id } = await params
   try {
     const body = await req.json()
-    const { name, email, gender, is_active, reapply_blocked } = body
+    const { name, email, gender, is_active, reapply_blocked, approval_status } = body
+
+    const VALID_STATUSES = ['pending_approval', 'approved', 'rejected']
 
     const result = await query(`
       UPDATE users SET 
@@ -19,15 +21,17 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         gender = COALESCE($3, gender),
         is_active = CASE WHEN $4::boolean IS NOT NULL THEN $4 ELSE is_active END,
         reapply_blocked = CASE WHEN $5::boolean IS NOT NULL THEN $5 ELSE reapply_blocked END,
+        approval_status = COALESCE($6, approval_status),
         updated_at = NOW()
-      WHERE id = $6 AND role = 'teacher'
-      RETURNING id, name, email, role, gender, is_active, reapply_blocked, created_at
+      WHERE id = $7 AND role = 'teacher'
+      RETURNING id, name, email, role, gender, is_active, reapply_blocked, approval_status, created_at
     `, [
       name || null,
       email ? email.toLowerCase().trim() : null,
       gender || null,
       is_active !== undefined ? is_active : null,
       reapply_blocked !== undefined ? reapply_blocked : null,
+      approval_status && VALID_STATUSES.includes(approval_status) ? approval_status : null,
       id
     ])
 
