@@ -38,10 +38,10 @@ export async function GET(req: NextRequest) {
       SELECT 
         e.course_id,
         c.title as course_title
-      FROM enrollments e
-      JOIN courses c ON c.id = e.course_id
-      WHERE e.student_id = $1 
-        AND e.status IN ('active', 'completed')
+      FROM enrollments ce
+      JOIN courses c ON c.id = ce.course_id
+      WHERE ce.student_id = $1 
+        AND LOWER(ce.status) IN ('active', 'completed', 'accepted')
     `, [session.sub])
 
     const courseIds = enrollments.map(e => e.course_id)
