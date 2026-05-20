@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
     // 1. Get enrolled courses for this student
     const enrollments = await query<any>(`
       SELECT 
-        ce.course_id,
+        e.course_id,
         c.title as course_title
       FROM enrollments ce
       JOIN courses c ON c.id = ce.course_id
