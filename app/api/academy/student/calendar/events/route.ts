@@ -112,7 +112,7 @@ export async function GET(req: NextRequest) {
       WHERE t.course_id = ANY($1)
         AND t.due_date >= $2
         AND t.due_date <= $3
-        AND t.status = 'published'
+        AND t.status IN ('pending', 'active')
       ORDER BY t.due_date ASC
     `, [courseIds, startDate.toISOString(), endDate.toISOString()])
 
