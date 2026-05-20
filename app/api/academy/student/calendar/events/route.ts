@@ -27,9 +27,12 @@ export async function GET(req: NextRequest) {
     const year = month ? parseInt(month.split('-')[0]) : new Date().getFullYear()
     const monthNum = month ? parseInt(month.split('-')[1]) : new Date().getMonth() + 1
 
-    // Calculate start and end of month
+    // Calculate start and end of month, extended by 1 day on each side
+    // to account for timezone offsets (e.g. a session at 23:00 UTC is next day in UTC+3)
     const startDate = new Date(year, monthNum - 1, 1)
+    startDate.setDate(startDate.getDate() - 1) // 1 day before start of month
     const endDate = new Date(year, monthNum, 0, 23, 59, 59)
+    endDate.setDate(endDate.getDate() + 1) // 1 day after end of month
 
     const events: CalendarEvent[] = []
 
@@ -74,6 +77,7 @@ export async function GET(req: NextRequest) {
         id: `session-${session.id}`,
         title: session.title || 'جلسة حية',
         date: schedDate.toISOString().split('T')[0],
+        scheduled_at: session.scheduled_at,
         time: schedDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
         type: 'live_session',
         course: courseMap.get(session.course_id) || 'دورة',
@@ -103,6 +107,7 @@ export async function GET(req: NextRequest) {
         id: `task-${task.id}`,
         title: `تسليم: ${task.title}`,
         date: dueDate.toISOString().split('T')[0],
+        scheduled_at: task.due_date,
         time: dueDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
         type: 'assignment_deadline',
         course: courseMap.get(task.course_id) || 'دورة',
@@ -156,6 +161,7 @@ export async function GET(req: NextRequest) {
         id: `lesson-${lesson.id}`,
         title: lesson.title,
         date: schedDate.toISOString().split('T')[0],
+        scheduled_at: lesson.scheduled_at,
         time: schedDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
         type: 'lesson',
         course: courseMap.get(lesson.course_id) || 'دورة',

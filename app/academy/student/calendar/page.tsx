@@ -10,22 +10,35 @@ import Link from 'next/link'
 interface CalendarEvent {
   id: string
   title: string
-  date: string // YYYY-MM-DD format
+  date: string // YYYY-MM-DD format (local timezone)
   time: string
   type: 'live_session' | 'assignment_deadline' | 'review' | 'lesson' | 'memorization_goal'
   course: string
   course_id?: string
   link?: string
   status?: string
+  scheduled_at?: string // raw UTC timestamp from server
   meta?: Record<string, any>
 }
 
 export default function AcademyCalendarPage() {
   const { t, locale } = useI18n()
   const isAr = locale === 'ar'
+
+  // Helper: convert a UTC ISO string to a local YYYY-MM-DD date string
+  const toLocalDateStr = (isoStr: string): string => {
+    const d = new Date(isoStr)
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  }
+
+  // Helper: get local YYYY-MM-DD for today
+  const getLocalToday = (): string => {
+    const d = new Date()
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  }
   
   const [currentDate, setCurrentDate] = useState(new Date())
-  const [selectedDate, setSelectedDate] = useState<string | null>(new Date().toISOString().split('T')[0])
+  const [selectedDate, setSelectedDate] = useState<string | null>(getLocalToday())
   const [events, setEvents] = useState<CalendarEvent[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -38,7 +51,19 @@ export default function AcademyCalendarPage() {
         const res = await fetch(`/api/academy/student/calendar/events?month=${month}`)
         if (res.ok) {
           const data = await res.json()
-          setEvents(data.events || [])
+          // Convert UTC timestamps to local dates for correct timezone display
+          const processed = (data.events || []).map((ev: CalendarEvent) => {
+            if (ev.scheduled_at) {
+              const d = new Date(ev.scheduled_at)
+              return {
+                ...ev,
+                date: toLocalDateStr(ev.scheduled_at),
+                time: d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })
+              }
+            }
+            return ev
+          })
+          setEvents(processed)
         }
       } catch (error) {
         console.error('Failed to fetch calendar events:', error)
@@ -51,7 +76,7 @@ export default function AcademyCalendarPage() {
   }, [currentDate.getFullYear(), currentDate.getMonth()])
 
   // Today's events split out of `events` for the side panel
-  const todayStr = new Date().toISOString().split('T')[0]
+  const todayStr = getLocalToday()
   const todayEvents = events.filter(e => e.date === todayStr)
   const todaySessions = todayEvents.filter(e => e.type === 'live_session' || e.type === 'lesson')
   const todayTasks = todayEvents.filter(e => e.type === 'assignment_deadline')
@@ -311,7 +336,7 @@ export default function AcademyCalendarPage() {
                 <div className="divide-y divide-border/50">
                   {monthEvents.map((ev) => {
                     const evDate = new Date(ev.date)
-                    const isToday = ev.date === new Date().toISOString().split('T')[0]
+                    const isToday = ev.date === getLocalToday()
                     return (
                       <button
                         key={ev.id}
@@ -404,7 +429,7 @@ export default function AcademyCalendarPage() {
                   const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
                   const dayEvents = getEventsForDate(dateStr)
                   const isSelected = selectedDate === dateStr
-                  const isToday = dateStr === new Date().toISOString().split('T')[0]
+                  const isToday = dateStr === getLocalToday()
 
                   return (
                     <button
@@ -470,7 +495,7 @@ export default function AcademyCalendarPage() {
               ) : (
                 <div className="divide-y divide-border/50">
                   {selectedEvents.map(ev => {
-                    const isToday = selectedDate === new Date().toISOString().split('T')[0]
+                    const isToday = selectedDate === getLocalToday()
                     return (
                       <div key={ev.id} className="p-6 transition-colors hover:bg-muted/20">
                         <div className="flex items-start gap-4">
