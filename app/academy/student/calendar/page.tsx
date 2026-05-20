@@ -57,7 +57,7 @@ export default function AcademyCalendarPage() {
 
     const month = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`
 
-    fetch(`/api/academy/student/calendar/events?month=${month}`)
+    fetch(`/api/academy/student/calendar/events?month=${month}`, { cache: 'no-store' })
       .then(r => r.json())
       .then(data => {
         if (cancelled) return
