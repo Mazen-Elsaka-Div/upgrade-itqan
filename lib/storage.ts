@@ -36,7 +36,7 @@ export async function uploadToStorage(
 ): Promise<StorageUploadResult> {
     let buffer: Buffer;
 
-    if (typeof File !== 'undefined' && fileOrBuffer instanceof File) {
+    if ('arrayBuffer' in fileOrBuffer && typeof fileOrBuffer.arrayBuffer === 'function') {
         buffer = Buffer.from(await fileOrBuffer.arrayBuffer());
     } else {
         buffer = fileOrBuffer as Buffer;

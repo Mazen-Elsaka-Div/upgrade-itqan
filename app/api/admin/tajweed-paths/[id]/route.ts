@@ -60,12 +60,6 @@ async function resolveSourceForPath(id: string): Promise<PathSource | null> {
   if (tajweedColumns.has("id") && await rowExists({ kind: "tajweed", table: "tajweed_paths", columns: tajweedColumns }, id)) {
     return { kind: "tajweed", table: "tajweed_paths", columns: tajweedColumns }
   }
-
-  const learningColumns = await getTableColumns("learning_paths")
-  if (learningColumns.has("id") && await rowExists({ kind: "learning", table: "learning_paths", columns: learningColumns }, id)) {
-    return { kind: "learning", table: "learning_paths", columns: learningColumns }
-  }
-
   return null
 }
 

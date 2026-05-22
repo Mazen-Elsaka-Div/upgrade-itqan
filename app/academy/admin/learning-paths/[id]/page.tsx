@@ -200,6 +200,50 @@ export default function AcademyAdminLearningPathDetailPage() {
     setStageDialog({ open: true, stage })
   }
 
+  async function handleStageFileUpload(file: File, type: "video" | "pdf") {
+    if (type === "video" && !file.type.startsWith("video/") && !file.type.startsWith("audio/")) {
+      toast.error("يجب اختيار ملف فيديو أو صوت")
+      return
+    }
+    if (type === "pdf" && file.type !== "application/pdf" && !file.type.startsWith("image/")) {
+      toast.error("يجب اختيار ملف PDF أو صورة")
+      return
+    }
+    
+    // Limits
+    const MAX_VIDEO_SIZE = 50 * 1024 * 1024 // 50MB
+    const MAX_PDF_SIZE = 10 * 1024 * 1024 // 10MB
+    if (type === "video" && file.size > MAX_VIDEO_SIZE) {
+      toast.error("الحجم الأقصى للفيديو 50MB")
+      return
+    }
+    if (type === "pdf" && file.size > MAX_PDF_SIZE) {
+      toast.error("الحجم الأقصى للملف 10MB")
+      return
+    }
+
+    const toastId = toast.loading("جاري الرفع...")
+    try {
+      const fd = new FormData()
+      fd.append("file", file)
+      const res = await fetch("/api/upload", { method: "POST", body: fd })
+      const json = await res.json()
+      if (!res.ok || !json.url) {
+        throw new Error(json.error || "فشل الرفع")
+      }
+      
+      if (type === "video") {
+        setStageForm(prev => ({ ...prev, video_url: json.url }))
+      } else {
+        setStageForm(prev => ({ ...prev, pdf_url: json.url }))
+      }
+      
+      toast.success("تم الرفع بنجاح", { id: toastId })
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "حدث خطأ أثناء الرفع", { id: toastId })
+    }
+  }
+
   async function saveStage() {
     if (!stageForm.title.trim()) return
     setSavingStage(true)
@@ -598,11 +642,45 @@ export default function AcademyAdminLearningPathDetailPage() {
             </div>
             <div className="space-y-1">
               <Label>{tp.stageForm.videoUrl}</Label>
-              <Input value={stageForm.video_url} onChange={e => setStageForm({ ...stageForm, video_url: e.target.value })} placeholder="https://..." />
+              <div className="flex gap-2">
+                <Input value={stageForm.video_url} onChange={e => setStageForm({ ...stageForm, video_url: e.target.value })} placeholder="https://... أو قم بالرفع" />
+                <div className="relative shrink-0">
+                  <input
+                    type="file"
+                    accept="video/*,audio/*"
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    onChange={e => {
+                      const file = e.target.files?.[0]
+                      if (file) handleStageFileUpload(file, "video")
+                      e.target.value = ""
+                    }}
+                  />
+                  <Button type="button" variant="outline" className="gap-2">
+                    <UploadCloud className="h-4 w-4" /> رفع
+                  </Button>
+                </div>
+              </div>
             </div>
             <div className="space-y-1">
               <Label>{tp.stageForm.pdfUrl}</Label>
-              <Input value={stageForm.pdf_url} onChange={e => setStageForm({ ...stageForm, pdf_url: e.target.value })} placeholder="https://..." />
+              <div className="flex gap-2">
+                <Input value={stageForm.pdf_url} onChange={e => setStageForm({ ...stageForm, pdf_url: e.target.value })} placeholder="https://... أو قم بالرفع" />
+                <div className="relative shrink-0">
+                  <input
+                    type="file"
+                    accept="application/pdf,image/*"
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    onChange={e => {
+                      const file = e.target.files?.[0]
+                      if (file) handleStageFileUpload(file, "pdf")
+                      e.target.value = ""
+                    }}
+                  />
+                  <Button type="button" variant="outline" className="gap-2">
+                    <UploadCloud className="h-4 w-4" /> رفع
+                  </Button>
+                </div>
+              </div>
             </div>
             <div className="md:col-span-2 space-y-1">
               <Label>الدورة المرتبطة (اختياري)</Label>

@@ -67,18 +67,8 @@ async function tableExists(tableName: string) {
 async function resolvePathSource(scope: string): Promise<PathSource | null> {
   const tajweedColumns = await getTableColumns("tajweed_paths")
   if (tajweedColumns.has("id") && tajweedColumns.has("title")) {
-    if (scope !== "academy" || tajweedColumns.has("subject")) {
-      return { kind: "tajweed", table: "tajweed_paths", columns: tajweedColumns }
-    }
+    return { kind: "tajweed", table: "tajweed_paths", columns: tajweedColumns }
   }
-
-  if (scope === "academy") {
-    const learningColumns = await getTableColumns("learning_paths")
-    if (learningColumns.has("id") && learningColumns.has("title")) {
-      return { kind: "learning", table: "learning_paths", columns: learningColumns }
-    }
-  }
-
   return null
 }
 
@@ -94,11 +84,6 @@ async function resolveAcademyPathSources(): Promise<PathSource[]> {
   const tajweedColumns = await getTableColumns("tajweed_paths")
   if (tajweedColumns.has("id") && tajweedColumns.has("title") && tajweedColumns.has("subject")) {
     sources.push({ kind: "tajweed", table: "tajweed_paths", columns: tajweedColumns })
-  }
-
-  const learningColumns = await getTableColumns("learning_paths")
-  if (learningColumns.has("id") && learningColumns.has("title")) {
-    sources.push({ kind: "learning", table: "learning_paths", columns: learningColumns })
   }
 
   return sources
