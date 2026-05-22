@@ -60,12 +60,6 @@ async function resolveSourceForPath(id: string): Promise<PathSource | null> {
   if (tajweedColumns.has("id") && await rowExists({ kind: "tajweed", table: "tajweed_paths", columns: tajweedColumns }, id)) {
     return { kind: "tajweed", table: "tajweed_paths", columns: tajweedColumns }
   }
-
-  const learningColumns = await getTableColumns("learning_paths")
-  if (learningColumns.has("id") && await rowExists({ kind: "learning", table: "learning_paths", columns: learningColumns }, id)) {
-    return { kind: "learning", table: "learning_paths", columns: learningColumns }
-  }
-
   return null
 }
 
@@ -165,7 +159,8 @@ async function readStats(source: PathSource, id: string) {
 }
 
 function buildPatch(source: PathSource, body: DbRecord) {
-  const allowed = ["title", "description", "level", "thumbnail_url", "is_published"]
+  const allowed = ["title", "description", "level", "thumbnail_url", "is_published", "target_audience", "promo_video_url", "certification_type", "enrollment_type", "price"]
+  const jsonbFields = ["what_you_will_learn", "prerequisites", "tags"]
   const sets: string[] = []
   const params: unknown[] = []
 
@@ -173,6 +168,13 @@ function buildPatch(source: PathSource, body: DbRecord) {
     if (key in body && source.columns.has(key)) {
       params.push(body[key])
       sets.push(`${key} = $${params.length}`)
+    }
+  }
+
+  for (const key of jsonbFields) {
+    if (key in body && source.columns.has(key)) {
+      params.push(JSON.stringify(body[key] || []))
+      sets.push(`${key} = $${params.length}::jsonb`)
     }
   }
 

@@ -35,16 +35,16 @@ type Stage = {
   title: string
   description: string | null
   content: string | null
-  video_url: string | null
   pdf_url: string | null
   passage_text: string | null
   estimated_minutes: number
+  course_id: string | null
 }
 
 const initialStageForm = {
   title: "", description: "", content: "",
   video_url: "", pdf_url: "", passage_text: "",
-  estimated_minutes: 30,
+  estimated_minutes: 30, course_id: "",
 }
 
 export default function AcademyAdminLearningPathDetailPage() {
@@ -65,12 +65,18 @@ export default function AcademyAdminLearningPathDetailPage() {
     subject: "tajweed" as Subject,
     manager_id: "" as string,
     estimated_days: "", require_audio: false, is_published: false,
+    target_audience: "", promo_video_url: "",
+    what_you_will_learn: [] as string[],
+    prerequisites: [] as string[],
+    certification_type: "certificate_of_completion", enrollment_type: "open", price: 0,
+    tags: [] as string[]
   })
   const [managers, setManagers] = useState<ManagerCandidate[]>([])
 
   const [stageDialog, setStageDialog] = useState<{ open: boolean; stage?: Stage }>({ open: false })
   const [stageForm, setStageForm] = useState(initialStageForm)
   const [savingStage, setSavingStage] = useState(false)
+  const [courses, setCourses] = useState<{id: string, title: string}[]>([])
 
   async function load() {
     setLoading(true)
@@ -93,6 +99,14 @@ export default function AcademyAdminLearningPathDetailPage() {
           estimated_days: d1.path.estimated_days?.toString() || "",
           require_audio: !!d1.path.require_audio,
           is_published: !!d1.path.is_published,
+          target_audience: d1.path.target_audience || "",
+          promo_video_url: d1.path.promo_video_url || "",
+          what_you_will_learn: d1.path.what_you_will_learn || [],
+          prerequisites: d1.path.prerequisites || [],
+          certification_type: d1.path.certification_type || "certificate_of_completion",
+          enrollment_type: d1.path.enrollment_type || "open",
+          price: d1.path.price || 0,
+          tags: d1.path.tags || [],
         })
       }
       if (r2.ok) {
@@ -120,10 +134,15 @@ export default function AcademyAdminLearningPathDetailPage() {
   useEffect(() => {
     (async () => {
       try {
-        const teachers = await fetch("/api/admin/users?role=teacher&limit=100").then(r => r.json()).catch(() => ({}))
+        const [teachers, coursesRes] = await Promise.all([
+          fetch("/api/admin/users?role=teacher&limit=100").then(r => r.json()).catch(() => ({})),
+          fetch("/api/academy/admin/courses").then(r => r.json()).catch(() => ({ data: [] })),
+        ])
         setManagers((teachers?.users as any[]) || [])
+        setCourses(coursesRes.data || [])
       } catch {
         setManagers([])
+        setCourses([])
       }
     })()
   }, [])
@@ -143,6 +162,14 @@ export default function AcademyAdminLearningPathDetailPage() {
           estimated_days: edit.estimated_days ? parseInt(edit.estimated_days, 10) : null,
           require_audio: edit.require_audio,
           is_published: edit.is_published,
+          target_audience: edit.target_audience,
+          promo_video_url: edit.promo_video_url,
+          what_you_will_learn: edit.what_you_will_learn,
+          prerequisites: edit.prerequisites,
+          certification_type: edit.certification_type,
+          enrollment_type: edit.enrollment_type,
+          price: edit.price,
+          tags: edit.tags,
         }),
       })
       await load()
@@ -164,8 +191,53 @@ export default function AcademyAdminLearningPathDetailPage() {
       pdf_url: stage.pdf_url || "",
       passage_text: stage.passage_text || "",
       estimated_minutes: stage.estimated_minutes || 30,
+      course_id: stage.course_id || "",
     })
     setStageDialog({ open: true, stage })
+  }
+
+  async function handleStageFileUpload(file: File, type: "video" | "pdf") {
+    if (type === "video" && !file.type.startsWith("video/") && !file.type.startsWith("audio/")) {
+      toast.error("يجب اختيار ملف فيديو أو صوت")
+      return
+    }
+    if (type === "pdf" && file.type !== "application/pdf" && !file.type.startsWith("image/")) {
+      toast.error("يجب اختيار ملف PDF أو صورة")
+      return
+    }
+    
+    // Limits
+    const MAX_VIDEO_SIZE = 50 * 1024 * 1024 // 50MB
+    const MAX_PDF_SIZE = 10 * 1024 * 1024 // 10MB
+    if (type === "video" && file.size > MAX_VIDEO_SIZE) {
+      toast.error("الحجم الأقصى للفيديو 50MB")
+      return
+    }
+    if (type === "pdf" && file.size > MAX_PDF_SIZE) {
+      toast.error("الحجم الأقصى للملف 10MB")
+      return
+    }
+
+    const toastId = toast.loading("جاري الرفع...")
+    try {
+      const fd = new FormData()
+      fd.append("file", file)
+      const res = await fetch("/api/upload", { method: "POST", body: fd })
+      const json = await res.json()
+      if (!res.ok || !json.url) {
+        throw new Error(json.error || "فشل الرفع")
+      }
+      
+      if (type === "video") {
+        setStageForm(prev => ({ ...prev, video_url: json.url }))
+      } else {
+        setStageForm(prev => ({ ...prev, pdf_url: json.url }))
+      }
+      
+      toast.success("تم الرفع بنجاح", { id: toastId })
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "حدث خطأ أثناء الرفع", { id: toastId })
+    }
   }
 
   async function saveStage() {
@@ -180,6 +252,7 @@ export default function AcademyAdminLearningPathDetailPage() {
         pdf_url: stageForm.pdf_url || null,
         passage_text: stageForm.passage_text || null,
         estimated_minutes: stageForm.estimated_minutes,
+        course_id: stageForm.course_id || null,
       }
       if (stageDialog.stage) {
         await fetch(`/api/admin/tajweed-paths/${pathId}/stages/${stageDialog.stage.id}`, {
@@ -268,6 +341,7 @@ export default function AcademyAdminLearningPathDetailPage() {
       <Tabs defaultValue="stages" className="space-y-4">
         <TabsList>
           <TabsTrigger value="stages">{tp.tabs.stages} ({stages.length})</TabsTrigger>
+          <TabsTrigger value="landing">صفحة الهبوط (Landing)</TabsTrigger>
           <TabsTrigger value="funnel">{tp.tabs.funnel}</TabsTrigger>
           <TabsTrigger value="settings">{tp.tabs.settings}</TabsTrigger>
         </TabsList>
@@ -293,6 +367,7 @@ export default function AcademyAdminLearningPathDetailPage() {
                     <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="font-semibold">{s.title}</h3>
                       <Badge variant="outline" className="text-xs">{s.estimated_minutes} {tp.metadata.minutesShort}</Badge>
+                      {s.course_id && <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-800 border-blue-200">دورة تدريبية</Badge>}
                       {s.video_url && <Badge variant="secondary" className="text-xs">{tp.metadata.videoBadge}</Badge>}
                       {s.pdf_url && <Badge variant="secondary" className="text-xs">{tp.metadata.pdfBadge}</Badge>}
                     </div>
@@ -485,6 +560,60 @@ export default function AcademyAdminLearningPathDetailPage() {
             </Button>
           </Card>
         </TabsContent>
+
+        <TabsContent value="landing">
+          <Card className="p-6 max-w-2xl space-y-4">
+            <h3 className="font-semibold text-lg border-b pb-2">إعدادات صفحة الهبوط</h3>
+            <div className="space-y-1">
+              <Label>الفيديو التعريفي (Promo Video URL)</Label>
+              <Input value={edit.promo_video_url} onChange={e => setEdit({ ...edit, promo_video_url: e.target.value })} placeholder="رابط يوتيوب أو فيديو تعريفي..." />
+            </div>
+            <div className="space-y-1">
+              <Label>الفئة المستهدفة (Target Audience)</Label>
+              <Textarea rows={2} value={edit.target_audience} onChange={e => setEdit({ ...edit, target_audience: e.target.value })} placeholder="لمن هذا المسار؟" />
+            </div>
+            <div className="space-y-1">
+              <Label>ماذا ستتعلم؟ (What you will learn) - افصل بينها بفاصلة</Label>
+              <Textarea rows={3} value={edit.what_you_will_learn.join(', ')} onChange={e => setEdit({ ...edit, what_you_will_learn: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })} placeholder="إتقان مخارج الحروف، التلاوة الصحيحة..." />
+            </div>
+            <div className="space-y-1">
+              <Label>المتطلبات السابقة (Prerequisites) - افصل بينها بفاصلة</Label>
+              <Textarea rows={2} value={edit.prerequisites.join(', ')} onChange={e => setEdit({ ...edit, prerequisites: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })} placeholder="القدرة على قراءة الحروف العربية..." />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label>نوع التسجيل</Label>
+                <Select value={edit.enrollment_type} onValueChange={v => setEdit({ ...edit, enrollment_type: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="open">مفتوح للجميع</SelectItem>
+                    <SelectItem value="cohort">نظام دفعات (Cohorts)</SelectItem>
+                    <SelectItem value="invite_only">بدعوة فقط</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label>نوع الشهادة</Label>
+                <Select value={edit.certification_type} onValueChange={v => setEdit({ ...edit, certification_type: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="certificate_of_completion">شهادة إتمام</SelectItem>
+                    <SelectItem value="ijazah">إجازة</SelectItem>
+                    <SelectItem value="none">بدون شهادة</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <Label>سعر المسار (إذا كان مدفوعاً، 0 للمجاني)</Label>
+              <Input type="number" min="0" value={edit.price} onChange={e => setEdit({ ...edit, price: parseFloat(e.target.value) || 0 })} />
+            </div>
+            <Button onClick={savePath} disabled={saving} className="gap-2 mt-4">
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+              حفظ بيانات صفحة الهبوط
+            </Button>
+          </Card>
+        </TabsContent>
       </Tabs>
 
       <Dialog open={stageDialog.open} onOpenChange={o => setStageDialog({ open: o })}>
@@ -509,11 +638,57 @@ export default function AcademyAdminLearningPathDetailPage() {
             </div>
             <div className="space-y-1">
               <Label>{tp.stageForm.videoUrl}</Label>
-              <Input value={stageForm.video_url} onChange={e => setStageForm({ ...stageForm, video_url: e.target.value })} placeholder="https://..." />
+              <div className="flex gap-2">
+                <Input value={stageForm.video_url} onChange={e => setStageForm({ ...stageForm, video_url: e.target.value })} placeholder="https://... أو قم بالرفع" />
+                <div className="relative shrink-0">
+                  <input
+                    type="file"
+                    accept="video/*,audio/*"
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    onChange={e => {
+                      const file = e.target.files?.[0]
+                      if (file) handleStageFileUpload(file, "video")
+                      e.target.value = ""
+                    }}
+                  />
+                  <Button type="button" variant="outline" className="gap-2">
+                    <UploadCloud className="h-4 w-4" /> رفع
+                  </Button>
+                </div>
+              </div>
             </div>
             <div className="space-y-1">
               <Label>{tp.stageForm.pdfUrl}</Label>
-              <Input value={stageForm.pdf_url} onChange={e => setStageForm({ ...stageForm, pdf_url: e.target.value })} placeholder="https://..." />
+              <div className="flex gap-2">
+                <Input value={stageForm.pdf_url} onChange={e => setStageForm({ ...stageForm, pdf_url: e.target.value })} placeholder="https://... أو قم بالرفع" />
+                <div className="relative shrink-0">
+                  <input
+                    type="file"
+                    accept="application/pdf,image/*"
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    onChange={e => {
+                      const file = e.target.files?.[0]
+                      if (file) handleStageFileUpload(file, "pdf")
+                      e.target.value = ""
+                    }}
+                  />
+                  <Button type="button" variant="outline" className="gap-2">
+                    <UploadCloud className="h-4 w-4" /> رفع
+                  </Button>
+                </div>
+              </div>
+            </div>
+            <div className="md:col-span-2 space-y-1">
+              <Label>الدورة المرتبطة (اختياري)</Label>
+              <Select value={stageForm.course_id || "none"} onValueChange={v => setStageForm({ ...stageForm, course_id: v === "none" ? "" : v })}>
+                <SelectTrigger><SelectValue placeholder="اختر دورة من المنصة لربطها بهذه المرحلة" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">بدون دورة</SelectItem>
+                  {courses.map(c => (
+                    <SelectItem key={c.id} value={c.id}>{c.title}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="md:col-span-2 space-y-1">
               <Label>{tp.stageForm.passageText}</Label>

@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { getSession } from '@/lib/auth'
 import { AcademyDashboardShell } from '@/components/academy-dashboard-shell'
+import { Toaster } from '@/components/ui/sonner'
 
 export default async function AcademyAdminLayout({
   children,
@@ -29,6 +30,7 @@ export default async function AcademyAdminLayout({
       libraryRole={session.role}
     >
       {children}
+      <Toaster richColors position="top-center" />
     </AcademyDashboardShell>
   )
 }

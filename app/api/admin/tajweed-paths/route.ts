@@ -67,19 +67,26 @@ async function tableExists(tableName: string) {
 async function resolvePathSource(scope: string): Promise<PathSource | null> {
   const tajweedColumns = await getTableColumns("tajweed_paths")
   if (tajweedColumns.has("id") && tajweedColumns.has("title")) {
-    if (scope !== "academy" || tajweedColumns.has("subject")) {
-      return { kind: "tajweed", table: "tajweed_paths", columns: tajweedColumns }
-    }
+    return { kind: "tajweed", table: "tajweed_paths", columns: tajweedColumns }
   }
-
-  if (scope === "academy") {
-    const learningColumns = await getTableColumns("learning_paths")
-    if (learningColumns.has("id") && learningColumns.has("title")) {
-      return { kind: "learning", table: "learning_paths", columns: learningColumns }
-    }
-  }
-
   return null
+}
+
+/**
+ * For the academy admin manager we want a *unified* view that includes
+ * both the newer tajweed_paths-style rows AND any legacy rows that may
+ * still live in the older learning_paths table. Returns every source
+ * that is queryable so the caller can merge results.
+ */
+async function resolveAcademyPathSources(): Promise<PathSource[]> {
+  const sources: PathSource[] = []
+
+  const tajweedColumns = await getTableColumns("tajweed_paths")
+  if (tajweedColumns.has("id") && tajweedColumns.has("title") && tajweedColumns.has("subject")) {
+    sources.push({ kind: "tajweed", table: "tajweed_paths", columns: tajweedColumns })
+  }
+
+  return sources
 }
 
 function selectColumn(source: PathSource, column: string, fallback: string, alias = column) {
@@ -125,7 +132,7 @@ function buildPathWhere(source: PathSource, subjectFilter: string | null, scope:
 
 function normalizePathRow(row: LearningPathRow, source: PathSource): LearningPathRow {
   if (source.kind === "tajweed") {
-    return { ...row, subject: fromDbSubject(row.subject) }
+    return { ...row, subject: fromDbSubject(row.subject), kind: "tajweed" }
   }
 
   return {
@@ -138,6 +145,7 @@ function normalizePathRow(row: LearningPathRow, source: PathSource): LearningPat
     manager_id: null,
     manager_name: null,
     manager_email: null,
+    kind: "learning",
   }
 }
 
@@ -185,20 +193,12 @@ function selectColumnsForSource(source: PathSource, usersAvailable: boolean) {
   ]
 }
 
-async function readLearningPaths(req: NextRequest) {
-  const { searchParams } = new URL(req.url)
-  const includeStats = searchParams.get("include_stats") === "1"
-  const subjectFilter = searchParams.get("subject") || null
-  const scope = (searchParams.get("scope") || "").toLowerCase()
-
-  const source = await resolvePathSource(scope)
-  if (!source) return { paths: [], warning: "learning_paths_unavailable" }
-
-  if (scope === "academy" && !source.columns.has("subject")) {
-    return { paths: [], warning: "learning_paths_subject_unavailable" }
-  }
-
-  const usersAvailable = await tableExists("users")
+async function readFromSource(
+  source: PathSource,
+  subjectFilter: string | null,
+  scope: string,
+  usersAvailable: boolean,
+) {
   const joins: string[] = []
   if (usersAvailable && source.columns.has("created_by")) {
     joins.push("LEFT JOIN users u ON u.id = p.created_by")
@@ -215,7 +215,7 @@ async function readLearningPaths(req: NextRequest) {
     source.columns.has("title") ? "p.title ASC" : null,
   ].filter(Boolean).join(", ")
 
-  let paths = await query<LearningPathRow>(
+  const rows = await query<LearningPathRow>(
     `SELECT ${selectColumns.join(",\n              ")}
        FROM ${source.table} p
        ${joins.join("\n       ")}
@@ -223,7 +223,70 @@ async function readLearningPaths(req: NextRequest) {
       ${order ? `ORDER BY ${order}` : ""}`,
     params,
   )
-  paths = paths.map(path => normalizePathRow(path, source))
+  return rows.map(row => normalizePathRow(row, source))
+}
+
+async function readLearningPaths(req: NextRequest) {
+  const { searchParams } = new URL(req.url)
+  const includeStats = searchParams.get("include_stats") === "1"
+  const subjectFilter = searchParams.get("subject") || null
+  const scope = (searchParams.get("scope") || "").toLowerCase()
+
+  const usersAvailable = await tableExists("users")
+
+  // For the academy admin manager we merge both tables so legacy rows are
+  // visible alongside the newer stage-based paths.
+  if (scope === "academy") {
+    const sources = await resolveAcademyPathSources()
+    if (sources.length === 0) {
+      return { paths: [], warning: "learning_paths_unavailable" }
+    }
+
+    const tajweedSource = sources.find(s => s.kind === "tajweed")
+    if (!tajweedSource && sources[0] && !sources[0].columns.has("subject")) {
+      return { paths: [], warning: "learning_paths_subject_unavailable" }
+    }
+
+    let merged: LearningPathRow[] = []
+    for (const source of sources) {
+      try {
+        const rows = await readFromSource(source, subjectFilter, scope, usersAvailable)
+        merged = merged.concat(rows)
+      } catch (error) {
+        console.error(`[admin tajweed paths] failed to read from ${source.table}`, error)
+      }
+    }
+
+    if (includeStats) {
+      const bySource = new Map<PathSource, LearningPathRow[]>()
+      for (const source of sources) bySource.set(source, [])
+      for (const path of merged) {
+        const source = sources.find(s => s.kind === (path.kind === "learning" ? "learning" : "tajweed"))
+        if (source) bySource.get(source)?.push(path)
+      }
+      const enriched: LearningPathRow[] = []
+      for (const [source, list] of bySource) {
+        enriched.push(...(await withStats(list, source)))
+      }
+      merged = enriched
+    }
+
+    merged.sort((a, b) => {
+      const pa = a.is_published === true ? 0 : 1
+      const pb = b.is_published === true ? 0 : 1
+      if (pa !== pb) return pa - pb
+      const ca = (a.created_at as string | null) || ""
+      const cb = (b.created_at as string | null) || ""
+      return cb.localeCompare(ca)
+    })
+
+    return { paths: merged }
+  }
+
+  const source = await resolvePathSource(scope)
+  if (!source) return { paths: [], warning: "learning_paths_unavailable" }
+
+  let paths = await readFromSource(source, subjectFilter, scope, usersAvailable)
 
   if (includeStats) {
     paths = await withStats(paths, source)
@@ -379,6 +442,25 @@ export async function POST(req: NextRequest) {
     if (source.kind === "tajweed" && source.columns.has("manager_id")) {
       insertColumns.push("manager_id")
       values.push(typeof body.manager_id === "string" && body.manager_id ? body.manager_id : null)
+    }
+
+    const simpleFields = ["target_audience", "promo_video_url", "certification_type", "enrollment_type"]
+    for (const key of simpleFields) {
+      if (source.columns.has(key)) {
+        insertColumns.push(key)
+        values.push(typeof body[key] === "string" ? body[key] : null)
+      }
+    }
+    if (source.columns.has("price")) {
+      insertColumns.push("price")
+      values.push(typeof body.price === "number" ? body.price : 0)
+    }
+    const jsonbFields = ["what_you_will_learn", "prerequisites", "tags"]
+    for (const key of jsonbFields) {
+      if (source.columns.has(key)) {
+        insertColumns.push(key)
+        values.push(JSON.stringify(Array.isArray(body[key]) ? body[key] : []))
+      }
     }
 
     const placeholders = values.map((_, index) => `$${index + 1}`)
