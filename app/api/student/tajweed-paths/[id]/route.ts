@@ -28,8 +28,17 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
     if (!path) return NextResponse.json({ error: "غير موجود" }, { status: 404 })
 
     const stages = (await query<any>(
-      `SELECT * FROM tajweed_path_stages WHERE path_id = $1 ORDER BY position ASC`,
-      [id],
+      `SELECT s.*,
+              c.title AS course_title,
+              c.thumbnail_url AS course_thumbnail_url,
+              ce.progress_percentage AS course_progress,
+              ce.status AS course_status
+       FROM tajweed_path_stages s
+       LEFT JOIN courses c ON c.id = s.course_id
+       LEFT JOIN enrollments ce ON ce.course_id = s.course_id AND ce.student_id = $2
+       WHERE s.path_id = $1 
+       ORDER BY s.position ASC`,
+      [id, session!.sub],
     )) as any[]
 
     const enrollmentRows = (await query<any>(

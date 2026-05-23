@@ -41,12 +41,17 @@ interface PathStage {
   pdf_url?: string
   passage_text?: string
   course_id?: string
+  course_title?: string
+  course_thumbnail_url?: string
+  course_progress?: number
+  course_status?: string
   progress: {
     status: 'locked' | 'unlocked' | 'in_progress' | 'completed'
     audio_url?: string
     notes?: string
   }
 }
+
 
 interface Enrollment {
   id: string
@@ -517,31 +522,77 @@ export default function StudentPathDetailPage() {
 
                     {/* Integrated course gating cards */}
                     {stage.course_id && (
-                      <div className="flex flex-col items-stretch sm:items-end gap-2.5 shrink-0">
-                        <div className="bg-slate-100 dark:bg-slate-800/80 px-4 py-2.5 rounded-xl border border-border/60 text-xs flex items-center gap-2 max-w-[240px]">
-                          <Award className="w-4 h-4 text-emerald-600 shrink-0" />
-                          <span className="text-muted-foreground">تتطلب هذه المرحلة إكمال دورة أكاديمية</span>
+                      <div className="flex flex-col gap-3 mt-4 sm:mt-0 sm:max-w-[320px] w-full shrink-0">
+                        <div className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800/80 dark:to-slate-900/80 p-3 rounded-2xl border border-border/80 shadow-sm flex flex-col gap-3 group/course transition-colors hover:border-emerald-500/30">
+                          <div className="flex gap-3">
+                            {/* Course Thumbnail */}
+                            <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 bg-slate-200 dark:bg-slate-700 relative">
+                              {stage.course_thumbnail_url ? (
+                                <img src={stage.course_thumbnail_url} alt={stage.course_title} className="w-full h-full object-cover" />
+                              ) : (
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                  <BookOpen className="w-6 h-6 text-slate-400" />
+                                </div>
+                              )}
+                            </div>
+                            
+                            {/* Course Info */}
+                            <div className="flex flex-col justify-center flex-1 min-w-0">
+                              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider mb-0.5">متطلب الدورة</span>
+                              <h4 className="text-sm font-semibold text-foreground truncate" title={stage.course_title || 'دورة أكاديمية'}>
+                                {stage.course_title || 'دورة أكاديمية مرتبطة'}
+                              </h4>
+                            </div>
+                          </div>
+                          
+                          {/* Course Progress Mini-bar */}
+                          <div className="space-y-1.5 px-1">
+                            <div className="flex justify-between items-center text-[10px] font-semibold">
+                              <span className="text-muted-foreground">نسبة إنجازك في الدورة</span>
+                              <span className={cn(
+                                "transition-colors",
+                                Number(stage.course_progress || 0) === 100 || stage.course_status === 'completed' ? "text-emerald-600" : "text-amber-600"
+                              )}>
+                                {Number(stage.course_progress || 0)}%
+                              </span>
+                            </div>
+                            <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                              <div 
+                                className={cn(
+                                  "h-full rounded-full transition-all duration-700",
+                                  Number(stage.course_progress || 0) === 100 || stage.course_status === 'completed' ? "bg-emerald-500" : "bg-amber-500"
+                                )}
+                                style={{ width: `${Number(stage.course_progress || 0)}%` }} 
+                              />
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2">
+
+                        <div className="flex items-center gap-2 justify-end">
                           {/* Complete stage checking */}
                           {!isStageCompleted && (
                             <button
                               onClick={() => handleCompleteStage(stage.id)}
                               disabled={completingStageId === stage.id || isStageLocked}
-                              className="px-4 py-2 text-xs font-bold rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 active:bg-emerald-800 transition-colors shadow-sm disabled:opacity-50"
+                              className={cn(
+                                "px-4 py-2 text-xs font-bold rounded-xl transition-all shadow-sm disabled:opacity-50 flex-1 sm:flex-none",
+                                Number(stage.course_progress || 0) === 100 || stage.course_status === 'completed'
+                                  ? "bg-emerald-600 text-white hover:bg-emerald-700 active:bg-emerald-800 ring-2 ring-emerald-600/20"
+                                  : "bg-slate-200 text-slate-500 dark:bg-slate-800 dark:text-slate-400"
+                              )}
                             >
                               {completingStageId === stage.id ? (
-                                <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin mx-auto" />
                               ) : (
-                                'إكمال المرحلة'
+                                'اعتماد الإكمال'
                               )}
                             </button>
                           )}
                           <Link
                             href={`/academy/student/courses/${stage.course_id}`}
-                            className="px-4 py-2 text-xs font-bold rounded-xl bg-secondary text-secondary-foreground border border-border hover:bg-secondary/80 transition-colors flex items-center gap-1"
+                            className="px-4 py-2 text-xs font-bold rounded-xl bg-white dark:bg-slate-950 text-foreground border border-border hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors flex items-center justify-center gap-1.5 shadow-sm flex-1 sm:flex-none"
                           >
-                            انتقل للدورة
+                            صفحة الدورة
                             <ExternalLink className="w-3.5 h-3.5" />
                           </Link>
                         </div>

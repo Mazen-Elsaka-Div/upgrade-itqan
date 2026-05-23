@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useI18n } from '@/lib/i18n/context'
 import { cn } from '@/lib/utils'
 import { 
-  Route, BookOpen, Clock, ChevronLeft, Award, PlayCircle, BookMarked, HelpCircle
+  Route, BookOpen, Clock, ChevronLeft, Award, PlayCircle, BookMarked, HelpCircle, Layers, Sparkles
 } from 'lucide-react'
 
 interface TajweedPath {
@@ -28,6 +28,7 @@ export default function StudentLearningPathPage() {
   const { t } = useI18n()
   const [paths, setPaths] = useState<TajweedPath[]>([])
   const [loading, setLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState<string>('all')
 
   useEffect(() => {
     async function fetchPaths() {
@@ -53,18 +54,26 @@ export default function StudentLearningPathPage() {
   }
 
   const levelColors = {
-    beginner: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20',
-    intermediate: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20',
-    advanced: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20'
+    beginner: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
+    intermediate: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
+    advanced: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
   }
 
   const subjectLabels: { [key: string]: string } = {
-    fiqh: 'الفقه الإسلامي',
-    aqeedah: 'العقيدة الإسلامية',
+    fiqh: 'الفقه',
+    aqeedah: 'العقيدة',
     seerah: 'السيرة النبوية',
-    tafsir: 'التفسير وعلوم القرآن',
-    tajweed: 'التجويد والمقرأة'
+    tafsir: 'التفسير',
+    tajweed: 'التجويد'
   }
+
+  const tabs = [
+    { id: 'all', label: 'الكل' },
+    { id: 'fiqh', label: 'الفقه' },
+    { id: 'aqeedah', label: 'العقيدة' },
+    { id: 'seerah', label: 'السيرة النبوية' },
+    { id: 'tafsir', label: 'التفسير' }
+  ]
 
   if (loading) {
     return (
@@ -75,36 +84,60 @@ export default function StudentLearningPathPage() {
     )
   }
 
-  // Filter paths
-  const myPaths = paths.filter(p => p.enrollment_status === 'active')
-  const availablePaths = paths.filter(p => p.enrollment_status !== 'active')
+  // Filter paths by tab
+  const filteredPaths = activeTab === 'all' 
+    ? paths 
+    : paths.filter(p => p.subject === activeTab)
+
+  const myPaths = filteredPaths.filter(p => p.enrollment_status === 'active')
+  const availablePaths = filteredPaths.filter(p => p.enrollment_status !== 'active')
 
   return (
-    <div className="space-y-10 py-4 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="space-y-10 py-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       {/* Hero Welcome Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-800 to-teal-900 text-white p-8 sm:p-12 shadow-2xl">
-        <div className="absolute -right-10 -bottom-10 w-44 h-44 rounded-full bg-white/10 blur-xl pointer-events-none" />
-        <div className="absolute right-1/3 -top-12 w-32 h-32 rounded-full bg-white/5 blur-lg pointer-events-none" />
-        <div className="relative z-10 max-w-2xl">
-          <span className="px-3 py-1 rounded-full bg-emerald-700/50 text-emerald-200 text-xs font-semibold uppercase tracking-wider">
-            المسارات التعليمية الأكاديمية
-          </span>
-          <h1 className="text-3xl sm:text-4xl font-extrabold mt-4 tracking-tight leading-tight">
-            ارتقِ بمعرفتك الشرعية عبر مسارات أكاديمية متكاملة
+      <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-emerald-800 via-teal-900 to-slate-900 text-white p-10 sm:p-14 shadow-2xl border border-emerald-800/50">
+        <div className="absolute -right-20 -bottom-20 w-64 h-64 rounded-full bg-emerald-500/20 blur-3xl pointer-events-none" />
+        <div className="absolute left-10 -top-20 w-48 h-48 rounded-full bg-teal-400/10 blur-2xl pointer-events-none" />
+        
+        <div className="relative z-10 max-w-3xl">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-emerald-100 text-xs font-bold uppercase tracking-wider backdrop-blur-md mb-6">
+            <Sparkles className="w-4 h-4 text-emerald-300" />
+            المسارات الأكاديمية المتكاملة
+          </div>
+          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-[1.15]">
+            ارتقِ بمعرفتك الشرعية في مسار منهجي متدرج
           </h1>
-          <p className="text-emerald-100/90 mt-4 text-base sm:text-lg leading-relaxed font-light">
-            تعلم الفقه، العقيدة، السيرة والتفسير في مسارات دراسية منظمة، مرتبطة مباشرة بالدورات والدروس لضمان التحصيل العلمي الأمثل.
+          <p className="text-emerald-100/90 mt-5 text-lg leading-relaxed font-light max-w-2xl">
+            تعلم الفقه، العقيدة، السيرة والتفسير عبر مسارات دراسية منظمة، مرتبطة مباشرة بالدورات لتحصل على أفضل تجربة تعليمية.
           </p>
         </div>
       </div>
 
+      {/* Tabs */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+        {tabs.map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={cn(
+              "px-5 py-2.5 rounded-full text-sm font-bold whitespace-nowrap transition-all duration-300",
+              activeTab === tab.id 
+                ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20" 
+                : "bg-card text-muted-foreground hover:bg-emerald-50 hover:text-emerald-700 border border-border/60"
+            )}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
       {/* Enrolled/Registered Paths Section */}
       {myPaths.length > 0 && (
-        <div className="space-y-6">
-          <div className="flex items-center gap-3 border-r-4 border-emerald-600 pr-3">
-            <h2 className="text-2xl font-bold text-foreground">مساراتي التعليمية النشطة</h2>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">
-              {myPaths.length}
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="flex items-center gap-3 border-r-4 border-emerald-600 pr-4">
+            <h2 className="text-2xl font-bold text-foreground">مساراتي قيد التعلم</h2>
+            <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">
+              {myPaths.length} مسار
             </span>
           </div>
 
@@ -118,22 +151,25 @@ export default function StudentLearningPathPage() {
                 <Link
                   key={path.id}
                   href={`/academy/student/path/${path.id}`}
-                  className="group relative flex flex-col justify-between bg-card hover:bg-accent/40 rounded-2xl border border-border/80 hover:border-emerald-500/40 transition-all duration-300 shadow-sm hover:shadow-md hover:-translate-y-1 overflow-hidden"
+                  className="group relative flex flex-col justify-between bg-card hover:bg-slate-50/50 dark:hover:bg-slate-900/50 rounded-3xl border border-border/80 hover:border-emerald-500/40 transition-all duration-300 shadow-sm hover:shadow-xl hover:-translate-y-1.5 overflow-hidden"
                 >
-                  <div className="p-6 space-y-4">
+                  <div className="p-6 sm:p-8 space-y-5">
                     {/* Header: Subject & Level */}
                     <div className="flex justify-between items-center gap-2">
-                      <span className="px-2.5 py-1 text-xs font-medium rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                        {subjectLabels[path.subject] || path.subject}
-                      </span>
-                      <span className={cn("px-2.5 py-1 text-xs font-medium rounded-full", levelColors[path.level])}>
+                      <div className="flex items-center gap-1.5">
+                        <Layers className="w-4 h-4 text-emerald-600" />
+                        <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400">
+                          {subjectLabels[path.subject] || path.subject}
+                        </span>
+                      </div>
+                      <span className={cn("px-2.5 py-1 text-[10px] font-bold rounded-md border", levelColors[path.level])}>
                         {levelLabels[path.level]}
                       </span>
                     </div>
 
                     {/* Title & Description */}
                     <div>
-                      <h3 className="font-bold text-lg group-hover:text-emerald-600 transition-colors leading-snug">
+                      <h3 className="font-extrabold text-xl group-hover:text-emerald-600 transition-colors leading-snug">
                         {path.title}
                       </h3>
                       {path.description && (
@@ -144,29 +180,31 @@ export default function StudentLearningPathPage() {
                     </div>
 
                     {/* Progress Info */}
-                    <div className="space-y-2 pt-2">
-                      <div className="flex justify-between text-xs font-medium">
-                        <span className="text-muted-foreground">نسبة إنجاز المسار</span>
-                        <span className="text-emerald-600 font-semibold">{progressPercent}%</span>
+                    <div className="space-y-2.5 bg-slate-50 dark:bg-slate-800/40 p-4 rounded-2xl border border-border/40">
+                      <div className="flex justify-between text-xs font-bold">
+                        <span className="text-muted-foreground">نسبة الإنجاز</span>
+                        <span className="text-emerald-600">{progressPercent}%</span>
                       </div>
-                      <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
+                      <div className="h-2 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                         <div 
-                          className="h-full bg-emerald-500 rounded-full transition-all duration-500 group-hover:bg-emerald-400"
+                          className="h-full bg-gradient-to-l from-emerald-400 to-emerald-600 rounded-full transition-all duration-700"
                           style={{ width: `${progressPercent}%` }}
                         />
                       </div>
-                      <p className="text-xs text-muted-foreground/80 mt-1">
-                        أكملت {path.stages_completed || 0} من أصل {path.total_stages} دورة
+                      <p className="text-[10px] text-muted-foreground/80 font-medium">
+                        أكملت {path.stages_completed || 0} من أصل {path.total_stages} مرحلة
                       </p>
                     </div>
                   </div>
 
                   {/* Footer Action */}
-                  <div className="border-t border-border/60 bg-muted/20 px-6 py-4 flex justify-between items-center group-hover:bg-muted/40 transition-colors">
-                    <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                  <div className="bg-emerald-600/5 px-6 sm:px-8 py-4 flex justify-between items-center border-t border-emerald-600/10 group-hover:bg-emerald-600 group-hover:text-white transition-colors duration-300">
+                    <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400 group-hover:text-white flex items-center gap-1 transition-colors">
                       واصل التعلم الآن
                     </span>
-                    <ChevronLeft className="w-4 h-4 text-emerald-600 dark:text-emerald-400 group-hover:-translate-x-1 transition-transform" />
+                    <div className="w-8 h-8 rounded-full bg-emerald-600/10 group-hover:bg-white/20 flex items-center justify-center transition-colors">
+                      <ChevronLeft className="w-4 h-4 text-emerald-700 dark:text-emerald-400 group-hover:text-white group-hover:-translate-x-0.5 transition-all" />
+                    </div>
                   </div>
                 </Link>
               )
@@ -176,11 +214,13 @@ export default function StudentLearningPathPage() {
       )}
 
       {/* Available Paths Section */}
-      <div className="space-y-6">
-        <div className="flex items-center gap-3 border-r-4 border-emerald-600 pr-3">
-          <h2 className="text-2xl font-bold text-foreground">المسارات التعليمية المتاحة</h2>
-          <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">
-            {availablePaths.length}
+      <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100 fill-mode-both">
+        <div className="flex items-center gap-3 border-r-4 border-emerald-600 pr-4">
+          <h2 className="text-2xl font-bold text-foreground">
+            {activeTab === 'all' ? 'المسارات الأكاديمية المتاحة' : `مسارات ${subjectLabels[activeTab]} المتاحة`}
+          </h2>
+          <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">
+            {availablePaths.length} مسار
           </span>
         </div>
 
@@ -190,81 +230,84 @@ export default function StudentLearningPathPage() {
               <Link
                 key={path.id}
                 href={`/academy/student/path/${path.id}`}
-                className="group relative flex flex-col justify-between bg-card hover:bg-accent/40 rounded-2xl border border-border/80 hover:border-emerald-500/40 transition-all duration-300 shadow-sm hover:shadow-md hover:-translate-y-1 overflow-hidden"
+                className="group relative flex flex-col justify-between bg-card hover:bg-slate-50/50 dark:hover:bg-slate-900/50 rounded-3xl border border-border/80 hover:border-emerald-500/40 transition-all duration-300 shadow-sm hover:shadow-xl hover:-translate-y-1.5 overflow-hidden"
               >
                 <div>
                   {/* Thumbnail / Header Gradient Banner */}
-                  <div className="h-32 bg-gradient-to-br from-emerald-700/90 to-teal-800 relative flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
+                  <div className="h-40 bg-gradient-to-br from-emerald-800 to-teal-950 relative flex items-center justify-center p-6 overflow-hidden">
+                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors duration-500 z-10" />
                     {path.thumbnail_url ? (
                       <img 
                         src={path.thumbnail_url} 
                         alt={path.title} 
-                        className="absolute inset-0 w-full h-full object-cover opacity-30 group-hover:opacity-40 transition-opacity" 
+                        className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-opacity duration-500 group-hover:scale-105" 
                       />
                     ) : (
-                      <BookMarked className="w-12 h-12 text-white/20 absolute right-4 bottom-2" />
+                      <BookMarked className="w-16 h-16 text-white/10 absolute right-4 bottom-0 transform translate-y-4 translate-x-4" />
                     )}
-                    <h3 className="relative z-10 text-white font-bold text-center text-lg leading-snug drop-shadow-sm px-2">
+                    
+                    {/* Badge over image */}
+                    <div className="absolute top-4 right-4 z-20 flex gap-2">
+                       <span className="px-2.5 py-1 text-[10px] font-bold rounded-md bg-white/20 backdrop-blur-sm text-white border border-white/20">
+                        {subjectLabels[path.subject] || path.subject}
+                      </span>
+                      <span className="px-2.5 py-1 text-[10px] font-bold rounded-md bg-white/20 backdrop-blur-sm text-white border border-white/20">
+                        {levelLabels[path.level]}
+                      </span>
+                    </div>
+
+                    <h3 className="relative z-20 text-white font-extrabold text-center text-xl sm:text-2xl leading-tight drop-shadow-md">
                       {path.title}
                     </h3>
                   </div>
 
                   {/* Body Content */}
-                  <div className="p-6 space-y-4">
-                    {/* Level and Subject Badges */}
-                    <div className="flex justify-between items-center gap-2">
-                      <span className="px-2.5 py-1 text-xs font-medium rounded-full bg-secondary text-secondary-foreground">
-                        {subjectLabels[path.subject] || path.subject}
-                      </span>
-                      <span className={cn("px-2.5 py-1 text-xs font-medium rounded-full", levelColors[path.level])}>
-                        {levelLabels[path.level]}
-                      </span>
-                    </div>
-
+                  <div className="p-6 sm:p-8 space-y-4">
                     {/* Description */}
                     {path.description && (
-                      <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+                      <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">
                         {path.description}
                       </p>
                     )}
 
                     {/* Metadata: stages & hours */}
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground pt-2">
-                      <span className="flex items-center gap-1">
+                    <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-xs text-muted-foreground font-semibold pt-2">
+                      <span className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800/50 px-3 py-1.5 rounded-lg border border-border/50">
                         <BookOpen className="w-4 h-4 text-emerald-600" />
-                        {path.total_stages} دورة
+                        {path.total_stages} مرحلة
                       </span>
-                      <span className="flex items-center gap-1">
+                      <span className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800/50 px-3 py-1.5 rounded-lg border border-border/50">
                         <Clock className="w-4 h-4 text-emerald-600" />
-                        {path.estimated_days} ساعة تقديرية
+                        {path.estimated_days} ساعة
                       </span>
                     </div>
                   </div>
                 </div>
 
-                {/* Footer Action: Price / Button */}
-                <div className="border-t border-border/60 bg-muted/10 px-6 py-4 flex justify-between items-center group-hover:bg-muted/30 transition-colors">
+                {/* Footer Action */}
+                <div className="bg-slate-50 dark:bg-slate-900/50 px-6 sm:px-8 py-5 flex justify-between items-center border-t border-border/60">
                   <div className="flex flex-col">
-                    <span className="text-[10px] text-muted-foreground uppercase font-semibold">التسجيل</span>
-                    <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                    <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">التسجيل</span>
+                    <span className="text-sm font-extrabold text-emerald-600 dark:text-emerald-400">
                       {path.enrollment_type === 'paid' ? `${path.price} ر.س` : 'مجاني بالكامل'}
                     </span>
                   </div>
-                  <div className="px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-medium group-hover:bg-emerald-500 transition-colors flex items-center gap-1">
-                    عرض التفاصيل
-                    <ChevronLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
+                  <div className="px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold group-hover:bg-emerald-500 group-hover:shadow-lg group-hover:shadow-emerald-600/20 transition-all flex items-center gap-1.5">
+                    استكشف المسار
+                    <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
                   </div>
                 </div>
               </Link>
             ))}
           </div>
         ) : (
-          <div className="text-center py-16 bg-muted/20 border border-dashed border-border rounded-2xl flex flex-col items-center justify-center p-6">
-            <HelpCircle className="w-12 h-12 text-muted-foreground/60 mb-3" />
-            <h3 className="text-base font-semibold">لا توجد مسارات متاحة حالياً</h3>
-            <p className="text-sm text-muted-foreground mt-1 max-w-md">
-              تم تسجيلك بالفعل في كافة المسارات المتاحة، أو سيتم طرح مسارات دراسية جديدة قريباً.
+          <div className="text-center py-20 bg-card border border-dashed border-border/80 rounded-[2rem] flex flex-col items-center justify-center p-6 shadow-sm">
+            <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4">
+              <BookOpen className="w-8 h-8 text-slate-400" />
+            </div>
+            <h3 className="text-lg font-bold text-foreground">لا توجد مسارات متاحة</h3>
+            <p className="text-sm text-muted-foreground mt-2 max-w-md leading-relaxed">
+              عذراً، لا توجد حالياً مسارات أكاديمية متاحة في هذا التخصص، أو أنك قد سجلت مسبقاً في كافة المسارات.
             </p>
           </div>
         )}
