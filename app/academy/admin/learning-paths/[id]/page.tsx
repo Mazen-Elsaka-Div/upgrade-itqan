@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
+import { toast } from "sonner"
 import {
   ArrowRight, GraduationCap, Eye, EyeOff, Loader2, Plus, Save, Trash2,
-  Users, CheckCircle2, Clock, ChevronUp, ChevronDown, BarChart3,
+  Users, CheckCircle2, Clock, ChevronUp, ChevronDown, BarChart3, UploadCloud,
 } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
@@ -35,6 +36,7 @@ type Stage = {
   title: string
   description: string | null
   content: string | null
+  video_url: string | null
   pdf_url: string | null
   passage_text: string | null
   estimated_minutes: number
