@@ -7,6 +7,7 @@ import { toast } from "sonner"
 import {
   ArrowRight, GraduationCap, Eye, EyeOff, Loader2, Plus, Save, Trash2,
   Users, CheckCircle2, Clock, ChevronUp, ChevronDown, BarChart3, UploadCloud,
+  Image as ImageIcon,
 } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
@@ -71,7 +72,8 @@ export default function AcademyAdminLearningPathDetailPage() {
     what_you_will_learn: [] as string[],
     prerequisites: [] as string[],
     certification_type: "certificate_of_completion", enrollment_type: "open", price: 0,
-    tags: [] as string[]
+    tags: [] as string[],
+    thumbnail_url: "",
   })
   const [managers, setManagers] = useState<ManagerCandidate[]>([])
 
@@ -79,6 +81,7 @@ export default function AcademyAdminLearningPathDetailPage() {
   const [stageForm, setStageForm] = useState(initialStageForm)
   const [savingStage, setSavingStage] = useState(false)
   const [courses, setCourses] = useState<{id: string, title: string}[]>([])
+  const [uploadingThumb, setUploadingThumb] = useState(false)
 
   async function load() {
     setLoading(true)
@@ -109,6 +112,7 @@ export default function AcademyAdminLearningPathDetailPage() {
           enrollment_type: d1.path.enrollment_type || "open",
           price: d1.path.price || 0,
           tags: d1.path.tags || [],
+          thumbnail_url: d1.path.thumbnail_url || "",
         })
       }
       if (r2.ok) {
@@ -172,6 +176,7 @@ export default function AcademyAdminLearningPathDetailPage() {
           enrollment_type: edit.enrollment_type,
           price: edit.price,
           tags: edit.tags,
+          thumbnail_url: edit.thumbnail_url || null,
         }),
       })
       await load()
@@ -239,6 +244,36 @@ export default function AcademyAdminLearningPathDetailPage() {
       toast.success("تم الرفع بنجاح", { id: toastId })
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "حدث خطأ أثناء الرفع", { id: toastId })
+    }
+  }
+
+  async function handleThumbnailUpload(file: File) {
+    if (!file.type.startsWith("image/")) {
+      toast.error("يجب اختيار ملف صورة")
+      return
+    }
+    const MAX_SIZE = 4 * 1024 * 1024 // 4MB
+    if (file.size > MAX_SIZE) {
+      toast.error("الحجم الأقصى للصورة 4MB")
+      return
+    }
+
+    setUploadingThumb(true)
+    const toastId = toast.loading("جاري رفع صورة الغلاف...")
+    try {
+      const fd = new FormData()
+      fd.append("file", file)
+      const res = await fetch("/api/upload", { method: "POST", body: fd })
+      const json = await res.json()
+      if (!res.ok || !json.url) {
+        throw new Error(json.error || "فشل الرفع")
+      }
+      setEdit(prev => ({ ...prev, thumbnail_url: json.url }))
+      toast.success("تم رفع الصورة بنجاح", { id: toastId })
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "حدث خطأ أثناء الرفع", { id: toastId })
+    } finally {
+      setUploadingThumb(false)
     }
   }
 
@@ -496,6 +531,50 @@ export default function AcademyAdminLearningPathDetailPage() {
 
         <TabsContent value="settings">
           <Card className="p-6 max-w-xl space-y-4">
+            <div className="space-y-2">
+              <Label>صورة الغلاف (Thumbnail)</Label>
+              <div className="border-2 border-dashed border-border/60 rounded-xl p-4 text-center bg-muted/10 hover:bg-muted/30 transition-colors">
+                <div className="mx-auto w-full max-w-xs aspect-[16/9] bg-background shadow-sm rounded-lg overflow-hidden border border-border/50 mb-3 relative flex items-center justify-center">
+                  {edit.thumbnail_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={edit.thumbnail_url} alt="معاينة الغلاف" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="text-center p-4">
+                      <ImageIcon className="h-8 w-8 text-muted-foreground/30 mx-auto mb-1" />
+                      <span className="text-xs text-muted-foreground">لا توجد صورة غلاف (16:9)</span>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="relative inline-block">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={e => {
+                      const file = e.target.files?.[0]
+                      if (file) void handleThumbnailUpload(file)
+                      e.target.value = ""
+                    }}
+                    disabled={uploadingThumb || saving}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                    aria-label="رفع صورة الغلاف"
+                  />
+                  <Button type="button" variant="outline" size="sm" disabled={uploadingThumb || saving} className="gap-2">
+                    {uploadingThumb ? <Loader2 className="h-4 w-4 animate-spin" /> : <UploadCloud className="h-4 w-4" />}
+                    {edit.thumbnail_url ? "تغيير الصورة" : "اختيار ورفع صورة"}
+                  </Button>
+                </div>
+                
+                {edit.thumbnail_url && (
+                  <div className="mt-2">
+                    <button type="button" onClick={() => setEdit(prev => ({ ...prev, thumbnail_url: "" }))} className="text-xs text-red-500 hover:text-red-700 underline underline-offset-2">
+                      إزالة الصورة
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
             <div className="space-y-1">
               <Label>{tp.form.title}</Label>
               <Input value={edit.title} onChange={e => setEdit({ ...edit, title: e.target.value })} />
