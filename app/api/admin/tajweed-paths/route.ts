@@ -275,9 +275,9 @@ async function readLearningPaths(req: NextRequest) {
       const pa = a.is_published === true ? 0 : 1
       const pb = b.is_published === true ? 0 : 1
       if (pa !== pb) return pa - pb
-      const ca = (a.created_at as string | null) || ""
-      const cb = (b.created_at as string | null) || ""
-      return cb.localeCompare(ca)
+      const ca = a.created_at ? new Date(a.created_at as string | Date).getTime() : 0
+      const cb = b.created_at ? new Date(b.created_at as string | Date).getTime() : 0
+      return cb - ca
     })
 
     return { paths: merged }
