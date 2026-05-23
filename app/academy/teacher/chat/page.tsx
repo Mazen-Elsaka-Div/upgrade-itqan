@@ -48,24 +48,46 @@ export default function TeacherChatPage() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  // Fetch conversations
-  useEffect(() => {
-    fetchConversations()
-  }, [])
-
   const fetchConversations = async () => {
     try {
       const res = await fetch('/api/academy/conversations')
       const data = await res.json()
       if (res.ok) {
         setConversations(data.conversations || [])
+        return data.conversations || []
       }
     } catch {
       // ignore
     } finally {
       setLoadingConv(false)
     }
+    return []
   }
+
+  // Initial load & URL params
+  useEffect(() => {
+    const init = async () => {
+      const convs = await fetchConversations()
+      
+      if (typeof window !== 'undefined') {
+        const urlParams = new URLSearchParams(window.location.search)
+        const studentId = urlParams.get('studentId')
+        
+        if (studentId) {
+          const existingConv = convs.find((c: any) => c.other_user_id === studentId)
+          if (existingConv) {
+            setActiveConv(existingConv)
+          } else {
+            // Need to start conversation
+            startConversation(studentId, convs)
+          }
+          // Clean up URL
+          window.history.replaceState({}, '', '/academy/teacher/chat')
+        }
+      }
+    }
+    init()
+  }, [])
 
   const fetchStudents = async () => {
     setLoadingStudents(true)
@@ -82,7 +104,7 @@ export default function TeacherChatPage() {
     }
   }
 
-  const startConversation = async (studentId: string) => {
+  const startConversation = async (studentId: string, currentConvs?: Conversation[]) => {
     setCreatingConv(true)
     try {
       const res = await fetch('/api/academy/conversations', {
@@ -93,9 +115,9 @@ export default function TeacherChatPage() {
       const data = await res.json()
       if (res.ok && data.conversationId) {
         // Refresh conversations and select the new one
-        await fetchConversations()
-        const newConv = conversations.find(c => c.id === data.conversationId) ||
-          { id: data.conversationId, other_user_id: studentId, other_user_name: students.find(s => s.id === studentId)?.name || '', other_user_avatar: null, last_message: null, last_message_at: null, unread_count: 0 }
+        const updatedConvs = await fetchConversations()
+        const newConv = updatedConvs.find((c: any) => c.id === data.conversationId) ||
+          { id: data.conversationId, other_user_id: studentId, other_user_name: students.find(s => s.id === studentId)?.name || 'Student', other_user_avatar: null, last_message: null, last_message_at: null, unread_count: 0 }
         setActiveConv(newConv)
         setShowNewConv(false)
       }
@@ -121,8 +143,8 @@ export default function TeacherChatPage() {
   // Fetch messages for active conversation
   useEffect(() => {
     if (!activeConv) return
-    const fetchMsgs = async () => {
-      setLoadingMsgs(true)
+    const fetchMsgs = async (isBackground = false) => {
+      if (!isBackground) setLoadingMsgs(true)
       try {
         const res = await fetch(`/api/academy/conversations/${activeConv.id}/messages`)
         const data = await res.json()
@@ -137,14 +159,14 @@ export default function TeacherChatPage() {
       } catch {
         // ignore
       } finally {
-        setLoadingMsgs(false)
+        if (!isBackground) setLoadingMsgs(false)
       }
     }
 
     fetchMsgs()
 
     // Polling setup (every 5 seconds)
-    const interval = setInterval(fetchMsgs, 5000)
+    const interval = setInterval(() => fetchMsgs(true), 5000)
     return () => clearInterval(interval)
   }, [activeConv])
 
