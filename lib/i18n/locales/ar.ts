@@ -1504,7 +1504,7 @@ export const ar = {
       content: 'المحتوى التعليمي',
       contentPlaceholder: 'شرح القاعدة، أمثلة، تمارين...',
       videoUrl: 'رابط المقطع المرئي',
-      pdfUrl: 'رابط الملف المرفق',
+      pdfUrl: 'الرابط',
       passageText: 'نص التطبيق (آيات للتلاوة)',
       passagePlaceholder: 'مثلا: سورة الفاتحة من الآية 1 إلى 7...',
       estimatedMinutes: 'المدة المتوقعة (دقيقة)',
