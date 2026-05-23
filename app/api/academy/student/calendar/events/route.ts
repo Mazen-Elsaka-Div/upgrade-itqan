@@ -139,39 +139,8 @@ export async function GET(req: NextRequest) {
     }
 
     // ─── 3. SCHEDULED LESSONS ─────────────────────────────────────────────────
-    // The lessons table does not have a scheduled_at column.
-    /*
-    const lessons = await query<any>(`
-      SELECT
-        l.id,
-        l.title,
-        l.course_id,
-        l.scheduled_at,
-        c.title AS course_title
-      FROM lessons l
-      JOIN courses c ON c.id = l.course_id
-      JOIN enrollments e ON e.course_id = l.course_id AND e.student_id = $1
-      WHERE l.scheduled_at IS NOT NULL
-        AND l.scheduled_at >= $2
-        AND l.scheduled_at <= $3
-        AND l.status = 'published'
-      ORDER BY l.scheduled_at ASC
-    `, [session.sub, startDate.toISOString(), endDate.toISOString()])
-
-    for (const l of lessons) {
-      const d = new Date(l.scheduled_at)
-      events.push({
-        id: `lesson-${l.id}`,
-        title: l.title,
-        date: toRiyadhDate(d),
-        time: toRiyadhTime(d),
-        type: 'lesson',
-        course: l.course_title || 'دورة',
-        course_id: l.course_id,
-        scheduled_at: l.scheduled_at,
-      })
-    }
-    */
+    // Lessons do not have a scheduled_at column in the database.
+    // They are self-paced and don't belong in the calendar query directly.
 
     // ─── 4. MEMORIZATION GOALS ────────────────────────────────────────────────
     try {
