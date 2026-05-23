@@ -143,12 +143,23 @@ export default function AdminTeachersPage() {
   }
 
   const handleDelete = async (teacher: Teacher) => {
-    if (!confirm(`سيتم حذف المدرس "${teacher.name}" نهائياً. هل تريد المتابعة؟`)) return
+    if (!confirm(`سيتم حذف المدرس "${teacher.name}" نهائياً. أي كورسات أو حلقات مرتبطة به ستُنقل تلقائياً للأرشيف. هل تريد المتابعة؟`)) return
     setDeletingId(teacher.id)
     try {
       const res = await fetch(`/api/academy/admin/teachers/${teacher.id}`, { method: 'DELETE' })
-      if (res.ok) fetchTeachers()
-      else { const err = await res.json().catch(() => ({})); alert(err.error || 'لا يمكن الحذف') }
+      const data = await res.json().catch(() => ({}))
+      if (res.ok) {
+        fetchTeachers()
+        const archived = data.archived
+        if (archived && (archived.courses > 0 || archived.halaqat > 0)) {
+          const parts: string[] = []
+          if (archived.courses > 0) parts.push(`${archived.courses} كورس`)
+          if (archived.halaqat > 0) parts.push(`${archived.halaqat} حلقة`)
+          alert(`✅ تم حذف المدرس وأرشفة ${parts.join(' و ')} تلقائياً.\n\nيمكنك استعادتها من صفحة الأرشيف الشامل وتعيين مدرس جديد لها.`)
+        }
+      } else {
+        alert(data.error || 'لا يمكن الحذف')
+      }
     } finally { setDeletingId(null) }
   }
 

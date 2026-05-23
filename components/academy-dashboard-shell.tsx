@@ -116,7 +116,7 @@ const getAcademyRoleConfig = (t: any, role: AcademyRole): { sections: NavSection
           title: t.management || 'الإدارة',
           items: [
             { href: '/academy/admin/courses', label: t.academy?.courses || 'الدورات', icon: BookOpen },
-            { href: '/academy/admin/courses/archive', label: t.academy?.coursesArchive || 'أرشيف الدورات', icon: Archive },
+            { href: '/academy/admin/archive', label: 'الأرشيف الشامل', icon: Archive },
             { href: '/academy/admin/categories', label: t.academy?.categories || 'التصنيفات', icon: Grid },
             { href: '/academy/admin/teachers', label: t.academy?.teachers || 'المدرسين', icon: GraduationCap },
             { href: '/academy/admin/teacher-applications', label: t.academy?.teacherApplications || 'طلبات التدريس', icon: UserCheck },

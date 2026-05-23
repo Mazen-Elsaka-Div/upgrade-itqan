@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSession } from '@/lib/auth'
-import { query } from '@/lib/db'
+import { query, queryOne } from '@/lib/db'
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getSession()
@@ -57,26 +57,81 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
   const { id } = await params
+  const adminId = session.sub
+
   try {
-    const result = await query<{ id: string }>(
-      `DELETE FROM users WHERE id = $1 AND role = 'teacher' RETURNING id`,
+    // تحقق من وجود المدرس
+    const teacher = await queryOne<{ id: string; name: string }>(
+      `SELECT id, name FROM users WHERE id = $1 AND role = 'teacher'`,
       [id]
     )
-    if (result.length === 0) {
+    if (!teacher) {
       return NextResponse.json({ error: 'المدرس غير موجود' }, { status: 404 })
     }
-    return NextResponse.json({ success: true })
+
+    // ========================================================
+    // 1) أرشفة الكورسات المرتبطة بالمدرس تلقائياً
+    // ========================================================
+    const archivedCourses = await query<{ id: string }>(
+      `UPDATE courses
+         SET is_active = false,
+             archived_at = NOW(),
+             archived_by = $1,
+             archive_reason = 'teacher_deleted',
+             original_teacher_id = teacher_id,
+             teacher_id = NULL
+       WHERE teacher_id = $2
+         AND (is_active = true OR archived_at IS NULL)
+       RETURNING id`,
+      [adminId, id]
+    )
+
+    // ========================================================
+    // 2) أرشفة الحلقات المرتبطة بالمدرس تلقائياً
+    // ========================================================
+    const archivedHalaqat = await query<{ id: string }>(
+      `UPDATE halaqat
+         SET is_active = false,
+             archived_at = NOW(),
+             archived_by = $1,
+             archive_reason = 'teacher_deleted',
+             original_teacher_id = teacher_id,
+             teacher_id = NULL
+       WHERE teacher_id = $2
+         AND (is_active = true OR archived_at IS NULL)
+       RETURNING id`,
+      [adminId, id]
+    )
+
+    // ========================================================
+    // 3) فك ارتباط الطلاب عن الحلقات قبل الحذف
+    // ========================================================
+    await query(
+      `UPDATE users SET halaqah_id = NULL
+       WHERE halaqah_id IN (
+         SELECT id FROM halaqat WHERE original_teacher_id = $1
+       )`,
+      [id]
+    )
+
+    // ========================================================
+    // 4) حذف المدرس من جدول المستخدمين
+    // ========================================================
+    await query(`DELETE FROM users WHERE id = $1 AND role = 'teacher'`, [id])
+
+    return NextResponse.json({
+      success: true,
+      archived: {
+        courses: archivedCourses.length,
+        halaqat: archivedHalaqat.length,
+      },
+      message:
+        archivedCourses.length > 0 || archivedHalaqat.length > 0
+          ? `تم حذف المدرس وأرشفة ${archivedCourses.length} كورس و ${archivedHalaqat.length} حلقة تلقائياً`
+          : 'تم حذف المدرس بنجاح',
+    })
   } catch (error: any) {
     console.error('Error deleting teacher:', error)
-    if (error?.code === '23503') {
-      return NextResponse.json(
-        {
-          error:
-            'لا يمكن حذف هذا المدرس لأنه مرتبط بكورسات أو حلقات. يرجى نقل أو أرشفة الكورسات أولاً ثم إعادة المحاولة.',
-        },
-        { status: 409 }
-      )
-    }
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
