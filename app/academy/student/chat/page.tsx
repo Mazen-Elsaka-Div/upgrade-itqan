@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Search, Send, User, Loader2, ArrowRight, MessageSquarePlus, X, BookOpen } from 'lucide-react'
+import { Search, Send, User, Loader2, ArrowRight, MessageSquarePlus, X, BookOpen, Shield } from 'lucide-react'
 import { useI18n } from '@/lib/i18n/context'
 
 interface Conversation {
@@ -16,6 +16,7 @@ interface Conversation {
   last_message: string | null
   last_message_at: string | null
   unread_count: number
+  is_ticket?: boolean
 }
 
 interface Message {
@@ -171,6 +172,41 @@ function StudentChatPageInner() {
     }
   }
 
+  const handleCreateTicket = async () => {
+    try {
+      const res = await fetch('/api/academy/conversations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isTicket: true }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        alert(data?.error || (isAr ? 'تعذر فتح التذكرة' : 'Could not open ticket'))
+        return
+      }
+      await fetchConversations()
+      setConversations(prev => {
+        const found = prev.find(c => c.id === data.conversationId)
+        if (found) setActiveConv(found)
+        return prev
+      })
+      if (!conversations.find(c => c.id === data.conversationId)) {
+        setActiveConv({
+          id: data.conversationId,
+          other_user_id: 'admin',
+          other_user_name: isAr ? 'إدارة الأكاديمية' : 'Academy Support',
+          other_user_avatar: null,
+          last_message: null,
+          last_message_at: null,
+          unread_count: 0,
+          is_ticket: true,
+        })
+      }
+    } catch {
+      // ignore
+    }
+  }
+
   // Fetch messages for active conversation
   useEffect(() => {
     if (!activeConv) return
@@ -260,13 +296,23 @@ function StudentChatPageInner() {
         {/* Sidebar (Conversations) */}
         <div className={`w-full md:w-80 border-${isAr ? 'l' : 'r'} border-border/50 flex flex-col min-h-0 ${activeConv ? 'hidden md:flex' : 'flex'}`}>
           <div className="p-4 border-b border-border/50 space-y-3">
-            <Button
-              onClick={openNewChatDialog}
-              className="w-full justify-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              <MessageSquarePlus className="w-4 h-4" />
-              {isAr ? 'بدء محادثة جديدة' : 'New conversation'}
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                onClick={openNewChatDialog}
+                className="flex-1 justify-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white px-2"
+              >
+                <MessageSquarePlus className="w-4 h-4" />
+                <span className="truncate">{isAr ? 'محادثة' : 'Chat'}</span>
+              </Button>
+              <Button
+                onClick={handleCreateTicket}
+                variant="outline"
+                className="flex-1 justify-center gap-2 rounded-xl border-blue-200 text-blue-700 hover:bg-blue-50 px-2"
+              >
+                <Shield className="w-4 h-4" />
+                <span className="truncate">{isAr ? 'الدعم' : 'Support'}</span>
+              </Button>
+            </div>
             <div className="relative">
               <Search className={`absolute ${isAr ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground`} />
               <Input
@@ -345,9 +391,15 @@ function StudentChatPageInner() {
                 </div>
                 <div>
                   <h3 className="font-bold text-foreground">{activeConv.other_user_name}</h3>
-                  <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 rounded-full hidden sm:inline-block">
-                    {isAr ? "أستاذ الأكاديمية" : "Academy Teacher"}
-                  </span>
+                  {activeConv.is_ticket ? (
+                    <span className="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-500/10 px-2 rounded-full hidden sm:inline-block">
+                      {isAr ? "الدعم الفني" : "Support"}
+                    </span>
+                  ) : (
+                    <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 rounded-full hidden sm:inline-block">
+                      {isAr ? "أستاذ الأكاديمية" : "Academy Teacher"}
+                    </span>
+                  )}
                 </div>
               </div>
 
