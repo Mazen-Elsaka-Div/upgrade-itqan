@@ -80,6 +80,7 @@ const getRoleConfig = (t: any): Record<'student' | 'reader' | 'admin' | 'student
       {
         title: t.management, items: [
           { href: '/admin/users', label: t.admin.users, icon: Users },
+          { href: '/admin/invitations', label: t.admin.invitations || 'الدعوات', icon: Mail },
           { href: '/admin/readers', label: t.admin.readers, icon: BookOpen },
           { href: '/admin/reader-applications', label: t.admin.readerApplications, icon: UserCheck },
           { href: '/admin/recitations', label: t.admin.recitations, icon: FileText },
