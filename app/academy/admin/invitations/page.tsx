@@ -15,7 +15,7 @@ import {
 import {
   Mail, UserPlus, Upload, RefreshCw, XCircle, CheckCircle,
   Clock, Search, ChevronLeft, ChevronRight, Send, FileText,
-  AlertCircle, Loader2, BookOpen, Users,
+  AlertCircle, Loader2, BookOpen, Users, Trash2,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import useSWR from 'swr'
@@ -209,6 +209,17 @@ export default function AdminInvitationsPage() {
     } finally { setActionId(null) }
   }
 
+  // ---- Delete ----
+  async function handleDelete(id: string) {
+    if (!confirm('هل أنت متأكد من حذف هذه الدعوة بشكل نهائي؟')) return
+    setActionId(id)
+    try {
+      const res = await fetch(`/api/academy/admin/invitations/${id}`, { method: 'DELETE' })
+      if (res.ok) { toast.success('تم حذف الدعوة'); mutate() }
+      else        { toast.error('تعذّر الحذف') }
+    } finally { setActionId(null) }
+  }
+
   const tabs = [
     { key: 'all',       label: 'الكل',   count: counts.ALL },
     { key: 'PENDING',   label: 'معلقة',  count: counts.PENDING },
@@ -382,13 +393,22 @@ export default function AdminInvitationsPage() {
                             <Button
                               size="sm"
                               variant="ghost"
-                              className="h-7 px-2 text-xs rounded-xl text-destructive hover:text-destructive hover:bg-destructive/10"
+                              className="h-7 px-2 text-xs rounded-xl text-amber-600 hover:text-amber-700 hover:bg-amber-600/10"
                               disabled={isBusy}
                               onClick={() => handleCancel(inv.id)}
                             >
                               إلغاء
                             </Button>
                           )}
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 px-2 text-xs rounded-xl text-destructive hover:text-destructive hover:bg-destructive/10"
+                            disabled={isBusy}
+                            onClick={() => handleDelete(inv.id)}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </Button>
                         </div>
                       </td>
                     </tr>

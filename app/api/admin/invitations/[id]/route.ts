@@ -127,7 +127,7 @@ export async function DELETE(req: NextRequest, { params }: Params) {
   const { id } = await params
 
   await query(
-    `DELETE FROM invitations WHERE id = $1 AND status IN ('CANCELLED','EXPIRED')`,
+    `DELETE FROM invitations WHERE id = $1`,
     [id]
   )
 

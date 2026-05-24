@@ -150,15 +150,29 @@ export async function getSmtpFromEmail(): Promise<string> {
 
 // Helper for App URL — used in invitation links etc.
 export async function getAppUrl(): Promise<string> {
-    // 1. ENV always wins
-    if (process.env.NEXT_PUBLIC_APP_URL) {
+    // 1. Explicit ENV always wins
+    if (process.env.NEXT_PUBLIC_APP_URL && process.env.NEXT_PUBLIC_APP_URL !== 'http://localhost:3000') {
         return process.env.NEXT_PUBLIC_APP_URL
     }
-    // 2. Check DB setting
+
+    // 2. Vercel System ENV (Production first, then preview)
+    if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+        return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    }
+    if (process.env.VERCEL_URL) {
+        return `https://${process.env.VERCEL_URL}`
+    }
+
+    // 3. Localhost explicit ENV fallback
+    if (process.env.NEXT_PUBLIC_APP_URL === 'http://localhost:3000') {
+        return 'http://localhost:3000'
+    }
+
+    // 4. Check DB setting
     const dbUrl = await getSetting<string | null>('app_url', null)
     if (dbUrl) return dbUrl
 
-    // 3. Fallback
+    // 5. Ultimate Fallback
     return 'http://localhost:3000'
 }
 
