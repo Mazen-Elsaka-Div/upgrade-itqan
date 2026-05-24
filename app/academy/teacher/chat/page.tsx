@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Search, Send, User, Loader2, ArrowRight, UserPlus, X } from 'lucide-react'
+import { Search, Send, User, Loader2, ArrowRight, UserPlus, X, Shield } from 'lucide-react'
 import { useI18n } from '@/lib/i18n/context'
 
 interface Student {
@@ -148,6 +148,30 @@ function ChatContent() {
     s.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
     s.email.toLowerCase().includes(studentSearch.toLowerCase())
   )
+
+
+  const handleCreateTicket = async () => {
+    setCreatingConv(true)
+    try {
+      const res = await fetch('/api/academy/conversations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isTicket: true }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        alert(data?.error || (isAr ? 'تعذر فتح التذكرة' : 'Could not open ticket'))
+        return
+      }
+      const newConvs = await fetchConversations()
+      const found = newConvs.find((c: any) => c.id === data.conversationId)
+      if (found) setActiveConv(found)
+    } catch {
+      // ignore
+    } finally {
+      setCreatingConv(false)
+    }
+  }
 
   // Fetch messages for active conversation
   useEffect(() => {

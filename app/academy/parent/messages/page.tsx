@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { useI18n } from '@/lib/i18n/context'
-import { Loader2, MessageSquare, Send, UserRound } from 'lucide-react'
+import { Loader2, MessageSquare, Send, UserRound, Shield } from 'lucide-react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 
 interface TeacherOption {
   id: string
@@ -47,6 +48,7 @@ export default function ParentMessagesPage() {
   const [loadingMessages, setLoadingMessages] = useState(false)
   const [sending, setSending] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const [showTicketDialog, setShowTicketDialog] = useState(false)
 
   const selectedTeacher = useMemo(
     () => teachers.find(t => t.id === teacherId && t.child_id === childId),
@@ -88,7 +90,7 @@ export default function ParentMessagesPage() {
     async function fetchMessages() {
       setLoadingMessages(true)
       try {
-        const res = await fetch(`/api/academy/conversations/${conversationId}/messages`)
+        const res = await fetch(activeConv.platform === 'maqraa' ? `/api/conversations/${conversationId}/messages` : `/api/academy/conversations/${conversationId}/messages`)
         const data = await res.json()
         if (res.ok) setMessages(data.messages || [])
       } finally {
@@ -125,6 +127,7 @@ export default function ParentMessagesPage() {
           last_message: null,
           last_message_at: null,
           unread_count: 0,
+          platform: 'academy',
         })
       }
     } finally {
@@ -139,7 +142,7 @@ export default function ParentMessagesPage() {
     setReply('')
     setSending(true)
     try {
-      const res = await fetch(`/api/academy/conversations/${activeConv.id}/messages`, {
+      const res = await fetch(activeConv.platform === 'maqraa' ? `/api/conversations/${activeConv.id}/messages` : `/api/academy/conversations/${activeConv.id}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content }),
@@ -148,6 +151,36 @@ export default function ParentMessagesPage() {
       if (res.ok) {
         setMessages(prev => [...prev, data.message])
         await fetchConversations()
+      }
+    } finally {
+      setSending(false)
+    }
+  }
+
+  async function handleCreateTicket(platform: 'maqraa' | 'academy') {
+    setSending(true)
+    setShowTicketDialog(false)
+    try {
+      const url = platform === 'maqraa' ? '/api/conversations' : '/api/academy/conversations'
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isTicket: true }),
+      })
+      const data = await res.json()
+      if (res.ok && data.conversationId) {
+        await fetchConversations()
+        setActiveConv({
+          id: data.conversationId,
+          other_user_id: 'admin',
+          other_user_name: platform === 'maqraa' ? (isAr ? 'إدارة المقرأة' : 'Maqraa Support') : (isAr ? 'إدارة الأكاديمية' : 'Academy Support'),
+          other_user_avatar: null,
+          last_message: null,
+          last_message_at: null,
+          unread_count: 0,
+          platform: platform,
+          is_ticket: true,
+        })
       }
     } finally {
       setSending(false)
@@ -203,7 +236,14 @@ export default function ParentMessagesPage() {
             )}
 
             <div className="pt-4 border-t border-border/50 space-y-2">
-              <h3 className="font-bold text-sm text-muted-foreground">{isAr ? 'المحادثات السابقة' : 'Conversations'}</h3>
+              
+              <div className="flex items-center justify-between pb-2 border-b border-border/50">
+                <h3 className="font-bold text-sm text-muted-foreground">{isAr ? 'المحادثات السابقة' : 'Conversations'}</h3>
+                <Button variant="outline" size="sm" onClick={() => setShowTicketDialog(true)} className="h-8 gap-1 rounded-xl text-blue-600 border-blue-200 hover:bg-blue-50">
+                  <Shield className="w-3.5 h-3.5" />
+                  {isAr ? 'تذكرة دعم' : 'Support Ticket'}
+                </Button>
+              </div>
               {conversations.length === 0 ? (
                 <p className="text-sm text-muted-foreground">{isAr ? 'لا توجد محادثات.' : 'No conversations.'}</p>
               ) : conversations.map(conv => (
