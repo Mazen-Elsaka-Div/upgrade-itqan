@@ -60,6 +60,16 @@ interface Me {
   role: string
 }
 
+interface RelatedQ {
+  id: string
+  title: string | null
+  question: string
+  views_count: number
+  published_at: string | null
+  answered_by_name: string | null
+  category_name_ar: string | null
+}
+
 const STATUS_TONE: Record<string, string> = {
   pending: 'bg-amber-100 text-amber-900 border-amber-200',
   assigned: 'bg-sky-100 text-sky-900 border-sky-200',
@@ -93,6 +103,7 @@ export default function FiqhDetailPage({
   const [question, setQuestion] = useState<Q | null>(null)
   const [me, setMe] = useState<Me | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
+  const [related, setRelated] = useState<RelatedQ[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [newMsg, setNewMsg] = useState('')
@@ -144,6 +155,23 @@ export default function FiqhDetailPage({
   useEffect(() => {
     loadMessages()
   }, [loadMessages])
+
+  // Fetch related questions in the same category (published only).
+  useEffect(() => {
+    if (!question?.category_slug) return
+    const sp = new URLSearchParams({
+      view: 'library',
+      category: question.category_slug,
+      limit: '6',
+    })
+    fetch(`/api/academy/fiqh?${sp.toString()}`)
+      .then((r) => (r.ok ? r.json() : { questions: [] }))
+      .then((d) => {
+        const list: RelatedQ[] = (d.questions || []).filter((q: RelatedQ) => q.id !== id)
+        setRelated(list.slice(0, 4))
+      })
+      .catch(() => {})
+  }, [question?.category_slug, id])
 
   async function sendMessage() {
     if (!newMsg.trim() || sending) return
@@ -390,6 +418,48 @@ export default function FiqhDetailPage({
                   <Send className="w-4 h-4" />
                 )}
               </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Related questions */}
+      {related.length > 0 && (
+        <Card className="rounded-3xl">
+          <CardContent className="p-6 space-y-3">
+            <h2 className="font-black text-base inline-flex items-center gap-2">
+              <Library className="w-4 h-4 text-primary" />
+              {isAr ? 'أسئلة في نفس التصنيف' : 'Related questions'}
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {related.map((r) => (
+                <Link
+                  key={r.id}
+                  href={`/academy/fiqh/${r.id}`}
+                  className="block p-3 rounded-xl border border-border hover:border-primary/40 hover:bg-muted/40 transition-colors"
+                >
+                  <p className="font-bold text-sm text-foreground line-clamp-2 leading-relaxed">
+                    {r.title || r.question}
+                  </p>
+                  <div className="flex items-center gap-2 mt-1 text-[11px] text-muted-foreground">
+                    {r.category_name_ar && (
+                      <span className="px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-bold">
+                        {r.category_name_ar}
+                      </span>
+                    )}
+                    <span className="inline-flex items-center gap-1">
+                      <Eye className="w-3 h-3" />
+                      {r.views_count}
+                    </span>
+                    {r.answered_by_name && (
+                      <span className="inline-flex items-center gap-1">
+                        <ShieldCheck className="w-3 h-3" />
+                        {r.answered_by_name}
+                      </span>
+                    )}
+                  </div>
+                </Link>
+              ))}
             </div>
           </CardContent>
         </Card>
