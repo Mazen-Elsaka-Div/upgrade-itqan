@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSession } from '@/lib/auth'
 import { query } from '@/lib/db'
 import { sendEmail } from '@/lib/email'
+import { getAppUrl } from '@/lib/settings'
 import crypto from 'crypto'
 
 const ADMIN_ROLES = ['academy_admin', 'admin']
@@ -162,7 +163,7 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json()
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://itqan.app'
+  const appUrl = await getAppUrl()
 
   // Fetch inviter name once
   const inviterRows = await query<{ name: string }>(`SELECT name FROM users WHERE id = $1`, [session.sub])
@@ -236,8 +237,16 @@ export async function POST(req: NextRequest) {
       expiresAt,
     })
 
-    await sendEmail({ to: email, ...emailContent }).catch(() => {})
-    results.push({ email, id: inserted[0]?.id, token })
+    let emailSent = false
+    try {
+      emailSent = await sendEmail({ to: email, ...emailContent })
+      if (!emailSent) {
+        console.error(`[Invite] Failed to send email to ${email}`)
+      }
+    } catch (emailErr) {
+      console.error(`[Invite] Email error for ${email}:`, emailErr)
+    }
+    results.push({ email, id: inserted[0]?.id, token, emailSent })
   }
 
   const status = errors.length === 0 ? 201 : results.length === 0 ? 400 : 207

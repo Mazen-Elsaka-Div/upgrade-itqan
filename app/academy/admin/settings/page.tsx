@@ -1,62 +1,117 @@
 "use client"
 
-import { Settings, Save, Globe, Mail, Bell } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Settings, Save, Globe, Loader2, CheckCircle } from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { toast } from 'sonner'
 
-export default function AdminSettingsPage() {
+export default function AcademyAdminSettingsPage() {
+    const [appUrl, setAppUrl] = useState('')
+    const [loading, setLoading] = useState(true)
+    const [saving, setSaving] = useState(false)
+    const [saved, setSaved] = useState(false)
+
+    useEffect(() => {
+        fetch('/api/admin/settings')
+            .then(r => r.json())
+            .then(d => {
+                if (d.settings?.app_url !== undefined) {
+                    const raw = d.settings.app_url
+                    setAppUrl(typeof raw === 'string' ? raw.replace(/^"|"$/g, '') : raw || '')
+                }
+            })
+            .catch(console.error)
+            .finally(() => setLoading(false))
+    }, [])
+
+    const handleSave = async () => {
+        if (!appUrl.trim()) { toast.error('يرجى إدخال رابط الموقع'); return }
+        setSaving(true)
+        try {
+            const res = await fetch('/api/admin/settings', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ settings: { app_url: appUrl.trim().replace(/\/$/, '') } }),
+            })
+            if (res.ok) {
+                toast.success('تم حفظ رابط الموقع')
+                setSaved(true)
+                setTimeout(() => setSaved(false), 3000)
+            } else {
+                toast.error('حدث خطأ أثناء الحفظ')
+            }
+        } catch {
+            toast.error('حدث خطأ')
+        } finally {
+            setSaving(false)
+        }
+    }
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center py-32">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+        )
+    }
+
     return (
-        <div className="space-y-6 max-w-4xl mx-auto">
+        <div className="space-y-6 max-w-3xl mx-auto" dir="rtl">
             <div>
                 <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-                    <Settings className="w-6 h-6 text-blue-500" />
+                    <Settings className="w-6 h-6 text-primary" />
                     إعدادات النظام
                 </h1>
                 <p className="text-sm text-muted-foreground mt-1">تكوين إعدادات منصة الأكاديمية</p>
             </div>
 
-            <div className="bg-card border border-border rounded-xl p-6 space-y-8">
-                {/* General Settings */}
-                <div className="space-y-4">
-                    <h2 className="text-lg font-bold flex items-center gap-2 border-b border-border pb-2">
-                        <Globe className="w-5 h-5 text-muted-foreground" /> الإعدادات العامة
-                    </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium mb-1">اسم الأكاديمية</label>
-                            <input type="text" defaultValue="أكاديمية إتقان" className="w-full p-2 bg-secondary/20 border border-border rounded-lg" />
+            {/* App URL Card */}
+            <Card className="border-border rounded-2xl overflow-hidden">
+                <CardHeader className="bg-muted/30 border-b border-border px-6 py-5">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-primary/10 rounded-xl">
+                            <Globe className="w-5 h-5 text-primary" />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium mb-1">اللغة الافتراضية</label>
-                            <select className="w-full p-2 bg-secondary/20 border border-border rounded-lg">
-                                <option>العربية</option>
-                                <option>English</option>
-                            </select>
+                            <CardTitle className="text-lg font-bold">رابط الموقع (Domain)</CardTitle>
+                            <CardDescription className="text-xs mt-0.5">
+                                يُستخدم في روابط الدعوات المرسلة عبر البريد الإلكتروني للأكاديمية
+                            </CardDescription>
                         </div>
                     </div>
-                </div>
-
-                {/* Email & Notifications */}
-                <div className="space-y-4">
-                    <h2 className="text-lg font-bold flex items-center gap-2 border-b border-border pb-2">
-                        <Bell className="w-5 h-5 text-muted-foreground" /> الإشعارات والتواصل
-                    </h2>
-                    <div className="space-y-3">
-                        <label className="flex items-center gap-3">
-                            <input type="checkbox" defaultChecked className="w-4 h-4 text-blue-600 rounded border-border" />
-                            <span className="text-sm">إرسال إشعارات التسجيل الجديد للمسؤولين</span>
-                        </label>
-                        <label className="flex items-center gap-3">
-                            <input type="checkbox" defaultChecked className="w-4 h-4 text-blue-600 rounded border-border" />
-                            <span className="text-sm">السماح بإشعارات البريد لتذكيرات المهام</span>
-                        </label>
+                </CardHeader>
+                <CardContent className="pt-6 space-y-4">
+                    <div className="space-y-2">
+                        <Label className="font-bold text-xs text-muted-foreground uppercase tracking-widest">
+                            رابط الموقع
+                        </Label>
+                        <Input
+                            dir="ltr"
+                            value={appUrl}
+                            onChange={e => setAppUrl(e.target.value)}
+                            placeholder="https://your-domain.com"
+                            className="h-11 border-border bg-muted/50 rounded-xl"
+                        />
+                        <p className="text-[11px] text-muted-foreground px-1">
+                            مثال: <code className="bg-muted px-1 rounded">https://itqan.example.com</code> — بدون / في النهاية
+                        </p>
                     </div>
-                </div>
 
-                <div className="pt-4 flex justify-end">
-                    <button className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
-                        <Save className="w-4 h-4" /> حفظ الإعدادات
-                    </button>
-                </div>
-            </div>
+                    <div className="flex justify-end pt-2">
+                        <Button
+                            onClick={handleSave}
+                            disabled={saving}
+                            className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-8 h-11 rounded-xl"
+                        >
+                            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : saved ? <CheckCircle className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+                            <span className="mx-2">{saved ? 'تم الحفظ ✓' : 'حفظ الرابط'}</span>
+                        </Button>
+                    </div>
+                </CardContent>
+            </Card>
         </div>
     )
 }

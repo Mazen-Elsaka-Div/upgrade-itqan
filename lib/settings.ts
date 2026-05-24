@@ -148,6 +148,20 @@ export async function getSmtpFromEmail(): Promise<string> {
     return '"إتقان التعليمية" <itqaan69@gmail.com>' // New default fallback
 }
 
+// Helper for App URL — used in invitation links etc.
+export async function getAppUrl(): Promise<string> {
+    // 1. ENV always wins
+    if (process.env.NEXT_PUBLIC_APP_URL) {
+        return process.env.NEXT_PUBLIC_APP_URL
+    }
+    // 2. Check DB setting
+    const dbUrl = await getSetting<string | null>('app_url', null)
+    if (dbUrl) return dbUrl
+
+    // 3. Fallback
+    return 'http://localhost:3000'
+}
+
 // Helper for UploadThing (Replaces Cloudinary)
 export async function getStorageConfig() {
     const config = await getSetting<any>("storage_config", null)

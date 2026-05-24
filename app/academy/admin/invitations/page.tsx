@@ -113,7 +113,12 @@ export default function AdminInvitationsPage() {
       if (!res.ok && res.status !== 207) {
         toast.error(json.error || 'حدث خطأ')
       } else {
-        toast.success(`تم إرسال الدعوة إلى ${formEmail}`)
+        const sent = json.sent?.[0]
+        if (sent?.emailSent === false) {
+          toast.warning(`تم حفظ الدعوة لكن فشل إرسال البريد إلى ${formEmail} — تحقق من إعدادات SMTP`)
+        } else {
+          toast.success(`تم إرسال الدعوة إلى ${formEmail}`)
+        }
         setShowForm(false)
         setFormEmail(''); setFormName('')
         setFormRole('academy_student'); setFormPlan('none')

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSession } from '@/lib/auth'
 import { query } from '@/lib/db'
 import { sendEmail } from '@/lib/email'
+import { getAppUrl } from '@/lib/settings'
 import crypto from 'crypto'
 
 const ADMIN_ROLES = ['admin', 'student_supervisor', 'reciter_supervisor']
@@ -162,7 +163,7 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json()
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://itqan.app'
+  const appUrl = await getAppUrl()
 
   // Fetch inviter name once
   const inviterRows = await query<{ name: string }>(`SELECT name FROM users WHERE id = $1`, [session.sub])

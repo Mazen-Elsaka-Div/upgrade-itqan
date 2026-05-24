@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
-import { Save, User, Settings2, Loader2, CheckCircle, Mail, Image as ImageIcon, Phone } from "lucide-react"
+import { Save, User, Settings2, Loader2, CheckCircle, Mail, Image as ImageIcon, Phone, Globe } from "lucide-react"
 import { AvatarUpload } from "@/components/avatar-upload"
 
 export default function AdminSettingsPage() {
@@ -42,6 +42,11 @@ export default function AdminSettingsPage() {
     const [branding, setBranding] = useState({ logoUrl: "", faviconUrl: "", dashboardLogoUrl: "" })
     const [brandingSaving, setBrandingSaving] = useState(false)
     const [brandingSaved, setBrandingSaved] = useState(false)
+
+    /* ──────────────── App URL ──────────────── */
+    const [appUrl, setAppUrl] = useState("")
+    const [appUrlSaving, setAppUrlSaving] = useState(false)
+    const [appUrlSaved, setAppUrlSaved] = useState(false)
 
     const [loading, setLoading] = useState(true)
 
@@ -96,6 +101,12 @@ export default function AdminSettingsPage() {
                             const parsedBranding = typeof d.settings.branding === 'string' ? JSON.parse(d.settings.branding) : d.settings.branding;
                             setBranding((prev: any) => ({ ...prev, ...parsedBranding }));
                         } catch (e) { console.error("Could not parse Branding", e) }
+                    }
+
+                    // Parse App URL
+                    if (d.settings?.app_url !== undefined) {
+                        const raw = d.settings.app_url
+                        setAppUrl(typeof raw === 'string' ? raw.replace(/^"|"$/g, '') : raw || '')
                     }
                 }
             } catch (err) {
@@ -218,6 +229,23 @@ export default function AdminSettingsPage() {
             } else { alert(t.admin.errorSaving) }
         } catch { alert(t.auth.errorOccurred) }
         finally { setBrandingSaving(false) }
+    }
+
+    const handleAppUrlSave = async () => {
+        if (!appUrl.trim()) { alert('يرجى إدخال رابط الموقع'); return }
+        setAppUrlSaving(true)
+        try {
+            const res = await fetch("/api/admin/settings", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ settings: { app_url: appUrl.trim().replace(/\/$/, '') } }),
+            })
+            if (res.ok) {
+                setAppUrlSaved(true)
+                setTimeout(() => setAppUrlSaved(false), 3000)
+            } else { alert(t.admin.errorSaving) }
+        } catch { alert(t.auth.errorOccurred) }
+        finally { setAppUrlSaving(false) }
     }
 
     if (loading) {
@@ -718,6 +746,51 @@ export default function AdminSettingsPage() {
                         >
                             {brandingSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : brandingSaved ? <CheckCircle className="w-4 h-4" /> : <Save className="w-4 h-4" />}
                             <span className="mx-2">{brandingSaved ? t.admin.savedSuccess : "Save Branding"}</span>
+                        </Button>
+                    </div>
+                </CardContent>
+            </Card>
+
+            {/* ── App URL Settings ── */}
+            <Card className="border-border shadow-sm rounded-2xl overflow-hidden bg-card">
+                <CardHeader className="bg-muted/30 border-b border-border px-6 py-5">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-primary/10 rounded-xl">
+                            <Globe className="w-5 h-5 text-primary" />
+                        </div>
+                        <div>
+                            <CardTitle className="text-lg font-bold text-foreground">
+                                رابط الموقع (Domain)
+                            </CardTitle>
+                            <CardDescription className="text-xs font-medium text-muted-foreground mt-0.5">
+                                يُستخدم في روابط الدعوات المرسلة عبر البريد الإلكتروني
+                            </CardDescription>
+                        </div>
+                    </div>
+                </CardHeader>
+                <CardContent className="pt-6 space-y-4">
+                    <div className="space-y-2">
+                        <Label className="font-bold text-xs text-muted-foreground uppercase tracking-widest">رابط الموقع</Label>
+                        <Input
+                            dir="ltr"
+                            value={appUrl}
+                            onChange={e => setAppUrl(e.target.value)}
+                            placeholder="https://your-domain.com"
+                            className="h-11 border-border bg-muted/50 text-foreground rounded-xl focus:ring-primary/20"
+                        />
+                        <p className="text-[11px] text-muted-foreground px-1">
+                            مثال: <code className="bg-muted px-1 rounded">https://itqan.example.com</code> — بدون / في النهاية
+                        </p>
+                    </div>
+
+                    <div className="flex justify-end pt-2">
+                        <Button
+                            onClick={handleAppUrlSave}
+                            disabled={appUrlSaving}
+                            className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-8 h-11 rounded-xl shadow-sm transition-all duration-200"
+                        >
+                            {appUrlSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : appUrlSaved ? <CheckCircle className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+                            <span className="mx-2">{appUrlSaved ? 'تم الحفظ ✓' : 'حفظ الرابط'}</span>
                         </Button>
                     </div>
                 </CardContent>

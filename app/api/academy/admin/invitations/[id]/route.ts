@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSession } from '@/lib/auth'
 import { query } from '@/lib/db'
 import { sendEmail } from '@/lib/email'
+import { getAppUrl } from '@/lib/settings'
 import crypto from 'crypto'
 
 const ADMIN_ROLES = ['academy_admin', 'admin']
@@ -62,7 +63,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       [newToken, expiresAt.toISOString(), id]
     )
 
-    const appUrl    = process.env.NEXT_PUBLIC_APP_URL || 'https://itqan.app'
+    const appUrl    = await getAppUrl()
     const inviteUrl = `${appUrl}/academy/invite/${newToken}`
 
     const roleLabels: Record<string, string> = {
