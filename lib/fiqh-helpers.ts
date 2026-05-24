@@ -94,8 +94,8 @@ export async function resolveCategory(
     )
   const row = await queryOne<{ id: string; slug: string; name_ar: string }>(
     isUuid
-      ? `SELECT id, slug, name_ar FROM fiqh_categories WHERE id = $1 AND is_active = TRUE LIMIT 1`
-      : `SELECT id, slug, name_ar FROM fiqh_categories WHERE slug = $1 AND is_active = TRUE LIMIT 1`,
+      ? `SELECT id, slug, name AS name_ar FROM categories WHERE id = $1 AND is_active = TRUE LIMIT 1`
+      : `SELECT id, slug, name AS name_ar FROM categories WHERE slug = $1 AND is_active = TRUE LIMIT 1`,
     [idOrSlug]
   )
   return row ?? null

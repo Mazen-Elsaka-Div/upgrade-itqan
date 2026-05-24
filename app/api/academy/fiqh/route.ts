@@ -102,6 +102,7 @@ const BASE_SELECT = `
     fq.asked_by,
     fq.assigned_to,
     fq.answered_by,
+    fq.extra_data,
     fq.category   AS category_slug_legacy,
     cat.id        AS category_id,
     cat.slug      AS category_slug,
@@ -112,7 +113,7 @@ const BASE_SELECT = `
     assignee.name AS assigned_to_name,
     answerer.name AS answered_by_name
   FROM fiqh_questions fq
-  LEFT JOIN fiqh_categories cat ON cat.id = fq.category_id
+  LEFT JOIN categories cat  ON cat.id = fq.category_id
   LEFT JOIN users asker     ON asker.id    = fq.asked_by
   LEFT JOIN users assignee  ON assignee.id = fq.assigned_to
   LEFT JOIN users answerer  ON answerer.id = fq.answered_by
@@ -384,6 +385,7 @@ export async function POST(req: NextRequest) {
     const title = typeof body?.title === "string" ? body.title.trim() : ""
     const question = typeof body?.question === "string" ? body.question.trim() : ""
     const isAnonymous = body?.isAnonymous === true
+    const extraData = body?.extraData && typeof body.extraData === 'object' ? body.extraData : {}
     const categoryRef =
       (typeof body?.categoryId === "string" && body.categoryId.trim()) ||
       (typeof body?.category === "string" && body.category.trim()) ||
@@ -418,9 +420,9 @@ export async function POST(req: NextRequest) {
     const inserted = await queryOne<{ id: string }>(
       `INSERT INTO fiqh_questions (
          asked_by, title, question, category, category_id,
-         assigned_to, status, is_anonymous, source_role, asked_at
+         assigned_to, status, is_anonymous, source_role, asked_at, extra_data
        )
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), $10)
        RETURNING id`,
       [
         session.sub,
@@ -432,6 +434,7 @@ export async function POST(req: NextRequest) {
         status,
         isAnonymous,
         session.role,
+        JSON.stringify(extraData)
       ]
     )
 

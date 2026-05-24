@@ -14,14 +14,14 @@ export async function GET() {
             COALESCE(
               (SELECT array_agg(c.id::text)
                  FROM fiqh_officer_categories oc
-                 JOIN fiqh_categories c ON c.id = oc.category_id
+                 JOIN categories c ON c.id = oc.category_id
                 WHERE oc.officer_id = o.id),
               ARRAY[]::text[]
             ) AS category_ids,
             COALESCE(
               (SELECT array_agg(c.name_ar)
                  FROM fiqh_officer_categories oc
-                 JOIN fiqh_categories c ON c.id = oc.category_id
+                 JOIN categories c ON c.id = oc.category_id
                 WHERE oc.officer_id = o.id),
               ARRAY[]::text[]
             ) AS category_names,

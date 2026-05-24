@@ -76,6 +76,7 @@ export async function GET(req: NextRequest) {
              fq.published_at,
              fq.asked_by,
              fq.assigned_to,
+             fq.extra_data,
              cat.id     AS category_id,
              cat.slug   AS category_slug,
              cat.name_ar AS category_name_ar,
@@ -86,7 +87,7 @@ export async function GET(req: NextRequest) {
              fq.answered_by,
              answerer.name        AS answerer_name
         FROM fiqh_questions fq
-        LEFT JOIN fiqh_categories cat ON cat.id = fq.category_id
+        LEFT JOIN categories cat ON cat.id = fq.category_id
         LEFT JOIN users asker    ON asker.id    = fq.asked_by
         LEFT JOIN users assignee ON assignee.id = fq.assigned_to
         LEFT JOIN users answerer ON answerer.id = fq.answered_by

@@ -136,6 +136,7 @@ export default function FiqhLibraryPage() {
   const [searchDebounced, setSearchDebounced] = useState('')
   const [activeCat, setActiveCat] = useState<string | null>(null)
   const [categories, setCategories] = useState<Category[]>([])
+  const [customFields, setCustomFields] = useState<any[]>([])
   const [loadingLib, setLoadingLib] = useState(true)
 
   // My questions
@@ -148,6 +149,7 @@ export default function FiqhLibraryPage() {
   const [askTitle, setAskTitle] = useState('')
   const [askBody, setAskBody] = useState('')
   const [askAnonymous, setAskAnonymous] = useState(false)
+  const [askExtraData, setAskExtraData] = useState<Record<string, string>>({})
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [submitSuccess, setSubmitSuccess] = useState<string | null>(null)
@@ -158,11 +160,15 @@ export default function FiqhLibraryPage() {
     return () => clearTimeout(t)
   }, [search])
 
-  // Bootstrap: categories + me
+  // Bootstrap: categories + custom fields + me
   useEffect(() => {
     fetch('/api/academy/fiqh/categories')
       .then((r) => r.json())
       .then((d) => setCategories(d.categories || []))
+      .catch(() => {})
+    fetch('/api/academy/fiqh/fields')
+      .then((r) => r.json())
+      .then((d) => setCustomFields(d.fields || []))
       .catch(() => {})
     fetch('/api/auth/me')
       .then((r) => (r.ok ? r.json() : null))
@@ -242,6 +248,14 @@ export default function FiqhLibraryPage() {
       )
       return
     }
+
+    for (const f of customFields) {
+      if (f.is_required && !askExtraData[f.name]?.trim()) {
+        setSubmitError(isAr ? `الحقل "${f.label_ar}" مطلوب` : `Field "${f.label_ar}" is required`)
+        return
+      }
+    }
+
     setSubmitting(true)
     try {
       const res = await fetch('/api/academy/fiqh', {
@@ -252,6 +266,7 @@ export default function FiqhLibraryPage() {
           title: askTitle.trim() || undefined,
           question: askBody.trim(),
           isAnonymous: askAnonymous,
+          extraData: askExtraData,
         }),
       })
       const data = await res.json().catch(() => ({}))
@@ -268,6 +283,7 @@ export default function FiqhLibraryPage() {
       setAskBody('')
       setAskAnonymous(false)
       setAskCategory('')
+      setAskExtraData({})
       // Refresh mine in the background so the new question shows up if they switch tabs.
       loadMine()
     } finally {
@@ -407,6 +423,9 @@ export default function FiqhLibraryPage() {
           submitSuccess={submitSuccess}
           onSubmit={submit}
           isLoggedIn={!!me}
+          customFields={customFields}
+          askExtraData={askExtraData}
+          setAskExtraData={setAskExtraData}
         />
       )}
     </div>
@@ -748,6 +767,9 @@ function AskTab({
   submitSuccess: string | null
   onSubmit: () => void
   isLoggedIn: boolean
+  customFields: any[]
+  askExtraData: Record<string, string>
+  setAskExtraData: (data: Record<string, string>) => void
 }) {
   if (!isLoggedIn) {
     return (
@@ -830,6 +852,40 @@ function AskTab({
             }
           />
         </div>
+
+        {customFields.map((f) => (
+          <div key={f.id} className="space-y-2">
+            <Label className="text-sm font-bold">
+              {f.label_ar} {f.is_required && <span className="text-destructive">*</span>}
+            </Label>
+            {f.type === 'select' ? (
+              <select
+                value={askExtraData[f.name] || ''}
+                onChange={(e) => setAskExtraData({ ...askExtraData, [f.name]: e.target.value })}
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              >
+                <option value="">{isAr ? '— اختر —' : '— Select —'}</option>
+                {f.options?.map((opt: string) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
+            ) : f.type === 'number' ? (
+              <Input
+                type="number"
+                value={askExtraData[f.name] || ''}
+                onChange={(e) => setAskExtraData({ ...askExtraData, [f.name]: e.target.value })}
+              />
+            ) : (
+              <Input
+                type="text"
+                value={askExtraData[f.name] || ''}
+                onChange={(e) => setAskExtraData({ ...askExtraData, [f.name]: e.target.value })}
+              />
+            )}
+          </div>
+        ))}
 
         <label className="flex items-center gap-2 cursor-pointer select-none text-sm">
           <input

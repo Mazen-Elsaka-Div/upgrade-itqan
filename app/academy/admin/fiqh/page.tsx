@@ -4,8 +4,9 @@ import Link from 'next/link'
 import { useState, useEffect, useMemo } from 'react'
 import {
   MessageSquare, Plus, Trash2, Edit2, CheckCircle, X, Loader2, Clock,
-  Search, Filter, User as UserIcon, Eye, EyeOff, Settings, ShieldCheck,
+  Search, Filter, User as UserIcon, Eye, EyeOff, Settings, ShieldCheck, FileText,
 } from 'lucide-react'
+import { FiqhFormSettingsModal } from '@/components/academy/fiqh-form-settings-modal'
 
 interface FiqhQuestion {
   id: string
@@ -25,6 +26,7 @@ interface FiqhQuestion {
   asker_avatar?: string | null
   assigned_to_name?: string | null
   answerer_name?: string | null
+  extra_data?: Record<string, any>
 }
 
 interface CountMap {
@@ -69,6 +71,7 @@ export default function AdminFiqhPage() {
   const [categoryFilter, setCategoryFilter] = useState('')
 
   const [showModal, setShowModal] = useState(false)
+  const [showSettingsModal, setShowSettingsModal] = useState(false)
   const [editItem, setEditItem] = useState<FiqhQuestion | null>(null)
   const [form, setForm] = useState(emptyForm)
   const [saving, setSaving] = useState(false)
@@ -213,13 +216,13 @@ export default function AdminFiqhPage() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Link
-            href="/academy/admin/fiqh/settings"
+          <button
+            onClick={() => setShowSettingsModal(true)}
             className="flex items-center gap-2 px-4 py-2.5 bg-card border border-border hover:border-teal-300 text-foreground rounded-xl font-bold transition-colors shadow-sm"
           >
             <Settings className="w-4 h-4" />
-            إعدادات الفقه
-          </Link>
+            إعدادات حقول النموذج
+          </button>
           <Link
             href="/academy/admin/fiqh/officers"
             className="flex items-center gap-2 px-4 py-2.5 bg-card border border-border hover:border-teal-300 text-foreground rounded-xl font-bold transition-colors shadow-sm"
@@ -393,6 +396,21 @@ export default function AdminFiqhPage() {
                         </span>
                       )}
                     </div>
+
+                    {/* Extra data (custom fields) */}
+                    {q.extra_data && Object.keys(q.extra_data).length > 0 && (
+                      <div className="flex flex-wrap gap-2 mb-2">
+                        {Object.entries(q.extra_data).map(([k, v]) => {
+                          if (v === null || v === '') return null
+                          return (
+                            <span key={k} className="text-xs px-2 py-1 bg-muted rounded-md text-foreground flex items-center gap-1 border border-border">
+                              <FileText className="w-3 h-3 text-muted-foreground" />
+                              <span className="font-bold opacity-70">{k}:</span> {String(v)}
+                            </span>
+                          )
+                        })}
+                      </div>
+                    )}
 
                     {/* Answer preview / expanded */}
                     {hasAnswer && (
@@ -575,6 +593,9 @@ export default function AdminFiqhPage() {
             </form>
           </div>
         </div>
+      )}
+      {showSettingsModal && (
+        <FiqhFormSettingsModal onClose={() => setShowSettingsModal(false)} />
       )}
     </div>
   )

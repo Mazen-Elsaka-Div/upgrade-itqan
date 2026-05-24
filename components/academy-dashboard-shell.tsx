@@ -144,7 +144,6 @@ const getAcademyRoleConfig = (t: any, role: AcademyRole): { sections: NavSection
             { href: '/community/academy/admin', label: t.academy?.forum || 'المنتدى', icon: MessageSquare },
             { href: '/community/academy/admin/manage', label: 'إدارة المنتدى', icon: Shield },
             { href: '/academy/admin/fiqh', label: t.academy?.fiqhQuestions || 'صندوق الأسئلة الفقهية', icon: HelpCircle },
-            { href: '/academy/admin/fiqh/settings', label: 'إعدادات الفقه', icon: Settings },
             { href: '/academy/fiqh', label: t.academy?.fiqhLibrary || 'المكتبة الفقهية', icon: Library },
             { href: '/academy/admin/announcements', label: t.admin?.announcements || 'الإعلانات', icon: Megaphone },
             { href: '/academy/admin/chat', label: t.academy?.chat || 'الرسائل', icon: MessageSquare },

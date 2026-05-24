@@ -75,7 +75,7 @@ export async function GET(
       assignee.name AS assigned_to_name,
       answerer.name AS answered_by_name
     FROM fiqh_questions fq
-    LEFT JOIN fiqh_categories cat ON cat.id = fq.category_id
+    LEFT JOIN categories cat  ON cat.id = fq.category_id
     LEFT JOIN users asker     ON asker.id    = fq.asked_by
     LEFT JOIN users assignee  ON assignee.id = fq.assigned_to
     LEFT JOIN users answerer  ON answerer.id = fq.answered_by
