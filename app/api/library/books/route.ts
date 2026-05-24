@@ -24,8 +24,14 @@ export async function GET(req: NextRequest) {
       conditions.push(`(b.title ILIKE $${params.length} OR b.author ILIKE $${params.length})`)
     }
     if (category) {
+      // Accept either UUID (category_id) or slug for backward compat.
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(category)
       params.push(category)
-      conditions.push(`b.category = $${params.length}`)
+      conditions.push(
+        isUuid
+          ? `b.category_id = $${params.length}`
+          : `(b.category = $${params.length} OR EXISTS (SELECT 1 FROM categories c WHERE c.id = b.category_id AND c.slug = $${params.length}))`
+      )
     }
     if (language) {
       params.push(language)
@@ -45,13 +51,18 @@ export async function GET(req: NextRequest) {
       pages_count: number | null
       publish_date: string | null
       category: string | null
+      category_id: string | null
+      category_name: string | null
+      category_slug: string | null
       languages: { language: string; language_label: string | null }[]
       created_at: string
     }>(
       `
       SELECT
         b.id, b.title, b.author, b.description, b.cover_image_url,
-        b.pages_count, b.publish_date, b.category, b.created_at,
+        b.pages_count, b.publish_date, b.category, b.category_id,
+        c.name AS category_name, c.slug AS category_slug,
+        b.created_at,
         COALESCE(
           (
             SELECT json_agg(json_build_object(
@@ -63,6 +74,7 @@ export async function GET(req: NextRequest) {
           '[]'::json
         ) AS languages
       FROM books b
+      LEFT JOIN categories c ON c.id = b.category_id
       ${whereClause}
       ORDER BY b.display_order ASC, b.created_at DESC
       `,

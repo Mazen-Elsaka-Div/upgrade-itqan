@@ -85,7 +85,7 @@ export default function EditBookPage() {
           cover_image_key: b.cover_image_key || null,
           pages_count: b.pages_count == null ? "" : String(b.pages_count),
           publish_date: b.publish_date ? String(b.publish_date).slice(0, 10) : "",
-          category: b.category || "",
+          category_id: b.category_id || "",
           is_published: !!b.is_published,
           display_order: b.display_order == null ? "0" : String(b.display_order),
         })
@@ -121,7 +121,7 @@ export default function EditBookPage() {
           pages_count:
             form.pages_count.trim() === "" ? null : Number(form.pages_count),
           publish_date: form.publish_date || null,
-          category: form.category || null,
+          category_id: form.category_id || null,
           is_published: form.is_published,
           display_order:
             form.display_order.trim() === "" ? 0 : Number(form.display_order),

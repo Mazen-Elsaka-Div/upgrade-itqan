@@ -1,15 +1,19 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Upload, X, Loader2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Switch } from "@/components/ui/switch"
 import { toast } from "sonner"
-import { BOOK_CATEGORIES } from "@/lib/library/languages"
+
+interface BookCategoryOption {
+  id: string
+  name: string
+  slug: string
+}
 
 export interface BookFormValue {
   title: string
@@ -19,7 +23,7 @@ export interface BookFormValue {
   cover_image_key: string | null
   pages_count: string
   publish_date: string
-  category: string
+  category_id: string
   is_published: boolean
   display_order: string
 }
@@ -32,7 +36,7 @@ export const emptyBookForm: BookFormValue = {
   cover_image_key: null,
   pages_count: "",
   publish_date: "",
-  category: "",
+  category_id: "",
   is_published: true,
   display_order: "0",
 }
@@ -44,8 +48,27 @@ interface BookFormProps {
 
 export function BookForm({ value, onChange }: BookFormProps) {
   const [uploadingCover, setUploadingCover] = useState(false)
+  const [categories, setCategories] = useState<BookCategoryOption[]>([])
   const update = <K extends keyof BookFormValue>(k: K, v: BookFormValue[K]) =>
     onChange({ ...value, [k]: v })
+
+  useEffect(() => {
+    let cancelled = false
+    const run = async () => {
+      try {
+        const res = await fetch("/api/library/categories")
+        if (!res.ok) return
+        const data = await res.json()
+        if (!cancelled) setCategories(Array.isArray(data.categories) ? data.categories : [])
+      } catch {
+        // silent: form still works without categories
+      }
+    }
+    void run()
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const handleCoverUpload = async (file: File) => {
     setUploadingCover(true)
@@ -146,14 +169,14 @@ export function BookForm({ value, onChange }: BookFormProps) {
                 <Label htmlFor="bk-category">التصنيف</Label>
                 <select
                   id="bk-category"
-                  value={value.category}
-                  onChange={(e) => update("category", e.target.value)}
+                  value={value.category_id}
+                  onChange={(e) => update("category_id", e.target.value)}
                   className="w-full border border-border bg-background rounded-md px-3 h-10 text-sm"
                 >
                   <option value="">بدون تصنيف</option>
-                  {BOOK_CATEGORIES.map((c) => (
-                    <option key={c.code} value={c.code}>
-                      {c.labelAr}
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
                     </option>
                   ))}
                 </select>

@@ -14,6 +14,7 @@ const ALLOWED_FIELDS = [
   "pages_count",
   "publish_date",
   "category",
+  "category_id",
   "is_published",
   "display_order",
 ] as const
@@ -33,7 +34,10 @@ export async function GET(
   const { id } = await params
   try {
     const book = await queryOne(
-      `SELECT * FROM books WHERE id = $1`,
+      `SELECT b.*, c.name AS category_name, c.slug AS category_slug
+         FROM books b
+         LEFT JOIN categories c ON c.id = b.category_id
+        WHERE b.id = $1`,
       [id]
     )
     if (!book) return NextResponse.json({ error: "غير موجود" }, { status: 404 })

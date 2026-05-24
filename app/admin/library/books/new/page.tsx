@@ -17,7 +17,7 @@ function buildPayload(v: BookFormValue) {
     cover_image_key: v.cover_image_key,
     pages_count: v.pages_count.trim() === "" ? null : Number(v.pages_count),
     publish_date: v.publish_date || null,
-    category: v.category || null,
+    category_id: v.category_id || null,
     is_published: v.is_published,
     display_order: v.display_order.trim() === "" ? 0 : Number(v.display_order),
   }

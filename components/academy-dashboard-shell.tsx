@@ -113,7 +113,6 @@ const getAcademyRoleConfig = (t: any, role: AcademyRole): { sections: NavSection
           items: [
             { href: '/academy/admin', label: t.academy?.dashboard || 'لوحة التحكم', icon: LayoutDashboard },
             { href: '/academy/admin/analytics', label: t.academy?.analytics || 'التحليلات', icon: BarChart3 },
-            { href: '/academy/admin/reports', label: t.academy?.reports || 'التقارير', icon: FileText },
           ]
         },
         {

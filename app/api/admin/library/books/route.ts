@@ -27,6 +27,8 @@ export async function GET(req: NextRequest) {
       `
       SELECT
         b.*,
+        c.name AS category_name,
+        c.slug AS category_slug,
         COALESCE(
           (SELECT COUNT(*) FROM book_files bf WHERE bf.book_id = b.id),
           0
@@ -42,6 +44,7 @@ export async function GET(req: NextRequest) {
           '[]'::json
         ) AS languages
       FROM books b
+      LEFT JOIN categories c ON c.id = b.category_id
       ${whereClause}
       ORDER BY b.display_order ASC, b.created_at DESC
       `,
@@ -73,6 +76,7 @@ export async function POST(req: NextRequest) {
       pages_count,
       publish_date,
       category,
+      category_id,
       is_published,
       display_order,
     } = body || {}
@@ -84,8 +88,9 @@ export async function POST(req: NextRequest) {
     const rows = await query<{ id: string }>(
       `INSERT INTO books
         (title, author, description, cover_image_url, cover_image_key,
-         pages_count, publish_date, category, is_published, display_order, created_by)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,COALESCE($9, TRUE),COALESCE($10, 0),$11)
+         pages_count, publish_date, category, category_id, is_published,
+         display_order, created_by)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,COALESCE($10, TRUE),COALESCE($11, 0),$12)
        RETURNING id`,
       [
         title.trim(),
@@ -96,6 +101,7 @@ export async function POST(req: NextRequest) {
         Number.isFinite(Number(pages_count)) ? Number(pages_count) : null,
         publish_date || null,
         category || null,
+        category_id || null,
         typeof is_published === "boolean" ? is_published : true,
         Number.isFinite(Number(display_order)) ? Number(display_order) : 0,
         session!.sub,
