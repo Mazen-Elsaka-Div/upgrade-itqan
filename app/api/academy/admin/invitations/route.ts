@@ -250,5 +250,10 @@ export async function POST(req: NextRequest) {
   }
 
   const status = errors.length === 0 ? 201 : results.length === 0 ? 400 : 207
-  return NextResponse.json({ sent: results, errors, batchId }, { status })
+  return NextResponse.json({ 
+    sent: results, 
+    errors, 
+    batchId,
+    error: errors.length > 0 ? errors[0].error : undefined
+  }, { status })
 }
