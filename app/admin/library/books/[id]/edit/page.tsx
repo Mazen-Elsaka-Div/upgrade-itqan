@@ -20,6 +20,14 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Progress } from "@/components/ui/progress"
 import { toast } from "sonner"
 import { BookForm, emptyBookForm, type BookFormValue } from "@/components/library/book-form"
 import {
@@ -60,6 +68,9 @@ export default function EditBookPage() {
   const [newLanguageLabel, setNewLanguageLabel] = useState<string>("")
   const [uploading, setUploading] = useState(false)
   const [deletingFileId, setDeletingFileId] = useState<string | null>(null)
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [uploadModalOpen, setUploadModalOpen] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
 
   const usedLanguageCodes = useMemo(
     () => new Set(files.map((f) => f.language)),
@@ -151,14 +162,23 @@ export default function EditBookPage() {
       return
     }
     setUploading(true)
+    setUploadProgress(10)
+
+    const progressInterval = setInterval(() => {
+      setUploadProgress((prev) => (prev >= 90 ? 90 : prev + 10))
+    }, 500)
+
     try {
       const fd = new FormData()
       fd.append("file", file)
-      const upRes = await fetch("/api/upload", { method: "POST", body: fd })
+      const upRes = await fetch("/api/upload-pdf", { method: "POST", body: fd })
       const upData = await upRes.json().catch(() => ({}))
       if (!upRes.ok) {
         throw new Error(upData.error || "تعذر رفع الملف")
       }
+      
+      setUploadProgress(90)
+
       const saveRes = await fetch(`/api/admin/library/books/${id}/files`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -167,15 +187,19 @@ export default function EditBookPage() {
           language_label:
             newLanguage === OTHER_LANGUAGE_CODE ? newLanguageLabel.trim() : null,
           pdf_url: upData.url,
-          pdf_key: upData.public_id,
+          pdf_key: upData.key || upData.public_id,
           file_size_bytes: file.size,
         }),
       })
       const saveData = await saveRes.json().catch(() => ({}))
       if (!saveRes.ok) throw new Error(saveData.error || "تعذر حفظ الملف")
+      
+      setUploadProgress(100)
       toast.success("تم رفع الملف")
       setNewLanguage("")
       setNewLanguageLabel("")
+      setUploadModalOpen(false)
+      
       // Reload list
       const fresh = await fetch(`/api/admin/library/books/${id}`)
       if (fresh.ok) {
@@ -185,7 +209,9 @@ export default function EditBookPage() {
     } catch (e: any) {
       toast.error(e?.message || "تعذر رفع الملف")
     } finally {
+      clearInterval(progressInterval)
       setUploading(false)
+      setTimeout(() => setUploadProgress(0), 1000)
     }
   }
 
@@ -319,71 +345,116 @@ export default function EditBookPage() {
           </div>
 
           {/* Add new file */}
-          <div className="border-t border-border pt-4 space-y-3">
-            <div className="flex items-center gap-2 font-bold text-sm">
-              <Plus className="w-4 h-4 text-primary" />
-              إضافة لغة
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-3 items-end">
-              <div className="space-y-1.5">
-                <Label htmlFor="bk-newlang">اللغة</Label>
-                <select
-                  id="bk-newlang"
-                  value={newLanguage}
-                  onChange={(e) => setNewLanguage(e.target.value)}
-                  className="w-full border border-border bg-background rounded-md px-3 h-10 text-sm"
-                >
-                  <option value="">اختر لغة...</option>
-                  {BOOK_LANGUAGES.map((l) => (
-                    <option key={l.code} value={l.code}>
-                      {l.labelAr}
-                      {usedLanguageCodes.has(l.code) ? " (مستبدل)" : ""}
-                    </option>
-                  ))}
-                  <option value={OTHER_LANGUAGE_CODE}>أخرى (نص حر)</option>
-                </select>
-              </div>
-              {newLanguage === OTHER_LANGUAGE_CODE && (
-                <div className="space-y-1.5">
-                  <Label htmlFor="bk-langlabel">اسم اللغة</Label>
-                  <Input
-                    id="bk-langlabel"
-                    value={newLanguageLabel}
-                    onChange={(e) => setNewLanguageLabel(e.target.value)}
-                    placeholder="مثلاً: السواحلية"
-                  />
-                </div>
-              )}
-              <div className={newLanguage === OTHER_LANGUAGE_CODE ? "" : "md:col-span-2"}>
-                <label
-                  htmlFor="bk-newfile"
-                  className={`inline-flex items-center gap-2 font-bold rounded-md px-4 h-10 text-sm ${
-                    uploading || !newLanguage
-                      ? "bg-muted text-muted-foreground cursor-not-allowed"
-                      : "bg-primary text-primary-foreground hover:opacity-90 cursor-pointer"
-                  }`}
-                >
-                  {uploading ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Upload className="w-4 h-4" />
+          <div className="border-t border-border pt-4">
+            <Dialog open={uploadModalOpen} onOpenChange={(open) => !uploading && setUploadModalOpen(open)}>
+              <DialogTrigger asChild>
+                <Button className="gap-2 font-bold">
+                  <Plus className="w-4 h-4" />
+                  إضافة لغة جديدة
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md" dir="rtl">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <Upload className="w-5 h-5 text-primary" />
+                    رفع ملف لغة جديدة
+                  </DialogTitle>
+                </DialogHeader>
+
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="bk-newlang">اللغة</Label>
+                    <select
+                      id="bk-newlang"
+                      value={newLanguage}
+                      onChange={(e) => setNewLanguage(e.target.value)}
+                      className="w-full border border-border bg-background rounded-md px-3 h-10 text-sm"
+                      disabled={uploading}
+                    >
+                      <option value="">اختر لغة...</option>
+                      {BOOK_LANGUAGES.map((l) => (
+                        <option key={l.code} value={l.code}>
+                          {l.labelAr}
+                          {usedLanguageCodes.has(l.code) ? " (مستبدل)" : ""}
+                        </option>
+                      ))}
+                      <option value={OTHER_LANGUAGE_CODE}>أخرى (نص حر)</option>
+                    </select>
+                  </div>
+                  
+                  {newLanguage === OTHER_LANGUAGE_CODE && (
+                    <div className="space-y-2">
+                      <Label htmlFor="bk-langlabel">اسم اللغة</Label>
+                      <Input
+                        id="bk-langlabel"
+                        value={newLanguageLabel}
+                        onChange={(e) => setNewLanguageLabel(e.target.value)}
+                        placeholder="مثلاً: السواحلية"
+                        disabled={uploading}
+                      />
+                    </div>
                   )}
-                  ارفع PDF
-                </label>
-                <input
-                  id="bk-newfile"
-                  type="file"
-                  accept="application/pdf"
-                  className="hidden"
-                  disabled={uploading || !newLanguage}
-                  onChange={(e) => {
-                    const f = e.target.files?.[0]
-                    if (f) void uploadLanguageFile(f)
-                    e.target.value = ""
-                  }}
-                />
-              </div>
-            </div>
+
+                  <div className="space-y-2 pt-2">
+                    <Label>ملف الـ PDF</Label>
+                    {!newLanguage ? (
+                        <div className="p-6 border-2 border-dashed border-border rounded-xl text-center text-muted-foreground bg-muted/20">
+                            يرجى اختيار اللغة أولاً
+                        </div>
+                    ) : (
+                        <label
+                          onDragOver={(e) => { e.preventDefault(); if(!uploading) setIsDragging(true) }}
+                          onDragLeave={(e) => { e.preventDefault(); setIsDragging(false) }}
+                          onDrop={(e) => {
+                            e.preventDefault();
+                            setIsDragging(false);
+                            if(uploading) return;
+                            const file = e.dataTransfer.files?.[0];
+                            if(file) void uploadLanguageFile(file);
+                          }}
+                          className={`flex flex-col items-center justify-center gap-3 border-2 border-dashed rounded-xl p-8 transition-all ${
+                            uploading ? "opacity-50 cursor-not-allowed bg-muted border-border" :
+                            isDragging ? "border-primary bg-primary/10 scale-[1.02]" : "border-border cursor-pointer hover:bg-muted/50"
+                          }`}
+                        >
+                          {uploading ? (
+                            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                          ) : (
+                            <Upload className={`w-8 h-8 ${isDragging ? "text-primary" : "text-muted-foreground"}`} />
+                          )}
+                          <div className="text-center">
+                              <p className={`text-sm font-bold ${isDragging ? "text-primary" : ""}`}>
+                                {uploading ? "جاري الرفع..." : isDragging ? "أفلت الملف هنا" : "اضغط لاختيار ملف PDF أو اسحبه هنا"}
+                              </p>
+                              <p className="text-xs text-muted-foreground mt-1">حد أقصى 8 ميجا</p>
+                          </div>
+                          <input
+                            type="file"
+                            accept="application/pdf"
+                            className="hidden"
+                            disabled={uploading}
+                            onChange={(e) => {
+                              const f = e.target.files?.[0]
+                              if (f) void uploadLanguageFile(f)
+                              e.target.value = ""
+                            }}
+                          />
+                        </label>
+                    )}
+                  </div>
+
+                  {uploading && (
+                    <div className="space-y-2 pt-2">
+                        <div className="flex justify-between text-xs font-bold text-primary">
+                            <span>جاري الرفع والمعالجة...</span>
+                            <span>{uploadProgress}%</span>
+                        </div>
+                        <Progress value={uploadProgress} className="h-2" />
+                    </div>
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </CardContent>
       </Card>

@@ -21,6 +21,7 @@ export const BOOK_LANGUAGES: BookLanguageOption[] = [
   { code: "ru", labelAr: "الروسية", labelEn: "Russian" },
   { code: "fa", labelAr: "الفارسية", labelEn: "Persian" },
   { code: "bn", labelAr: "البنغالية", labelEn: "Bengali" },
+  { code: "he", labelAr: "العبرية", labelEn: "Hebrew" },
 ]
 
 export const OTHER_LANGUAGE_CODE = "other"
