@@ -4,7 +4,7 @@ import { FormEvent, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { BookOpen, Calendar, Clock, ExternalLink, Mail, PlayCircle, User, Video } from 'lucide-react'
+import { BookOpen, Calendar, Clock, ExternalLink, Mail, PlayCircle, Radio, User, Video } from 'lucide-react'
 
 type SeriesSession = {
   id: string
@@ -126,16 +126,26 @@ export default function PublicSessionPage({ params }: { params: { token: string 
               <p className="text-muted-foreground">
                 لا تحتاج إلى تسجيل دخول. اضغط الرابط وادخل مباشرة.
               </p>
-              {session.meeting_link ? (
-                <Button size="lg" asChild className="gap-2">
-                  <a href={session.meeting_link} target="_blank" rel="noopener noreferrer">
-                    <ExternalLink className="w-5 h-5" />
-                    دخول الدرس
-                  </a>
-                </Button>
-              ) : (
-                <p className="text-sm text-amber-700">سيضيف الشيخ رابط الاجتماع قريباً.</p>
-              )}
+              <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                {!isEnded && (
+                  <Button size="lg" asChild className={`gap-2 ${isLive ? 'bg-red-600 hover:bg-red-700 animate-pulse' : 'bg-emerald-700 hover:bg-emerald-800'} text-white`}>
+                    <Link href={`/academy/public/session/${params.token}/live`}>
+                      <Radio className="w-5 h-5" />
+                      {isLive ? 'انضم للبث المباشر الآن' : 'الدخول إلى غرفة البث'}
+                    </Link>
+                  </Button>
+                )}
+                {session.meeting_link ? (
+                  <Button size="lg" variant="outline" asChild className="gap-2">
+                    <a href={session.meeting_link} target="_blank" rel="noopener noreferrer">
+                      <ExternalLink className="w-5 h-5" />
+                      الرابط الخارجي
+                    </a>
+                  </Button>
+                ) : !isLive && !isEnded ? (
+                  <p className="text-sm text-amber-700 self-center">يمكن دخول البث الآن قبل البدء بقليل.</p>
+                ) : null}
+              </div>
             </div>
           </CardContent>
         </Card>

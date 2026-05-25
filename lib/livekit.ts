@@ -226,3 +226,61 @@ export async function listRoomParticipants(roomName: string) {
     return []
   }
 }
+
+/**
+ * Make sure a room with the given name exists with the requested
+ * `maxParticipants` cap. Idempotent — if the room already exists LiveKit
+ * keeps the existing settings, so we look it up first and only create when
+ * missing.
+ *
+ * Returns true when the call succeeded or the room already existed,
+ * false when LiveKit isn't configured.
+ */
+export async function ensureRoom(
+  roomName: string,
+  opts: {
+    maxParticipants?: number
+    emptyTimeoutSeconds?: number
+    departureTimeoutSeconds?: number
+    metadata?: Record<string, unknown>
+  } = {}
+): Promise<boolean> {
+  const svc = getRoomService()
+  if (!svc) return false
+  try {
+    const existing = await svc.listRooms([roomName])
+    if (existing.length > 0) {
+      // Room already exists — `createRoom` would error with AlreadyExists. We
+      // skip mutating an in-flight room so we don't churn settings while a
+      // call is happening. The settings take effect on the next start.
+      return true
+    }
+    await svc.createRoom({
+      name: roomName,
+      maxParticipants: opts.maxParticipants && opts.maxParticipants > 0 ? opts.maxParticipants : undefined,
+      emptyTimeout: opts.emptyTimeoutSeconds,
+      departureTimeout: opts.departureTimeoutSeconds,
+      metadata: opts.metadata ? JSON.stringify(opts.metadata) : undefined,
+    })
+    return true
+  } catch (err) {
+    console.error('[livekit] ensureRoom failed', err)
+    return false
+  }
+}
+
+/**
+ * Forcibly remove a participant identity from a LiveKit room. Used by the
+ * waiting-room flow when a host denies pending guests.
+ */
+export async function removeParticipant(roomName: string, identity: string): Promise<boolean> {
+  const svc = getRoomService()
+  if (!svc) return false
+  try {
+    await svc.removeParticipant(roomName, identity)
+    return true
+  } catch (err) {
+    console.error('[livekit] removeParticipant failed', err)
+    return false
+  }
+}

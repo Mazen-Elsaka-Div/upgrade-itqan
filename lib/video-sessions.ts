@@ -151,6 +151,16 @@ export async function endVideoSession(sessionId: string): Promise<void> {
     )
   }
 
+  // Close any participants who never received a participant_left webhook so
+  // their attendance window is bounded.
+  await query(
+    `UPDATE video_session_participants
+     SET left_at = NOW(),
+         duration_seconds = EXTRACT(EPOCH FROM (NOW() - joined_at))::int
+     WHERE session_id = $1 AND left_at IS NULL`,
+    [sessionId]
+  )
+
   await query(
     `UPDATE video_sessions
      SET ended_at = NOW(),

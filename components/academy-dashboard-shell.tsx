@@ -40,6 +40,7 @@ const getAcademyRoleConfig = (t: any, role: AcademyRole): { sections: NavSection
             { href: '/academy/student/enrollment-requests', label: t.academy?.enrollmentRequests || 'طلبات الانضمام', icon: UserPlus },
             { href: '/academy/student/tasks', label: t.academy?.tasks || 'المهام', icon: ClipboardList },
             { href: '/academy/student/sessions', label: t.academy?.liveSessions || 'الجلسات الحية', icon: Video },
+            { href: '/academy/student/recordings', label: t.video?.myRecordings || 'تسجيلاتي', icon: Video },
             { href: '/academy/student/halaqat', label: t.academy?.halaqat || 'حلقاتي', icon: GraduationCap },
             { href: '/academy/student/path', label: t.academy?.learningPath || 'المسار التعليمي', icon: Route },
             { href: '/academy/student/chat', label: t.academy?.chat || 'الرسائل', icon: MessageSquare },
@@ -92,7 +93,8 @@ const getAcademyRoleConfig = (t: any, role: AcademyRole): { sections: NavSection
           title: t.academy?.liveSection || 'البث المباشر',
           items: [
             { href: '/academy/teacher/live', label: t.academy?.startSession || 'بدء جلسة', icon: PlayCircle },
-            { href: '/academy/teacher/recordings', label: t.academy?.recordings || 'التسجيلات', icon: Video },
+            { href: '/academy/teacher/my-sessions', label: t.video?.mySessions || 'سجل جلساتي', icon: Video },
+            { href: '/academy/teacher/recordings', label: t.video?.recordings || 'التسجيلات', icon: Video },
           ]
         },
         {

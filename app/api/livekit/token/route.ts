@@ -5,6 +5,7 @@ import {
   halaqaRoomName,
   bookingRoomName,
   courseSessionRoomName,
+  ensureRoom,
   mintLiveKitToken,
   isLiveKitConfigured,
   LIVEKIT_URL,
@@ -172,6 +173,57 @@ export async function POST(req: NextRequest) {
 
   const settings = await getVideoSettings(platform)
 
+  // Apply room-level config from video_settings before minting the token so
+  // LiveKit enforces caps server-side. Idempotent: only takes effect on the
+  // first creation of the room.
+  try {
+    await ensureRoom(roomName, {
+      maxParticipants: settings.max_participants,
+      // Keep the room open 5 minutes after the last participant leaves so a
+      // reconnect doesn't restart the call.
+      departureTimeoutSeconds: 300,
+      // Reap the room shell after 15 minutes if nobody ever joined.
+      emptyTimeoutSeconds: 15 * 60,
+      metadata: { kind, refId, platform },
+    })
+  } catch (err) {
+    console.error('[livekit/token] ensureRoom failed', err)
+  }
+
+  // require_approval_to_join: non-hosts must be approved before they get a
+  // live token. The pending row is created here; the host calls
+  // /api/livekit/waiting-room to admit them.
+  if (settings.require_approval_to_join && livekitRole !== 'host') {
+    try {
+      await query(
+        `INSERT INTO video_session_pending_joins (kind, ref_id, user_id, status)
+         VALUES ($1, $2, $3, 'pending')
+         ON CONFLICT (kind, ref_id, user_id)
+         DO UPDATE SET status = CASE WHEN video_session_pending_joins.status = 'approved' THEN 'approved' ELSE 'pending' END`,
+        [kind, refId, userId]
+      )
+      const pending = await query<{ status: string }>(
+        `SELECT status FROM video_session_pending_joins
+         WHERE kind = $1 AND ref_id = $2 AND user_id = $3`,
+        [kind, refId, userId]
+      )
+      const approved = pending[0]?.status === 'approved'
+      if (!approved) {
+        return NextResponse.json(
+          {
+            waiting: true,
+            message: 'في انتظار موافقة المضيف للسماح بالدخول',
+          },
+          { status: 202 }
+        )
+      }
+    } catch (err) {
+      // Table missing (migration not run) — fall through and behave as if the
+      // setting is off. Logged for visibility.
+      console.error('[livekit/token] waiting-room check failed', err)
+    }
+  }
+
   let videoSessionId: string | null = null
   try {
     if (livekitRole === 'host') {
@@ -224,6 +276,7 @@ export async function POST(req: NextRequest) {
         show_participant_count: settings.show_participant_count,
         watermark_text: settings.watermark_text,
         max_participants: settings.max_participants,
+        max_duration_minutes: settings.max_duration_minutes,
       },
     })
   } catch (err) {

@@ -1,9 +1,10 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Calendar, Clock, Globe2, Link2, Megaphone, Plus, Edit2, Trash2 } from 'lucide-react'
+import { Calendar, Clock, Globe2, Link2, Megaphone, Plus, Edit2, Trash2, Radio, Video } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
@@ -11,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogT
 import { toast } from 'sonner'
 
 export default function TeacherSchedulePage() {
+  const router = useRouter()
   const [sessions, setSessions] = useState<any[]>([])
   const [courses, setCourses] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -185,14 +187,18 @@ export default function TeacherSchedulePage() {
         body: JSON.stringify({ status: 'in_progress' })
       });
       if (res.ok) {
-        toast.success('تم تفعيل الجلسة للطلاب')
-        fetchSessions()
+        toast.success('تم تفعيل الجلسة، جاري فتح غرفة البث...')
+        router.push(`/academy/teacher/sessions/${id}/live`)
       } else {
         toast.error('حدث خطأ أثناء التفعيل')
       }
     } catch (err) {
       toast.error('فشل في الاتصال بالخادم')
     }
+  }
+
+  const handleEnterLive = (id: string) => {
+    router.push(`/academy/teacher/sessions/${id}/live`)
   }
 
   if (loading) {
@@ -271,7 +277,7 @@ export default function TeacherSchedulePage() {
                       </div>
                       {session.status === 'in_progress' && <p className="text-sm text-green-600 font-bold mt-1">الجلسة نشطة حالياً</p>}
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2 justify-end">
                       <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => handleDelete(session.id)}>
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -279,9 +285,32 @@ export default function TeacherSchedulePage() {
                         <Edit2 className="w-4 h-4 ml-1" />
                         تعديل
                       </Button>
-                      <Button size="sm" onClick={() => handleStartNow(session.id)} disabled={session.status === 'in_progress'}>
-                        {session.status === 'in_progress' ? 'نشطة' : 'ابدأ الآن'}
-                      </Button>
+                      {session.status === 'in_progress' ? (
+                        <Button
+                          size="sm"
+                          onClick={() => handleEnterLive(session.id)}
+                          className="bg-red-600 hover:bg-red-700 text-white"
+                        >
+                          <Radio className="w-4 h-4 ml-1 animate-pulse" />
+                          ادخل البث المباشر
+                        </Button>
+                      ) : (
+                        <>
+                          <Button size="sm" onClick={() => handleStartNow(session.id)}>
+                            <Video className="w-4 h-4 ml-1" />
+                            بدء الدرس المباشر
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleEnterLive(session.id)}
+                            title="دخول الغرفة بدون تغيير الحالة"
+                          >
+                            <Video className="w-4 h-4 ml-1" />
+                            دخول الغرفة
+                          </Button>
+                        </>
+                      )}
                     </div>
                   </div>
                 </CardContent>

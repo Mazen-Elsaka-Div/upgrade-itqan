@@ -389,16 +389,14 @@ function SessionCard({ session, isLive, isAr, t, statusConfig, fmtTime, timeUnti
 
         {/* Action */}
         <div className="shrink-0 flex flex-col gap-2 md:items-end">
-          {isLive && session.meeting_link ? (
-            <a
-              href={session.meeting_link}
-              target="_blank"
-              rel="noopener noreferrer"
+          {isLive ? (
+            <Link
+              href={`/academy/student/sessions/${session.id}/live`}
               className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 font-bold shadow-md shadow-red-500/30"
             >
               <PlayCircle className="w-5 h-5" />
-              {t.academy?.joinNow || (isAr ? 'انضم الآن' : 'Join now')}
-            </a>
+              {t.academy?.joinNow || (isAr ? 'انضم للبث المباشر' : 'Join live now')}
+            </Link>
           ) : session.meeting_link && session.status === 'scheduled' ? (
             <a
               href={session.meeting_link}
@@ -407,7 +405,7 @@ function SessionCard({ session, isLive, isAr, t, statusConfig, fmtTime, timeUnti
               className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
             >
               <Video className="w-5 h-5" />
-              {isAr ? 'رابط الجلسة' : 'Meeting link'}
+              {isAr ? 'رابط الجلسة الخارجي' : 'External meeting link'}
             </a>
           ) : session.status === 'completed' && session.recording_url ? (
             <a
