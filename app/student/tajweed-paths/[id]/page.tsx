@@ -39,6 +39,8 @@ type Stage = {
   pdf_url: string | null
   passage_text: string | null
   estimated_minutes: number
+  halaqa_name?: string | null
+  halaqa_id?: string | null
   progress?: ProgressRow
 }
 
@@ -302,6 +304,23 @@ export default function StudentTajweedPathDetail() {
                       <div className="text-sm whitespace-pre-wrap leading-loose font-serif">
                         {stage.passage_text}
                       </div>
+                    </div>
+                  )}
+
+                  {stage.halaqa_name && stage.halaqa_id && (
+                    <div className="bg-emerald-50/50 border border-emerald-100 rounded-lg p-4">
+                      <h4 className="text-sm font-semibold mb-2 flex items-center gap-2 text-emerald-800">
+                        <GraduationCap className="h-4 w-4" />
+                        حلقة متعلقة بهذه المرحلة
+                      </h4>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        يمكنك الانضمام إلى الحلقة المرتبطة بهذه المرحلة لتعزيز فهمك وتطبيقك العملي.
+                      </p>
+                      <Button asChild size="sm" variant="outline" className="gap-2 border-emerald-200 text-emerald-700 hover:bg-emerald-100">
+                        <Link href={`/student/halaqat/${stage.halaqa_id}`}>
+                          الذهاب إلى {stage.halaqa_name}
+                        </Link>
+                      </Button>
                     </div>
                   )}
 

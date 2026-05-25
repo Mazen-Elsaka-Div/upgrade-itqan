@@ -42,12 +42,13 @@ type Stage = {
   passage_text: string | null
   estimated_minutes: number
   course_id: string | null
+  halaqa_id: string | null
 }
 
 const initialStageForm = {
   title: "", description: "", content: "",
   video_url: "", pdf_url: "", passage_text: "",
-  estimated_minutes: 30, course_id: "",
+  estimated_minutes: 30, course_id: "", halaqa_id: "",
 }
 
 export default function AcademyAdminLearningPathDetailPage() {
@@ -81,6 +82,7 @@ export default function AcademyAdminLearningPathDetailPage() {
   const [stageForm, setStageForm] = useState(initialStageForm)
   const [savingStage, setSavingStage] = useState(false)
   const [courses, setCourses] = useState<{id: string, title: string}[]>([])
+  const [halaqat, setHalaqat] = useState<{id: string, name: string}[]>([])
   const [uploadingThumb, setUploadingThumb] = useState(false)
 
   async function load() {
@@ -140,15 +142,18 @@ export default function AcademyAdminLearningPathDetailPage() {
   useEffect(() => {
     (async () => {
       try {
-        const [teachers, coursesRes] = await Promise.all([
+        const [teachers, coursesRes, halaqatRes] = await Promise.all([
           fetch("/api/admin/users?role=teacher&limit=100").then(r => r.json()).catch(() => ({})),
           fetch("/api/academy/admin/courses").then(r => r.json()).catch(() => ({ data: [] })),
+          fetch("/api/halaqat?platform=academy").then(r => r.json()).catch(() => ({ data: [] })),
         ])
         setManagers((teachers?.users as any[]) || [])
         setCourses(coursesRes.data || [])
+        setHalaqat(halaqatRes.data || [])
       } catch {
         setManagers([])
         setCourses([])
+        setHalaqat([])
       }
     })()
   }, [])
@@ -199,6 +204,7 @@ export default function AcademyAdminLearningPathDetailPage() {
       passage_text: stage.passage_text || "",
       estimated_minutes: stage.estimated_minutes || 30,
       course_id: stage.course_id || "",
+      halaqa_id: stage.halaqa_id || "",
     })
     setStageDialog({ open: true, stage })
   }
@@ -290,6 +296,7 @@ export default function AcademyAdminLearningPathDetailPage() {
         passage_text: stageForm.passage_text || null,
         estimated_minutes: stageForm.estimated_minutes,
         course_id: stageForm.course_id || null,
+        halaqa_id: stageForm.halaqa_id || null,
       }
       if (stageDialog.stage) {
         await fetch(`/api/admin/tajweed-paths/${pathId}/stages/${stageDialog.stage.id}`, {
@@ -405,6 +412,7 @@ export default function AcademyAdminLearningPathDetailPage() {
                       <h3 className="font-semibold">{s.title}</h3>
                       <Badge variant="outline" className="text-xs">{s.estimated_minutes} {tp.metadata.minutesShort}</Badge>
                       {s.course_id && <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-800 border-blue-200">دورة تدريبية</Badge>}
+                      {s.halaqa_id && <Badge variant="secondary" className="text-xs bg-emerald-100 text-emerald-800 border-emerald-200">حلقة مرتبطة</Badge>}
                       {s.video_url && <Badge variant="secondary" className="text-xs">{tp.metadata.videoBadge}</Badge>}
                       {s.pdf_url && <Badge variant="secondary" className="text-xs">{tp.metadata.pdfBadge}</Badge>}
                     </div>
@@ -798,7 +806,7 @@ export default function AcademyAdminLearningPathDetailPage() {
                 التطبيق المتقدم والربط
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div className="md:col-span-2 space-y-1.5">
+                <div className="md:col-span-1 space-y-1.5">
                   <Label className="text-muted-foreground font-medium">الدورة المرتبطة (اختياري)</Label>
                   <Select value={stageForm.course_id || "none"} onValueChange={v => setStageForm({ ...stageForm, course_id: v === "none" ? "" : v })}>
                     <SelectTrigger className="bg-background shadow-sm border-input/50"><SelectValue placeholder="اختر دورة من المنصة لربطها بهذه المرحلة" /></SelectTrigger>
@@ -806,6 +814,21 @@ export default function AcademyAdminLearningPathDetailPage() {
                       <SelectItem value="none">بدون دورة</SelectItem>
                       {courses.map(c => (
                         <SelectItem key={c.id} value={c.id}>{c.title}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="md:col-span-1 space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-muted-foreground font-medium">الحلقة المرتبطة (اختياري)</Label>
+                    <Link href="/academy/admin/halaqat" target="_blank" className="text-[11px] text-emerald-600 hover:text-emerald-700 underline font-medium">إنشاء حلقة جديدة</Link>
+                  </div>
+                  <Select value={stageForm.halaqa_id || "none"} onValueChange={v => setStageForm({ ...stageForm, halaqa_id: v === "none" ? "" : v })}>
+                    <SelectTrigger className="bg-background shadow-sm border-input/50"><SelectValue placeholder="اختر حلقة لربطها بهذه المرحلة" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">بدون حلقة</SelectItem>
+                      {halaqat.map(h => (
+                        <SelectItem key={h.id} value={h.id}>{h.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>

@@ -45,6 +45,9 @@ interface PathStage {
   course_thumbnail_url?: string
   course_progress?: number
   course_status?: string
+  halaqa_id?: string
+  halaqa_name?: string
+  halaqa_is_active?: boolean
   progress: {
     status: 'locked' | 'unlocked' | 'in_progress' | 'completed'
     audio_url?: string
@@ -595,6 +598,34 @@ export default function StudentPathDetailPage() {
                             صفحة الدورة
                             <ExternalLink className="w-3.5 h-3.5" />
                           </Link>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Integrated halaqa gating cards */}
+                    {stage.halaqa_id && (
+                      <div className="flex flex-col gap-3 mt-4 sm:mt-0 sm:max-w-[320px] w-full shrink-0">
+                        <div className="bg-emerald-50/50 dark:bg-emerald-950/20 p-3 rounded-2xl border border-emerald-100 dark:border-emerald-900/50 shadow-sm flex flex-col gap-3">
+                          <div className="flex gap-3">
+                            <div className="w-12 h-12 rounded-xl overflow-hidden shrink-0 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 flex items-center justify-center">
+                              <GraduationCap className="w-6 h-6" />
+                            </div>
+                            <div className="flex flex-col justify-center flex-1 min-w-0">
+                              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider mb-0.5">حلقة مرتبطة</span>
+                              <h4 className="text-sm font-semibold text-foreground truncate" title={stage.halaqa_name}>
+                                {stage.halaqa_name}
+                              </h4>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 justify-end">
+                            <Link
+                              href={`/academy/student/halaqat/${stage.halaqa_id}`}
+                              className="px-4 py-2 text-xs font-bold rounded-xl bg-emerald-600 text-white border border-transparent hover:bg-emerald-700 transition-colors flex items-center justify-center gap-1.5 shadow-sm flex-1 sm:flex-none"
+                            >
+                              الذهاب للحلقة
+                              <ArrowRight className="w-3.5 h-3.5 rtl:rotate-180" />
+                            </Link>
+                          </div>
                         </div>
                       </div>
                     )}

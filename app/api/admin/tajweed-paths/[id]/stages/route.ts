@@ -18,7 +18,7 @@ async function authorizePath(pathId: string, sessionSub: string, isReaderOnly: b
 }
 
 // POST /api/admin/tajweed-paths/[id]/stages
-// Body: { title, description?, content?, video_url?, pdf_url?, passage_text?, estimated_minutes?, position? }
+// Body: { title, description?, content?, video_url?, pdf_url?, passage_text?, estimated_minutes?, position?, course_id?, halaqa_id? }
 export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   try {
     const session = await getSession()
@@ -49,8 +49,8 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
     const inserted = (await query<any>(
       `INSERT INTO tajweed_path_stages (
           path_id, position, title, description, content,
-          video_url, pdf_url, passage_text, estimated_minutes, course_id
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
+          video_url, pdf_url, passage_text, estimated_minutes, course_id, halaqa_id
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *`,
       [
         id, position, title,
         body.description || null,
@@ -60,6 +60,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
         body.passage_text || null,
         body.estimated_minutes || 30,
         body.course_id || null,
+        body.halaqa_id || null,
       ],
     )) as any[]
 
