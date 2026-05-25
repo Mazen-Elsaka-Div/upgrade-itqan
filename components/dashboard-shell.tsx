@@ -302,19 +302,18 @@ export function DashboardShell({ role, children, headerTitle }: { role: 'student
         collapsed ? 'w-72 lg:w-20' : 'w-72'
       )}>
         <div className={cn(
-          'py-1 flex items-center border-b border-border relative overflow-hidden',
+          'flex items-center border-b border-border relative overflow-hidden shrink-0',
           isReader ? 'bg-primary/5' : 'bg-card',
-          collapsed ? 'lg:justify-center lg:px-2' : 'justify-center'
+          collapsed ? 'lg:justify-center lg:px-2' : 'justify-center',
+          role === 'student' ? 'h-20' : 'h-16'
         )}>
-          <Link href="/" className={cn('block', collapsed ? 'w-full lg:w-12 lg:px-0 px-4' : 'w-full px-4')}>
-            <img
-              src={branding.dashboardLogoUrl || "/branding/dashboard-logo.png"}
-              alt={t.appName}
-              className={cn(
-                'w-full h-auto object-contain dark:brightness-150 dark:contrast-125 transition-all',
-                collapsed ? 'min-h-[36px] max-h-[48px]' : 'min-h-[40px] max-h-[100px]'
-              )}
-            />
+          <Link href="/" className={cn('block text-center w-full', collapsed ? 'px-0' : 'px-4')}>
+            <span className={cn(
+              "font-black text-primary leading-none tracking-tight",
+              collapsed ? "text-2xl" : "text-3xl"
+            )}>
+              {collapsed ? "إ" : "إتقان"}
+            </span>
           </Link>
 
           {/* Desktop collapse toggle */}
