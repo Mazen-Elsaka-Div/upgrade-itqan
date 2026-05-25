@@ -44,60 +44,61 @@ END $$;
 --    Idempotent — uses ON CONFLICT DO NOTHING on the partial unique
 --    index (student_id, scope, kind, source_table, source_id).
 -- ---------------------------------------------------------------------------
+-- We use dynamic SQL + to_jsonb(cd) so the migration is robust to
+-- different legacy schemas of certificate_data.  Whatever columns
+-- exist on that table get copied verbatim into the new `data` JSONB
+-- field (minus a handful we already pull out into typed columns).
 DO $$
 BEGIN
   IF EXISTS (SELECT 1 FROM information_schema.tables
               WHERE table_name = 'certificate_data')
      AND EXISTS (SELECT 1 FROM information_schema.tables
                   WHERE table_name = 'certificate_issuance_requests') THEN
-    INSERT INTO certificate_issuance_requests (
-      id, scope, kind, student_id,
-      source_table, source_id, source_label,
-      status, data,
-      certificate_number, pdf_url,
-      requested_at, submitted_at, approved_at, issued_at,
-      created_at, updated_at
-    )
-    SELECT
-      gen_random_uuid(),
-      'maqraa'::varchar,
-      'recitation'::varchar,
-      cd.student_id,
-      'certificate_data'::varchar,
-      cd.id,
-      NULL,
-      'issued'::varchar,
-      jsonb_build_object(
-        'university',        cd.university,
-        'university_other',  cd.university_other,
-        'college',           cd.college,
-        'college_other',     cd.college_other,
-        'city',              cd.city,
-        'city_other',        cd.city_other,
-        'phone',             cd.phone,
-        'age',               cd.age,
-        'entity_id',         cd.entity_id,
-        'entity_other',      cd.entity_other,
-        'pdf_file_url',      cd.pdf_file_url
-      ),
-      cd.certificate_url,
-      cd.certificate_pdf_url,
-      cd.created_at,
-      cd.created_at,
-      cd.created_at,
-      cd.created_at,
-      cd.created_at,
-      cd.updated_at
-    FROM certificate_data cd
-    WHERE cd.certificate_issued = TRUE
-      AND NOT EXISTS (
-        SELECT 1 FROM certificate_issuance_requests r
-         WHERE r.student_id = cd.student_id
-           AND r.scope      = 'maqraa'
-           AND r.kind       = 'recitation'
-           AND r.source_table = 'certificate_data'
-           AND r.source_id    = cd.id
-      );
+    EXECUTE $sql$
+      INSERT INTO certificate_issuance_requests (
+        id, scope, kind, student_id,
+        source_table, source_id, source_label,
+        status, data,
+        certificate_number, pdf_url,
+        requested_at, submitted_at, approved_at, issued_at,
+        created_at, updated_at
+      )
+      SELECT
+        gen_random_uuid(),
+        'maqraa'::varchar,
+        'recitation'::varchar,
+        cd.student_id,
+        'certificate_data'::varchar,
+        cd.id,
+        NULL,
+        'issued'::varchar,
+        (to_jsonb(cd)
+           - 'id'
+           - 'student_id'
+           - 'created_at'
+           - 'updated_at'
+           - 'certificate_issued'
+           - 'certificate_url'
+           - 'certificate_pdf_url'),
+        cd.certificate_url,
+        cd.certificate_pdf_url,
+        cd.created_at,
+        cd.created_at,
+        cd.created_at,
+        cd.created_at,
+        cd.created_at,
+        cd.updated_at
+      FROM certificate_data cd
+      WHERE cd.certificate_issued = TRUE
+        AND NOT EXISTS (
+          SELECT 1 FROM certificate_issuance_requests r
+           WHERE r.student_id = cd.student_id
+             AND r.scope      = 'maqraa'
+             AND r.kind       = 'recitation'
+             AND r.source_table = 'certificate_data'
+             AND r.source_id    = cd.id
+        );
+    $sql$;
   END IF;
 END $$;
 
