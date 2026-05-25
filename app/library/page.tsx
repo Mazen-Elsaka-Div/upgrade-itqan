@@ -6,8 +6,8 @@ import { Search, BookOpen, Globe, Calendar, FileText, Loader2 } from "lucide-rea
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
+import { useI18n } from "@/lib/i18n/context"
 import {
-  BOOK_CATEGORIES,
   BOOK_LANGUAGES,
   OTHER_LANGUAGE_CODE,
   getLanguageDisplay,
@@ -22,15 +22,46 @@ interface BookListItem {
   pages_count: number | null
   publish_date: string | null
   category: string | null
+  category_id: string | null
+  category_name: string | null
+  category_slug: string | null
   languages: { language: string; language_label: string | null }[]
 }
 
+interface CategoryOption {
+  id: string
+  name: string
+  slug: string
+}
+
 export default function PublicLibraryPage() {
+  const { t } = useI18n()
+  const lib = t.library
+  const isAr = t.locale === "ar"
   const [books, setBooks] = useState<BookListItem[]>([])
+  const [categories, setCategories] = useState<CategoryOption[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
   const [category, setCategory] = useState("")
   const [language, setLanguage] = useState("")
+
+  useEffect(() => {
+    let cancelled = false
+    const run = async () => {
+      try {
+        const res = await fetch("/api/library/categories")
+        if (!res.ok) return
+        const data = await res.json()
+        if (!cancelled) setCategories(Array.isArray(data.categories) ? data.categories : [])
+      } catch {
+        // ignore
+      }
+    }
+    void run()
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -68,10 +99,13 @@ export default function PublicLibraryPage() {
 
   const languageOptions = useMemo(
     () => [
-      { code: "", label: "كل اللغات" },
-      ...BOOK_LANGUAGES.map((l) => ({ code: l.code, label: l.labelAr })),
+      { code: "", label: lib?.allLanguages || "كل اللغات" },
+      ...BOOK_LANGUAGES.map((l) => ({
+        code: l.code,
+        label: isAr ? l.labelAr : l.labelEn,
+      })),
     ],
-    []
+    [isAr, lib?.allLanguages]
   )
 
   return (
@@ -80,10 +114,10 @@ export default function PublicLibraryPage() {
         <div>
           <h1 className="text-3xl font-black flex items-center gap-3">
             <BookOpen className="w-8 h-8 text-primary" />
-            المكتبة العامة
+            {lib?.title || "مكتبة الكتب"}
           </h1>
           <p className="text-muted-foreground mt-1">
-            مجموعة من الكتب المترجمة المتاحة بعدة لغات
+            {lib?.subtitle || "تصفح الكتب المتاحة بلغات متعددة"}
           </p>
         </div>
       </div>
@@ -96,7 +130,7 @@ export default function PublicLibraryPage() {
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="ابحث بالعنوان أو المؤلف..."
+              placeholder={lib?.searchPlaceholder || "ابحث بالعنوان أو المؤلف..."}
               className="pr-9"
             />
           </div>
@@ -105,10 +139,10 @@ export default function PublicLibraryPage() {
             onChange={(e) => setCategory(e.target.value)}
             className="border border-border bg-background rounded-md px-3 h-10 text-sm"
           >
-            <option value="">كل التصنيفات</option>
-            {BOOK_CATEGORIES.map((c) => (
-              <option key={c.code} value={c.code}>
-                {c.labelAr}
+            <option value="">{lib?.allCategories || "كل التصنيفات"}</option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
               </option>
             ))}
           </select>
@@ -135,7 +169,7 @@ export default function PublicLibraryPage() {
         <Card className="border-dashed">
           <CardContent className="p-12 text-center text-muted-foreground">
             <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-40" />
-            لا توجد كتب متاحة حالياً
+            {lib?.noResults || "لا توجد كتب متاحة حالياً"}
           </CardContent>
         </Card>
       ) : (

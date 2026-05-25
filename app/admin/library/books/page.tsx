@@ -20,6 +20,7 @@ import {
   OTHER_LANGUAGE_CODE,
   getLanguageDisplay,
 } from "@/lib/library/languages"
+import { BookCategoriesManager } from "@/components/library/book-categories-manager"
 
 interface AdminBookRow {
   id: string
@@ -103,19 +104,24 @@ export default function AdminLibraryBooksPage() {
         </Link>
       </div>
 
-      <Card>
-        <CardContent className="p-3">
-          <div className="relative">
-            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="ابحث بعنوان الكتاب أو المؤلف..."
-              className="pr-9"
-            />
-          </div>
-        </CardContent>
-      </Card>
+      <div className="grid gap-4 md:grid-cols-3">
+        <div className="md:col-span-2">
+          <Card>
+            <CardContent className="p-3">
+              <div className="relative">
+                <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="ابحث بعنوان الكتاب أو المؤلف..."
+                  className="pr-9"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+        <BookCategoriesManager />
+      </div>
 
       {loading ? (
         <div className="flex justify-center py-16">

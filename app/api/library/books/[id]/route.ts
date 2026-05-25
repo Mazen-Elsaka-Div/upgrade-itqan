@@ -26,12 +26,19 @@ export async function GET(
       pages_count: number | null
       publish_date: string | null
       category: string | null
+      category_id: string | null
+      category_name: string | null
+      category_slug: string | null
       is_published: boolean
       created_at: string
     }>(
-      `SELECT id, title, author, description, cover_image_url,
-              pages_count, publish_date, category, is_published, created_at
-       FROM books WHERE id = $1 AND is_published = TRUE`,
+      `SELECT b.id, b.title, b.author, b.description, b.cover_image_url,
+              b.pages_count, b.publish_date, b.category, b.category_id,
+              c.name AS category_name, c.slug AS category_slug,
+              b.is_published, b.created_at
+       FROM books b
+       LEFT JOIN categories c ON c.id = b.category_id
+       WHERE b.id = $1 AND b.is_published = TRUE`,
       [id]
     )
 
@@ -63,22 +70,26 @@ export async function GET(
       pages_count: number | null
       publish_date: string | null
       category: string | null
+      category_id: string | null
+      category_name: string | null
     }>(
-      `SELECT id, title, author, cover_image_url, pages_count, publish_date, category
-       FROM books
-       WHERE is_published = TRUE
-         AND id <> $1
+      `SELECT b.id, b.title, b.author, b.cover_image_url, b.pages_count,
+              b.publish_date, b.category, b.category_id, c.name AS category_name
+       FROM books b
+       LEFT JOIN categories c ON c.id = b.category_id
+       WHERE b.is_published = TRUE
+         AND b.id <> $1
          AND (
-           ($2::text IS NOT NULL AND category = $2)
-           OR ($3::text IS NOT NULL AND author = $3)
+           ($2::uuid IS NOT NULL AND b.category_id = $2)
+           OR ($3::text IS NOT NULL AND b.author = $3)
          )
        ORDER BY
-         CASE WHEN category = $2 AND author = $3 THEN 0
-              WHEN category = $2 THEN 1
+         CASE WHEN b.category_id = $2 AND b.author = $3 THEN 0
+              WHEN b.category_id = $2 THEN 1
               ELSE 2 END,
-         created_at DESC
+         b.created_at DESC
        LIMIT 6`,
-      [id, book.category, book.author]
+      [id, book.category_id, book.author]
     )
 
     return NextResponse.json({ book, files, related })

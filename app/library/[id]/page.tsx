@@ -17,8 +17,8 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import TajweedPdfViewer from "@/components/tajweed/pdf-viewer"
+import { useI18n } from "@/lib/i18n/context"
 import {
-  BOOK_CATEGORIES,
   OTHER_LANGUAGE_CODE,
   getLanguageDisplay,
 } from "@/lib/library/languages"
@@ -40,6 +40,9 @@ interface Book {
   pages_count: number | null
   publish_date: string | null
   category: string | null
+  category_id: string | null
+  category_name: string | null
+  category_slug: string | null
 }
 
 interface RelatedBook {
@@ -50,6 +53,7 @@ interface RelatedBook {
   pages_count: number | null
   publish_date: string | null
   category: string | null
+  category_name: string | null
 }
 
 function formatFileSize(bytes: number | null): string | null {
@@ -63,6 +67,9 @@ function formatFileSize(bytes: number | null): string | null {
 export default function BookDetailPage() {
   const params = useParams<{ id: string }>()
   const id = params?.id
+  const { t } = useI18n()
+  const lib = t.library
+  const isAr = t.locale === "ar"
 
   const [book, setBook] = useState<Book | null>(null)
   const [files, setFiles] = useState<BookFile[]>([])
@@ -109,8 +116,8 @@ export default function BookDetailPage() {
   )
 
   const categoryLabel = useMemo(() => {
-    if (!book?.category) return null
-    return BOOK_CATEGORIES.find((c) => c.code === book.category)?.labelAr || book.category
+    if (!book) return null
+    return book.category_name || book.category || null
   }, [book])
 
   if (loading) {
@@ -126,11 +133,11 @@ export default function BookDetailPage() {
       <div className="container mx-auto px-4 py-12" dir="rtl">
         <Card className="border-destructive/30">
           <CardContent className="p-8 text-center space-y-4">
-            <p className="text-destructive font-bold">{error || "الكتاب غير موجود"}</p>
+            <p className="text-destructive font-bold">{error || (isAr ? "الكتاب غير موجود" : "Book not found")}</p>
             <Link href="/library">
               <Button variant="outline">
                 <ArrowLeft className="w-4 h-4 ml-2 rtl:rotate-180" />
-                العودة للمكتبة
+                {lib?.backToLibrary || (isAr ? "العودة للمكتبة" : "Back to library")}
               </Button>
             </Link>
           </CardContent>
@@ -144,7 +151,7 @@ export default function BookDetailPage() {
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <Link href="/library" className="hover:text-primary transition-colors">
-          المكتبة
+          {lib?.title || (isAr ? "مكتبة الكتب" : "Library")}
         </Link>
         <span>/</span>
         <span className="text-foreground font-medium truncate">{book.title}</span>
@@ -191,7 +198,7 @@ export default function BookDetailPage() {
                 {book.pages_count != null && (
                   <span className="inline-flex items-center gap-1.5">
                     <FileText className="w-4 h-4" />
-                    {book.pages_count} صفحة
+                    {book.pages_count} {lib?.pages || (isAr ? "صفحة" : "pages")}
                   </span>
                 )}
                 {book.publish_date && (
@@ -202,7 +209,7 @@ export default function BookDetailPage() {
                 )}
                 <span className="inline-flex items-center gap-1.5">
                   <Globe className="w-4 h-4" />
-                  {files.length} لغة
+                  {files.length} {lib?.languages || (isAr ? "لغة" : "languages")}
                 </span>
               </div>
 
@@ -216,11 +223,11 @@ export default function BookDetailPage() {
                 <div className="space-y-3 pt-2">
                   <div className="flex items-center gap-2 text-sm font-bold">
                     <Globe className="w-4 h-4 text-primary" />
-                    اختر اللغة
+                    {lib?.selectLanguage || (isAr ? "اختر اللغة" : "Select language")}
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {files.map((f) => {
-                      const label = getLanguageDisplay(f.language, f.language_label, "ar")
+                      const label = getLanguageDisplay(f.language, f.language_label, isAr ? "ar" : "en")
                       const sizeLabel = formatFileSize(
                         f.file_size_bytes != null ? Number(f.file_size_bytes) : null
                       )
@@ -253,8 +260,9 @@ export default function BookDetailPage() {
                     >
                       <Button className="gap-2 font-bold">
                         <Download className="w-4 h-4" />
-                        تحميل (
-                        {getLanguageDisplay(activeFile.language, activeFile.language_label, "ar")}
+                        {lib?.downloadFile || (isAr ? "تحميل الملف" : "Download")}
+                        {" "}(
+                        {getLanguageDisplay(activeFile.language, activeFile.language_label, isAr ? "ar" : "en")}
                         )
                       </Button>
                     </a>
@@ -269,10 +277,10 @@ export default function BookDetailPage() {
       {/* PDF Viewer */}
       {activeFile ? (
         <div className="space-y-2">
-          <h2 className="text-xl font-black">معاينة الكتاب</h2>
+          <h2 className="text-xl font-black">{lib?.preview || (isAr ? "معاينة الكتاب" : "Preview")}</h2>
           <TajweedPdfViewer
             src={activeFile.pdf_url}
-            label={getLanguageDisplay(activeFile.language, activeFile.language_label, "ar")}
+            label={getLanguageDisplay(activeFile.language, activeFile.language_label, isAr ? "ar" : "en")}
             className="min-h-[60vh]"
           />
         </div>
@@ -280,7 +288,7 @@ export default function BookDetailPage() {
         <Card className="border-dashed">
           <CardContent className="p-10 text-center text-muted-foreground">
             <FileText className="w-10 h-10 mx-auto mb-2 opacity-40" />
-            لا توجد نسخة للعرض حالياً
+            {lib?.noFiles || (isAr ? "لا توجد نسخة للعرض حالياً" : "No file to preview yet")}
           </CardContent>
         </Card>
       )}
@@ -288,7 +296,7 @@ export default function BookDetailPage() {
       {/* Related */}
       {related.length > 0 && (
         <div className="space-y-3">
-          <h2 className="text-xl font-black">كتب ذات صلة</h2>
+          <h2 className="text-xl font-black">{lib?.relatedBooks || (isAr ? "كتب مقترحة" : "Related books")}</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
             {related.map((r) => (
               <Link key={r.id} href={`/library/${r.id}`} className="group">
