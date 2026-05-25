@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react"
 import { Mic, Square, Trash2, Upload, Loader2, Play, Pause } from "lucide-react"
+import { useUploadThing } from "@/lib/uploadthing-client"
 
 type Props = {
     value?: string | null
@@ -10,10 +11,35 @@ type Props = {
     label?: string
 }
 
+// Pick the first MediaRecorder MIME type the current browser actually
+// supports. Safari/iOS does NOT support audio/webm, so without this the
+// recorder produces an unusable blob (or throws), which is why the upload
+// step failed for those users — the file claimed to be webm but the bytes
+// were something else, and UploadThing rejected it.
+const pickSupportedMimeType = () => {
+    const candidates = ["audio/mp4", "audio/webm;codecs=opus", "audio/webm"]
+    if (typeof window === "undefined" || typeof MediaRecorder === "undefined") {
+        return "audio/webm"
+    }
+    for (const t of candidates) {
+        if (MediaRecorder.isTypeSupported?.(t)) return t
+    }
+    return "audio/webm"
+}
+
+const extensionFor = (mime: string) => {
+    if (mime.includes("mp4")) return "mp4"
+    if (mime.includes("ogg")) return "ogg"
+    if (mime.includes("wav")) return "wav"
+    return "webm"
+}
+
 /**
- * Records audio in the browser via MediaRecorder, lets the applicant preview /
- * re-record, then uploads the resulting blob to UploadThing's
- * `audioUploader`. The final URL is propagated through `onChange`.
+ * Records audio in the browser via MediaRecorder, lets the user preview /
+ * re-record, then uploads the resulting blob directly to UploadThing's
+ * `audioUploader` (browser → UT, bypassing the Vercel function so we avoid
+ * the 4.5 MB serverless request body limit). The final URL is propagated
+ * through `onChange`.
  */
 export default function AudioRecorder({ value, onChange, maxSeconds = 300, label }: Props) {
     const [recording, setRecording] = useState(false)
@@ -29,6 +55,9 @@ export default function AudioRecorder({ value, onChange, maxSeconds = 300, label
     const timerRef = useRef<NodeJS.Timeout | null>(null)
     const streamRef = useRef<MediaStream | null>(null)
     const audioRef = useRef<HTMLAudioElement | null>(null)
+    const mimeTypeRef = useRef<string>("audio/webm")
+
+    const { startUpload } = useUploadThing("audioUploader")
 
     useEffect(() => () => {
         if (timerRef.current) clearInterval(timerRef.current)
@@ -41,12 +70,20 @@ export default function AudioRecorder({ value, onChange, maxSeconds = 300, label
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
             streamRef.current = stream
-            const rec = new MediaRecorder(stream)
+            const mimeType = pickSupportedMimeType()
+            mimeTypeRef.current = mimeType
+            const rec = MediaRecorder.isTypeSupported?.(mimeType)
+                ? new MediaRecorder(stream, { mimeType })
+                : new MediaRecorder(stream)
             recorderRef.current = rec
             chunksRef.current = []
             rec.ondataavailable = e => { if (e.data.size > 0) chunksRef.current.push(e.data) }
             rec.onstop = () => {
-                const b = new Blob(chunksRef.current, { type: "audio/webm" })
+                // Use the recorder's actual mimeType when we can — some
+                // browsers downgrade silently from the requested type.
+                const type = rec.mimeType || mimeTypeRef.current || "audio/webm"
+                mimeTypeRef.current = type
+                const b = new Blob(chunksRef.current, { type })
                 setBlob(b)
                 setBlobUrl(URL.createObjectURL(b))
                 streamRef.current?.getTracks().forEach(t => t.stop())
@@ -86,15 +123,23 @@ export default function AudioRecorder({ value, onChange, maxSeconds = 300, label
         setUploading(true)
         setError(null)
         try {
-            const file = new File([blob], `recording-${Date.now()}.webm`, { type: "audio/webm" })
-            const fd = new FormData()
-            fd.append("file", file)
-            const res = await fetch("/api/upload-audio", { method: "POST", body: fd })
-            if (!res.ok) throw new Error("فشل رفع الملف")
-            const json = await res.json()
-            onChange(json.url)
+            const mime = mimeTypeRef.current || blob.type || "audio/webm"
+            const ext = extensionFor(mime)
+            const file = new File([blob], `recording-${Date.now()}.${ext}`, { type: mime })
+
+            const uploaded = await startUpload([file])
+            if (!uploaded || uploaded.length === 0) {
+                throw new Error("فشل رفع الملف")
+            }
+            // UploadThing v6 exposes `url`; v7 also exposes `ufsUrl`. Use
+            // whichever is present.
+            const first = uploaded[0] as { url?: string; ufsUrl?: string }
+            const url = first.ufsUrl || first.url
+            if (!url) throw new Error("لم نستلم رابطًا للملف المرفوع")
+            onChange(url)
         } catch (err: any) {
-            setError(err?.message || "فشل الرفع")
+            const msg = err?.message || err?.data?.message
+            setError(msg || "فشل الرفع")
         } finally {
             setUploading(false)
         }
