@@ -157,6 +157,7 @@ const getAcademyRoleConfig = (t: any, role: AcademyRole): { sections: NavSection
           title: 'الحلقات والبث',
           items: [
             { href: '/academy/admin/halaqat', label: t.academy?.halaqat || 'الحلقات', icon: GraduationCap },
+            { href: '/academy/admin/video-settings', label: 'إعدادات البث والفيديو', icon: Video },
           ]
         },
         {

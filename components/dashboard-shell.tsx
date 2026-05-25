@@ -16,7 +16,7 @@ import {
   Search, Plus, BookOpen, Award, UserCheck, CalendarCheck, CalendarDays,
   MessagesSquare, Megaphone, ScrollText, PieChart, Star, ShieldCheck,
   Globe, Home, Archive, Shield, Phone, BookMarked, FileEdit, Route, Target, GraduationCap, Mail,
-  Trophy, PanelLeftClose, PanelLeftOpen, Library
+  Trophy, PanelLeftClose, PanelLeftOpen, Library, Video
 } from 'lucide-react'
 import { usePublicSettings } from '@/lib/hooks/use-public-settings'
 import { useSidebarCollapsed } from '@/hooks/use-sidebar-collapsed'
@@ -99,6 +99,7 @@ const getRoleConfig = (t: any): Record<'student' | 'reader' | 'admin' | 'student
           { href: '/admin/tajweed-paths', label: t.tajweedPaths?.tajweedTitle || 'مسارات التجويد', icon: GraduationCap },
           { href: '/admin/bookings', label: t.admin.bookings, icon: CalendarDays },
           { href: '/admin/halaqat', label: 'الحلقات', icon: GraduationCap },
+          { href: '/admin/video-settings', label: 'إعدادات البث والفيديو', icon: Video },
           { href: '/admin/competitions', label: 'مسابقات المقرأة', icon: Trophy },
           { href: '/admin/conversations', label: t.admin.conversations, icon: MessagesSquare },
           { href: '/admin/certificates', label: t.admin.certificates.title, icon: Award },
