@@ -8,6 +8,24 @@ export async function GET(req: NextRequest) {
   if (!session || !['academy_admin', 'admin'].includes(session.role)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+
+  // Optional filter so admin UIs that present a teacher picker (assigning a
+  // teacher to a course / halaqa / series / archived item / etc.) can ask for
+  // only the *assignable* teachers. The teacher management page itself does
+  // NOT pass this flag — it intentionally lists every teacher (pending,
+  // approved, rejected) so the admin can review them.
+  //
+  // Accepted values for ?assignable= : "1" | "true" | "approved"
+  // Accepted values for ?status=     : "approved"  (alias)
+  const url = new URL(req.url)
+  const assignableParam = (url.searchParams.get('assignable') || '').toLowerCase()
+  const statusParam = (url.searchParams.get('status') || '').toLowerCase()
+  const onlyAssignable =
+    assignableParam === '1' ||
+    assignableParam === 'true' ||
+    assignableParam === 'approved' ||
+    statusParam === 'approved'
+
   try {
     // Pull the latest teacher_application row per user so we can show the
     // application status (pending / approved / rejected) and rejection reason
@@ -17,6 +35,10 @@ export async function GET(req: NextRequest) {
     // here because not every production database has run migration 020 yet,
     // and the column may not exist. We use created_at for both ordering and
     // the timestamp shown to admins -- it is part of the base schema.
+    const assignableFilter = onlyAssignable
+      ? `AND u.approval_status = 'approved' AND COALESCE(u.is_active, TRUE) = TRUE`
+      : ''
+
     const rows = await query(`
       SELECT
         u.id,
@@ -53,6 +75,7 @@ export async function GET(req: NextRequest) {
         WHERE ta2.user_id = u.id AND ta2.status = 'rejected'
       ) rejection_stats ON TRUE
       WHERE u.role = 'teacher'
+      ${assignableFilter}
       GROUP BY u.id, latest_app.status, latest_app.rejection_reason, latest_app.app_submitted_at,
                rejection_stats.rejection_count, rejection_stats.last_rejected_at
       ORDER BY u.created_at DESC

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSession } from '@/lib/auth'
 import { query } from '@/lib/db'
+import { assertTeacherAssignable } from '@/lib/teachers'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -139,6 +140,13 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       if (v === null || v === '' || v === undefined) {
         push(field, null)
       } else if (typeof v === 'string' && UUID_RE.test(v)) {
+        if (field === 'teacher_id') {
+          // Reject assignment to pending / rejected / suspended teachers.
+          const teacherCheck = await assertTeacherAssignable(v)
+          if (!teacherCheck.ok) {
+            return NextResponse.json({ error: teacherCheck.message }, { status: 400 })
+          }
+        }
         push(field, v)
       } else {
         return NextResponse.json({ error: `Invalid ${field}` }, { status: 400 })

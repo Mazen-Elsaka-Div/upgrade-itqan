@@ -224,7 +224,8 @@ export default function AdminUnifiedArchivePage() {
   }
 
   const fetchTeachers = () => {
-    fetch('/api/academy/admin/teachers')
+    // Only assignable teachers (approved + active) appear in the restore picker.
+    fetch('/api/academy/admin/teachers?assignable=1')
       .then((r) => (r.ok ? r.json() : []))
       .then((d) => setTeachers(Array.isArray(d) ? d : d?.data || []))
   }

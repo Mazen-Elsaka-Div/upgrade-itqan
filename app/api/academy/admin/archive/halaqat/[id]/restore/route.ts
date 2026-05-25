@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSession } from '@/lib/auth'
 import { query, queryOne } from '@/lib/db'
+import { assertTeacherAssignable } from '@/lib/teachers'
 
 /**
  * PATCH /api/academy/admin/archive/halaqat/[id]/restore
@@ -39,6 +40,14 @@ export async function PATCH(
   // التحقق من صحة teacher_id إذا أُرسل
   if (body.teacher_id && !UUID_RE.test(body.teacher_id)) {
     return NextResponse.json({ error: 'teacher_id غير صالح' }, { status: 400 })
+  }
+
+  // لا يُسمح بتعيين مدرّس قيد المراجعة أو مرفوض أو موقوف عند استعادة الحلقة.
+  if (body.teacher_id) {
+    const teacherCheck = await assertTeacherAssignable(body.teacher_id)
+    if (!teacherCheck.ok) {
+      return NextResponse.json({ error: teacherCheck.message }, { status: 400 })
+    }
   }
 
   try {

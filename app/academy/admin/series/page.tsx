@@ -58,7 +58,8 @@ export default function AdminSeriesPage() {
 
   const fetchTeachers = async () => {
     try {
-      const res = await fetch('/api/academy/admin/teachers')
+      // Only show assignable teachers (approved + active) in the picker.
+      const res = await fetch('/api/academy/admin/teachers?assignable=1')
       if (res.ok) {
         const json = await res.json()
         setTeachers(json.data || [])

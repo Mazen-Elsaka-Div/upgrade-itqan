@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSession } from '@/lib/auth'
 import { query } from '@/lib/db'
+import { assertTeacherAssignable } from '@/lib/teachers'
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getSession()
@@ -10,6 +11,15 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const { id } = await params
   try {
     const body = await req.json()
+
+    if (body.teacher_id) {
+      // Reject assignment to pending / rejected / suspended teachers.
+      const teacherCheck = await assertTeacherAssignable(body.teacher_id)
+      if (!teacherCheck.ok) {
+        return NextResponse.json({ error: teacherCheck.message }, { status: 400 })
+      }
+    }
+
     const result = await query(`
       UPDATE halaqat SET name = COALESCE($1, name), description = COALESCE($2, description),
         teacher_id = COALESCE($3, teacher_id), gender = COALESCE($4, gender),
