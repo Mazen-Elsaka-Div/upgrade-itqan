@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getSession, requireRole } from "@/lib/auth"
 import { query, queryOne } from "@/lib/db"
 
-const ADMIN_ROLES: ("admin")[] = ["admin"]
+const ADMIN_ROLES: ("academy_admin")[] = ["academy_admin"]
 
 // POST /api/admin/library/books/[id]/files
 // Body: { language, language_label?, pdf_url, pdf_key?, file_size_bytes? }
@@ -38,7 +38,7 @@ export async function POST(
 
     // Make sure the book exists
     const book = await queryOne<{ id: string }>(
-      `SELECT id FROM books WHERE id = $1 AND library_domain = 'maqraa'`,
+      `SELECT id FROM books WHERE id = $1 AND library_domain = 'academy'`,
       [id]
     )
     if (!book) return NextResponse.json({ error: "الكتاب غير موجود" }, { status: 404 })
@@ -60,7 +60,7 @@ export async function POST(
 
     return NextResponse.json({ id: rows[0].id }, { status: 201 })
   } catch (error) {
-    console.error("[admin/library] file upsert error:", error)
+    console.error("[academy/admin/library] file upsert error:", error)
     return NextResponse.json({ error: "حدث خطأ في حفظ الملف" }, { status: 500 })
   }
 }

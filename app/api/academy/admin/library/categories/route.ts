@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getSession, requireRole, type AllRoles } from "@/lib/auth"
 import { query, queryOne } from "@/lib/db"
 
-const ADMIN_ROLES: AllRoles[] = ["admin"]
+const ADMIN_ROLES: AllRoles[] = ["academy_admin"]
 
 async function getBookRoot(): Promise<string | null> {
   const row = await queryOne<{ id: string }>(
@@ -35,9 +35,9 @@ export async function GET() {
     books_count: number
   }>(
     `SELECT c.id, c.name, c.slug, c.color, c.icon, c.display_order, c.is_active,
-            (SELECT COUNT(*)::int FROM books b WHERE b.category_id = c.id AND b.library_domain = 'maqraa') AS books_count
+            (SELECT COUNT(*)::int FROM books b WHERE b.category_id = c.id AND b.library_domain = 'academy') AS books_count
        FROM categories c
-      WHERE c.parent_id = $1 AND c.library_domain = 'maqraa'
+      WHERE c.parent_id = $1 AND c.library_domain = 'academy'
       ORDER BY c.display_order ASC, c.name ASC`,
     [rootId]
   )
@@ -89,14 +89,14 @@ export async function POST(req: NextRequest) {
     const row = await queryOne<{ id: string; name: string; slug: string }>(
       `INSERT INTO categories
          (name, slug, parent_id, color, icon, display_order, is_active, library_domain, created_at, updated_at, created_by)
-       VALUES ($1, $2, $3, $4, $5, $6, TRUE, 'maqraa', NOW(), NOW(), $7)
+       VALUES ($1, $2, $3, $4, $5, $6, TRUE, 'academy', NOW(), NOW(), $7)
        RETURNING id, name, slug`,
       [name.slice(0, 255), slug, rootId, color, icon, display_order, session!.sub]
     )
 
     return NextResponse.json({ category: row }, { status: 201 })
   } catch (error) {
-    console.error("[admin/library/categories POST]", error)
+    console.error("[academy/admin/library/categories POST]", error)
     return NextResponse.json({ error: "حدث خطأ في إنشاء التصنيف" }, { status: 500 })
   }
 }

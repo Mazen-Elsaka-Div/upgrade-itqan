@@ -3,7 +3,7 @@ import { getSession, requireRole } from "@/lib/auth"
 import { query, queryOne } from "@/lib/db"
 import { deleteFromStorage } from "@/lib/storage"
 
-const ADMIN_ROLES: ("admin")[] = ["admin"]
+const ADMIN_ROLES: ("academy_admin")[] = ["academy_admin"]
 
 // DELETE /api/admin/library/books/[id]/files/[fileId]
 export async function DELETE(
@@ -19,7 +19,7 @@ export async function DELETE(
 
   try {
     const file = await queryOne<{ pdf_key: string | null }>(
-      `SELECT bf.pdf_key FROM book_files bf JOIN books b ON b.id = bf.book_id WHERE bf.id = $1 AND bf.book_id = $2 AND b.library_domain = 'maqraa'`,
+      `SELECT bf.pdf_key FROM book_files bf JOIN books b ON b.id = bf.book_id WHERE bf.id = $1 AND bf.book_id = $2 AND b.library_domain = 'academy'`,
       [fileId, id]
     )
     if (!file) return NextResponse.json({ error: "الملف غير موجود" }, { status: 404 })
@@ -32,7 +32,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error("[admin/library] file delete error:", error)
+    console.error("[academy/admin/library] file delete error:", error)
     return NextResponse.json({ error: "حدث خطأ في حذف الملف" }, { status: 500 })
   }
 }

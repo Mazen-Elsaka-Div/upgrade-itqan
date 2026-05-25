@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getSession, requireRole } from "@/lib/auth"
 import { query } from "@/lib/db"
 
-const ADMIN_ROLES: ("admin")[] = ["admin"]
+const ADMIN_ROLES: ("academy_admin")[] = ["academy_admin"]
 
 // GET /api/admin/library/books
 export async function GET(req: NextRequest) {
@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url)
     const search = (searchParams.get("search") || "").trim()
 
-    const conditions: string[] = ["b.library_domain = 'maqraa'"]
+    const conditions: string[] = ["b.library_domain = 'academy'"]
     const params: any[] = []
     if (search) {
       params.push(`%${search}%`)
@@ -53,7 +53,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ books })
   } catch (error) {
-    console.error("[admin/library] list error:", error)
+    console.error("[academy/admin/library] list error:", error)
     return NextResponse.json({ error: "حدث خطأ" }, { status: 500 })
   }
 }
@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
         (title, author, description, cover_image_url, cover_image_key,
          pages_count, publish_date, category, category_id, is_published,
          display_order, library_domain, created_by)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,COALESCE($10, TRUE),COALESCE($11, 0),'maqraa',$12)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,COALESCE($10, TRUE),COALESCE($11, 0),'academy',$12)
        RETURNING id`,
       [
         title.trim(),
@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ id: rows[0].id }, { status: 201 })
   } catch (error) {
-    console.error("[admin/library] create error:", error)
+    console.error("[academy/admin/library] create error:", error)
     return NextResponse.json({ error: "حدث خطأ في إنشاء الكتاب" }, { status: 500 })
   }
 }

@@ -31,11 +31,12 @@ export async function GET(
       category_slug: string | null
       is_published: boolean
       created_at: string
+      library_domain: string
     }>(
       `SELECT b.id, b.title, b.author, b.description, b.cover_image_url,
               b.pages_count, b.publish_date, b.category, b.category_id,
               c.name AS category_name, c.slug AS category_slug,
-              b.is_published, b.created_at
+              b.is_published, b.created_at, b.library_domain
        FROM books b
        LEFT JOIN categories c ON c.id = b.category_id
        WHERE b.id = $1 AND b.is_published = TRUE`,
@@ -78,6 +79,7 @@ export async function GET(
        FROM books b
        LEFT JOIN categories c ON c.id = b.category_id
        WHERE b.is_published = TRUE
+         AND b.library_domain = $4
          AND b.id <> $1
          AND (
            ($2::uuid IS NOT NULL AND b.category_id = $2)
@@ -89,7 +91,7 @@ export async function GET(
               ELSE 2 END,
          b.created_at DESC
        LIMIT 6`,
-      [id, book.category_id, book.author]
+      [id, book.category_id, book.author, book.library_domain]
     )
 
     return NextResponse.json({ book, files, related })

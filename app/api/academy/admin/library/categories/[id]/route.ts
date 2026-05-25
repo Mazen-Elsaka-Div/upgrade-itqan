@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getSession, requireRole, type AllRoles } from "@/lib/auth"
 import { query, queryOne } from "@/lib/db"
 
-const ADMIN_ROLES: AllRoles[] = ["admin"]
+const ADMIN_ROLES: AllRoles[] = ["academy_admin"]
 
 /**
  * PATCH /api/admin/library/categories/[id]
@@ -42,7 +42,7 @@ export async function PATCH(
         .replace(/^-+|-+$/g, "")
         .slice(0, 255)
       const existing = await queryOne<{ id: string }>(
-        `SELECT id FROM categories WHERE slug = $1 AND id <> $2 AND library_domain = 'maqraa' LIMIT 1`,
+        `SELECT id FROM categories WHERE slug = $1 AND id <> $2 AND library_domain = 'academy' LIMIT 1`,
         [slug, id]
       )
       if (existing) {
@@ -78,13 +78,13 @@ export async function PATCH(
 
     values.push(id)
     await query(
-      `UPDATE categories SET ${updates.join(", ")}, updated_at = NOW() WHERE id = $${values.length} AND library_domain = 'maqraa'`,
+      `UPDATE categories SET ${updates.join(", ")}, updated_at = NOW() WHERE id = $${values.length} AND library_domain = 'academy'`,
       values
     )
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error("[admin/library/categories PATCH]", error)
+    console.error("[academy/admin/library/categories PATCH]", error)
     return NextResponse.json({ error: "حدث خطأ في تحديث التصنيف" }, { status: 500 })
   }
 }
@@ -109,13 +109,13 @@ export async function DELETE(
     `SELECT c.parent_id
        FROM categories c
        JOIN categories root ON root.id = c.parent_id AND root.slug = 'book'
-      WHERE c.id = $1 AND c.library_domain = 'maqraa'`,
+      WHERE c.id = $1 AND c.library_domain = 'academy'`,
     [id]
   )
   if (!cat) {
     return NextResponse.json({ error: "التصنيف غير موجود أو ليس تصنيف كتاب" }, { status: 404 })
   }
 
-  await query(`DELETE FROM categories WHERE id = $1 AND library_domain = 'maqraa'`, [id])
+  await query(`DELETE FROM categories WHERE id = $1 AND library_domain = 'academy'`, [id])
   return NextResponse.json({ success: true })
 }

@@ -11,13 +11,18 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const { searchParams } = new URL(req.url)
+    const searchParams = new URL(req.url).searchParams
     const search = (searchParams.get("search") || "").trim()
     const category = (searchParams.get("category") || "").trim()
     const language = (searchParams.get("language") || "").trim()
+    const domain = (searchParams.get("domain") || "maqraa").trim()
 
     const conditions: string[] = ["b.is_published = TRUE"]
     const params: any[] = []
+
+    // Domain filter
+    params.push(domain)
+    conditions.push(`b.library_domain = $${params.length}`)
 
     if (search) {
       params.push(`%${search}%`)

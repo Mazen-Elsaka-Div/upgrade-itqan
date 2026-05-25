@@ -28,7 +28,7 @@ function slugify(name: string): string {
     .slice(0, 64)
 }
 
-export function BookCategoriesManager() {
+export function BookCategoriesManager({ apiPrefix = "/api/admin/library/categories" }: { apiPrefix?: string }) {
   const [categories, setCategories] = useState<BookCategory[]>([])
   const [loading, setLoading] = useState(true)
   const [creating, setCreating] = useState(false)
@@ -39,7 +39,7 @@ export function BookCategoriesManager() {
   const load = async () => {
     setLoading(true)
     try {
-      const res = await fetch("/api/admin/library/categories")
+      const res = await fetch(apiPrefix)
       if (!res.ok) throw new Error()
       const data = await res.json()
       setCategories(Array.isArray(data.categories) ? data.categories : [])
@@ -54,7 +54,7 @@ export function BookCategoriesManager() {
     let cancelled = false
     const run = async () => {
       try {
-        const res = await fetch("/api/admin/library/categories")
+        const res = await fetch(apiPrefix)
         if (!res.ok) throw new Error()
         const data = await res.json()
         if (!cancelled) setCategories(Array.isArray(data.categories) ? data.categories : [])
@@ -68,7 +68,7 @@ export function BookCategoriesManager() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [apiPrefix])
 
   const handleCreate = async () => {
     const name = newName.trim()
@@ -78,7 +78,7 @@ export function BookCategoriesManager() {
     }
     setCreating(true)
     try {
-      const res = await fetch("/api/admin/library/categories", {
+      const res = await fetch(apiPrefix, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, slug: slugify(name) }),
@@ -102,7 +102,7 @@ export function BookCategoriesManager() {
       return
     }
     try {
-      const res = await fetch(`/api/admin/library/categories/${id}`, {
+      const res = await fetch(`${apiPrefix}/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name }),
@@ -123,7 +123,7 @@ export function BookCategoriesManager() {
   const handleDelete = async (id: string) => {
     if (!confirm("حذف هذا التصنيف؟ الكتب لن تُحذف لكنها ستفقد ارتباطها بالتصنيف.")) return
     try {
-      const res = await fetch(`/api/admin/library/categories/${id}`, { method: "DELETE" })
+      const res = await fetch(`${apiPrefix}/${id}`, { method: "DELETE" })
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
         throw new Error(data.error || "تعذر الحذف")

@@ -3,7 +3,7 @@ import { getSession, requireRole } from "@/lib/auth"
 import { query, queryOne } from "@/lib/db"
 import { deleteFromStorage } from "@/lib/storage"
 
-const ADMIN_ROLES: ("admin")[] = ["admin"]
+const ADMIN_ROLES: ("academy_admin")[] = ["academy_admin"]
 
 const ALLOWED_FIELDS = [
   "title",
@@ -37,7 +37,7 @@ export async function GET(
       `SELECT b.*, c.name AS category_name, c.slug AS category_slug
          FROM books b
          LEFT JOIN categories c ON c.id = b.category_id
-        WHERE b.id = $1 AND b.library_domain = 'maqraa'`,
+        WHERE b.id = $1 AND b.library_domain = 'academy'`,
       [id]
     )
     if (!book) return NextResponse.json({ error: "غير موجود" }, { status: 404 })
@@ -52,7 +52,7 @@ export async function GET(
     )
     return NextResponse.json({ book, files })
   } catch (error) {
-    console.error("[admin/library] get error:", error)
+    console.error("[academy/admin/library] get error:", error)
     return NextResponse.json({ error: "حدث خطأ" }, { status: 500 })
   }
 }
@@ -97,13 +97,13 @@ export async function PATCH(
     args.push(id)
     await query(
       `UPDATE books SET ${setFragments.join(", ")}, updated_at = NOW()
-       WHERE id = $${args.length} AND library_domain = 'maqraa'`,
+       WHERE id = $${args.length} AND library_domain = 'academy'`,
       args
     )
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error("[admin/library] update error:", error)
+    console.error("[academy/admin/library] update error:", error)
     return NextResponse.json({ error: "حدث خطأ في التحديث" }, { status: 500 })
   }
 }
@@ -121,15 +121,15 @@ export async function DELETE(
   const { id } = await params
   try {
     const fileKeys = await query<{ key: string | null }>(
-      `SELECT pdf_key AS key FROM book_files bf JOIN books b ON b.id = bf.book_id WHERE bf.book_id = $1 AND bf.pdf_key IS NOT NULL AND b.library_domain = 'maqraa'`,
+      `SELECT pdf_key AS key FROM book_files bf JOIN books b ON b.id = bf.book_id WHERE bf.book_id = $1 AND bf.pdf_key IS NOT NULL AND b.library_domain = 'academy'`,
       [id]
     )
     const cover = await queryOne<{ key: string | null }>(
-      `SELECT cover_image_key AS key FROM books WHERE id = $1 AND library_domain = 'maqraa'`,
+      `SELECT cover_image_key AS key FROM books WHERE id = $1 AND library_domain = 'academy'`,
       [id]
     )
 
-    await query(`DELETE FROM books WHERE id = $1 AND library_domain = 'maqraa'`, [id])
+    await query(`DELETE FROM books WHERE id = $1 AND library_domain = 'academy'`, [id])
 
     // Best-effort storage cleanup (don't fail the request if these error)
     for (const row of fileKeys) {
@@ -139,7 +139,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error("[admin/library] delete error:", error)
+    console.error("[academy/admin/library] delete error:", error)
     return NextResponse.json({ error: "حدث خطأ في الحذف" }, { status: 500 })
   }
 }
