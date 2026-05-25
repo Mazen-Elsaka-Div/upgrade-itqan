@@ -18,7 +18,10 @@ import {
   Image as ImageIcon,
   ExternalLink,
   Search,
+  Layout,
+  Eye,
 } from "lucide-react"
+import { CertificateTemplateEditor } from "@/components/academy/certificate-editor/template-editor"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -65,7 +68,7 @@ interface Template {
   id: string
   scope: string
   kind: string
-  language: string
+  language: "ar" | "en"
   name: string
   description: string | null
   template_url: string
@@ -604,6 +607,10 @@ function TemplatesTab({
   const [items, setItems] = useState<Template[]>([])
   const [loading, setLoading] = useState(true)
   const [showCreate, setShowCreate] = useState(false)
+  const [editorOpen, setEditorOpen] = useState(false)
+  const [editorTemplate, setEditorTemplate] = useState<Template | null>(null)
+  const [previewUrls, setPreviewUrls] = useState<Record<string, string>>({})
+  const [previewing, setPreviewing] = useState<string | null>(null)
 
   const [form, setForm] = useState({
     name: "",
@@ -876,6 +883,41 @@ function TemplatesTab({
                           />
                         </a>
                         <div className="flex flex-wrap gap-2 text-xs">
+                          <Button
+                            size="sm"
+                            variant="default"
+                            onClick={() => {
+                              setEditorTemplate(tpl)
+                              setEditorOpen(true)
+                            }}
+                          >
+                            <Layout className="w-3 h-3" />
+                            {isAr ? "تحرير المواضع" : "Edit positions"}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={previewing === tpl.id}
+                            onClick={async () => {
+                              setPreviewing(tpl.id)
+                              try {
+                                const r = await fetch(
+                                  `/api/academy/admin/certificates/templates/${tpl.id}/preview?format=png&t=${Date.now()}`,
+                                )
+                                if (!r.ok) {
+                                  toast({ variant: "destructive", title: isAr ? "تعذر إنشاء المعاينة" : "Preview failed" })
+                                  return
+                                }
+                                const blob = await r.blob()
+                                setPreviewUrls((p) => ({ ...p, [tpl.id]: URL.createObjectURL(blob) }))
+                              } finally {
+                                setPreviewing(null)
+                              }
+                            }}
+                          >
+                            {previewing === tpl.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Eye className="w-3 h-3" />}
+                            {isAr ? "معاينة" : "Preview"}
+                          </Button>
                           <Button size="sm" variant="outline" onClick={() => toggleDefault(tpl)}>
                             <Star className="w-3 h-3" />
                             {tpl.is_default
@@ -893,6 +935,17 @@ function TemplatesTab({
                             <Trash2 className="w-3 h-3 text-red-500" />
                           </Button>
                         </div>
+                        {previewUrls[tpl.id] && (
+                          <a
+                            href={previewUrls[tpl.id]}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="block mt-2 rounded-lg overflow-hidden bg-muted"
+                          >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={previewUrls[tpl.id]} alt="preview" className="w-full" />
+                          </a>
+                        )}
                       </CardContent>
                     </Card>
                   ))}
@@ -902,6 +955,27 @@ function TemplatesTab({
           })}
         </div>
       )}
+
+      <CertificateTemplateEditor
+        open={editorOpen}
+        onOpenChange={setEditorOpen}
+        template={
+          editorTemplate
+            ? {
+                id: editorTemplate.id,
+                name: editorTemplate.name,
+                template_url: editorTemplate.template_url,
+                field_positions: editorTemplate.field_positions as Record<
+                  string,
+                  { x: number; y: number }
+                >,
+                language: editorTemplate.language,
+              }
+            : null
+        }
+        scopePath="academy"
+        onSaved={load}
+      />
     </div>
   )
 }
