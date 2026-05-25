@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server"
 import { getSession } from "@/lib/auth"
 import { query, queryOne } from "@/lib/db"
 import { generateSerialCode } from "@/lib/certificates"
+import { issueCertificateForRequest } from "@/lib/certificate/issue"
+
+export const maxDuration = 60
 
 const SCOPE = "academy" as const
 
@@ -134,16 +137,40 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
     }
 
     case "issue": {
-      // PR2 will hook up the PDF rendering pipeline.  For PR1 the admin can
-      // already mark a request as issued and optionally provide an external
-      // PDF URL.  This unblocks the dashboard end-to-end.
+      // First, try to auto-render the certificate using the assigned
+      // template.  If no template is assigned or the render fails the admin
+      // can still pass an external `pdf_url` to mark it issued manually.
       const serial = existing.serial_code || (await generateSerialCode(SCOPE))
       const certNumber =
         existing.certificate_number ||
         serial ||
         `ACA-${Date.now().toString(36).toUpperCase()}`
 
-      const pdfUrl = body.pdf_url || null
+      let pdfUrl: string | null = body.pdf_url || null
+      const autoRender = body.auto_render !== false && !pdfUrl
+
+      if (autoRender && existing.template_id) {
+        try {
+          const r = await issueCertificateForRequest({
+            request_id: id,
+            scope: SCOPE,
+            format: body.format === "png" ? "png" : "pdf",
+          })
+          pdfUrl = r.pdf_url
+        } catch (e) {
+          console.error("[issue] auto-render failed", e)
+          // Fall through — admin will get an error and can retry or provide URL.
+          if (!body.allow_no_pdf) {
+            return NextResponse.json(
+              {
+                error: "Auto-render failed",
+                detail: e instanceof Error ? e.message : String(e),
+              },
+              { status: 500 },
+            )
+          }
+        }
+      }
 
       const [row] = await query(
         `UPDATE certificate_issuance_requests
