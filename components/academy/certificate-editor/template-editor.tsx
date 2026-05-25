@@ -60,8 +60,11 @@ interface TemplateEditorProps {
     field_positions: Record<string, FieldAnchor>
     language: "ar" | "en"
   } | null
-  // Where to PATCH the positions
-  scopePath: "academy" | "maqraa"
+  // Where to PATCH the positions / fetch previews. Either pass
+  // `scopePath` (legacy) for the path `/api/${scopePath}/admin/...`
+  // or pass an explicit `apiBase` (e.g. `/api/admin/certificates-center`).
+  scopePath?: "academy" | "maqraa"
+  apiBase?: string
   onSaved?: () => void
 }
 
@@ -71,10 +74,12 @@ export function CertificateTemplateEditor({
   open,
   onOpenChange,
   template,
-  scopePath,
+  scopePath = "academy",
+  apiBase,
   onSaved,
 }: TemplateEditorProps) {
   const { locale } = useI18n()
+  const base = apiBase || `/api/${scopePath}/admin/certificates`
   const isAr = locale === "ar"
   const lbl = (f: FieldDef) => (isAr ? f.label_ar : f.label_en)
 
@@ -170,7 +175,7 @@ export function CertificateTemplateEditor({
     setSaving(true)
     try {
       const res = await fetch(
-        `/api/${scopePath}/admin/certificates/templates/${template.id}`,
+        `${base}/templates/${template.id}`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -199,7 +204,7 @@ export function CertificateTemplateEditor({
       // through a temporary save → preview flow:
       // First persist current positions, then GET the rendered PNG.
       const r1 = await fetch(
-        `/api/${scopePath}/admin/certificates/templates/${template.id}`,
+        `${base}/templates/${template.id}`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -211,7 +216,7 @@ export function CertificateTemplateEditor({
         return
       }
       const r2 = await fetch(
-        `/api/${scopePath}/admin/certificates/templates/${template.id}/preview?format=png&t=${Date.now()}`,
+        `${base}/templates/${template.id}/preview?format=png&t=${Date.now()}`,
       )
       if (!r2.ok) {
         toast({ variant: "destructive", title: isAr ? "تعذر إنشاء المعاينة" : "Preview failed" })
