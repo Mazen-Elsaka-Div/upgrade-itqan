@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSession } from '@/lib/auth'
 import { query } from '@/lib/db'
+import { assertTeacherAssignable } from '@/lib/teachers'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const ALLOWED_STATUSES = ['draft', 'pending_review', 'published', 'archived', 'rejected'] as const
@@ -73,6 +74,12 @@ export async function POST(req: NextRequest) {
 
     if (!teacher_id) {
       return NextResponse.json({ error: 'Teacher is required' }, { status: 400 })
+    }
+
+    // Reject assignment to pending / rejected / suspended teachers.
+    const teacherCheck = await assertTeacherAssignable(teacher_id)
+    if (!teacherCheck.ok) {
+      return NextResponse.json({ error: teacherCheck.message }, { status: 400 })
     }
 
     const status = typeof body.status === 'string' && (ALLOWED_STATUSES as readonly string[]).includes(body.status)

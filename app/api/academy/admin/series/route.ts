@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSession } from '@/lib/auth'
 import { query } from '@/lib/db'
+import { assertTeacherAssignable } from '@/lib/teachers'
 
 export async function GET(req: NextRequest) {
   const session = await getSession()
@@ -36,6 +37,14 @@ export async function POST(req: NextRequest) {
   try {
     const { title, description, subject, teacher_id, thumbnail_url } = await req.json()
     if (!title) return NextResponse.json({ error: 'Title required' }, { status: 400 })
+
+    if (teacher_id) {
+      // Reject assignment to pending / rejected / suspended teachers.
+      const teacherCheck = await assertTeacherAssignable(teacher_id)
+      if (!teacherCheck.ok) {
+        return NextResponse.json({ error: teacherCheck.message }, { status: 400 })
+      }
+    }
 
     const result = await query(`
       INSERT INTO series (title, description, subject, teacher_id, thumbnail_url, created_at)

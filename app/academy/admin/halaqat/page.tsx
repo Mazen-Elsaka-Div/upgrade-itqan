@@ -38,7 +38,8 @@ export default function AdminHalaqatPage() {
     try {
       const [halaqaRes, teachersRes] = await Promise.all([
         fetch('/api/academy/admin/halaqat'),
-        fetch('/api/academy/admin/teachers')
+        // Only assignable teachers (approved + active) appear in the picker.
+        fetch('/api/academy/admin/teachers?assignable=1')
       ])
       if (halaqaRes.ok) {
         const data = await halaqaRes.json()

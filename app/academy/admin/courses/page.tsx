@@ -148,7 +148,9 @@ export default function AdminCoursesPage() {
 
   const fetchTeachers = async () => {
     try {
-      const res = await fetch('/api/academy/admin/teachers')
+      // Only fetch teachers that are eligible to be assigned (approved + active).
+      // Pending / rejected / suspended teachers must NOT appear in the dropdown.
+      const res = await fetch('/api/academy/admin/teachers?assignable=1')
       if (res.ok) {
         const json = await res.json()
         setTeachers(json.data || [])
