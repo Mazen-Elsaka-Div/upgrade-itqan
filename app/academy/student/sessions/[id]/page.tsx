@@ -91,9 +91,8 @@ export default function SessionDetailsPage() {
     }
   }, [router, sessionId, isAr])
 
-  useEffect(() => {
-    fetchSession()
-  }, [fetchSession])
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { fetchSession() }, [fetchSession])
 
   const handleJoinSession = async () => {
     if (!session?.meeting_link) return
@@ -381,14 +380,25 @@ export default function SessionDetailsPage() {
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-3 pt-2">
+            {isLive && (
+              <Button
+                size="lg"
+                asChild
+                className="gap-2 flex-1 font-semibold bg-red-600 hover:bg-red-700 hover:shadow-lg hover:shadow-red-500/25 transition-all duration-200"
+              >
+                <Link href={`/academy/student/sessions/${session.id}/live`}>
+                  <PlayCircle className="w-5 h-5" />
+                  {isAr ? 'انضم للبث المباشر الآن' : 'Join Live Stream Now'}
+                </Link>
+              </Button>
+            )}
             {(isLive || isUpcoming) && session.meeting_link && (
               <Button
                 size="lg"
+                variant={isLive ? 'outline' : 'default'}
                 className={cn(
                   "gap-2 flex-1 font-semibold transition-all duration-200",
-                  isLive
-                    ? "bg-red-600 hover:bg-red-700 hover:shadow-lg hover:shadow-red-500/25"
-                    : "bg-blue-600 hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-500/25"
+                  !isLive && "bg-blue-600 hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-500/25"
                 )}
                 onClick={handleJoinSession}
                 disabled={joining}
@@ -396,10 +406,10 @@ export default function SessionDetailsPage() {
                 {joining ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
                 ) : (
-                  <PlayCircle className="w-5 h-5" />
+                  <ExternalLink className="w-5 h-5" />
                 )}
                 {isLive
-                  ? (isAr ? 'انضم للجلسة الآن' : 'Join Session Now')
+                  ? (isAr ? 'فتح الرابط الخارجي' : 'Open External Link')
                   : (isAr ? 'فتح رابط الجلسة' : 'Open Meeting Link')}
               </Button>
             )}

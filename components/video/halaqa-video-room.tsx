@@ -10,13 +10,13 @@ import {
 } from '@livekit/components-react'
 import '@livekit/components-styles'
 import {
-  Circle,
   Loader2,
   LogOut,
   Radio,
   Star,
   Video,
 } from 'lucide-react'
+import { ClientRecorder } from './client-recorder'
 
 export type VideoCallKind = 'halaqa' | 'booking' | 'session' | 'course_session'
 
@@ -83,7 +83,6 @@ export function HalaqaVideoRoom({ kind, refId, title, subtitle, exitHref, accent
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
-  const [recordingStatus, setRecordingStatus] = useState<'off' | 'starting' | 'recording' | 'stopping'>('off')
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false)
   const [showRating, setShowRating] = useState(false)
   const [elapsed, setElapsed] = useState(0)
@@ -143,32 +142,6 @@ export function HalaqaVideoRoom({ kind, refId, title, subtitle, exitHref, accent
     router.push(exitHref)
   }, [router, exitHref, sessionId, data?.role])
 
-  const toggleRecording = useCallback(async () => {
-    if (!sessionId) return
-    if (recordingStatus === 'off') {
-      setRecordingStatus('starting')
-      try {
-        const res = await fetch(`/api/video/sessions/${sessionId}/recording`, { method: 'POST' })
-        if (!res.ok) {
-          const j = await res.json().catch(() => ({}))
-          alert(j.error || 'فشل بدء التسجيل')
-          setRecordingStatus('off')
-          return
-        }
-        setRecordingStatus('recording')
-      } catch {
-        setRecordingStatus('off')
-      }
-    } else if (recordingStatus === 'recording') {
-      setRecordingStatus('stopping')
-      try {
-        await fetch(`/api/video/sessions/${sessionId}/recording`, { method: 'DELETE' })
-      } finally {
-        setRecordingStatus('off')
-      }
-    }
-  }, [recordingStatus, sessionId])
-
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[70vh] gap-4 text-center px-6">
@@ -224,20 +197,7 @@ export function HalaqaVideoRoom({ kind, refId, title, subtitle, exitHref, accent
             <span className="hidden md:inline-flex text-[11px] font-bold px-2 py-1 rounded-full bg-white/10 border border-white/10">
               {data.role === 'host' ? 'المضيف' : 'مشارك'}
             </span>
-            {isHost && data.settings.recording_enabled && (
-              <button
-                onClick={toggleRecording}
-                disabled={recordingStatus === 'starting' || recordingStatus === 'stopping'}
-                className={
-                  recordingStatus === 'recording'
-                    ? 'inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-bold px-2.5 py-1 rounded-full bg-rose-500/20 border border-rose-500/40 text-rose-300 hover:bg-rose-500/30 transition-colors disabled:opacity-50'
-                    : 'inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-bold px-2.5 py-1 rounded-full bg-white/10 border border-white/10 hover:bg-white/20 transition-colors disabled:opacity-50'
-                }
-              >
-                <Circle className={`w-3 h-3 ${recordingStatus === 'recording' ? 'fill-rose-400 text-rose-400 animate-pulse' : ''}`} />
-                {recordingStatus === 'recording' ? 'إيقاف التسجيل' : recordingStatus === 'starting' ? '...' : 'بدء التسجيل'}
-              </button>
-            )}
+
             <button
               onClick={() => setShowLeaveConfirm(true)}
               className="inline-flex items-center gap-1.5 text-[11px] sm:text-sm font-bold px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-200 transition-colors"
@@ -268,6 +228,11 @@ export function HalaqaVideoRoom({ kind, refId, title, subtitle, exitHref, accent
         >
           <VideoConference chatMessageFormatter={formatChatMessageLinks} />
           <RoomAudioRenderer />
+          {isHost && sessionId && data.settings.recording_enabled && (
+            <div className="absolute top-2 left-2 z-20 pointer-events-auto">
+              <ClientRecorder sessionId={sessionId} enabled />
+            </div>
+          )}
         </LiveKitRoom>
         {data.settings.watermark_text && (
           <div className="pointer-events-none absolute bottom-3 right-3 text-[11px] font-bold opacity-40 select-none">

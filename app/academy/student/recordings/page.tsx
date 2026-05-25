@@ -39,15 +39,13 @@ function fmtDate(s: string) {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
     }).format(new Date(s))
   } catch {
     return s
   }
 }
 
-export default function TeacherRecordingsPage() {
+export default function StudentRecordingsPage() {
   const [data, setData] = useState<Recording[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -75,19 +73,14 @@ export default function TeacherRecordingsPage() {
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto" dir="rtl">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-            <Video className="w-6 h-6 text-blue-500" />
-            التسجيلات
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            استعراض تسجيلات الجلسات والحلقات التي بدأتها أو حضرتها.
-          </p>
-        </div>
-        <Button asChild variant="outline" size="sm">
-          <Link href="/recordings">عرض كل التسجيلات</Link>
-        </Button>
+      <div>
+        <h1 className="text-2xl font-bold flex items-center gap-2">
+          <PlayCircle className="w-6 h-6 text-emerald-600" />
+          تسجيلاتي
+        </h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          راجع جلساتك السابقة في أي وقت — تشمل دروس الدورات والحلقات.
+        </p>
       </div>
 
       {loading ? (
@@ -109,67 +102,54 @@ export default function TeacherRecordingsPage() {
             </div>
             <h3 className="font-semibold">لا توجد تسجيلات بعد</h3>
             <p className="text-sm text-muted-foreground">
-              ستظهر هنا تسجيلات الجلسات بعد انتهائها مباشرة.
+              بمجرد أن تنتهي جلسة كنت حاضراً فيها بتسجيل، ستجدها هنا.
             </p>
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {data.map((r) => (
-            <Card key={r.id} className="hover:shadow-md transition-shadow overflow-hidden">
-              <a
-                href={r.recording_url || '#'}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block aspect-video bg-secondary/30 grid place-items-center relative group"
-              >
-                <Video className="w-10 h-10 text-muted-foreground opacity-60 group-hover:opacity-100 transition-opacity" />
-                <span className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
-                  {fmtDuration(r.duration_seconds)}
-                </span>
-              </a>
-              <CardContent className="pt-4 space-y-2.5">
+            <Card key={r.id} className="hover:shadow-md transition-shadow">
+              <CardContent className="pt-5 space-y-3">
                 <div className="flex items-start justify-between gap-2">
-                  <h3 className="font-bold truncate flex-1">{r.title || KIND_LABEL[r.kind]}</h3>
+                  <h3 className="font-semibold truncate flex-1">
+                    {r.title || KIND_LABEL[r.kind]}
+                  </h3>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-muted">
                     {KIND_LABEL[r.kind]}
                   </span>
                 </div>
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <Calendar className="w-3 h-3" />
+                <div className="space-y-1 text-xs text-muted-foreground">
+                  <p className="flex items-center gap-1.5">
+                    <Calendar className="w-3.5 h-3.5" />
                     {fmtDate(r.started_at)}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
+                  </p>
+                  <p className="flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5" />
                     {fmtDuration(r.duration_seconds)}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Users className="w-3 h-3" />
-                    {r.participants_count}
-                  </span>
+                  </p>
+                  <p className="flex items-center gap-1.5">
+                    <Users className="w-3.5 h-3.5" />
+                    {r.participants_count} حاضر
+                  </p>
                 </div>
-                <div className="flex items-center justify-between pt-2">
+                <div className="flex gap-2">
                   {r.recording_url ? (
-                    <a
-                      href={r.recording_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-blue-600 hover:underline font-medium inline-flex items-center gap-1"
-                    >
-                      <PlayCircle className="w-4 h-4" />
-                      عرض
-                    </a>
+                    <Button asChild size="sm" className="flex-1 gap-1">
+                      <a href={r.recording_url} target="_blank" rel="noopener noreferrer">
+                        <PlayCircle className="w-4 h-4" />
+                        مشاهدة
+                      </a>
+                    </Button>
                   ) : (
-                    <span className="text-xs text-muted-foreground">لا يوجد رابط</span>
+                    <Button size="sm" disabled className="flex-1">
+                      لا يوجد رابط
+                    </Button>
                   )}
                   {r.kind === 'course_session' && (
-                    <Link
-                      href={`/academy/teacher/sessions/${r.ref_id}`}
-                      className="text-xs text-muted-foreground hover:text-foreground"
-                    >
-                      التفاصيل
-                    </Link>
+                    <Button asChild size="sm" variant="outline">
+                      <Link href={`/academy/student/sessions/${r.ref_id}`}>التفاصيل</Link>
+                    </Button>
                   )}
                 </div>
               </CardContent>

@@ -3,7 +3,18 @@ import { getSession } from '@/lib/auth'
 import { query, queryOne } from '@/lib/db'
 import { ADMIN_ROLES, type HalaqaPlatform } from '@/lib/halaqat'
 
-/** GET /api/video/sessions/[id] — admin only. */
+/**
+ * GET /api/video/sessions/[id]
+ *
+ * Allowed for:
+ *   - platform admins (academy_admin / admin / reciter_supervisor),
+ *   - the host that started the session,
+ *   - participants who actually joined.
+ *
+ * Non-admin callers still get participant + rating roll-ups so the teacher
+ * portal can render aggregated ratings, but per-user feedback comments are
+ * anonymised for non-admins.
+ */
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getSession()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -27,7 +38,18 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   }>(`SELECT * FROM video_sessions WHERE id = $1`, [id])
 
   if (!row) return NextResponse.json({ error: 'الجلسة غير موجودة' }, { status: 404 })
-  if (!ADMIN_ROLES[row.platform].includes(session.role)) {
+
+  const isAdmin = ADMIN_ROLES[row.platform].includes(session.role)
+  const isHost = row.started_by === session.sub
+  let isAttendee = false
+  if (!isAdmin && !isHost) {
+    const att = await queryOne<{ id: string }>(
+      `SELECT id FROM video_session_participants WHERE session_id = $1 AND user_id = $2 LIMIT 1`,
+      [id, session.sub]
+    )
+    isAttendee = !!att
+  }
+  if (!isAdmin && !isHost && !isAttendee) {
     return NextResponse.json({ error: 'غير مصرح' }, { status: 403 })
   }
 
@@ -88,9 +110,22 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     ) || { title: null }
   }
 
+  // Non-admins (hosts + attendees) don't get raw email addresses or other
+  // users' comments. Hosts still see ratings + counts they're entitled to.
+  const safeParticipants = isAdmin
+    ? participants
+    : participants.map((p) => ({ ...p, email: '' }))
+  const safeRatings = isAdmin || isHost
+    ? ratings
+    : ratings.map((r) =>
+        r.user_id === session.sub
+          ? r
+          : { ...r, user_id: '', name: '', comment: null }
+      )
+
   return NextResponse.json({
-    data: { ...row, title: titleInfo.title },
-    participants,
-    ratings,
+    data: { ...row, title: titleInfo.title, viewer_role: isAdmin ? 'admin' : isHost ? 'host' : 'attendee' },
+    participants: safeParticipants,
+    ratings: safeRatings,
   })
 }
