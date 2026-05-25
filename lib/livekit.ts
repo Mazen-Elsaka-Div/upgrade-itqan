@@ -10,7 +10,14 @@
  *   NEXT_PUBLIC_LIVEKIT_URL  (mirrors LIVEKIT_URL; falls back to LIVEKIT_URL)
  */
 
-import { AccessToken, RoomServiceClient } from 'livekit-server-sdk'
+import {
+  AccessToken,
+  RoomServiceClient,
+  EgressClient,
+  EncodedFileOutput,
+  EncodedFileType,
+  S3Upload,
+} from 'livekit-server-sdk'
 
 export const LIVEKIT_URL =
   process.env.NEXT_PUBLIC_LIVEKIT_URL || process.env.LIVEKIT_URL || ''
@@ -90,18 +97,120 @@ export function courseSessionRoomName(sessionId: string): string {
   return `session-${sessionId.replace(/-/g, '')}`
 }
 
+function livekitHttpUrl(): string {
+  return LIVEKIT_URL
+    .replace(/^wss:\/\//, 'https://')
+    .replace(/^ws:\/\//, 'http://')
+}
+
 let roomService: RoomServiceClient | null = null
 
 export function getRoomService(): RoomServiceClient | null {
   if (!LIVEKIT_URL || !LIVEKIT_API_KEY || !LIVEKIT_API_SECRET) return null
   if (!roomService) {
-    // RoomServiceClient expects the HTTP API URL, not the WS one
-    const httpUrl = LIVEKIT_URL
-      .replace(/^wss:\/\//, 'https://')
-      .replace(/^ws:\/\//, 'http://')
-    roomService = new RoomServiceClient(httpUrl, LIVEKIT_API_KEY, LIVEKIT_API_SECRET)
+    roomService = new RoomServiceClient(livekitHttpUrl(), LIVEKIT_API_KEY, LIVEKIT_API_SECRET)
   }
   return roomService
+}
+
+let egressClient: EgressClient | null = null
+
+export function getEgressClient(): EgressClient | null {
+  if (!LIVEKIT_URL || !LIVEKIT_API_KEY || !LIVEKIT_API_SECRET) return null
+  if (!egressClient) {
+    egressClient = new EgressClient(livekitHttpUrl(), LIVEKIT_API_KEY, LIVEKIT_API_SECRET)
+  }
+  return egressClient
+}
+
+export interface RecordingS3Config {
+  accessKey: string
+  secret: string
+  bucket: string
+  region: string
+  endpoint?: string
+  pathPrefix?: string
+}
+
+function parseS3FromEnv(): RecordingS3Config | null {
+  const accessKey = process.env.RECORDING_S3_ACCESS_KEY || process.env.AWS_ACCESS_KEY_ID
+  const secret = process.env.RECORDING_S3_SECRET_KEY || process.env.AWS_SECRET_ACCESS_KEY
+  const bucket = process.env.RECORDING_S3_BUCKET
+  const region = process.env.RECORDING_S3_REGION || 'us-east-1'
+  const endpoint = process.env.RECORDING_S3_ENDPOINT
+  const pathPrefix = process.env.RECORDING_S3_PATH_PREFIX || 'recordings'
+  if (!accessKey || !secret || !bucket) return null
+  return { accessKey, secret, bucket, region, endpoint, pathPrefix }
+}
+
+export function isRecordingConfigured(): boolean {
+  return !!parseS3FromEnv()
+}
+
+/**
+ * Start a room-composite recording for a LiveKit room. The output is an MP4
+ * uploaded to the configured S3-compatible bucket.
+ *
+ * Returns the LiveKit Egress info on success, or null when LiveKit/S3 isn't
+ * configured. Throws on LiveKit API errors so callers can surface them.
+ */
+export async function startRoomRecording(
+  roomName: string,
+  filenameHint: string
+): Promise<{ egressId: string; filepath: string } | null> {
+  const client = getEgressClient()
+  const s3 = parseS3FromEnv()
+  if (!client || !s3) return null
+
+  const safeHint = filenameHint.replace(/[^a-zA-Z0-9_-]/g, '-')
+  const filepath = `${s3.pathPrefix || 'recordings'}/${safeHint}-${Date.now()}.mp4`
+
+  const output = new EncodedFileOutput({
+    fileType: EncodedFileType.MP4,
+    filepath,
+    output: {
+      case: 's3',
+      value: new S3Upload({
+        accessKey: s3.accessKey,
+        secret: s3.secret,
+        bucket: s3.bucket,
+        region: s3.region,
+        endpoint: s3.endpoint,
+        forcePathStyle: !!s3.endpoint,
+      }),
+    },
+  })
+
+  const info = await client.startRoomCompositeEgress(
+    roomName,
+    { file: output },
+    { layout: 'grid' }
+  )
+  return { egressId: info.egressId, filepath }
+}
+
+export async function stopEgress(egressId: string): Promise<void> {
+  const client = getEgressClient()
+  if (!client) return
+  try {
+    await client.stopEgress(egressId)
+  } catch (err) {
+    console.error('[livekit] stopEgress failed', err)
+  }
+}
+
+/**
+ * Build a public URL for a recorded MP4 stored in S3 (or compatible). Falls
+ * back to null when storage isn't configured.
+ */
+export function buildRecordingUrl(filepath: string | null | undefined): string | null {
+  if (!filepath) return null
+  const s3 = parseS3FromEnv()
+  if (!s3) return null
+  if (s3.endpoint) {
+    return `${s3.endpoint.replace(/\/$/, '')}/${s3.bucket}/${filepath}`
+  }
+  return `https://${s3.bucket}.s3.${s3.region}.amazonaws.com/${filepath}`
 }
 
 /**

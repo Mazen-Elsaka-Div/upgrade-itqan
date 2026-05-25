@@ -270,6 +270,15 @@ export default function StudentSessionsPage() {
                       {/* Meeting Section */}
                       <div className="bg-card p-5 rounded-2xl border border-border shadow-sm space-y-3">
                         <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{t.student.sessionLinkLabel}</h4>
+                        {isActive && (
+                          <a
+                            href={`/student/sessions/${b.id}/live`}
+                            className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white px-6 py-3.5 rounded-xl text-sm font-bold transition-all shadow-md shadow-emerald-900/20"
+                          >
+                            <Video className="w-5 h-5" />
+                            انضم للجلسة المباشرة (داخل المنصة)
+                          </a>
+                        )}
                         {b.meeting_link ? (
                           <div className="space-y-3">
                             <p className="text-sm font-medium text-muted-foreground">
