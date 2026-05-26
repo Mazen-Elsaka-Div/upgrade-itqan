@@ -63,11 +63,14 @@ export async function getStudentEntries(studentId: string, scope?: string) {
 
 export async function getEntries(competitionId: string) {
   return query(`
-    SELECT ce.*, u.full_name as student_name, u.email as student_email
+    SELECT ce.*, u.name as student_name, u.email as student_email,
+           u.avatar_url as student_avatar_url,
+           evaluator.name as evaluated_by_name
     FROM competition_entries ce
     JOIN users u ON u.id = ce.student_id
+    LEFT JOIN users evaluator ON evaluator.id = ce.evaluated_by
     WHERE ce.competition_id = $1
-    ORDER BY ce.submitted_at DESC
+    ORDER BY ce.rank ASC NULLS LAST, ce.score DESC NULLS LAST, ce.submitted_at DESC
   `, [competitionId])
 }
 
