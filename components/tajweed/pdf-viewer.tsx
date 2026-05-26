@@ -107,6 +107,8 @@ export default function TajweedPdfViewer({ src, label, className }: TajweedPdfVi
       cMapUrl: "https://unpkg.com/pdfjs-dist@5.4.296/cmaps/",
       cMapPacked: true,
       standardFontDataUrl: "https://unpkg.com/pdfjs-dist@5.4.296/standard_fonts/",
+      disableRange: true, // Fix for "Failed to fetch" on S3/UploadThing due to Range CORS
+      disableStream: true,
     }),
     [],
   )
