@@ -10,7 +10,7 @@ import {
   ArrowRight, Mail, User, BookOpen, Award, CheckCircle, 
   MapPin, Calendar, BookMarked, GraduationCap, Clock, TrendingUp
 } from 'lucide-react'
-import { toast } from 'react-hot-toast'
+import { toast } from 'sonner'
 
 interface StudentData {
   id: string
