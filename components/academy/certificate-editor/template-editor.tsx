@@ -89,8 +89,29 @@ export function CertificateTemplateEditor({
   const [previewing, setPreviewing] = useState(false)
   const [previewSrc, setPreviewSrc] = useState<string | null>(null)
   const [imgLoaded, setImgLoaded] = useState(false)
+  const [canvasSize, setCanvasSize] = useState<{ w: number; h: number }>({ w: 0, h: 0 })
   const canvasRef = useRef<HTMLDivElement | null>(null)
   const draggingRef = useRef<{ key: string; dx: number; dy: number } | null>(null)
+
+  // Track canvas size so we can render field sample text at the correct
+  // pixel size (font_size is stored as % of the canvas short side, mirroring
+  // the render engine).
+  useEffect(() => {
+    const node = canvasRef.current
+    if (!node || typeof ResizeObserver === "undefined") return
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect
+        if (width > 0 && height > 0) {
+          setCanvasSize({ w: width, h: height })
+        }
+      }
+    })
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [open])
+
+  const minSide = Math.min(canvasSize.w || 1, canvasSize.h || 1)
 
   // Reset state when opening a new template
   useEffect(() => {
@@ -212,18 +233,38 @@ export function CertificateTemplateEditor({
         },
       )
       if (!r1.ok) {
-        toast({ variant: "destructive", title: isAr ? "تعذر حفظ المواضع" : "Save failed" })
+        const e = await r1.json().catch(() => ({}))
+        toast({
+          variant: "destructive",
+          title: isAr ? "تعذر حفظ المواضع" : "Save failed",
+          description: e.error || r1.statusText,
+        })
         return
       }
       const r2 = await fetch(
         `${base}/templates/${template.id}/preview?format=png&t=${Date.now()}`,
       )
       if (!r2.ok) {
-        toast({ variant: "destructive", title: isAr ? "تعذر إنشاء المعاينة" : "Preview failed" })
+        // Preview endpoint returns JSON on failure, image on success.
+        const ct = r2.headers.get("content-type") || ""
+        const detail = ct.includes("json")
+          ? ((await r2.json().catch(() => ({}))).error as string | undefined)
+          : await r2.text().catch(() => "")
+        toast({
+          variant: "destructive",
+          title: isAr ? "تعذر إنشاء المعاينة" : "Preview failed",
+          description: detail || r2.statusText,
+        })
         return
       }
       const blob = await r2.blob()
       setPreviewSrc(URL.createObjectURL(blob))
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        title: isAr ? "خطأ في المعاينة" : "Preview error",
+        description: err instanceof Error ? err.message : String(err),
+      })
     } finally {
       setPreviewing(false)
     }
@@ -498,28 +539,99 @@ export function CertificateTemplateEditor({
                     <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
                   </div>
                 )}
-                {/* Markers */}
+                {/* Live field renders — mirrors the actual render engine so
+                    every property change (font size / weight / color /
+                    align / rotation / max_width) is visible in real time. */}
                 {placedKeys.map((k) => {
                   const def = ALL_FIELDS.find((f) => f.key === k)!
                   const pos = positions[k]
                   const isActive = activeKey === k
+                  const isImg = IMAGE_FIELDS.has(def.key)
+                  const align = pos.align || def.default_align || "center"
+                  const translate =
+                    align === "center"
+                      ? "-translate-x-1/2 -translate-y-1/2"
+                      : align === "left"
+                        ? "translate-x-0 -translate-y-1/2"
+                        : "-translate-x-full -translate-y-1/2"
+                  const sizePct = pos.font_size ?? def.default_size ?? 4
+                  const fontPx = (minSide * sizePct) / 100
+                  const imgWidthPx = (canvasSize.w * sizePct) / 100
+                  const color = pos.color || def.default_color || "#0f172a"
+                  const weight = (pos.weight || def.default_weight) === "bold" ? 800 : 400
+                  const maxWidth = pos.max_width ?? def.default_max_width
+                  const rotate = pos.rotate ? ` rotate(${pos.rotate}deg)` : ""
+                  const placement: React.CSSProperties = {
+                    left: `${pos.x * 100}%`,
+                    top: `${pos.y * 100}%`,
+                    transform: rotate ? rotate.trim() : undefined,
+                  }
                   return (
                     <div
                       key={k}
                       onPointerDown={(e) => startDrag(e, k)}
                       className={cn(
-                        "absolute z-10 -translate-x-1/2 -translate-y-1/2 cursor-grab active:cursor-grabbing",
-                        "rounded-full px-3 py-1 text-xs font-bold border-2 shadow-md",
-                        isActive
-                          ? "bg-primary text-primary-foreground border-primary"
-                          : "bg-white/95 text-primary border-primary/50 hover:bg-primary/10",
+                        "absolute z-10 cursor-grab active:cursor-grabbing select-none",
+                        translate,
+                        isActive && "ring-2 ring-primary ring-offset-2 ring-offset-white rounded-sm",
                       )}
-                      style={{
-                        left: `${pos.x * 100}%`,
-                        top: `${pos.y * 100}%`,
-                      }}
+                      style={placement}
+                      title={lbl(def)}
                     >
-                      {lbl(def)}
+                      {isImg ? (
+                        <div
+                          style={{
+                            width: `${imgWidthPx}px`,
+                            maxWidth: "90%",
+                            opacity: def.key === "watermark" ? 0.18 : 1,
+                          }}
+                          className="pointer-events-none"
+                        >
+                          {/* Placeholder box for image-type fields. The real
+                              asset (logo / signature / watermark) shows up in
+                              the server preview; in the editor we keep a
+                              labelled box so the admin can position it. */}
+                          <div
+                            className="flex items-center justify-center rounded-md border-2 border-dashed border-primary/50 bg-primary/5 text-primary text-[10px] font-bold"
+                            style={{ height: `${imgWidthPx * 0.6}px` }}
+                          >
+                            {lbl(def)}
+                          </div>
+                        </div>
+                      ) : (
+                        <div
+                          style={{
+                            fontSize: `${fontPx}px`,
+                            fontWeight: weight,
+                            color,
+                            textAlign: align,
+                            maxWidth: maxWidth ? `${maxWidth * canvasSize.w}px` : undefined,
+                            letterSpacing: pos.letter_spacing
+                              ? `${pos.letter_spacing}px`
+                              : undefined,
+                            lineHeight: 1.2,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            fontFamily:
+                              template.language === "en"
+                                ? "'Inter', 'Cairo', sans-serif"
+                                : "'Cairo', 'Amiri', sans-serif",
+                          }}
+                          className="pointer-events-none"
+                        >
+                          {def.sample}
+                        </div>
+                      )}
+                      {isActive && (
+                        <span
+                          className="absolute -top-2 -start-2 inline-flex items-center gap-0.5 rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground shadow"
+                          style={{ pointerEvents: "none" }}
+                        >
+                          <GripVertical className="w-2.5 h-2.5" />
+                          {lbl(def)}
+                        </span>
+                      )}
                     </div>
                   )
                 })}
