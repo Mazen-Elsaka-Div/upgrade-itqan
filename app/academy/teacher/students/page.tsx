@@ -67,8 +67,21 @@ export default function TeacherStudentsPage() {
         {filteredStudents.map((student) => (
           <Card key={student.id} className="hover:shadow-lg transition-shadow">
             <CardHeader className="pb-2">
-              <CardTitle className="text-lg">{student.name}</CardTitle>
-              <p className="text-sm text-gray-600">{student.email}</p>
+              <div className="flex items-center gap-3">
+                {student.avatar_url ? (
+                  <img src={student.avatar_url} alt={student.name} className="w-10 h-10 rounded-full object-cover shrink-0" />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold shrink-0">
+                    {student.name.charAt(0)}
+                  </div>
+                )}
+                <div>
+                  <Link href={`/academy/teacher/students/${student.id}`}>
+                    <CardTitle className="text-lg hover:text-primary transition-colors cursor-pointer">{student.name}</CardTitle>
+                  </Link>
+                  <p className="text-sm text-gray-600">{student.email}</p>
+                </div>
+              </div>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="grid grid-cols-2 gap-2 text-sm">
@@ -101,7 +114,9 @@ export default function TeacherStudentsPage() {
               </div>
 
               <div className="flex gap-2 pt-2">
-                <Button size="sm" variant="outline" className="flex-1">عرض</Button>
+                <Link href={`/academy/teacher/students/${student.id}`} className="flex-1">
+                  <Button size="sm" variant="outline" className="w-full">عرض</Button>
+                </Link>
                 <Button size="sm" variant="outline" className="flex-1" onClick={() => window.location.href = `/academy/teacher/chat?studentId=${student.id}`}>
                   <Mail className="w-3 h-3 ml-1" />
                   تواصل
