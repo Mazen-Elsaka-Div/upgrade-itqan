@@ -19,7 +19,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Progress } from "@/components/ui/progress"
 import { toast } from "sonner"
 import { AcademySettings } from "../hooks/use-academy-settings"
 
