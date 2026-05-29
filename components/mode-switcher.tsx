@@ -1,15 +1,12 @@
 "use client"
 
-import { useState, useEffect } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { useI18n } from '@/lib/i18n/context'
+import { motion } from 'framer-motion'
 import {
-  BookOpen,
   GraduationCap,
-  Mic,
-  ChevronDown,
-  Check
+  Mic
 } from 'lucide-react'
 
 interface Mode {
@@ -18,7 +15,6 @@ interface Mode {
   icon: React.ElementType
   href: string
   description: string
-  color: string
 }
 
 interface ModeSwitcherProps {
@@ -31,9 +27,7 @@ interface ModeSwitcherProps {
 
 export function ModeSwitcher({ currentMode, userRole, academyRole, hasQuranAccess, hasAcademyAccess }: ModeSwitcherProps) {
   const router = useRouter()
-  const pathname = usePathname()
   const { t } = useI18n()
-  const [isOpen, setIsOpen] = useState(false)
 
   // Define available modes based on user role
   const modes: Mode[] = []
@@ -49,8 +43,7 @@ export function ModeSwitcher({ currentMode, userRole, academyRole, hasQuranAcces
       label: t.modeSwitcher?.library || 'المقرأة',
       icon: Mic,
       href: libraryHref,
-      description: t.modeSwitcher?.libraryDesc || 'تلاوات وتسميع القرآن والتصحيح',
-      color: 'text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30'
+      description: t.modeSwitcher?.libraryDesc || 'تلاوات وتسميع القرآن والتصحيح'
     })
   }
 
@@ -62,27 +55,12 @@ export function ModeSwitcher({ currentMode, userRole, academyRole, hasQuranAcces
       label: t.modeSwitcher?.academy || 'الأكاديمية',
       icon: GraduationCap,
       href: academyHref,
-      description: t.modeSwitcher?.academyDesc || 'الدورات والدروس التفاعلية',
-      color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30'
+      description: t.modeSwitcher?.academyDesc || 'الدورات والدروس التفاعلية'
     })
   }
 
-  // Close dropdown on outside click — must be before any early return to satisfy React hooks rules
-  useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
-      if (isOpen && !(e.target as Element).closest('.mode-switcher')) {
-        setIsOpen(false)
-      }
-    }
-    document.addEventListener('click', handleClick)
-    return () => document.removeEventListener('click', handleClick)
-  }, [isOpen])
-
   // Don't show switcher if only one mode available
   if (modes.length <= 1) return null
-
-  const currentModeData = modes.find(m => m.id === currentMode) || modes[0]
-  if (!currentModeData) return null
 
   function getAcademyHref(role: string, academyRole?: string | null): string {
     if (role === 'teacher') return '/academy/teacher'
@@ -94,67 +72,49 @@ export function ModeSwitcher({ currentMode, userRole, academyRole, hasQuranAcces
   }
 
   const handleModeChange = (mode: Mode) => {
-    setIsOpen(false)
     if (mode.id !== currentMode) {
       router.push(mode.href)
     }
   }
 
   return (
-    <div className="mode-switcher relative">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className={cn(
-          "flex items-center gap-2 px-3 py-2 rounded-lg transition-all",
-          "border border-border hover:border-primary/50",
-          "bg-background hover:bg-muted"
-        )}
-      >
-        <div className={cn("p-1.5 rounded-md", currentModeData.color)}>
-          <currentModeData.icon className="w-4 h-4" />
-        </div>
-        <span className="text-sm font-medium hidden sm:inline">{currentModeData.label}</span>
-        <ChevronDown className={cn(
-          "w-4 h-4 text-muted-foreground transition-transform",
-          isOpen && "rotate-180"
-        )} />
-      </button>
-
-      {isOpen && (
-        <div className={cn(
-          "absolute top-full mt-2 right-0 z-50",
-          "w-64 p-2 rounded-xl",
-          "bg-card border border-border shadow-xl",
-          "animate-in fade-in-0 zoom-in-95"
-        )}>
-          <div className="text-xs font-semibold text-muted-foreground px-2 py-1 mb-1">
-            {t.modeSwitcher?.switchMode || 'تبديل الوضع'}
-          </div>
-          {modes.map((mode) => (
-            <button
-              key={mode.id}
-              onClick={() => handleModeChange(mode)}
-              className={cn(
-                "w-full flex items-center gap-3 p-3 rounded-lg transition-all",
-                mode.id === currentMode
-                  ? "bg-primary/10 text-primary"
-                  : "hover:bg-muted text-foreground"
-              )}
-            >
-              <div className={cn("p-2 rounded-lg", mode.color)}>
-                <mode.icon className="w-5 h-5" />
-              </div>
-              <div className="flex-1 text-right">
-                <div className="font-medium text-sm">{mode.label}</div>
-                <div className="text-xs text-muted-foreground">{mode.description}</div>
-              </div>
-              {mode.id === currentMode && (
-                <Check className="w-4 h-4 text-primary" />
-              )}
-            </button>
-          ))}
-        </div>
-      )}
+    <div className="flex items-center bg-muted/40 dark:bg-zinc-950/40 p-1 rounded-xl border border-border/60 shadow-inner relative gap-0.5 select-none">
+      {modes.map((mode) => {
+        const isActive = mode.id === currentMode
+        const Icon = mode.icon
+        return (
+          <button
+            key={mode.id}
+            onClick={() => handleModeChange(mode)}
+            title={mode.description}
+            className={cn(
+              "relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-300 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-primary",
+              isActive
+                ? mode.id === 'library'
+                  ? "text-emerald-600 dark:text-emerald-400"
+                  : "text-blue-600 dark:text-blue-400"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <span className="relative z-10 flex items-center gap-1.5">
+              <Icon className={cn("w-4.5 h-4.5 transition-transform duration-300", isActive && "scale-110")} />
+              <span className="hidden sm:inline">{mode.label}</span>
+            </span>
+            {isActive && (
+              <motion.div
+                layoutId="activeModeIndicator"
+                className={cn(
+                  "absolute inset-0 rounded-lg shadow-sm border",
+                  mode.id === 'library'
+                    ? "bg-emerald-500/10 border-emerald-500/20 dark:bg-emerald-500/15"
+                    : "bg-blue-500/10 border-blue-500/20 dark:bg-blue-500/15"
+                )}
+                transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+              />
+            )}
+          </button>
+        )
+      })}
     </div>
   )
 }
