@@ -26,7 +26,7 @@ async function getSessionAttendance(id: string) {
       sa.id,
       sa.joined_at,
       sa.left_at,
-      u.full_name,
+      u.name as full_name,
       u.email
     FROM session_attendance sa
     JOIN users u ON sa.student_id = u.id
