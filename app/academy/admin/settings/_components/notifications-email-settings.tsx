@@ -51,17 +51,33 @@ export function NotificationsEmailSettings({
   const [smtpStatus, setSmtpStatus] = useState<"idle" | "success" | "error">("idle")
 
   const smtp = settings.smtp_config || {}
-  const events = settings.academy_notifications_events || []
+  
+  // Robust parser for academy_notifications_events supporting both array and record formats
+  const rawEvents = settings.academy_notifications_events || {}
+  const events: Record<string, boolean> = {}
+
+  if (Array.isArray(rawEvents)) {
+    rawEvents.forEach((ev) => {
+      if (typeof ev === "string") {
+        events[ev] = true
+      }
+    })
+  } else if (rawEvents && typeof rawEvents === "object") {
+    Object.entries(rawEvents).forEach(([key, val]) => {
+      events[key] = !!val
+    })
+  }
 
   const updateSmtp = (updates: Partial<AcademySettings["smtp_config"]>) => {
     onUpdate({ smtp_config: { ...smtp, ...updates } })
   }
 
   const toggleEvent = (eventId: string) => {
-    const newEvents = events.includes(eventId)
-      ? events.filter((e) => e !== eventId)
-      : [...events, eventId]
-    onUpdate({ academy_notifications_events: newEvents })
+    const updated = {
+      ...events,
+      [eventId]: !events[eventId],
+    }
+    onUpdate({ academy_notifications_events: updated })
   }
 
   const handleTestSmtp = async () => {
@@ -260,7 +276,7 @@ export function NotificationsEmailSettings({
                 onClick={() => toggleEvent(event.id)}
               >
                 <Checkbox
-                  checked={events.includes(event.id)}
+                  checked={!!events[event.id]}
                   onCheckedChange={() => toggleEvent(event.id)}
                 />
                 <Label className="cursor-pointer text-sm">{event.label}</Label>

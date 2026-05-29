@@ -77,7 +77,7 @@ export interface AcademySettings {
     fromEmail?: string
     fromName?: string
   }
-  academy_notifications_events?: string[]
+  academy_notifications_events?: Record<string, boolean> | string[]
   academy_notifications_parent_report_day?: string
   academy_notifications_parent_report_time?: string
   academy_notifications_werd_reminder_time?: string
