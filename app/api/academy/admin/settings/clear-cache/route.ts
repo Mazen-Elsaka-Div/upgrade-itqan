@@ -18,7 +18,7 @@ export async function POST() {
     const tags = ["settings", "courses", "users", "academy"]
     for (const tag of tags) {
       try {
-        revalidateTag(tag)
+        revalidateTag(tag, "max")
       } catch {
         // ignore - tag may not exist
       }

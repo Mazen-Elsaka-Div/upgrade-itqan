@@ -18,7 +18,7 @@ export async function POST() {
     const tags = ["settings", "halaqat", "readers", "recitations", "maqraah"]
     for (const tag of tags) {
       try {
-        revalidateTag(tag)
+        revalidateTag(tag, "max")
       } catch {
         // ignore - tag may not exist
       }
