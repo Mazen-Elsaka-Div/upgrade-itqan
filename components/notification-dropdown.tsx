@@ -66,7 +66,7 @@ export function NotificationDropdown({ role, unreadCount, onRefresh }: { role: s
             const res = await fetch("/api/notifications?page=1")
             if (res.ok) {
                 const data = await res.json()
-                setNotifications(data.notifications.slice(0, 5))
+                setNotifications((data.notifications || []).slice(0, 5))
             }
         } finally {
             setLoading(false)

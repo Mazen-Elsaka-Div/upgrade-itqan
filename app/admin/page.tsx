@@ -12,6 +12,8 @@ import { ViewsChart } from "@/components/admin/analytics/views-chart"
 import { VisitorStats } from "@/components/admin/analytics/visitors-stats"
 import { SuspendedStudents } from "@/components/admin/SuspendedStudents"
 
+import { StatsGridSkeleton, StatsMiniGridSkeleton, ChartSkeleton, TableSkeleton } from "@/components/admin/skeletons"
+
 export default function AdminDashboard() {
   const { t } = useI18n()
   const isAr = t.locale === "ar"
@@ -47,8 +49,26 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="flex justify-center p-20">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="space-y-6 pb-20 lg:pb-0 font-sans" dir={isAr ? "rtl" : "ltr"}>
+        {/* Quick Stats Summary */}
+        <StatsGridSkeleton count={4} />
+
+        {/* Stats Grid */}
+        <StatsMiniGridSkeleton count={5} />
+
+        {/* Views Chart */}
+        <ChartSkeleton />
+
+        {/* Latest Recitations Table */}
+        <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+          <div className="p-6 border-b border-border flex items-center justify-between bg-muted/50 mb-0">
+            <div className="space-y-2">
+              <div className="h-5 w-32 bg-accent animate-pulse rounded-md" />
+              <div className="h-4 w-48 bg-accent animate-pulse rounded-md" />
+            </div>
+          </div>
+          <TableSkeleton rows={4} cols={5} />
+        </div>
       </div>
     )
   }

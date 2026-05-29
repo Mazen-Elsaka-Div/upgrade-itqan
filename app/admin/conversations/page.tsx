@@ -16,6 +16,7 @@ import {
 import {
     Tabs, TabsList, TabsTrigger, TabsContent
 } from "@/components/ui/tabs"
+import { TableSkeleton, ConversationsSkeleton } from "@/components/admin/skeletons"
 
 // --- TYPES ---
 type Conversation = {
@@ -68,8 +69,8 @@ function SupervisionTab({ isAr, t }: { isAr: boolean, t: any }) {
             const res = await fetch(`/api/admin/conversations?${params}`)
             if (res.ok) {
                 const data = await res.json()
-                setConversations(data.conversations)
-                setTotal(data.total)
+                setConversations(data.conversations || [])
+                setTotal(data.total || 0)
             }
         } finally {
             setLoading(false)
@@ -126,7 +127,7 @@ function SupervisionTab({ isAr, t }: { isAr: boolean, t: any }) {
                 </div>
 
                 {loading ? (
-                    <div className="flex justify-center p-16"><Loader2 className="w-7 h-7 animate-spin text-primary" /></div>
+                    <TableSkeleton rows={5} cols={4} />
                 ) : conversations.length === 0 ? (
                     <div className="p-12 text-center text-gray-400 font-medium">{isAr ? 'لا توجد محادثات' : 'No conversations found'}</div>
                 ) : (
@@ -488,11 +489,7 @@ function DirectChatTab({ isAr, t }: { isAr: boolean, t: any }) {
     const getOtherPartyAvatar = (c: Conversation) => c.student_avatar || c.reader_avatar
     const getOtherPartyRole = (c: Conversation) => c.student_id ? (isAr ? "طالب" : "Student") : (isAr ? "مقرئ" : "Reader")
 
-    if (loading) return (
-        <div className="flex justify-center items-center min-h-[400px]">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        </div>
-    )
+    if (loading) return <ConversationsSkeleton />
 
     return (
         <div className="flex flex-col lg:flex-row-reverse gap-6 lg:h-[650px]">
@@ -763,11 +760,7 @@ function TicketsTab({ isAr, t }: { isAr: boolean, t: any }) {
     const getOtherPartyAvatar = (c: Conversation) => c.student_avatar || c.reader_avatar
     const getOtherPartyRole = (c: Conversation) => c.student_id ? (isAr ? "طالب" : "Student") : (isAr ? "مقرئ" : "Reader")
 
-    if (loading) return (
-        <div className="flex justify-center items-center min-h-[400px]">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        </div>
-    )
+    if (loading) return <ConversationsSkeleton />
 
     return (
         <div className="flex flex-col lg:flex-row-reverse gap-6 lg:h-[650px]">
@@ -992,11 +985,7 @@ const AdminConversationsContent = () => {
 
 export default function AdminConversationsPage() {
     return (
-        <Suspense fallback={
-            <div className="flex h-screen items-center justify-center">
-                <Loader2 className="w-10 h-10 animate-spin text-primary" />
-            </div>
-        }>
+        <Suspense fallback={<ConversationsSkeleton />}>
             <AdminConversationsContent />
         </Suspense>
     )

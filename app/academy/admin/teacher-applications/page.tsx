@@ -7,6 +7,7 @@ import {
 } from "lucide-react"
 import AdminAudioPlayer from "@/components/admin/audio-player"
 import AdminPdfViewer from "@/components/admin/pdf-viewer"
+import { Skeleton } from "@/components/ui/skeleton"
 
 type App = {
     id: string
@@ -129,8 +130,49 @@ export default function TeacherApplicationsPage() {
 
     if (loading) {
         return (
-            <div className="p-12 flex justify-center">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <div className="space-y-6 animate-pulse" dir="rtl">
+                <div className="flex items-center justify-between flex-wrap gap-3">
+                    <Skeleton className="h-8 w-48" />
+                    <div className="flex gap-2">
+                        <Skeleton className="h-6 w-20 rounded-full" />
+                        <Skeleton className="h-6 w-20 rounded-full" />
+                        <Skeleton className="h-6 w-20 rounded-full" />
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6">
+                    {/* List Skeleton */}
+                    <div className="space-y-2">
+                        {Array.from({ length: 4 }).map((_, i) => (
+                            <div key={i} className="p-4 bg-card border border-border rounded-xl space-y-3">
+                                <Skeleton className="h-5 w-32" />
+                                <Skeleton className="h-4 w-40" />
+                                <Skeleton className="h-3 w-20" />
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Detail Skeleton */}
+                    <div className="space-y-5 bg-card border border-border rounded-xl p-6">
+                        <div className="flex justify-between items-start gap-4">
+                            <div className="flex gap-4 items-center">
+                                <Skeleton className="w-14 h-14 rounded-full shrink-0" />
+                                <div className="space-y-2">
+                                    <Skeleton className="h-6 w-40" />
+                                    <Skeleton className="h-4 w-48" />
+                                </div>
+                            </div>
+                            <div className="flex gap-2">
+                                <Skeleton className="h-10 w-20 rounded-lg" />
+                                <Skeleton className="h-10 w-20 rounded-lg" />
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-border pt-4">
+                            <Skeleton className="h-10 w-full rounded-xl" />
+                            <Skeleton className="h-10 w-full rounded-xl" />
+                        </div>
+                    </div>
+                </div>
             </div>
         )
     }

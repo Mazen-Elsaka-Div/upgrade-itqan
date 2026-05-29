@@ -49,6 +49,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { DetailViewSkeleton } from "@/components/admin/skeletons"
 
 type AcademyUserData = {
     user: {
@@ -199,12 +200,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
     }, [id, t.admin.failedToLoadData])
 
     if (loading) {
-        return (
-            <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-                <Loader2 className="w-10 h-10 animate-spin text-primary" />
-                <p className="text-muted-foreground font-medium">{t.loading}</p>
-            </div>
-        )
+        return <DetailViewSkeleton />
     }
 
     if (error || !data) {

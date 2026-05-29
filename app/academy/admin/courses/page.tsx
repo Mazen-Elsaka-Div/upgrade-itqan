@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
+import { CourseCardsGridSkeleton } from "@/components/admin/skeletons"
 
 type CourseStatus = 'draft' | 'pending_review' | 'published' | 'archived' | 'rejected'
 type Level = 'beginner' | 'intermediate' | 'advanced'
@@ -354,13 +355,7 @@ export default function AdminCoursesPage() {
     return { total, published, draft, pending, rejected, archived, students }
   }, [courses])
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-      </div>
-    )
-  }
+
 
   return (
     <div className="space-y-6">
@@ -471,7 +466,9 @@ export default function AdminCoursesPage() {
       </div>
 
       {/* Course Grid */}
-      {filteredCourses.length === 0 ? (
+      {loading ? (
+        <CourseCardsGridSkeleton count={6} />
+      ) : filteredCourses.length === 0 ? (
         <div className="bg-card border border-border rounded-xl p-16 text-center">
           <BookOpen className="w-14 h-14 mx-auto mb-4 text-muted-foreground opacity-30" />
           {courses.length === 0 ? (

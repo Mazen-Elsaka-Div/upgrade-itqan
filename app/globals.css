@@ -659,51 +659,8 @@ html {
   border-color: color-mix(in srgb, var(--accent) 40%, transparent);
 }
 
-/* === Admin Theme (Gold Borders Only) === */
-.admin-theme .bg-card,
-.admin-theme .bg-white,
-.admin-theme table,
-.admin-theme tr,
-.admin-theme th,
-.admin-theme td,
-.admin-theme .border,
-.admin-theme .border-t,
-.admin-theme .border-b,
-.admin-theme .border-l,
-.admin-theme .border-r {
-  border-color: #CBB17A !important;
-}
-
+/* === Admin Theme === */
 .admin-theme .bg-card,
 .admin-theme .bg-white {
   border-width: 1px;
-}
-
-.admin-theme button.border,
-.admin-theme a.border,
-.admin-theme input,
-.admin-theme select,
-.admin-theme textarea {
-  border-color: #CBB17A !important;
-}
-
-
-/* === Override: Remove Gold Borders in Dark Mode === */
-.dark.admin-theme .bg-card,
-.dark.admin-theme .bg-white,
-.dark.admin-theme table,
-.dark.admin-theme tr,
-.dark.admin-theme th,
-.dark.admin-theme td,
-.dark.admin-theme .border,
-.dark.admin-theme .border-t,
-.dark.admin-theme .border-b,
-.dark.admin-theme .border-l,
-.dark.admin-theme .border-r,
-.dark.admin-theme button.border,
-.dark.admin-theme a.border,
-.dark.admin-theme input,
-.dark.admin-theme select,
-.dark.admin-theme textarea {
-  border-color: var(--border) !important;
 }

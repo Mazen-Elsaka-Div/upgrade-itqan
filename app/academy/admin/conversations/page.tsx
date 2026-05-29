@@ -71,8 +71,8 @@ function SupervisionTab({ isAr, t }: { isAr: boolean, t: any }) {
             const res = await fetch(`/api/academy/admin/conversations?${params}`)
             if (res.ok) {
                 const data = await res.json()
-                setConversations(data.conversations)
-                setTotal(data.total)
+                setConversations(data.conversations || [])
+                setTotal(data.total || 0)
             }
         } finally {
             setLoading(false)

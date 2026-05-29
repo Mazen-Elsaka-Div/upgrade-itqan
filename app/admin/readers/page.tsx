@@ -16,6 +16,7 @@ import {
     TrendingUp, Star, Users, Loader2, Phone, MapPin, ChevronRight, User, Mail, Shield, ShieldAlert,
     Clock, AlertCircle, MessageSquare
 } from "lucide-react"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export default function AdminReadersPage() {
     const { t, locale } = useI18n()
@@ -147,11 +148,36 @@ export default function AdminReadersPage() {
 
             {/* Grid */}
             {loading ? (
-                <div className="flex flex-col items-center justify-center p-24 gap-4">
-                    <Loader2 className="w-10 h-10 animate-spin text-primary" />
-                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground animate-pulse">
-                        {isAr ? "جاري تحميل قائمة المحفظين..." : "Loading Readers..."}
-                    </p>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {Array.from({ length: 6 }).map((_, i) => (
+                        <div key={i} className="bg-card border border-border rounded-3xl p-6 shadow-sm space-y-6">
+                            <div className="flex items-start gap-4">
+                                <Skeleton className="w-14 h-14 rounded-2xl shrink-0" />
+                                <div className="space-y-3 flex-1">
+                                    <Skeleton className="h-6 w-36" />
+                                    <Skeleton className="h-4 w-48" />
+                                    <div className="flex gap-2">
+                                        <Skeleton className="h-5 w-20 rounded-full" />
+                                        <Skeleton className="h-5 w-20 rounded-full" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="pt-6 border-t border-border grid grid-cols-3 gap-4">
+                                <div className="space-y-2 text-center">
+                                    <Skeleton className="h-8 w-12 mx-auto" />
+                                    <Skeleton className="h-3 w-16 mx-auto" />
+                                </div>
+                                <div className="space-y-2 text-center">
+                                    <Skeleton className="h-8 w-12 mx-auto" />
+                                    <Skeleton className="h-3 w-16 mx-auto" />
+                                </div>
+                                <div className="space-y-2 text-center">
+                                    <Skeleton className="h-8 w-12 mx-auto" />
+                                    <Skeleton className="h-3 w-16 mx-auto" />
+                                </div>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

@@ -18,6 +18,8 @@ import {
 } from 'lucide-react'
 import { ViewsChart } from '@/components/admin/analytics/views-chart'
 import { VisitorStats } from '@/components/admin/analytics/visitors-stats'
+import { StatsGridSkeleton, StatsMiniGridSkeleton, ChartSkeleton } from "@/components/admin/skeletons"
+import { Skeleton } from "@/components/ui/skeleton"
 
 interface AcademyStats {
   total_students: number
@@ -82,8 +84,21 @@ export default function AcademyAdminPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-[50vh]">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+      <div className="space-y-6 pb-20 lg:pb-0 font-sans" dir={isAr ? 'rtl' : 'ltr'}>
+        {/* Title */}
+        <div className="flex items-center gap-3 mb-6">
+          <Skeleton className="w-12 h-12 rounded-xl" />
+          <Skeleton className="h-8 w-60" />
+        </div>
+
+        {/* Quick Stats Summary */}
+        <StatsGridSkeleton count={4} />
+
+        {/* Stats Grid */}
+        <StatsMiniGridSkeleton count={5} />
+
+        {/* Views Chart */}
+        <ChartSkeleton />
       </div>
     )
   }

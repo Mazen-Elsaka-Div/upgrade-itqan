@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
+import { TableSkeleton } from "@/components/admin/skeletons"
 
 export default function AdminRecitationsPage() {
   const { t, locale } = useI18n()
@@ -210,9 +211,7 @@ export default function AdminRecitationsPage() {
       <div className="bg-card rounded-3xl shadow-sm border border-border overflow-hidden">
         <div className="overflow-x-auto min-h-[400px]">
           {loading ? (
-            <div className="flex justify-center p-24">
-              <Loader2 className="w-10 h-10 animate-spin text-primary" />
-            </div>
+            <TableSkeleton rows={8} cols={7} />
           ) : (
             <table className="w-full text-right border-collapse">
               <thead>

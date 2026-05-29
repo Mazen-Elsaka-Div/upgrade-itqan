@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { Plus, Trash2, Edit2, GraduationCap, X, Loader2, Search, CheckCircle2, Clock, XCircle, AlertCircle, RefreshCcw, Ban, Unlock, History, ChevronDown, ChevronUp } from 'lucide-react'
+import { Skeleton } from "@/components/ui/skeleton"
 
 type ApprovalStatus = 'approved' | 'pending_approval' | 'rejected' | null
 
@@ -190,8 +191,29 @@ export default function AdminTeachersPage() {
   }
 
   if (loading) return (
-    <div className="flex items-center justify-center min-h-[400px]">
-      <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className="bg-card border border-border rounded-xl p-5 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Skeleton className="w-10 h-10 rounded-full shrink-0" />
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-28" />
+                <Skeleton className="h-3 w-36" />
+              </div>
+            </div>
+            <Skeleton className="h-5 w-12 rounded-full" />
+          </div>
+          <div className="flex gap-2">
+            <Skeleton className="h-5 w-20 rounded-full" />
+          </div>
+          <Skeleton className="h-3 w-24" />
+          <div className="flex gap-2 pt-2">
+            <Skeleton className="h-9 flex-1 rounded-lg" />
+            <Skeleton className="h-9 w-9 rounded-lg shrink-0" />
+          </div>
+        </div>
+      ))}
     </div>
   )
 
