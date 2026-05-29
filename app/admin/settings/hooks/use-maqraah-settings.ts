@@ -8,16 +8,23 @@ import { toast } from "sonner"
 export interface MaqraahSettings {
   // General / System
   maqraah_general_name?: string
-  maqraah_general_logo?: string
-  maqraah_general_favicon?: string
   maqraah_general_description?: string
-  maqraah_general_contact_email?: string
-  maqraah_general_whatsapp?: string
   maqraah_general_timezone?: string
   maqraah_general_language?: string
   maqraah_general_direction?: string
   app_url?: string
   reader_assignment_strategy?: string
+  // Shared/global keys consumed by the public site (layout, navbar, dashboards)
+  branding?: {
+    logoUrl?: string
+    faviconUrl?: string
+    dashboardLogoUrl?: string
+  }
+  contact_info?: {
+    email?: string
+    phone?: string
+    address?: string
+  }
 
   // Readers & Applications
   maqraah_readers_student_self_signup?: boolean
@@ -135,6 +142,16 @@ export const defaultMaqraahSettings: MaqraahSettings = {
   maqraah_general_language: "ar",
   maqraah_general_direction: "rtl",
   reader_assignment_strategy: "least_booked_today",
+  branding: {
+    logoUrl: "/branding/main-logo.png",
+    faviconUrl: "/favicon.png",
+    dashboardLogoUrl: "/branding/dashboard-logo.png",
+  },
+  contact_info: {
+    email: "",
+    phone: "",
+    address: "",
+  },
 
   // Readers
   maqraah_readers_student_self_signup: true,

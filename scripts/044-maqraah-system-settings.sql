@@ -15,12 +15,8 @@
 -- ────────────────────────────────────────────
 INSERT INTO system_settings (setting_key, setting_value, setting_type, description, is_editable)
 VALUES
-  ('maqraah_general_name',          '"مقرأة إتقان"'::jsonb,  'maqraah_general', 'اسم المقرأة',        true),
-  ('maqraah_general_logo',          '""'::jsonb,            'maqraah_general', 'شعار المقرأة',       true),
-  ('maqraah_general_favicon',       '""'::jsonb,            'maqraah_general', 'أيقونة الموقع',      true),
-  ('maqraah_general_description',   '""'::jsonb,            'maqraah_general', 'وصف المقرأة',        true),
-  ('maqraah_general_contact_email', '""'::jsonb,            'maqraah_general', 'البريد الرسمي',      true),
-  ('maqraah_general_whatsapp',      '""'::jsonb,            'maqraah_general', 'رقم الواتساب',       true),
+  ('maqraah_general_name',          '"مقرأة إتقان"'::jsonb,  'maqraah_general', 'اسم المنصة',         true),
+  ('maqraah_general_description',   '""'::jsonb,            'maqraah_general', 'وصف المنصة',         true),
   ('maqraah_general_timezone',      '"Asia/Riyadh"'::jsonb, 'maqraah_general', 'المنطقة الزمنية',    true),
   ('maqraah_general_language',      '"ar"'::jsonb,          'maqraah_general', 'اللغة الافتراضية',   true),
   ('maqraah_general_direction',     '"rtl"'::jsonb,         'maqraah_general', 'اتجاه الواجهة',      true)
