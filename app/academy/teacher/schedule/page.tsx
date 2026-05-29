@@ -323,18 +323,33 @@ export default function TeacherSchedulePage() {
       {pastSessions.length > 0 && (
         <div>
           <h2 className="text-xl font-semibold mb-4 mt-8">الجلسات السابقة</h2>
-          <div className="space-y-2">
+          <div className="space-y-3">
             {pastSessions.slice(0, 10).map((session) => (
-              <Card key={session.id} className="opacity-80">
+              <Card key={session.id} className="opacity-80 hover:opacity-100 transition-opacity">
                 <CardContent className="pt-6">
                   <div className="flex justify-between items-center">
-                    <div>
-                      <h3 className="font-semibold">{session.title}</h3>
-                      <p className="text-sm text-gray-600">
-                        {new Date(session.scheduled_at).toLocaleDateString('ar-EG')} - {session.course_name}
-                      </p>
+                    <div className="space-y-1">
+                      <h3 className="font-semibold">{session.title} <span className="text-sm font-normal text-muted-foreground mr-2">({session.course_name})</span></h3>
+                      <div className="flex gap-4 text-sm text-gray-600">
+                        <div className="flex items-center gap-1">
+                          <Calendar className="w-4 h-4" />
+                          {new Date(session.scheduled_at).toLocaleDateString('ar-EG')}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-4 h-4" />
+                          {new Date(session.scheduled_at).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}
+                        </div>
+                        <div className="flex items-center gap-1 text-primary">
+                          مدتها: {session.duration_minutes || 60} دقيقة
+                        </div>
+                      </div>
                     </div>
-                    <Button size="sm" variant="outline">عرض التفاصيل</Button>
+                    <div className="flex gap-2">
+                      <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => handleDelete(session.id)}>
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                      <Button size="sm" variant="outline" onClick={() => router.push(`/academy/teacher/sessions/${session.id}`)}>عرض التفاصيل</Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
