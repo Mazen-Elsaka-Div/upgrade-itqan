@@ -221,7 +221,7 @@ export default function TeacherSchedulePage() {
   }
 
   const handleDeactivate = async (id: string) => {
-    if (!confirm('هل أنت متأكد من إلغاء تفعيل هذه الجلسة؟ لن ت��هر للطلاب بعد الآن.')) return
+    if (!confirm('هل أنت متأكد من إلغاء تفعيل هذه الجلسة؟ لن تظهر للطلاب بعد الآن.')) return
 
     try {
       const res = await fetch(`/api/academy/teacher/sessions/${id}`, {
@@ -234,6 +234,26 @@ export default function TeacherSchedulePage() {
         fetchSessions()
       } else {
         toast.error('حدث خطأ أثناء إلغاء التفعيل')
+      }
+    } catch (err) {
+      toast.error('فشل في الاتصال بالخادم')
+    }
+  }
+
+  const handleActivate = async (id: string) => {
+    if (!confirm('هل تريد إعادة تفعيل هذه الجلسة؟ ستظهر للطلاب مرة أخرى.')) return
+
+    try {
+      const res = await fetch(`/api/academy/teacher/sessions/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'scheduled' })
+      });
+      if (res.ok) {
+        toast.success('تم تفعيل الجلسة بنجاح')
+        fetchSessions()
+      } else {
+        toast.error('حدث خطأ أثناء التفعيل')
       }
     } catch (err) {
       toast.error('فشل في الاتصال بالخادم')
@@ -398,73 +418,109 @@ export default function TeacherSchedulePage() {
 
           <TabsContent value="past" className="space-y-4 animate-in fade-in-50 duration-500">
             {pastSessions.length > 0 ? (
-              <div className="grid grid-cols-1 gap-3">
-                {pastSessions.map((session) => (
-                  <Card key={session.id} className="hover:border-primary/50 transition-colors bg-muted/20">
-                    <CardContent className="p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                      <div>
-                        <h3 className="font-bold text-lg mb-1 flex items-center gap-2">
-                          {session.title}
-                          {(session.status !== 'completed' || session.is_public) ? (
-                            <Badge variant="default" className="text-xs bg-green-600 hover:bg-green-700">
-                              <Radio className="w-3 h-3 ml-1" />
-                              مفعّلة للطلاب
-                            </Badge>
-                          ) : (
-                            <Badge variant="outline" className="text-xs bg-background">
-                              مكتملة
-                            </Badge>
-                          )}
-                        </h3>
-                        <p className="text-sm text-muted-foreground mb-3">{session.course_name}</p>
-                        <div className="flex flex-wrap gap-4 text-xs font-medium text-gray-500">
-                          <div className="flex items-center gap-1">
-                            <Calendar className="w-3 h-3" />
-                            {new Date(session.scheduled_at).toLocaleDateString('ar-EG')}
+              <div className="grid grid-cols-1 gap-4">
+                {pastSessions.map((session) => {
+                  const isActiveForStudents = session.status !== 'completed' || session.is_public
+                  return (
+                  <Card
+                    key={session.id}
+                    className={`overflow-hidden border-r-4 transition-all hover:shadow-md ${
+                      isActiveForStudents ? 'border-r-green-500' : 'border-r-muted-foreground/30'
+                    }`}
+                  >
+                    <CardContent className="p-5">
+                      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+                        {/* Session info */}
+                        <div className="flex items-start gap-4 flex-1 min-w-0">
+                          <div
+                            className={`shrink-0 inline-flex items-center justify-center w-12 h-12 rounded-xl ${
+                              isActiveForStudents
+                                ? 'bg-green-500/10 text-green-600'
+                                : 'bg-muted text-muted-foreground'
+                            }`}
+                          >
+                            {isActiveForStudents ? <Radio className="w-6 h-6" /> : <CheckCircle2 className="w-6 h-6" />}
                           </div>
-                          <div className="flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
-                            {new Date(session.scheduled_at).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}
-                          </div>
-                          <div className="flex items-center gap-1 text-green-700 bg-green-50 px-2 py-0.5 rounded-full border border-green-100">
-                            <Users className="w-3 h-3" />
-                            {session.attendance_count || 0} حضور مسجل
+
+                          <div className="min-w-0">
+                            <div className="flex flex-wrap items-center gap-2 mb-1">
+                              <h3 className="font-bold text-lg truncate">{session.title}</h3>
+                              {isActiveForStudents ? (
+                                <Badge className="text-xs bg-green-600 hover:bg-green-700 gap-1">
+                                  <Radio className="w-3 h-3" />
+                                  مفعّلة للطلاب
+                                </Badge>
+                              ) : (
+                                <Badge variant="secondary" className="text-xs gap-1">
+                                  <CheckCircle2 className="w-3 h-3" />
+                                  مكتملة
+                                </Badge>
+                              )}
+                            </div>
+                            <p className="text-sm text-muted-foreground mb-3">{session.course_name}</p>
+                            <div className="flex flex-wrap items-center gap-2 text-xs font-medium">
+                              <span className="inline-flex items-center gap-1.5 bg-muted/60 px-2.5 py-1 rounded-md text-muted-foreground">
+                                <Calendar className="w-3.5 h-3.5" />
+                                {new Date(session.scheduled_at).toLocaleDateString('ar-EG')}
+                              </span>
+                              <span className="inline-flex items-center gap-1.5 bg-muted/60 px-2.5 py-1 rounded-md text-muted-foreground">
+                                <Clock className="w-3.5 h-3.5" />
+                                {new Date(session.scheduled_at).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                              <span className="inline-flex items-center gap-1.5 bg-green-500/10 text-green-700 px-2.5 py-1 rounded-md border border-green-500/20">
+                                <Users className="w-3.5 h-3.5" />
+                                {session.attendance_count || 0} حضور مسجل
+                              </span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      
-                      <div className="flex sm:flex-col gap-2 w-full sm:w-auto mt-2 sm:mt-0">
-                        <Button 
-                          variant="default" 
-                          size="sm" 
-                          className="w-full sm:w-auto"
-                          onClick={() => router.push(`/academy/teacher/sessions/${session.id}`)}
-                        >
-                          عرض تقرير الحضور
-                        </Button>
-                        {(session.status !== 'completed' || session.is_public) && (
+
+                        {/* Actions */}
+                        <div className="flex flex-wrap lg:flex-nowrap items-center gap-2 lg:border-r lg:pr-5 lg:shrink-0">
                           <Button
-                            variant="outline"
+                            variant="default"
                             size="sm"
-                            className="w-full sm:w-auto border-amber-300 text-amber-700 hover:bg-amber-50"
-                            onClick={() => handleDeactivate(session.id)}
+                            className="flex-1 lg:flex-none"
+                            onClick={() => router.push(`/academy/teacher/sessions/${session.id}`)}
                           >
-                            إلغاء التفعيل
+                            تقرير الحضور
                           </Button>
-                        )}
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="w-full sm:w-auto text-destructive hover:bg-destructive/10"
-                          onClick={() => handleDelete(session.id)}
-                        >
-                          <Trash2 className="w-4 h-4 ml-1" />
-                          حذف السجل
-                        </Button>
+                          {isActiveForStudents ? (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex-1 lg:flex-none border-amber-400/60 text-amber-600 hover:bg-amber-500/10 hover:text-amber-700"
+                              onClick={() => handleDeactivate(session.id)}
+                            >
+                              إلغاء التفعيل
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex-1 lg:flex-none border-green-500/60 text-green-600 hover:bg-green-500/10 hover:text-green-700"
+                              onClick={() => handleActivate(session.id)}
+                            >
+                              <Radio className="w-4 h-4 ml-1" />
+                              تفعيل
+                            </Button>
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-destructive hover:bg-destructive/10 shrink-0"
+                            onClick={() => handleDelete(session.id)}
+                            title="حذف السجل"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                            <span className="sr-only">حذف السجل</span>
+                          </Button>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
-                ))}
+                  )
+                })}
               </div>
             ) : (
               <div className="text-center py-16 bg-card rounded-xl border">
