@@ -221,13 +221,13 @@ export default function TeacherSchedulePage() {
   }
 
   const handleDeactivate = async (id: string) => {
-    if (!confirm('هل أنت متأكد من إلغاء تفعيل هذه الجلسة؟ لن تظهر للطلاب بعد الآن.')) return
+    if (!confirm('هل أنت متأكد من إلغاء تفعيل هذه الجلسة؟ لن ت��هر للطلاب بعد الآن.')) return
 
     try {
       const res = await fetch(`/api/academy/teacher/sessions/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'completed' })
+        body: JSON.stringify({ status: 'completed', is_public: false })
       });
       if (res.ok) {
         toast.success('تم إلغاء تفعيل الجلسة بنجاح')
@@ -405,14 +405,14 @@ export default function TeacherSchedulePage() {
                       <div>
                         <h3 className="font-bold text-lg mb-1 flex items-center gap-2">
                           {session.title}
-                          {session.status === 'completed' ? (
-                            <Badge variant="outline" className="text-xs bg-background">
-                              مكتملة
-                            </Badge>
-                          ) : (
+                          {(session.status !== 'completed' || session.is_public) ? (
                             <Badge variant="default" className="text-xs bg-green-600 hover:bg-green-700">
                               <Radio className="w-3 h-3 ml-1" />
                               مفعّلة للطلاب
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-xs bg-background">
+                              مكتملة
                             </Badge>
                           )}
                         </h3>
@@ -442,7 +442,7 @@ export default function TeacherSchedulePage() {
                         >
                           عرض تقرير الحضور
                         </Button>
-                        {session.status !== 'completed' && (
+                        {(session.status !== 'completed' || session.is_public) && (
                           <Button
                             variant="outline"
                             size="sm"
