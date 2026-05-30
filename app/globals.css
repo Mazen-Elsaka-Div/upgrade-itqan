@@ -48,6 +48,45 @@
   --academy-primary: #1E3A5F;
   --academy-primary-light: #2A4A73;
   --academy-primary-dark: #152C4A;
+
+  /* ===================================================================
+     HOMEPAGE (app/page.tsx) — CMS-driven palette.
+     Only these 8 BASE colors are edited from /admin/homepage; every
+     other shade below is DERIVED from them via color-mix, so changing
+     one base color cascades to all of its tints/shades automatically.
+     The admin injects overrides for the 8 base vars on the page wrapper.
+     =================================================================== */
+  --hp-navy: #0F2A44;
+  --hp-green: #1B4332;
+  --hp-bronze: #B08D57;
+  --hp-gold: #C9A962;
+  --hp-parchment: #F7F2E9;
+  --hp-cream: #F2EBDD;
+  --hp-ink: #1A1A1A;
+  --hp-dark: #0B1217;
+
+  /* Derived navy family */
+  --hp-navy-deep: color-mix(in srgb, var(--hp-navy) 74%, #000);
+  --hp-navy-2: color-mix(in srgb, var(--hp-navy) 94%, #fff);
+  --hp-navd-1: color-mix(in srgb, var(--hp-dark) 82%, var(--hp-navy));
+  --hp-navd-2: color-mix(in srgb, var(--hp-dark) 68%, var(--hp-navy));
+  --hp-navd-3: color-mix(in srgb, var(--hp-dark) 42%, var(--hp-navy));
+
+  /* Derived gold/bronze family */
+  --hp-gold-light: color-mix(in srgb, var(--hp-gold) 75%, #fff);
+
+  /* Derived light parchment surfaces */
+  --hp-card: color-mix(in srgb, var(--hp-parchment) 58%, #fff);
+  --hp-parch-1: color-mix(in srgb, var(--hp-parchment) 32%, #fff);
+  --hp-parch-2: color-mix(in srgb, var(--hp-parchment) 80%, #fff);
+  --hp-parch-3: color-mix(in srgb, var(--hp-parchment) 87%, var(--hp-bronze));
+  --hp-parchm-1: color-mix(in srgb, var(--hp-parchment) 55%, #fff);
+  --hp-parchm-2: color-mix(in srgb, var(--hp-parchment) 92%, var(--hp-bronze));
+  --hp-parchm-3: color-mix(in srgb, var(--hp-parchment) 80%, var(--hp-bronze));
+
+  /* Derived dark surfaces */
+  --hp-dark-2: color-mix(in srgb, var(--hp-dark) 78%, var(--hp-navy));
+  --hp-dark-3: color-mix(in srgb, var(--hp-dark) 88%, var(--hp-navy));
 }
 
 .dark {
@@ -148,6 +187,31 @@
   --color-teal-700: #0F766E;
   --color-teal-800: #115E59;
   --color-teal-900: #134E4A;
+
+  /* Homepage palette utilities (bg-hp-*, text-hp-*, border-hp-*, /alpha) */
+  --color-hp-navy: var(--hp-navy);
+  --color-hp-navy-deep: var(--hp-navy-deep);
+  --color-hp-navy-2: var(--hp-navy-2);
+  --color-hp-navd-1: var(--hp-navd-1);
+  --color-hp-navd-2: var(--hp-navd-2);
+  --color-hp-navd-3: var(--hp-navd-3);
+  --color-hp-green: var(--hp-green);
+  --color-hp-bronze: var(--hp-bronze);
+  --color-hp-gold: var(--hp-gold);
+  --color-hp-gold-light: var(--hp-gold-light);
+  --color-hp-parchment: var(--hp-parchment);
+  --color-hp-card: var(--hp-card);
+  --color-hp-parch-1: var(--hp-parch-1);
+  --color-hp-parch-2: var(--hp-parch-2);
+  --color-hp-parch-3: var(--hp-parch-3);
+  --color-hp-parchm-1: var(--hp-parchm-1);
+  --color-hp-parchm-2: var(--hp-parchm-2);
+  --color-hp-parchm-3: var(--hp-parchm-3);
+  --color-hp-cream: var(--hp-cream);
+  --color-hp-ink: var(--hp-ink);
+  --color-hp-dark: var(--hp-dark);
+  --color-hp-dark-2: var(--hp-dark-2);
+  --color-hp-dark-3: var(--hp-dark-3);
 }
 
 @layer base {
