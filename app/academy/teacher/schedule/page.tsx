@@ -221,7 +221,7 @@ export default function TeacherSchedulePage() {
   }
 
   const handleDeactivate = async (id: string) => {
-    if (!confirm('هل أنت متأكد من إلغاء تفعيل هذه الجلسة؟ لن ت����هر للطلاب بعد الآن.')) return
+    if (!confirm('هل أنت متأكد من إلغاء تفعيل هذه الجلسة؟ لن تظهر للطلاب بعد الآن.')) return
 
     try {
       const res = await fetch(`/api/academy/teacher/sessions/${id}`, {
