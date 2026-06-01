@@ -1,27 +1,16 @@
 import { NextRequest, NextResponse } from "next/server"
-import { UTApi } from "uploadthing/server"
 import { getSession } from "@/lib/auth"
+import { uploadToStorage } from "@/lib/storage"
+import { transliterate } from "transliteration"
 
-// Force Node.js runtime so Next.js doesn't try to evaluate the module during
-// the Edge bundling pass (which previously broke prod builds when the
-// UPLOADTHING_TOKEN env var wasn't available at build time).
+// Force Node.js runtime — S3 upload uses the AWS SDK which relies on Node APIs.
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
-// Lazy singleton so `new UTApi()` doesn't run at module-evaluation time. If
-// it does, Next's "collecting page data" build step crashes with
-// "Missing or invalid API key" whenever the build environment lacks the
-// UploadThing token.
-let _utapi: UTApi | null = null
-function getUtApi(): UTApi {
-    if (!_utapi) _utapi = new UTApi()
-    return _utapi
-}
-
 /**
- * Server-side audio upload helper used by the applicant audio recorder.
- * Accepts a multipart/form-data POST with field `file` and returns the
- * UploadThing URL.
+ * Server-side audio upload helper used by the applicant audio recorder and the
+ * student recitation recorder. Accepts a multipart/form-data POST with field
+ * `file` and uploads it to AWS S3, returning the public URL + key.
  */
 export async function POST(req: NextRequest) {
     const session = await getSession()
@@ -41,11 +30,14 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "الحد الأقصى 32 ميجا" }, { status: 400 })
         }
 
-        const res = await getUtApi().uploadFiles(file)
-        if (res.error || !res.data) {
-            return NextResponse.json({ error: res.error?.message || "فشل الرفع" }, { status: 500 })
-        }
-        return NextResponse.json({ url: res.data.url, key: res.data.key })
+        // Sanitize filename to keep the S3 key ASCII-clean
+        const ext = file.name.includes(".") ? `.${file.name.split(".").pop()}` : ""
+        let base = transliterate(file.name.replace(/\.[^/.]+$/, "")).replace(/[^a-zA-Z0-9\-_]/g, "_").slice(0, 60)
+        if (base.length < 2) base = "audio"
+        const safeName = `${base}${ext}`
+
+        const result = await uploadToStorage(file, safeName, file.type)
+        return NextResponse.json({ url: result.url, key: result.key })
     } catch (err: any) {
         console.error("upload-audio error:", err)
         return NextResponse.json({ error: err?.message || "خطأ في الخادم" }, { status: 500 })

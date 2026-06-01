@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 
 const publicPaths = ["/", "/about", "/contact", "/sitemap-page", "/login", "/login-admin", "/register", "/reader-register", "/teacher-register", "/forgot-password", "/reset-password", "/verify", "/privacy", "/terms", "/maintenance", "/change-password", "/rejected"]
-const apiPublicPaths = ["/api/auth", "/api/admin/homepage", "/api/admin/analytics", "/api/uploadthing"]
+const apiPublicPaths = ["/api/auth", "/api/admin/homepage", "/api/admin/analytics"]
 
 // Academy public paths (for public lessons and invitations)
 const academyPublicPaths = ["/academy/public", "/academy/invite", "/academy/lesson"]
@@ -132,7 +132,7 @@ export default async function middleware(req: NextRequest) {
                                 pathname.startsWith('/api/auth') ||
                                 pathname.startsWith('/api/upload-audio') ||
                                 pathname.startsWith('/api/upload-pdf') ||
-                                pathname.startsWith('/api/uploadthing') ||
+                                pathname.startsWith('/api/upload') ||
                                 pathname.startsWith('/api/admin/application-questions') ||
                                 pathname.startsWith('/api/notifications') ||
                                 pathname.startsWith('/api/unread-counts') ||

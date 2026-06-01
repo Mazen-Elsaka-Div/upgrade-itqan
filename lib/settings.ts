@@ -176,20 +176,12 @@ export async function getAppUrl(): Promise<string> {
     return 'http://localhost:3000'
 }
 
-// Helper for UploadThing (Replaces Cloudinary)
+// Helper for AWS S3 storage configuration
 export async function getStorageConfig() {
-    const config = await getSetting<any>("storage_config", null)
-
-    if (config && config.uploadthingToken) {
-        return {
-            token: config.uploadthingToken,
-        }
-    }
-
-    // Fallback to env
     return {
-        token: process.env.UPLOADTHING_TOKEN,
-        secret: process.env.UPLOADTHING_SECRET,
-        appId: process.env.UPLOADTHING_APP_ID,
+        region: process.env.AWS_REGION,
+        bucket: process.env.AWS_S3_BUCKET_NAME,
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
     }
 }
