@@ -170,8 +170,9 @@ BEGIN
     ON CONFLICT (parent_id, child_id) DO UPDATE SET status = 'active';
   END IF;
 
-  -- 11) Recitations: one pending (for the reader/review queue) + one approved
+  -- 11) Recitations: one pending (for the reader/review queue) + one mastered
   --     (so the student "memorization / recitation progress" screen has history).
+  --     Allowed statuses: pending, in_review, mastered, needs_session, session_booked, rejected.
   INSERT INTO recitations (student_id, assigned_reader_id, surah_name, surah_number, ayah_from, ayah_to,
                            audio_url, recitation_type, status, created_at)
   SELECT v_student, v_reader, 'الفاتحة', 1, 1, 7,
@@ -183,10 +184,10 @@ BEGIN
   INSERT INTO recitations (student_id, assigned_reader_id, surah_name, surah_number, ayah_from, ayah_to,
                            audio_url, recitation_type, status, reviewed_at, created_at)
   SELECT v_student, v_reader, 'الإخلاص', 112, 1, 4,
-         'https://example.com/qa-recitation-approved.mp3', 'hifd', 'approved',
+         'https://example.com/qa-recitation-approved.mp3', 'hifd', 'mastered',
          NOW() - INTERVAL '5 days', NOW() - INTERVAL '6 days'
   WHERE NOT EXISTS (
-    SELECT 1 FROM recitations WHERE student_id = v_student AND surah_number = 112 AND status = 'approved'
+    SELECT 1 FROM recitations WHERE student_id = v_student AND surah_number = 112 AND status = 'mastered'
   );
 
   -- 12) A forum reply, then a report on it, so the forum moderation queue
