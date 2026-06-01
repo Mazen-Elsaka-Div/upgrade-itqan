@@ -78,7 +78,7 @@ export async function generateCertificatePDF(studentId: string): Promise<{ url: 
     // Ensure it's a proper Node.js Buffer (puppeteer may return Uint8Array)
     const nodeBuffer = Buffer.from(pdfBuffer)
 
-    // Upload to Storage (UploadThing)
+    // Upload to Storage (AWS S3)
     const fileName = `certificate-${studentId}-${Date.now()}.pdf`
     console.log('Uploading to Storage...')
     const uploadResult = await uploadToStorage(nodeBuffer, fileName, 'application/pdf')

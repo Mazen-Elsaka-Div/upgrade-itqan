@@ -6,9 +6,6 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { ChevronLeft, Award, User, MapPin, Building, FileText, ArrowLeft, Loader2, Info, CheckCircle } from "lucide-react"
 
-// UploadThing client
-import { UploadButton } from "@uploadthing/react"
-
 export default function CertificatePage() {
   const router = useRouter()
   const { t, locale } = useI18n()

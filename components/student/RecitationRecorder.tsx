@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation"
 import { Mic, Square, Play, Pause, RotateCcw, Send, Info, Loader2, BookOpen, Hash, ChevronDown, ChevronUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useI18n } from "@/lib/i18n/context"
-import { useUploadThing } from "@/lib/uploadthing-client"
 import { SURAHS } from "@/lib/data/surahs"
 
 // ─── Ayah text reference panel (shown only for Tilawa type) ──────────────────
@@ -414,8 +413,6 @@ export function RecitationRecorder({ onSuccess }: RecitationRecorderProps) {
     setIsPlaying(true)
   }
 
-  const { startUpload } = useUploadThing("audioUploader")
-
   const validateBeforeSubmit = (): string | null => {
     if (ayahFrom < 1 || ayahFrom > selectedSurah.verses) {
       return `«من الآية» يجب أن يكون بين 1 و ${selectedSurah.verses}`
@@ -462,15 +459,18 @@ export function RecitationRecorder({ onSuccess }: RecitationRecorderProps) {
         }
       }
 
-      // رفع مباشر من المتصفح لـ UploadThing - لا يمر على Hostinger
+      // رفع الملف الصوتي إلى AWS S3 عبر السيرفر
       const audioFile = new File([audioBlob], `recitation_${timestamp}.${extension}`, {
         type: audioBlob.type || `audio/${extension}`,
       })
 
-      const uploaded = await startUpload([audioFile])
-      if (!uploaded || uploaded.length === 0) throw new Error("Upload failed")
+      const uploadForm = new FormData()
+      uploadForm.append("file", audioFile)
+      const uploadRes = await fetch("/api/upload-audio", { method: "POST", body: uploadForm })
+      const uploadData = await uploadRes.json().catch(() => ({}))
+      if (!uploadRes.ok || !uploadData?.url) throw new Error(uploadData?.error || "Upload failed")
 
-      const audioUrl = uploaded[0].url
+      const audioUrl = uploadData.url
 
       const recRes = await fetch("/api/recitations", {
         method: "POST",
