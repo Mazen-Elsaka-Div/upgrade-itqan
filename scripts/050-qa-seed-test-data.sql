@@ -1,10 +1,18 @@
 -- ============================================================================
 -- 050 - QA SEED: test data for empty queues (#4 tasks/points, #5 moderation)
 -- ----------------------------------------------------------------------------
--- Why: QA reported that the student dashboard shows empty "tasks" and "points
--- history", and the supervisor/admin moderation queues (fiqh + forum) are empty,
--- so reviewers have nothing to act on. This script seeds realistic sample rows
--- for ONE test student so those screens can be exercised end-to-end.
+-- Why: QA automation was "blocked" on many screens because the deployed database
+-- has no data for the test accounts (empty tasks, points, moderation queues,
+-- parent children, courses to resume, recitation/memorization history, reported
+-- forum content). This script seeds realistic sample rows so every one of those
+-- screens can be exercised end-to-end:
+--   * tasks assigned to the student            (student "tasks")
+--   * points history                           (student "points")
+--   * an enrolled course + in-progress lesson  (student "resume course")
+--   * recitations (pending + approved)         (recitation review / memorization)
+--   * fiqh questions awaiting an answer        (fiqh moderation queue)
+--   * forum post + reply + report              (forum moderation queue)
+--   * parent <-> child link (active)           (parent oversight "my children")
 --
 -- Safe to run multiple times: every insert is guarded so re-running will not
 -- create duplicates.
@@ -13,16 +21,23 @@
 --   psql "$POSTGRES_URL" -f scripts/050-qa-seed-test-data.sql
 --   -- or paste into the Supabase/Neon SQL editor.
 --
--- CONFIGURE: change the email below to the student account you test with.
+-- CONFIGURE: change the two emails below to the accounts you test with.
 -- ============================================================================
 
 DO $$
 DECLARE
   v_student_email TEXT := 'student@test.com';  -- <-- change to your test student
+  v_parent_email  TEXT := 'parent@test.com';   -- <-- change to your test parent
   v_student   UUID;
+  v_parent    UUID;
   v_teacher   UUID;
+  v_reader    UUID;
   v_category  UUID;
   v_course    UUID;
+  v_lesson    UUID;
+  v_enrollment UUID;
+  v_post      UUID;
+  v_reply     UUID;
 BEGIN
   -- 1) Resolve the target student (fallback: most recent user with student role)
   SELECT id INTO v_student FROM users WHERE lower(email) = lower(v_student_email) LIMIT 1;
@@ -42,6 +57,20 @@ BEGIN
     v_teacher := v_student; -- last-resort so NOT NULL FKs are satisfied
   END IF;
 
+  -- 2b) Resolve a parent account (for parent oversight screen)
+  SELECT id INTO v_parent FROM users WHERE lower(email) = lower(v_parent_email) LIMIT 1;
+  IF v_parent IS NULL THEN
+    SELECT id INTO v_parent FROM users WHERE role = 'parent' ORDER BY created_at DESC LIMIT 1;
+  END IF;
+
+  -- 2c) Resolve an approved reader (for recitation review queue)
+  SELECT id INTO v_reader FROM users
+  WHERE role = 'reader' AND COALESCE(approval_status, 'approved') = 'approved'
+  ORDER BY created_at LIMIT 1;
+  IF v_reader IS NULL THEN
+    SELECT id INTO v_reader FROM users WHERE role = 'reader' ORDER BY created_at LIMIT 1;
+  END IF;
+
   -- 3) Ensure a category exists (courses.category_id is NOT NULL)
   SELECT id INTO v_category FROM categories ORDER BY created_at LIMIT 1;
   IF v_category IS NULL THEN
@@ -59,12 +88,30 @@ BEGIN
     RETURNING id INTO v_course;
   END IF;
 
+  -- 4b) Ensure the course has at least one published lesson (so "resume course" works)
+  SELECT id INTO v_lesson FROM lessons WHERE course_id = v_course ORDER BY lesson_order LIMIT 1;
+  IF v_lesson IS NULL THEN
+    INSERT INTO lessons (course_id, title, description, lesson_order, duration_minutes, is_published)
+    VALUES (v_course, 'الدرس الأول: مقدمة في التجويد',
+            'مقدمة تعريفية بأحكام التجويد.', 1, 12, TRUE)
+    RETURNING id INTO v_lesson;
+  END IF;
+
   -- 5) Enroll the student in the course (active)
-  INSERT INTO enrollments (student_id, course_id, status)
-  SELECT v_student, v_course, 'ACTIVE'
-  WHERE NOT EXISTS (
-    SELECT 1 FROM enrollments WHERE student_id = v_student AND course_id = v_course
-  );
+  SELECT id INTO v_enrollment FROM enrollments
+  WHERE student_id = v_student AND course_id = v_course LIMIT 1;
+  IF v_enrollment IS NULL THEN
+    INSERT INTO enrollments (student_id, course_id, status)
+    VALUES (v_student, v_course, 'ACTIVE')
+    RETURNING id INTO v_enrollment;
+  END IF;
+
+  -- 5b) Lesson progress (in-progress) so the dashboard shows a course to resume
+  IF v_enrollment IS NOT NULL AND v_lesson IS NOT NULL THEN
+    INSERT INTO lesson_progress (enrollment_id, lesson_id, is_in_progress, watched_duration_seconds, started_at)
+    VALUES (v_enrollment, v_lesson, TRUE, 180, NOW() - INTERVAL '1 day')
+    ON CONFLICT (enrollment_id, lesson_id) DO NOTHING;
+  END IF;
 
   -- 6) Tasks assigned directly to the student (mix of upcoming + overdue)
   INSERT INTO tasks (assigned_by, assigned_to, course_id, title, description, due_date, status, points_reward)
@@ -115,5 +162,53 @@ BEGIN
     SELECT 1 FROM forum_posts p WHERE p.author_id = v_student AND p.title = fp.title
   );
 
-  RAISE NOTICE 'QA seed complete for student %, teacher %, course %', v_student, v_teacher, v_course;
+  -- 10) Link the parent to the student (active) so the parent oversight screen
+  --     ("My children") is not empty. Capture the reply id for the report below.
+  IF v_parent IS NOT NULL AND v_parent <> v_student THEN
+    INSERT INTO parent_children (parent_id, child_id, relation, status)
+    VALUES (v_parent, v_student, 'guardian', 'active')
+    ON CONFLICT (parent_id, child_id) DO UPDATE SET status = 'active';
+  END IF;
+
+  -- 11) Recitations: one pending (for the reader/review queue) + one mastered
+  --     (so the student "memorization / recitation progress" screen has history).
+  --     Allowed statuses: pending, in_review, mastered, needs_session, session_booked, rejected.
+  INSERT INTO recitations (student_id, assigned_reader_id, surah_name, surah_number, ayah_from, ayah_to,
+                           audio_url, recitation_type, status, created_at)
+  SELECT v_student, v_reader, 'الفاتحة', 1, 1, 7,
+         'https://example.com/qa-recitation-pending.mp3', 'tilawa', 'pending', NOW() - INTERVAL '2 hours'
+  WHERE NOT EXISTS (
+    SELECT 1 FROM recitations WHERE student_id = v_student AND status = 'pending'
+  );
+
+  INSERT INTO recitations (student_id, assigned_reader_id, surah_name, surah_number, ayah_from, ayah_to,
+                           audio_url, recitation_type, status, reviewed_at, created_at)
+  SELECT v_student, v_reader, 'الإخلاص', 112, 1, 4,
+         'https://example.com/qa-recitation-approved.mp3', 'hifd', 'mastered',
+         NOW() - INTERVAL '5 days', NOW() - INTERVAL '6 days'
+  WHERE NOT EXISTS (
+    SELECT 1 FROM recitations WHERE student_id = v_student AND surah_number = 112 AND status = 'mastered'
+  );
+
+  -- 12) A forum reply, then a report on it, so the forum moderation queue
+  --     (reported content) has an item to action.
+  SELECT id INTO v_post FROM forum_posts WHERE author_id = v_student ORDER BY created_at LIMIT 1;
+  IF v_post IS NOT NULL THEN
+    SELECT id INTO v_reply FROM forum_replies WHERE post_id = v_post ORDER BY created_at LIMIT 1;
+    IF v_reply IS NULL THEN
+      INSERT INTO forum_replies (post_id, author_id, content)
+      VALUES (v_post, v_student, 'رد تجريبي للاختبار، يحتوي على محتوى تم الإبلاغ عنه.')
+      RETURNING id INTO v_reply;
+    END IF;
+
+    INSERT INTO forum_reports (target_type, target_id, reporter_id, community, reason, details, status)
+    SELECT 'reply', v_reply, v_student, 'academy', 'inappropriate',
+           'بلاغ تجريبي لاختبار طابور الإشراف.', 'open'
+    WHERE NOT EXISTS (
+      SELECT 1 FROM forum_reports WHERE target_type = 'reply' AND target_id = v_reply
+    );
+  END IF;
+
+  RAISE NOTICE 'QA seed complete for student %, parent %, teacher %, reader %, course %',
+    v_student, v_parent, v_teacher, v_reader, v_course;
 END $$;
