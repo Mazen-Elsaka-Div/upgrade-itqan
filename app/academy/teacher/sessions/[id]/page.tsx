@@ -19,8 +19,31 @@ import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
 
-async function getSessionDetails(id: string, teacherId: string) {
-  const sessions = await query(
+interface SessionDetails {
+  id: string
+  title: string
+  description: string | null
+  status: string
+  scheduled_at: string
+  duration_minutes: number
+  is_public: boolean
+  meeting_url: string | null
+  recording_url: string | null
+  course_name: string
+  series_title: string | null
+  [key: string]: unknown
+}
+
+interface AttendanceRecord {
+  id: string
+  joined_at: string
+  left_at: string | null
+  full_name: string
+  email: string
+}
+
+async function getSessionDetails(id: string, teacherId: string): Promise<SessionDetails | null> {
+  const sessions = await query<SessionDetails>(
     `
     SELECT 
       cs.*,
@@ -37,8 +60,8 @@ async function getSessionDetails(id: string, teacherId: string) {
   return sessions[0] || null
 }
 
-async function getSessionAttendance(id: string) {
-  const attendance = await query(
+async function getSessionAttendance(id: string): Promise<AttendanceRecord[]> {
+  const attendance = await query<AttendanceRecord>(
     `
     SELECT 
       sa.id,
@@ -245,7 +268,7 @@ export default async function SessionDetailsPage({ params }: { params: Promise<{
           <CardContent>
             {attendance.length > 0 ? (
               <div className="max-h-[460px] space-y-2 overflow-y-auto pl-1">
-                {attendance.map((record: any) => (
+                {attendance.map((record) => (
                   <div
                     key={record.id}
                     className="flex items-center gap-3 rounded-xl border bg-card p-3 transition-colors hover:bg-muted/40"
