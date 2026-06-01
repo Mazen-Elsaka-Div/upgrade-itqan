@@ -165,8 +165,8 @@ BEGIN
   -- 10) Link the parent to the student (active) so the parent oversight screen
   --     ("My children") is not empty. Capture the reply id for the report below.
   IF v_parent IS NOT NULL AND v_parent <> v_student THEN
-    INSERT INTO parent_children (parent_id, child_id, relation, status, responded_at)
-    VALUES (v_parent, v_student, 'guardian', 'active', NOW())
+    INSERT INTO parent_children (parent_id, child_id, relation, status)
+    VALUES (v_parent, v_student, 'guardian', 'active')
     ON CONFLICT (parent_id, child_id) DO UPDATE SET status = 'active';
   END IF;
 
