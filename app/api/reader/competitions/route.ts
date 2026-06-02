@@ -12,7 +12,9 @@ export async function GET(req: NextRequest) {
     const assigned = await getJudgeAssignments(session.sub)
 
     if (assigned.length === 0) {
-      const active = await getCompetitions({ status: 'active' })
+      // Readers belong to the Maqraah platform, so only surface library-scoped
+      // competitions here (never academy ones) when no explicit assignment exists.
+      const active = await getCompetitions({ status: 'active', scope: 'library' })
       return NextResponse.json({ data: active, mode: 'all' })
     }
 

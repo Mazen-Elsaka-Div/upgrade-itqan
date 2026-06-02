@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
         COUNT(DISTINCT e.id)::int as courses_count,
         COALESCE(SUM(CASE WHEN ts.status = 'submitted' THEN 1 ELSE 0 END), 0)::int as tasks_completed,
         COALESCE(SUM(CASE WHEN ts.id IS NOT NULL THEN 1 ELSE 0 END), 0)::int as tasks_total,
-        COALESCE(SUM(up.points), 0)::int as total_points,
+        COALESCE(MAX(up.total_points), 0)::int as total_points,
         MAX(e.enrolled_at) as last_activity,
         COUNT(DISTINCT b.id)::int as badges_count,
         COALESCE(AVG(e.progress_percentage), 0)::numeric(5,2) as progress_percentage

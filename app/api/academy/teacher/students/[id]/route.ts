@@ -22,16 +22,20 @@ export async function GET(
           (SELECT COUNT(e.id)::int FROM enrollments e WHERE e.student_id = u.id) as courses_count,
           (SELECT COUNT(ts.id)::int FROM task_submissions ts WHERE ts.student_id = u.id AND ts.status='submitted') as tasks_completed,
           (SELECT COUNT(ts.id)::int FROM task_submissions ts WHERE ts.student_id = u.id) as tasks_total,
-          (SELECT COALESCE(SUM(up.points),0)::int FROM user_points up WHERE up.user_id = u.id) as total_points,
+          (SELECT COALESCE(SUM(up.total_points),0)::int FROM user_points up WHERE up.user_id = u.id) as total_points,
           (SELECT COALESCE(AVG(e.progress_percentage),0)::numeric(5,2) FROM enrollments e WHERE e.student_id = u.id) as progress_percentage,
           (SELECT MAX(e.enrolled_at) FROM enrollments e WHERE e.student_id = u.id) as last_activity
         FROM users u
         WHERE u.id = $1
-          AND (u.created_by = $2 OR EXISTS (
-            SELECT 1 FROM enrollments e 
-            JOIN courses c ON e.course_id = c.id 
-            WHERE e.student_id = u.id AND c.teacher_id = $2
-          ) OR $3 = 'academy_admin')
+          AND (
+            $3 = 'academy_admin'
+            OR u.created_by = $2
+            OR EXISTS (
+              SELECT 1 FROM enrollments e
+              JOIN courses c ON e.course_id = c.id
+              WHERE e.student_id = u.id AND c.teacher_id = $2
+            )
+          )
       `, [studentId, session.sub, session.role]),
       
       query(`
@@ -43,9 +47,13 @@ export async function GET(
       `, [studentId, session.sub]),
       
       query(`
-        SELECT bd.id, bd.name, bd.icon, bd.icon_url, b.awarded_at
+        SELECT b.id,
+               COALESCE(b.badge_name, bd.badge_name) as name,
+               COALESCE(bd.badge_icon, '🏆') as icon,
+               bd.badge_image_url as icon_url,
+               b.awarded_at
         FROM badges b
-        JOIN badge_definitions bd ON b.badge_id = bd.id
+        LEFT JOIN badge_definitions bd ON bd.badge_key = b.badge_key
         WHERE b.user_id = $1
         ORDER BY b.awarded_at DESC
         LIMIT 12
