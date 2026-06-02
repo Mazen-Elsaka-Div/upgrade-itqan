@@ -43,9 +43,13 @@ export async function GET(
       `, [studentId, session.sub]),
       
       query(`
-        SELECT bd.id, bd.name, bd.icon, bd.icon_url, b.awarded_at
+        SELECT b.id,
+               COALESCE(b.badge_name, bd.badge_name) as name,
+               COALESCE(bd.badge_icon, '🏆') as icon,
+               bd.badge_image_url as icon_url,
+               b.awarded_at
         FROM badges b
-        JOIN badge_definitions bd ON b.badge_id = bd.id
+        LEFT JOIN badge_definitions bd ON bd.badge_key = b.badge_key
         WHERE b.user_id = $1
         ORDER BY b.awarded_at DESC
         LIMIT 12

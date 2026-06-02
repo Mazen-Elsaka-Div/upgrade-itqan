@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import dynamic from "next/dynamic"
 import {
   ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Maximize2, Minimize2,
@@ -37,7 +37,9 @@ const SCALE_STEP = 0.2
 // pdf.js fetches the file from the browser. PDFs hosted on S3 (or legacy
 // UploadThing) can block cross-origin range requests, which makes the viewer
 // fail with "Failed to load PDF". Routing those URLs through our same-origin
-// proxy avoids the CORS problem. Same-origin / already-proxied URLs pass through.
+// proxy avoids the CORS problem AND lets us stream byte-ranges per page
+// (the proxy forwards Range headers and returns 206 responses), so only the
+// pages the reader actually scrolls to are downloaded.
 const PROXY_HOST_SUFFIXES = ["amazonaws.com", "utfs.io", "ufs.sh", "cloudinary.com"]
 
 function toFetchableSrc(src: string): string {
@@ -66,14 +68,18 @@ export default function TajweedPdfViewer({ src, label, className }: TajweedPdfVi
   const v = (t as any).tajweedPaths?.pdfViewer ?? {}
 
   const [numPages, setNumPages] = useState<number>(0)
-  const [pageNumber, setPageNumber] = useState<number>(1)
+  const [currentPage, setCurrentPage] = useState<number>(1)
   const [scale, setScale] = useState<number>(1)
   const [expanded, setExpanded] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [containerWidth, setContainerWidth] = useState<number>(0)
+  // Pages that have scrolled near the viewport at least once. Once rendered we
+  // keep them mounted to avoid re-fetching / flicker while scrolling back.
+  const [visiblePages, setVisiblePages] = useState<Set<number>>(() => new Set([1]))
 
-  const containerRef = useRef<HTMLDivElement | null>(null)
+  const scrollRef = useRef<HTMLDivElement | null>(null)
+  const pageRefs = useRef<Map<number, HTMLDivElement>>(new Map())
 
   // URL pdf.js actually fetches (proxied for cross-origin file hosts).
   const fetchSrc = useMemo(() => toFetchableSrc(src), [src])
@@ -83,14 +89,16 @@ export default function TajweedPdfViewer({ src, label, className }: TajweedPdfVi
   }, [])
 
   useEffect(() => {
-    setPageNumber(1)
+    setCurrentPage(1)
     setError(null)
     setIsLoading(true)
+    setVisiblePages(new Set([1]))
+    pageRefs.current.clear()
   }, [src])
 
-  // Track container width so the page can scale to fit horizontally.
+  // Track container width so each page scales to fit horizontally.
   useEffect(() => {
-    const node = containerRef.current
+    const node = scrollRef.current
     if (!node || typeof ResizeObserver === "undefined") return
     const observer = new ResizeObserver(entries => {
       for (const entry of entries) {
@@ -102,11 +110,23 @@ export default function TajweedPdfViewer({ src, label, className }: TajweedPdfVi
     return () => observer.disconnect()
   }, [])
 
-  const pageWidth = useMemo(() => {
+  // Base page width (before zoom) so it fits the container nicely.
+  const basePageWidth = useMemo(() => {
     if (containerWidth <= 0) return undefined
-    // Subtract a little so the page never overflows the container's padding.
-    return Math.max(280, containerWidth - 24)
+    return Math.max(280, containerWidth - 32)
   }, [containerWidth])
+
+  const pageWidth = useMemo(
+    () => (basePageWidth ? Math.round(basePageWidth * scale) : undefined),
+    [basePageWidth, scale],
+  )
+
+  // Estimated placeholder height (A4 ratio) before a page renders, so the
+  // scrollbar length is roughly correct and lazy loading feels natural.
+  const placeholderHeight = useMemo(
+    () => (pageWidth ? Math.round(pageWidth * 1.414) : 560),
+    [pageWidth],
+  )
 
   const onDocumentLoadSuccess = ({ numPages: n }: { numPages: number }) => {
     setNumPages(n)
@@ -119,20 +139,84 @@ export default function TajweedPdfViewer({ src, label, className }: TajweedPdfVi
     setIsLoading(false)
   }
 
-  const goPrev = () => setPageNumber(p => Math.max(1, p - 1))
-  const goNext = () => setPageNumber(p => Math.min(numPages || 1, p + 1))
+  // Lazy-render + current-page tracking via a single IntersectionObserver
+  // that watches every page slot inside the scroll container.
+  useEffect(() => {
+    if (!numPages || typeof IntersectionObserver === "undefined") return
+    const root = scrollRef.current
+    if (!root) return
+
+    const observer = new IntersectionObserver(
+      entries => {
+        let bestPage = 0
+        let bestRatio = 0
+        const toRender: number[] = []
+        for (const entry of entries) {
+          const pageNum = Number((entry.target as HTMLElement).dataset.page)
+          if (!pageNum) continue
+          if (entry.isIntersecting) {
+            toRender.push(pageNum)
+            if (entry.intersectionRatio > bestRatio) {
+              bestRatio = entry.intersectionRatio
+              bestPage = pageNum
+            }
+          }
+        }
+        if (toRender.length) {
+          setVisiblePages(prev => {
+            let changed = false
+            const next = new Set(prev)
+            for (const p of toRender) {
+              if (!next.has(p)) { next.add(p); changed = true }
+            }
+            return changed ? next : prev
+          })
+        }
+        if (bestPage) setCurrentPage(bestPage)
+      },
+      {
+        root,
+        // Preload the page just above/below the viewport for smoother scroll.
+        rootMargin: "300px 0px 300px 0px",
+        threshold: [0, 0.25, 0.5, 0.75, 1],
+      },
+    )
+
+    pageRefs.current.forEach(node => observer.observe(node))
+    return () => observer.disconnect()
+  }, [numPages])
+
+  const setPageRef = useCallback(
+    (pageNum: number) => (node: HTMLDivElement | null) => {
+      if (node) pageRefs.current.set(pageNum, node)
+      else pageRefs.current.delete(pageNum)
+    },
+    [],
+  )
+
+  const scrollToPage = useCallback((pageNum: number) => {
+    const node = pageRefs.current.get(pageNum)
+    if (node) node.scrollIntoView({ behavior: "smooth", block: "start" })
+  }, [])
+
+  const goPrev = () => scrollToPage(Math.max(1, currentPage - 1))
+  const goNext = () => scrollToPage(Math.min(numPages || 1, currentPage + 1))
   const zoomIn = () => setScale(s => Math.min(MAX_SCALE, +(s + SCALE_STEP).toFixed(2)))
   const zoomOut = () => setScale(s => Math.max(MIN_SCALE, +(s - SCALE_STEP).toFixed(2)))
   const resetZoom = () => setScale(1)
 
   // Memoize options to avoid re-rendering Document on every parent render.
+  // Range + streaming are enabled so pdf.js downloads only the byte-ranges it
+  // needs for the pages on screen (bandwidth-friendly). Cross-origin files go
+  // through our proxy which supports Range requests.
   const documentOptions = useMemo(
     () => ({
       cMapUrl: "https://unpkg.com/pdfjs-dist@5.4.296/cmaps/",
       cMapPacked: true,
       standardFontDataUrl: "https://unpkg.com/pdfjs-dist@5.4.296/standard_fonts/",
-      disableRange: true, // Fix for "Failed to fetch" on S3/UploadThing due to Range CORS
-      disableStream: true,
+      disableRange: false,
+      disableStream: false,
+      disableAutoFetch: true, // don't greedily prefetch the whole file
     }),
     [],
   )
@@ -155,11 +239,11 @@ export default function TajweedPdfViewer({ src, label, className }: TajweedPdfVi
         </div>
 
         <div className="flex items-center gap-1 shrink-0">
-          {/* Page navigation */}
+          {/* Page navigation (scrolls to the page) */}
           <button
             type="button"
             onClick={goPrev}
-            disabled={pageNumber <= 1 || !!error}
+            disabled={currentPage <= 1 || !!error}
             className="p-1.5 rounded text-muted-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed"
             title={v.previous || "Previous"}
             aria-label={v.previous || "Previous"}
@@ -169,13 +253,13 @@ export default function TajweedPdfViewer({ src, label, className }: TajweedPdfVi
           </button>
           <span className="text-xs tabular-nums px-1 min-w-[64px] text-center">
             {numPages > 0
-              ? `${pageNumber} / ${numPages}`
+              ? `${currentPage} / ${numPages}`
               : "—"}
           </span>
           <button
             type="button"
             onClick={goNext}
-            disabled={pageNumber >= numPages || !!error}
+            disabled={currentPage >= numPages || !!error}
             className="p-1.5 rounded text-muted-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed"
             title={v.next || "Next"}
             aria-label={v.next || "Next"}
@@ -247,18 +331,18 @@ export default function TajweedPdfViewer({ src, label, className }: TajweedPdfVi
         </div>
       </div>
 
-      {/* Document area */}
+      {/* Document area — continuous vertical scroll */}
       <div
-        ref={containerRef}
+        ref={scrollRef}
         className={cn(
-          "relative overflow-auto bg-muted/30 flex justify-center",
+          "relative overflow-auto bg-muted/30",
           expanded ? "h-[80vh]" : "h-[520px]",
         )}
         // pdf.js renders left-to-right; force LTR so canvas pages aren't flipped.
         dir="ltr"
       >
         {error ? (
-          <div className="flex flex-col items-center justify-center gap-2 text-sm text-muted-foreground p-6 text-center w-full">
+          <div className="flex flex-col items-center justify-center gap-2 text-sm text-muted-foreground p-6 text-center w-full h-full">
             <AlertTriangle className="w-6 h-6 text-amber-600" />
             <p className="font-semibold">{v.errorTitle || "Failed to load PDF"}</p>
             <p className="text-xs">{error}</p>
@@ -272,9 +356,9 @@ export default function TajweedPdfViewer({ src, label, className }: TajweedPdfVi
             </a>
           </div>
         ) : (
-          <div className="py-4 flex flex-col items-center gap-3">
+          <>
             {isLoading && (
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
                 <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
               </div>
             )}
@@ -285,19 +369,52 @@ export default function TajweedPdfViewer({ src, label, className }: TajweedPdfVi
               loading={null}
               error={null}
               options={documentOptions}
+              className="flex flex-col items-center gap-4 py-4"
             >
-              {pageWidth ? (
-                <Page
-                  pageNumber={pageNumber}
-                  width={pageWidth}
-                  scale={scale}
-                  renderTextLayer={false}
-                  renderAnnotationLayer={false}
-                  loading={null}
-                />
-              ) : null}
+              {numPages > 0 && pageWidth
+                ? Array.from({ length: numPages }, (_, i) => {
+                    const pageNum = i + 1
+                    const shouldRender = visiblePages.has(pageNum)
+                    return (
+                      <div
+                        key={pageNum}
+                        data-page={pageNum}
+                        ref={setPageRef(pageNum)}
+                        className="relative shadow-sm bg-white rounded-sm overflow-hidden"
+                        style={{
+                          width: pageWidth,
+                          minHeight: shouldRender ? undefined : placeholderHeight,
+                        }}
+                      >
+                        {shouldRender ? (
+                          <Page
+                            pageNumber={pageNum}
+                            width={pageWidth}
+                            renderTextLayer={false}
+                            renderAnnotationLayer={false}
+                            loading={
+                              <div
+                                className="flex items-center justify-center"
+                                style={{ height: placeholderHeight }}
+                              >
+                                <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                              </div>
+                            }
+                          />
+                        ) : (
+                          <div
+                            className="flex items-center justify-center text-xs text-muted-foreground"
+                            style={{ height: placeholderHeight }}
+                          >
+                            {pageNum}
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })
+                : null}
             </Document>
-          </div>
+          </>
         )}
       </div>
     </div>
