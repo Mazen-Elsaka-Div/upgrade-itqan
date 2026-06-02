@@ -4,10 +4,17 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   LiveKitRoom,
-  VideoConference,
   RoomAudioRenderer,
+  GridLayout,
+  ParticipantTile,
+  Chat,
+  ConnectionStateToast,
+  useTracks,
+  useLocalParticipant,
+  useParticipants,
   formatChatMessageLinks,
 } from '@livekit/components-react'
+import { Track } from 'livekit-client'
 import '@livekit/components-styles'
 import {
   Loader2,
@@ -15,7 +22,15 @@ import {
   Radio,
   Star,
   Video,
+  Mic,
+  MicOff,
+  VideoOff,
+  MonitorUp,
+  MessageSquare,
+  Users,
+  X,
 } from 'lucide-react'
+import { useI18n } from '@/lib/i18n/context'
 import { ClientRecorder } from './client-recorder'
 
 export type VideoCallKind = 'halaqa' | 'booking' | 'session' | 'course_session'
@@ -54,31 +69,162 @@ interface TokenResponse {
   }
 }
 
-const ACCENTS: Record<NonNullable<Props['accent']>, { ring: string; chip: string; gradient: string }> = {
+type Locale = 'ar' | 'en'
+
+interface T {
+  preparing: string
+  checking: string
+  cantOpen: string
+  unknownError: string
+  tokenError: string
+  urlError: string
+  back: string
+  roomFallback: string
+  live: string
+  host: string
+  participant: string
+  leave: string
+  mic: string
+  micOff: string
+  camera: string
+  cameraOff: string
+  share: string
+  stopShare: string
+  chat: string
+  participants: string
+  leaveTitle: string
+  leaveDesc: string
+  stay: string
+  ratingTitle: string
+  ratingDesc: string
+  overall: string
+  audioQ: string
+  videoQ: string
+  teacherPerf: string
+  notesPlaceholder: string
+  skip: string
+  submit: string
+  submitting: string
+  thanksTitle: string
+  thanksDesc: string
+  starsLabel: (n: number) => string
+  waitingTitle: string
+  waitingDesc: string
+}
+
+const STR: Record<Locale, T> = {
+  ar: {
+    preparing: 'جاري تجهيز غرفة البث المباشر…',
+    checking: 'يتم التحقق من الصلاحيات والاتصال بالخادم',
+    cantOpen: 'تعذر فتح الغرفة',
+    unknownError: 'خطأ غير معروف',
+    tokenError: 'تعذر إنشاء رمز الدخول',
+    urlError: 'عنوان خادم البث غير معرّف',
+    back: 'رجوع',
+    roomFallback: 'غرفة الجلسة',
+    live: 'مباشر',
+    host: 'المضيف',
+    participant: 'مشارك',
+    leave: 'خروج',
+    mic: 'الميكروفون',
+    micOff: 'كتم',
+    camera: 'الكاميرا',
+    cameraOff: 'إيقاف الكاميرا',
+    share: 'مشاركة الشاشة',
+    stopShare: 'إيقاف المشاركة',
+    chat: 'المحادثة',
+    participants: 'المشاركون',
+    leaveTitle: 'هل تريد الخروج؟',
+    leaveDesc: 'سيتم قطع الاتصال بهذه الجلسة.',
+    stay: 'البقاء',
+    ratingTitle: 'قيّم هذه الجلسة',
+    ratingDesc: 'رأيك يهمنا — سيظهر للمدرّس والإدارة فقط.',
+    overall: 'التقييم العام',
+    audioQ: 'جودة الصوت',
+    videoQ: 'جودة الفيديو',
+    teacherPerf: 'أداء المدرّس',
+    notesPlaceholder: 'ملاحظات إضافية (اختياري)',
+    skip: 'تخطي',
+    submit: 'إرسال التقييم',
+    submitting: 'جاري الإرسال…',
+    thanksTitle: 'شكراً على تقييمك',
+    thanksDesc: 'سيساعدنا في تحسين الجلسات القادمة.',
+    starsLabel: (n: number) => `${n} نجوم`,
+    waitingTitle: 'بانتظار انضمام المشاركين',
+    waitingDesc: 'سيظهر المشاركون هنا بمجرد دخولهم الغرفة.',
+  },
+  en: {
+    preparing: 'Preparing the live room…',
+    checking: 'Verifying permissions and connecting to the server',
+    cantOpen: 'Couldn’t open the room',
+    unknownError: 'Unknown error',
+    tokenError: 'Failed to create an access token',
+    urlError: 'Streaming server URL is not configured',
+    back: 'Back',
+    roomFallback: 'Session room',
+    live: 'Live',
+    host: 'Host',
+    participant: 'Participant',
+    leave: 'Leave',
+    mic: 'Microphone',
+    micOff: 'Mute',
+    camera: 'Camera',
+    cameraOff: 'Stop camera',
+    share: 'Share screen',
+    stopShare: 'Stop sharing',
+    chat: 'Chat',
+    participants: 'Participants',
+    leaveTitle: 'Leave the session?',
+    leaveDesc: 'You’ll be disconnected from this session.',
+    stay: 'Stay',
+    ratingTitle: 'Rate this session',
+    ratingDesc: 'Your feedback matters — visible only to the teacher and admins.',
+    overall: 'Overall rating',
+    audioQ: 'Audio quality',
+    videoQ: 'Video quality',
+    teacherPerf: 'Teacher performance',
+    notesPlaceholder: 'Additional notes (optional)',
+    skip: 'Skip',
+    submit: 'Submit rating',
+    submitting: 'Submitting…',
+    thanksTitle: 'Thanks for your feedback',
+    thanksDesc: 'It helps us improve future sessions.',
+    starsLabel: (n: number) => `${n} stars`,
+    waitingTitle: 'Waiting for participants',
+    waitingDesc: 'Participants will appear here once they join the room.',
+  },
+}
+
+const ACCENTS: Record<NonNullable<Props['accent']>, { chip: string; gradient: string; solid: string }> = {
   emerald: {
-    ring: 'ring-emerald-500/40',
     chip: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30',
     gradient: 'from-emerald-600/20 via-emerald-500/5 to-transparent',
+    solid: 'bg-emerald-500 hover:bg-emerald-600',
   },
   indigo: {
-    ring: 'ring-indigo-500/40',
     chip: 'bg-indigo-500/10 text-indigo-300 border-indigo-500/30',
     gradient: 'from-indigo-600/20 via-indigo-500/5 to-transparent',
+    solid: 'bg-indigo-500 hover:bg-indigo-600',
   },
   amber: {
-    ring: 'ring-amber-500/40',
     chip: 'bg-amber-500/10 text-amber-300 border-amber-500/30',
     gradient: 'from-amber-600/20 via-amber-500/5 to-transparent',
+    solid: 'bg-amber-500 hover:bg-amber-600',
   },
   rose: {
-    ring: 'ring-rose-500/40',
     chip: 'bg-rose-500/10 text-rose-300 border-rose-500/30',
     gradient: 'from-rose-600/20 via-rose-500/5 to-transparent',
+    solid: 'bg-rose-500 hover:bg-rose-600',
   },
 }
 
 export function HalaqaVideoRoom({ kind, refId, title, subtitle, exitHref, accent = 'emerald' }: Props) {
   const router = useRouter()
+  const { locale } = useI18n()
+  const lang: Locale = locale === 'en' ? 'en' : 'ar'
+  const dir = lang === 'ar' ? 'rtl' : 'ltr'
+  const t = STR[lang]
+
   const [data, setData] = useState<TokenResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -88,7 +234,6 @@ export function HalaqaVideoRoom({ kind, refId, title, subtitle, exitHref, accent
   const [elapsed, setElapsed] = useState(0)
   const startedAtRef = useRef<number | null>(null)
 
-  // tokenKind mapped for backwards compatibility — 'session' becomes 'course_session' on the server.
   const apiKind = kind === 'session' ? 'session' : kind
 
   useEffect(() => {
@@ -101,13 +246,13 @@ export function HalaqaVideoRoom({ kind, refId, title, subtitle, exitHref, accent
           body: JSON.stringify({ kind: apiKind, id: refId }),
         })
         const json = await res.json()
-        if (!res.ok) throw new Error(json.error || 'تعذر إنشاء رمز الدخول')
+        if (!res.ok) throw new Error(json.error || t.tokenError)
         if (cancelled) return
-        if (!json.url) throw new Error('LIVEKIT_URL غير معرّف على الخادم')
+        if (!json.url) throw new Error(t.urlError)
         setData(json as TokenResponse)
         startedAtRef.current = Date.now()
       } catch (e) {
-        if (!cancelled) setError(e instanceof Error ? e.message : 'حدث خطأ غير متوقع')
+        if (!cancelled) setError(e instanceof Error ? e.message : t.unknownError)
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -116,9 +261,9 @@ export function HalaqaVideoRoom({ kind, refId, title, subtitle, exitHref, accent
     return () => {
       cancelled = true
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [apiKind, refId])
 
-  // Tick the elapsed-time chip in the header.
   useEffect(() => {
     if (!data) return
     const i = setInterval(() => {
@@ -144,28 +289,28 @@ export function HalaqaVideoRoom({ kind, refId, title, subtitle, exitHref, accent
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[70vh] gap-4 text-center px-6">
+      <div dir={dir} className="flex flex-col items-center justify-center min-h-[70vh] gap-4 text-center px-6">
         <div className="relative">
           <div className={`absolute inset-0 rounded-full blur-2xl bg-gradient-to-tr ${accentTheme.gradient}`} />
           <Loader2 className="relative w-12 h-12 animate-spin text-emerald-400" />
         </div>
-        <p className="text-base font-medium text-foreground">جاري تجهيز غرفة البث المباشر…</p>
-        <p className="text-xs text-muted-foreground">يتم التحقق من الصلاحيات والاتصال بخادم LiveKit</p>
+        <p className="text-base font-medium text-foreground">{t.preparing}</p>
+        <p className="text-xs text-muted-foreground">{t.checking}</p>
       </div>
     )
   }
 
   if (error || !data) {
     return (
-      <div className="max-w-md mx-auto bg-card border border-border rounded-2xl p-8 text-center space-y-4 mt-12">
+      <div dir={dir} className="max-w-md mx-auto bg-card border border-border rounded-2xl p-8 text-center space-y-4 mt-12">
         <Video className="w-12 h-12 text-rose-500 mx-auto" />
-        <h2 className="text-xl font-bold">تعذر فتح الغرفة</h2>
-        <p className="text-sm text-muted-foreground">{error || 'خطأ غير معروف'}</p>
+        <h2 className="text-xl font-bold">{t.cantOpen}</h2>
+        <p className="text-sm text-muted-foreground">{error || t.unknownError}</p>
         <button
           onClick={() => router.push(exitHref)}
           className="inline-flex items-center gap-2 px-4 py-2 bg-secondary hover:bg-secondary/80 rounded-lg font-medium transition-colors"
         >
-          <LogOut className="w-4 h-4" /> رجوع
+          <LogOut className="w-4 h-4" /> {t.back}
         </button>
       </div>
     )
@@ -176,7 +321,7 @@ export function HalaqaVideoRoom({ kind, refId, title, subtitle, exitHref, accent
   const timeStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
 
   return (
-    <div className="fixed inset-0 z-50 bg-zinc-950 text-white flex flex-col">
+    <div dir={dir} className="fixed inset-0 z-50 bg-zinc-950 text-white flex flex-col">
       {/* Header bar */}
       <div className={`relative shrink-0 border-b border-white/10 bg-gradient-to-b ${accentTheme.gradient}`}>
         <div className="flex items-center justify-between gap-3 px-3 sm:px-6 py-2.5">
@@ -185,25 +330,24 @@ export function HalaqaVideoRoom({ kind, refId, title, subtitle, exitHref, accent
               <Radio className="w-4 h-4" />
             </div>
             <div className="min-w-0">
-              <h2 className="font-bold truncate text-sm sm:text-base">{title || 'غرفة الجلسة'}</h2>
+              <h2 className="font-bold truncate text-sm sm:text-base">{title || t.roomFallback}</h2>
               {subtitle && <p className="text-[11px] sm:text-xs opacity-70 truncate">{subtitle}</p>}
             </div>
           </div>
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <span className={`inline-flex items-center gap-1.5 text-[10px] sm:text-xs font-bold px-2 py-1 rounded-full border ${accentTheme.chip}`}>
               <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
-              مباشر · {timeStr}
+              {t.live} · {timeStr}
             </span>
             <span className="hidden md:inline-flex text-[11px] font-bold px-2 py-1 rounded-full bg-white/10 border border-white/10">
-              {data.role === 'host' ? 'المضيف' : 'مشارك'}
+              {data.role === 'host' ? t.host : t.participant}
             </span>
-
             <button
               onClick={() => setShowLeaveConfirm(true)}
               className="inline-flex items-center gap-1.5 text-[11px] sm:text-sm font-bold px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-200 transition-colors"
             >
               <LogOut className="w-3.5 h-3.5" />
-              خروج
+              {t.leave}
             </button>
           </div>
         </div>
@@ -226,27 +370,37 @@ export function HalaqaVideoRoom({ kind, refId, title, subtitle, exitHref, accent
           }}
           style={{ height: '100%' }}
         >
-          <VideoConference chatMessageFormatter={formatChatMessageLinks} />
+          <ConferenceView
+            t={t}
+            dir={dir}
+            isHost={isHost}
+            settings={data.settings}
+            accent={accentTheme}
+            onLeave={() => setShowLeaveConfirm(true)}
+          />
           <RoomAudioRenderer />
           {isHost && sessionId && data.settings.recording_enabled && (
-            <div className="absolute top-2 left-2 z-20 pointer-events-auto">
+            <div className="absolute top-2 ltr:left-2 rtl:right-2 z-20 pointer-events-auto">
               <ClientRecorder sessionId={sessionId} enabled />
             </div>
           )}
         </LiveKitRoom>
         {data.settings.watermark_text && (
-          <div className="pointer-events-none absolute bottom-3 right-3 text-[11px] font-bold opacity-40 select-none">
+          <div className="pointer-events-none absolute bottom-20 ltr:right-3 rtl:left-3 text-[11px] font-bold opacity-40 select-none">
             {data.settings.watermark_text}
           </div>
         )}
       </div>
 
       {showLeaveConfirm && (
-        <LeaveConfirm onCancel={() => setShowLeaveConfirm(false)} onConfirm={handleLeave} />
+        <LeaveConfirm t={t} dir={dir} onCancel={() => setShowLeaveConfirm(false)} onConfirm={handleLeave} />
       )}
 
       {showRating && sessionId && (
         <RatingModal
+          t={t}
+          dir={dir}
+          accentSolid={accentTheme.solid}
           sessionId={sessionId}
           onClose={() => {
             setShowRating(false)
@@ -258,18 +412,260 @@ export function HalaqaVideoRoom({ kind, refId, title, subtitle, exitHref, accent
   )
 }
 
-function LeaveConfirm({ onCancel, onConfirm }: { onCancel: () => void; onConfirm: () => void }) {
+/* ----------------------------- Conference View ---------------------------- */
+
+function ConferenceView({
+  t,
+  dir,
+  isHost,
+  settings,
+  accent,
+  onLeave,
+}: {
+  t: T
+  dir: 'rtl' | 'ltr'
+  isHost: boolean
+  settings: TokenResponse['settings']
+  accent: { chip: string; gradient: string; solid: string }
+  onLeave: () => void
+}) {
+  const [chatOpen, setChatOpen] = useState(false)
+
+  const cameraTracks = useTracks([{ source: Track.Source.Camera, withPlaceholder: true }], {
+    onlySubscribed: false,
+  })
+  const screenTracks = useTracks([{ source: Track.Source.ScreenShare, withPlaceholder: false }], {
+    onlySubscribed: false,
+  })
+  const participants = useParticipants()
+
+  const hasScreen = screenTracks.length > 0
+
   return (
-    <div className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm flex items-center justify-center px-4">
+    <div className="absolute inset-0 flex flex-col">
+      {/* Tiles */}
+      <div className="flex-1 min-h-0 p-2 sm:p-3 pb-24">
+        {cameraTracks.length === 0 && !hasScreen ? (
+          <div className="h-full flex flex-col items-center justify-center text-center gap-3 text-zinc-400">
+            <Users className="w-10 h-10 opacity-50" />
+            <p className="font-semibold text-zinc-200">{t.waitingTitle}</p>
+            <p className="text-sm max-w-xs">{t.waitingDesc}</p>
+          </div>
+        ) : hasScreen ? (
+          <div className="h-full flex flex-col gap-2">
+            <div className="flex-1 min-h-0 rounded-xl overflow-hidden bg-black/40 ring-1 ring-white/10">
+              <ParticipantTile trackRef={screenTracks[0]} />
+            </div>
+            {cameraTracks.length > 0 && (
+              <div className="h-24 sm:h-28 flex gap-2 overflow-x-auto shrink-0">
+                {cameraTracks.map((track) => (
+                  <div
+                    key={`${track.participant.identity}-${track.source}`}
+                    className="w-36 sm:w-44 shrink-0 rounded-lg overflow-hidden bg-black/40 ring-1 ring-white/10"
+                  >
+                    <ParticipantTile trackRef={track} />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          <GridLayout tracks={cameraTracks} className="h-full">
+            <ParticipantTile />
+          </GridLayout>
+        )}
+      </div>
+
+      {/* Floating control bar */}
+      <ControlBar
+        t={t}
+        isHost={isHost}
+        settings={settings}
+        accent={accent}
+        participantCount={participants.length}
+        chatOpen={chatOpen}
+        onToggleChat={() => setChatOpen((v) => !v)}
+        onLeave={onLeave}
+      />
+
+      {/* Chat panel */}
+      {settings.allow_chat && (
+        <div
+          className={`absolute top-0 bottom-0 ltr:right-0 rtl:left-0 w-full sm:w-80 bg-zinc-900/95 backdrop-blur border-white/10 ltr:border-l rtl:border-r z-30 flex flex-col transition-transform duration-300 ${
+            chatOpen ? 'translate-x-0' : 'ltr:translate-x-full rtl:-translate-x-full'
+          }`}
+        >
+          <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 shrink-0">
+            <h3 className="font-bold text-sm flex items-center gap-2">
+              <MessageSquare className="w-4 h-4" /> {t.chat}
+            </h3>
+            <button
+              onClick={() => setChatOpen(false)}
+              className="p-1.5 rounded-lg hover:bg-white/10 transition-colors"
+              aria-label={t.chat}
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="flex-1 min-h-0" dir={dir}>
+            <Chat messageFormatter={formatChatMessageLinks} style={{ height: '100%' }} />
+          </div>
+        </div>
+      )}
+
+      <ConnectionStateToast />
+    </div>
+  )
+}
+
+/* ------------------------------- Control Bar ------------------------------ */
+
+function ControlBar({
+  t,
+  isHost,
+  settings,
+  accent,
+  participantCount,
+  chatOpen,
+  onToggleChat,
+  onLeave,
+}: {
+  t: T
+  isHost: boolean
+  settings: TokenResponse['settings']
+  accent: { chip: string; gradient: string; solid: string }
+  participantCount: number
+  chatOpen: boolean
+  onToggleChat: () => void
+  onLeave: () => void
+}) {
+  const { localParticipant, isMicrophoneEnabled, isCameraEnabled, isScreenShareEnabled } = useLocalParticipant()
+
+  const canMic = isHost || settings.allow_student_unmute
+  const canCam = isHost || (settings.allow_student_video && !settings.default_audio_only)
+  const canShare = isHost || settings.allow_screen_share
+
+  return (
+    <div className="absolute bottom-3 inset-x-0 z-30 flex justify-center px-3 pointer-events-none">
+      <div className="pointer-events-auto flex items-center gap-1.5 sm:gap-2 rounded-2xl bg-zinc-900/85 backdrop-blur-md border border-white/10 shadow-2xl px-2 py-2">
+        {canMic && (
+          <CtrlButton
+            active={isMicrophoneEnabled}
+            label={t.mic}
+            onClick={() => localParticipant.setMicrophoneEnabled(!isMicrophoneEnabled)}
+            iconOn={<Mic className="w-5 h-5" />}
+            iconOff={<MicOff className="w-5 h-5" />}
+          />
+        )}
+        {canCam && (
+          <CtrlButton
+            active={isCameraEnabled}
+            label={t.camera}
+            onClick={() => localParticipant.setCameraEnabled(!isCameraEnabled)}
+            iconOn={<Video className="w-5 h-5" />}
+            iconOff={<VideoOff className="w-5 h-5" />}
+          />
+        )}
+        {canShare && (
+          <CtrlButton
+            active={isScreenShareEnabled}
+            highlight={isScreenShareEnabled}
+            label={isScreenShareEnabled ? t.stopShare : t.share}
+            onClick={() => localParticipant.setScreenShareEnabled(!isScreenShareEnabled)}
+            iconOn={<MonitorUp className="w-5 h-5" />}
+            iconOff={<MonitorUp className="w-5 h-5" />}
+          />
+        )}
+        {settings.allow_chat && (
+          <CtrlButton
+            active={chatOpen}
+            highlight={chatOpen}
+            label={t.chat}
+            onClick={onToggleChat}
+            iconOn={<MessageSquare className="w-5 h-5" />}
+            iconOff={<MessageSquare className="w-5 h-5" />}
+          />
+        )}
+
+        {settings.show_participant_count && (
+          <div className="hidden sm:flex items-center gap-1.5 px-3 h-11 rounded-xl bg-white/5 text-zinc-200 text-sm font-bold mx-0.5">
+            <Users className="w-4 h-4" />
+            {participantCount}
+          </div>
+        )}
+
+        <div className="w-px h-7 bg-white/10 mx-0.5" />
+
+        <button
+          onClick={onLeave}
+          className="flex items-center gap-2 h-11 px-4 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-sm transition-colors"
+        >
+          <LogOut className="w-5 h-5" />
+          <span className="hidden sm:inline">{t.leave}</span>
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function CtrlButton({
+  active,
+  highlight,
+  label,
+  onClick,
+  iconOn,
+  iconOff,
+}: {
+  active: boolean
+  highlight?: boolean
+  label: string
+  onClick: () => void
+  iconOn: React.ReactNode
+  iconOff: React.ReactNode
+}) {
+  return (
+    <button
+      onClick={onClick}
+      title={label}
+      aria-label={label}
+      aria-pressed={active}
+      className={`flex flex-col items-center justify-center w-12 sm:w-14 h-11 rounded-xl transition-colors ${
+        highlight
+          ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+          : active
+            ? 'bg-white/10 text-white hover:bg-white/15'
+            : 'bg-rose-500/15 text-rose-300 hover:bg-rose-500/25 border border-rose-500/30'
+      }`}
+    >
+      {active ? iconOn : iconOff}
+    </button>
+  )
+}
+
+/* ------------------------------ Leave confirm ----------------------------- */
+
+function LeaveConfirm({
+  t,
+  dir,
+  onCancel,
+  onConfirm,
+}: {
+  t: T
+  dir: 'rtl' | 'ltr'
+  onCancel: () => void
+  onConfirm: () => void
+}) {
+  return (
+    <div dir={dir} className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm flex items-center justify-center px-4">
       <div className="max-w-sm w-full bg-zinc-900 border border-white/10 rounded-2xl p-6 text-center">
-        <h3 className="text-lg font-bold mb-2">هل تريد الخروج؟</h3>
-        <p className="text-sm text-zinc-400 mb-5">سيتم قطع الاتصال بهذه الجلسة.</p>
+        <h3 className="text-lg font-bold mb-2">{t.leaveTitle}</h3>
+        <p className="text-sm text-zinc-400 mb-5">{t.leaveDesc}</p>
         <div className="flex gap-2 justify-center">
           <button onClick={onCancel} className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-sm font-bold">
-            البقاء
+            {t.stay}
           </button>
           <button onClick={onConfirm} className="px-4 py-2 rounded-lg bg-rose-500 hover:bg-rose-600 text-white text-sm font-bold">
-            خروج
+            {t.leave}
           </button>
         </div>
       </div>
@@ -277,7 +673,21 @@ function LeaveConfirm({ onCancel, onConfirm }: { onCancel: () => void; onConfirm
   )
 }
 
-function RatingModal({ sessionId, onClose }: { sessionId: string; onClose: () => void }) {
+/* ------------------------------- Rating modal ----------------------------- */
+
+function RatingModal({
+  t,
+  dir,
+  accentSolid,
+  sessionId,
+  onClose,
+}: {
+  t: T
+  dir: 'rtl' | 'ltr'
+  accentSolid: string
+  sessionId: string
+  onClose: () => void
+}) {
   const [rating, setRating] = useState(0)
   const [audio, setAudio] = useState(0)
   const [video, setVideo] = useState(0)
@@ -309,28 +719,28 @@ function RatingModal({ sessionId, onClose }: { sessionId: string; onClose: () =>
   }
 
   return (
-    <div className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm flex items-center justify-center px-4">
+    <div dir={dir} className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm flex items-center justify-center px-4">
       <div className="max-w-md w-full bg-zinc-900 border border-white/10 rounded-2xl p-6 space-y-4">
         {done ? (
           <div className="text-center py-6">
-            <div className="text-4xl mb-3">🌟</div>
-            <h3 className="text-lg font-bold mb-1">شكراً على تقييمك</h3>
-            <p className="text-sm text-zinc-400">سيساعدنا في تحسين الجلسات القادمة.</p>
+            <Star className="w-10 h-10 mx-auto mb-3 fill-amber-400 text-amber-400" />
+            <h3 className="text-lg font-bold mb-1">{t.thanksTitle}</h3>
+            <p className="text-sm text-zinc-400">{t.thanksDesc}</p>
           </div>
         ) : (
           <>
             <div>
-              <h3 className="text-lg font-bold mb-1">قيّم هذه الجلسة</h3>
-              <p className="text-xs text-zinc-400">رأيك يهمنا — سيظهر للمدرّس والإدارة فقط.</p>
+              <h3 className="text-lg font-bold mb-1">{t.ratingTitle}</h3>
+              <p className="text-xs text-zinc-400">{t.ratingDesc}</p>
             </div>
-            <RatingRow label="التقييم العام" value={rating} onChange={setRating} required />
-            <RatingRow label="جودة الصوت" value={audio} onChange={setAudio} />
-            <RatingRow label="جودة الفيديو" value={video} onChange={setVideo} />
-            <RatingRow label="أداء المدرّس" value={teacher} onChange={setTeacher} />
+            <RatingRow t={t} label={t.overall} value={rating} onChange={setRating} required />
+            <RatingRow t={t} label={t.audioQ} value={audio} onChange={setAudio} />
+            <RatingRow t={t} label={t.videoQ} value={video} onChange={setVideo} />
+            <RatingRow t={t} label={t.teacherPerf} value={teacher} onChange={setTeacher} />
             <textarea
               value={comment}
               onChange={(e) => setComment(e.target.value)}
-              placeholder="ملاحظات إضافية (اختياري)"
+              placeholder={t.notesPlaceholder}
               rows={3}
               maxLength={500}
               className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-sm placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
@@ -340,14 +750,14 @@ function RatingModal({ sessionId, onClose }: { sessionId: string; onClose: () =>
                 onClick={onClose}
                 className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-sm font-bold"
               >
-                تخطي
+                {t.skip}
               </button>
               <button
                 onClick={submit}
                 disabled={!rating || submitting}
-                className="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                className={`px-4 py-2 rounded-lg text-white text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed ${accentSolid}`}
               >
-                {submitting ? 'جاري الإرسال…' : 'إرسال التقييم'}
+                {submitting ? t.submitting : t.submit}
               </button>
             </div>
           </>
@@ -358,11 +768,13 @@ function RatingModal({ sessionId, onClose }: { sessionId: string; onClose: () =>
 }
 
 function RatingRow({
+  t,
   label,
   value,
   onChange,
   required,
 }: {
+  t: T
   label: string
   value: number
   onChange: (v: number) => void
@@ -381,13 +793,9 @@ function RatingRow({
             type="button"
             onClick={() => onChange(n)}
             className="p-1 transition-transform hover:scale-110"
-            aria-label={`${n} نجوم`}
+            aria-label={t.starsLabel(n)}
           >
-            <Star
-              className={`w-5 h-5 ${
-                n <= value ? 'fill-amber-400 text-amber-400' : 'text-zinc-600'
-              }`}
-            />
+            <Star className={`w-5 h-5 ${n <= value ? 'fill-amber-400 text-amber-400' : 'text-zinc-600'}`} />
           </button>
         ))}
       </div>
