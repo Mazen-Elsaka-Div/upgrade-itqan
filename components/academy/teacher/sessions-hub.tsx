@@ -38,6 +38,9 @@ import {
   Zap,
   CalendarClock,
   BarChart3,
+  MessageSquare,
+  Mic,
+  GraduationCap,
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -718,7 +721,165 @@ function PastSessionCard({ s, onDelete }: { s: SessionRow; onDelete: (id: string
   )
 }
 
+interface RatingDetail {
+  rating: number
+  comment: string | null
+  audio_quality: number | null
+  video_quality: number | null
+  teacher_rating: number | null
+  created_at: string
+  student_name: string | null
+}
+
+interface RatingSummary {
+  count: number
+  avg_rating: number | null
+  avg_audio: number | null
+  avg_video: number | null
+  avg_teacher: number | null
+}
+
+function MiniStars({ value }: { value: number | null }) {
+  if (value === null || value === undefined) return <span className="text-xs text-muted-foreground">—</span>
+  return (
+    <span className="inline-flex items-center gap-0.5" aria-label={`${value} من 5`}>
+      {[1, 2, 3, 4, 5].map((n) => (
+        <Star
+          key={n}
+          className={`w-3 h-3 ${n <= Math.round(value) ? 'fill-amber-400 text-amber-400' : 'text-muted-foreground/30'}`}
+        />
+      ))}
+    </span>
+  )
+}
+
+function SessionRatingsDialog({
+  sessionId,
+  title,
+  count,
+  open,
+  onOpenChange,
+}: {
+  sessionId: string
+  title: string
+  count: number
+  open: boolean
+  onOpenChange: (v: boolean) => void
+}) {
+  const [loading, setLoading] = useState(false)
+  const [details, setDetails] = useState<RatingDetail[]>([])
+  const [summary, setSummary] = useState<RatingSummary | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!open) return
+    let cancelled = false
+    setLoading(true)
+    setError(null)
+    fetch(`/api/video/sessions/${sessionId}/ratings`)
+      .then(async (res) => {
+        const json = await res.json()
+        if (!res.ok) throw new Error(json.error || 'تعذّر تحميل التقييمات')
+        return json
+      })
+      .then((json) => {
+        if (cancelled) return
+        setDetails(json.data || [])
+        setSummary(json.summary || null)
+      })
+      .catch((e) => {
+        if (!cancelled) setError(e.message)
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [open, sessionId])
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <MessageSquare className="w-5 h-5 text-primary" />
+            تقييمات الطلاب
+          </DialogTitle>
+          <DialogDescription className="truncate">{title}</DialogDescription>
+        </DialogHeader>
+
+        {loading ? (
+          <div className="space-y-3 py-2">
+            <Skeleton className="h-16 w-full" />
+            <Skeleton className="h-16 w-full" />
+          </div>
+        ) : error ? (
+          <p className="text-sm text-destructive py-4 text-center">{error}</p>
+        ) : (
+          <div className="space-y-4">
+            {summary && summary.count > 0 && (
+              <div className="grid grid-cols-2 gap-2 rounded-lg border bg-muted/30 p-3 text-sm">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-muted-foreground inline-flex items-center gap-1">
+                    <Star className="w-3.5 h-3.5" /> عام
+                  </span>
+                  <MiniStars value={summary.avg_rating !== null ? Number(summary.avg_rating) : null} />
+                </div>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-muted-foreground inline-flex items-center gap-1">
+                    <GraduationCap className="w-3.5 h-3.5" /> المعلّم
+                  </span>
+                  <MiniStars value={summary.avg_teacher !== null ? Number(summary.avg_teacher) : null} />
+                </div>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-muted-foreground inline-flex items-center gap-1">
+                    <Mic className="w-3.5 h-3.5" /> الصوت
+                  </span>
+                  <MiniStars value={summary.avg_audio !== null ? Number(summary.avg_audio) : null} />
+                </div>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-muted-foreground inline-flex items-center gap-1">
+                    <Video className="w-3.5 h-3.5" /> الفيديو
+                  </span>
+                  <MiniStars value={summary.avg_video !== null ? Number(summary.avg_video) : null} />
+                </div>
+              </div>
+            )}
+
+            {details.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4 text-center">لا توجد تقييمات بعد.</p>
+            ) : (
+              <ul className="space-y-3">
+                {details.map((d, idx) => (
+                  <li key={idx} className="rounded-lg border p-3 space-y-1.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-semibold text-sm truncate">{d.student_name || 'طالب'}</span>
+                      <MiniStars value={d.rating} />
+                    </div>
+                    {d.comment && (
+                      <p className="text-sm text-foreground/80 leading-relaxed text-pretty">{d.comment}</p>
+                    )}
+                    <span className="block text-[11px] text-muted-foreground">{fmtDateTime(d.created_at)}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            إغلاق
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 function HistoryCard({ row }: { row: HistoryRow }) {
+  const [ratingsOpen, setRatingsOpen] = useState(false)
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardContent className="pt-5 flex flex-col md:flex-row gap-4 md:items-start">
@@ -763,6 +924,17 @@ function HistoryCard({ row }: { row: HistoryRow }) {
               {row.recording_status === 'recording' ? 'جاري التسجيل...' : 'لا يوجد تسجيل'}
             </span>
           )}
+          {row.ratings_count > 0 && (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="gap-1"
+              onClick={() => setRatingsOpen(true)}
+            >
+              <MessageSquare className="w-4 h-4" />
+              {`تقييمات الطلاب (${row.ratings_count})`}
+            </Button>
+          )}
           {row.kind === 'course_session' && (
             <Button asChild size="sm" variant="ghost" className="gap-1">
               <Link href={`/academy/teacher/sessions/${row.ref_id}`}>تفاصيل الدرس</Link>
@@ -770,6 +942,15 @@ function HistoryCard({ row }: { row: HistoryRow }) {
           )}
         </div>
       </CardContent>
+      {row.ratings_count > 0 && (
+        <SessionRatingsDialog
+          sessionId={row.id}
+          title={row.title || KIND_LABEL[row.kind] || row.kind}
+          count={row.ratings_count}
+          open={ratingsOpen}
+          onOpenChange={setRatingsOpen}
+        />
+      )}
     </Card>
   )
 }
