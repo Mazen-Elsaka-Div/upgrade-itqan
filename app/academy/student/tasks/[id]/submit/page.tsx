@@ -38,6 +38,15 @@ type TaskType =
   | "image"
   | string
 
+interface QuizQuestion {
+  id: string
+  type: "mcq" | "essay"
+  question: string
+  options?: string[]
+  correct?: number
+  points: number
+}
+
 interface Task {
   id: string
   title: string
@@ -48,6 +57,7 @@ interface Task {
   course_title?: string
   teacher_name?: string
   submission_instructions?: string
+  quiz_questions?: QuizQuestion[] | string | null
 }
 
 interface Submission {
@@ -80,8 +90,10 @@ export default function SubmitTaskPage() {
   const [uploading, setUploading] = useState<null | "file" | "image" | "video">(null)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState(false)
+  const [quizResult, setQuizResult] = useState<{ auto_score: number; max_score: number; needs_grading: boolean } | null>(null)
 
   const [textContent, setTextContent] = useState("")
+  const [quizAnswers, setQuizAnswers] = useState<Record<string, { selected?: number; text?: string }>>({})
   const [fileData, setFileData] = useState<{ url: string; name: string; type: string; size: number } | null>(null)
   const [imageData, setImageData] = useState<{ url: string; name: string; type: string; size: number } | null>(null)
   const [videoData, setVideoData] = useState<{ url: string; name: string; type: string; size: number } | null>(null)
@@ -106,6 +118,24 @@ export default function SubmitTaskPage() {
         if (json.submission) {
           setSubmission(json.submission)
           setTextContent(json.submission.content || "")
+          if (json.submission.quiz_answers) {
+            try {
+              const raw =
+                typeof json.submission.quiz_answers === "string"
+                  ? JSON.parse(json.submission.quiz_answers)
+                  : json.submission.quiz_answers
+              const map: Record<string, { selected?: number; text?: string }> = {}
+              for (const a of raw || []) {
+                map[a.questionId] = {
+                  selected: typeof a.selected === "number" ? a.selected : undefined,
+                  text: a.text || undefined,
+                }
+              }
+              setQuizAnswers(map)
+            } catch {
+              /* ignore malformed answers */
+            }
+          }
           if (json.submission.audio_url) setAudioUrl(json.submission.audio_url)
           if (json.submission.video_url) {
             setVideoData({
@@ -138,6 +168,62 @@ export default function SubmitTaskPage() {
   }, [taskId])
 
   const taskType: TaskType = task?.type || "written"
+  const isQuiz = taskType === "quiz"
+
+  const quizQuestions: QuizQuestion[] = (() => {
+    if (!task?.quiz_questions) return []
+    try {
+      return typeof task.quiz_questions === "string"
+        ? JSON.parse(task.quiz_questions)
+        : (task.quiz_questions as QuizQuestion[])
+    } catch {
+      return []
+    }
+  })()
+
+  const setQuizAnswer = (qId: string, patch: { selected?: number; text?: string }) => {
+    setQuizAnswers(prev => ({ ...prev, [qId]: { ...prev[qId], ...patch } }))
+  }
+
+  const quizAnswered = quizQuestions.filter(q => {
+    const a = quizAnswers[q.id]
+    if (!a) return false
+    if (q.type === "mcq") return typeof a.selected === "number"
+    return !!(a.text && a.text.trim())
+  }).length
+
+  const handleQuizSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError("")
+    if (quizAnswered < quizQuestions.length) {
+      return setError("يرجى الإجابة على جميع الأسئلة قبل التسليم")
+    }
+    setSubmitting(true)
+    try {
+      const payload = {
+        submission_type: "quiz",
+        quiz_answers: quizQuestions.map(q => ({
+          questionId: q.id,
+          ...(q.type === "mcq"
+            ? { selected: quizAnswers[q.id]?.selected }
+            : { text: (quizAnswers[q.id]?.text || "").trim() }),
+        })),
+      }
+      const res = await fetch(`/api/academy/student/tasks/${taskId}/submit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error || "فشل تسليم الاختبار")
+      setSuccess(true)
+    } catch (err: any) {
+      setError(err?.message || "حدث خطأ أثناء تسليم الاختبار")
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
   const requiresAudio = taskType === "audio" || taskType === "recitation"
   const requiresVideo = taskType === "video"
   const requiresFile = taskType === "project" || taskType === "file"
