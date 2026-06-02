@@ -216,6 +216,13 @@ export default function SubmitTaskPage() {
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || "فشل تسليم الاختبار")
+      if (json.quiz) {
+        setQuizResult({
+          auto_score: json.quiz.auto_score,
+          max_score: json.quiz.max_score,
+          needs_grading: json.quiz.needs_grading,
+        })
+      }
       setSuccess(true)
     } catch (err: any) {
       setError(err?.message || "حدث خطأ أثناء تسليم الاختبار")
@@ -476,12 +483,122 @@ export default function SubmitTaskPage() {
           <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center mb-6 shadow-xl shadow-primary/20">
             <CheckCircle2 className="w-10 h-10 text-primary-foreground" />
           </div>
-          <h3 className="font-black text-2xl text-primary mb-4">تم استلام عملك بنجاح!</h3>
+          <h3 className="font-black text-2xl text-primary mb-4">
+            {isQuiz ? "تم تسليم الاختبار بنجاح!" : "تم استلام عملك بنجاح!"}
+          </h3>
+          {isQuiz && quizResult && (
+            <div className="mb-6 w-full max-w-sm">
+              {quizResult.needs_grading ? (
+                <p className="text-primary/80 font-bold">
+                  تم تصحيح أسئلة الاختيار تلقائياً. الأسئلة المقالية بانتظار تصحيح المعلم.
+                </p>
+              ) : (
+                <p className="text-primary/80 font-bold">
+                  درجتك:{" "}
+                  <span className="text-3xl text-primary">{quizResult.auto_score}</span> من{" "}
+                  {quizResult.max_score}
+                </p>
+              )}
+            </div>
+          )}
           <Link href="/academy/student/tasks" className="inline-flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl transition-colors">
             <ArrowRight className="w-5 h-5 rtl:rotate-180" />
             العودة لقائمة المهام
           </Link>
         </div>
+      ) : isQuiz ? (
+        <form onSubmit={handleQuizSubmit} className="space-y-6">
+          {error && (
+            <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-600 dark:text-red-400 flex items-center gap-3 font-bold text-sm animate-in slide-in-from-top-2">
+              <AlertCircle className="w-5 h-5 shrink-0" /> {error}
+            </div>
+          )}
+
+          {isGraded ? (
+            <div className="p-6 bg-card border border-border rounded-2xl text-center text-muted-foreground font-bold">
+              تم تصحيح هذا الاختبار. لا يمكن إعادة حله.
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center justify-between flex-wrap gap-2 px-1">
+                <p className="text-sm font-bold text-muted-foreground">
+                  أجبت على {quizAnswered} من {quizQuestions.length} سؤال
+                </p>
+                <span className="text-xs font-bold text-primary bg-primary/10 px-3 py-1 rounded-full">
+                  {quizQuestions.reduce((s, q) => s + (q.points || 0), 0)} درجة إجمالية
+                </span>
+              </div>
+
+              {quizQuestions.map((q, idx) => (
+                <div
+                  key={q.id}
+                  className="bg-card border border-border rounded-2xl p-5 space-y-4 shadow-sm"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <h4 className="font-bold text-foreground leading-relaxed flex gap-2">
+                      <span className="text-primary shrink-0">{idx + 1}.</span>
+                      <span className="whitespace-pre-wrap">{q.question}</span>
+                    </h4>
+                    <span className="text-xs font-bold text-muted-foreground bg-muted px-2 py-1 rounded-md shrink-0">
+                      {q.points} د
+                    </span>
+                  </div>
+
+                  {q.type === "mcq" ? (
+                    <div className="space-y-2">
+                      {(q.options || []).map((opt, oIdx) => {
+                        const selected = quizAnswers[q.id]?.selected === oIdx
+                        return (
+                          <button
+                            key={oIdx}
+                            type="button"
+                            onClick={() => setQuizAnswer(q.id, { selected: oIdx })}
+                            className={cn(
+                              "w-full flex items-center gap-3 p-3 rounded-xl border-2 text-right transition-colors",
+                              selected
+                                ? "border-primary bg-primary/10"
+                                : "border-border hover:border-primary/40 hover:bg-muted/40",
+                            )}
+                          >
+                            <span
+                              className={cn(
+                                "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0",
+                                selected ? "border-primary bg-primary" : "border-muted-foreground/40",
+                              )}
+                            >
+                              {selected && <CheckCircle2 className="w-3 h-3 text-primary-foreground" />}
+                            </span>
+                            <span className="font-medium text-foreground">{opt}</span>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  ) : (
+                    <textarea
+                      rows={4}
+                      value={quizAnswers[q.id]?.text || ""}
+                      onChange={e => setQuizAnswer(q.id, { text: e.target.value })}
+                      placeholder="اكتب إجابتك هنا..."
+                      className="w-full p-3 rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary resize-none text-sm"
+                    />
+                  )}
+                </div>
+              ))}
+
+              <button
+                type="submit"
+                disabled={submitting}
+                className="w-full flex items-center justify-center gap-2 py-4 bg-primary hover:bg-primary/90 disabled:opacity-60 text-primary-foreground font-black rounded-xl transition-colors shadow-lg shadow-primary/20"
+              >
+                {submitting ? (
+                  <><Loader2 className="w-5 h-5 animate-spin" /> جارٍ التسليم...</>
+                ) : (
+                  <><Save className="w-5 h-5" /> تسليم الاختبار</>
+                )}
+              </button>
+            </>
+          )}
+        </form>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-6">
           {error && (

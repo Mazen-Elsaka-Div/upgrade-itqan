@@ -326,7 +326,7 @@ async function handleQuizSubmission(
       const studentName = studentRows[0]?.name || "الطالب"
       await createNotification({
         userId: teacherId,
-        type: "task",
+        type: "task_marked_done",
         title: hasEssay ? "تم حل اختبار (يحتاج تصحيح)" : "تم حل اختبار",
         message: hasEssay
           ? `${studentName} حلّ اختبار «${task.title}» ويحتاج تصحيح الأسئلة المقالية.`
