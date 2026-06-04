@@ -138,7 +138,6 @@ export function ClientRecorder({ sessionId, enabled, autoStart = false }: Props)
     return 'video/webm'
   }, [])
 
-  // Serial chunk uploader so we never reorder Parts.
   const enqueueUpload = useCallback(async (partNumber: number, body: Blob) => {
     if (!uploadCtxRef.current) return
     const ctx = uploadCtxRef.current
@@ -152,8 +151,11 @@ export function ClientRecorder({ sessionId, enabled, autoStart = false }: Props)
       keepalive: false,
     })
     if (!res.ok) {
+      if (res.status === 413) {
+        throw new Error('فشل الرفع: حجم المقطع كبير (413). يرجى زيادة client_max_body_size.')
+      }
       const j = await res.json().catch(() => ({}))
-      throw new Error(j.error || `فشل رفع الجزء ${partNumber}`)
+      throw new Error(j.error || `فشل رفع الجزء ${partNumber} (رمز: ${res.status})`)
     }
   }, [])
 
@@ -175,6 +177,13 @@ export function ClientRecorder({ sessionId, enabled, autoStart = false }: Props)
         .catch((err) => {
           console.error('[client-recorder] upload failed', err)
           setError(err instanceof Error ? err.message : 'فشل رفع جزء التسجيل')
+          stopRequestedRef.current = true
+          try {
+            recorderRef.current?.stop()
+          } catch {
+            // ignore
+          }
+          throw err
         })
     },
     [chosenMime, enqueueUpload]

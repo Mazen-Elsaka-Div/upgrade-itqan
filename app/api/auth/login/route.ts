@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
     if (user.is_locked) {
       await logFailed(user.id)
       return NextResponse.json(
-        { error: "الحساب مقفل بسبب محاولات دخول متعددة فاشلة. تواصل مع الإدارة." },
+        { error: "تم قفل الحساب بسبب كثرة المحاولات الفاشلة. يرجى استخدام 'نسيت كلمة المرور' لإعادة تنشيط حسابك." },
         { status: 403 }
       )
     }
@@ -111,7 +111,7 @@ export async function POST(req: NextRequest) {
 
       if (shouldLock) {
         return NextResponse.json(
-          { error: `تم قفل الحساب بعد ${MAX_FAILED_ATTEMPTS} محاولات فاشلة. تواصل مع الإدارة.` },
+          { error: "تم قفل الحساب بسبب كثرة المحاولات الفاشلة. يرجى استخدام 'نسيت كلمة المرور' لإعادة تنشيط حسابك." },
           { status: 403 }
         )
       }

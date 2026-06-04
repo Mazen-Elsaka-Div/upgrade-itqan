@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
         const passwordHash = await bcrypt.hash(newPassword, 10)
 
         await query(
-            `UPDATE users SET password_hash = $1, reset_code = NULL, reset_expires_at = NULL WHERE id = $2`,
+            `UPDATE users SET password_hash = $1, reset_code = NULL, reset_expires_at = NULL, is_locked = false, failed_login_count = 0 WHERE id = $2`,
             [passwordHash, user.id]
         )
 

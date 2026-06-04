@@ -249,7 +249,11 @@ export async function POST(req: NextRequest) {
       videoSessionId = active?.id || null
     }
     if (videoSessionId) {
-      await recordParticipantJoin(videoSessionId, userId, livekitRole)
+      await recordParticipantJoin(
+        videoSessionId,
+        userId,
+        livekitRole === 'stealth' ? 'viewer' : livekitRole
+      )
     }
   } catch (err) {
     console.error('[livekit/token] failed to track session', err)

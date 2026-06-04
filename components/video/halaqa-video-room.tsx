@@ -433,6 +433,7 @@ function ConferenceView({
   onLeave: () => void
 }) {
   const [chatOpen, setChatOpen] = useState(false)
+  const [participantsOpen, setParticipantsOpen] = useState(false)
 
   const cameraTracks = useTracks([{ source: Track.Source.Camera, withPlaceholder: true }], {
     onlySubscribed: false,
@@ -441,8 +442,32 @@ function ConferenceView({
     onlySubscribed: false,
   })
   const participants = useParticipants()
+  const { localParticipant } = useLocalParticipant()
 
   const hasScreen = screenTracks.length > 0
+
+  const allParticipants = useMemo(() => {
+    return localParticipant ? [localParticipant, ...participants] : participants
+  }, [localParticipant, participants])
+
+  const getParticipantRoleInfo = (p: any) => {
+    let role = ''
+    if (p.metadata) {
+      try {
+        const meta = JSON.parse(p.metadata)
+        role = meta.role || ''
+      } catch (e) {
+        // ignore
+      }
+    }
+    const isAr = dir === 'rtl'
+    if (role === 'teacher') return { label: isAr ? 'المعلم' : 'Teacher', color: 'text-amber-300 border-amber-500/30 bg-amber-500/10' }
+    if (role === 'reader') return { label: isAr ? 'المقرئ' : 'Reader', color: 'text-amber-300 border-amber-500/30 bg-amber-500/10' }
+    if (role === 'admin' || role === 'academy_admin') return { label: isAr ? 'مشرف' : 'Admin', color: 'text-rose-300 border-rose-500/30 bg-rose-500/10' }
+    if (role === 'reciter_supervisor') return { label: isAr ? 'مشرف' : 'Supervisor', color: 'text-indigo-300 border-indigo-500/30 bg-indigo-500/10' }
+    if (role === 'student') return { label: isAr ? 'طالب' : 'Student', color: 'text-emerald-300 border-emerald-500/30 bg-emerald-500/10' }
+    return null
+  }
 
   return (
     <div className="absolute inset-0 flex flex-col">
@@ -485,9 +510,17 @@ function ConferenceView({
         isHost={isHost}
         settings={settings}
         accent={accent}
-        participantCount={participants.length}
+        participantCount={allParticipants.length}
         chatOpen={chatOpen}
-        onToggleChat={() => setChatOpen((v) => !v)}
+        onToggleChat={() => {
+          setChatOpen((v) => !v)
+          setParticipantsOpen(false)
+        }}
+        participantsOpen={participantsOpen}
+        onToggleParticipants={() => {
+          setParticipantsOpen((v) => !v)
+          setChatOpen(false)
+        }}
         onLeave={onLeave}
       />
 
@@ -516,6 +549,80 @@ function ConferenceView({
         </div>
       )}
 
+      {/* Participants panel */}
+      {settings.show_participant_count && (
+        <div
+          className={`absolute top-0 bottom-0 ltr:right-0 rtl:left-0 w-full sm:w-80 bg-zinc-900/95 backdrop-blur border-white/10 ltr:border-l rtl:border-r z-30 flex flex-col transition-transform duration-300 ${
+            participantsOpen ? 'translate-x-0' : 'ltr:translate-x-full rtl:-translate-x-full'
+          }`}
+        >
+          <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 shrink-0">
+            <h3 className="font-bold text-sm flex items-center gap-2">
+              <Users className="w-4 h-4" /> {t.participants}
+              <span className="px-2 py-0.5 rounded-full bg-white/10 text-xs text-zinc-300">
+                {allParticipants.length}
+              </span>
+            </h3>
+            <button
+              onClick={() => setParticipantsOpen(false)}
+              className="p-1.5 rounded-lg hover:bg-white/10 transition-colors"
+              aria-label={t.participants}
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto p-4 space-y-3" dir={dir}>
+            {allParticipants.map((p) => {
+              const name = p.name || p.identity
+              const isLocal = p.identity === localParticipant?.identity
+              const roleInfo = getParticipantRoleInfo(p)
+              const initial = name ? name.trim().charAt(0).toUpperCase() : '?'
+
+              return (
+                <div
+                  key={p.identity}
+                  className="flex items-center justify-between p-2 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-zinc-700 to-zinc-800 border border-white/10 flex items-center justify-center font-bold text-sm text-zinc-200 shrink-0 select-none">
+                      {initial}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-semibold text-sm text-zinc-100 truncate">
+                          {name}
+                        </span>
+                        {isLocal && (
+                          <span className="text-[10px] bg-zinc-800 text-zinc-400 border border-zinc-700 px-1 py-0.5 rounded">
+                            {dir === 'rtl' ? 'أنت' : 'You'}
+                          </span>
+                        )}
+                      </div>
+                      {roleInfo && (
+                        <div className="mt-0.5">
+                          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full border ${roleInfo.color}`}>
+                            {roleInfo.label}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <div className={`p-1.5 rounded-lg ${p.isMicrophoneEnabled ? 'text-emerald-400 bg-emerald-500/10' : 'text-rose-400 bg-rose-500/10'}`}>
+                      {p.isMicrophoneEnabled ? <Mic className="w-3.5 h-3.5" /> : <MicOff className="w-3.5 h-3.5" />}
+                    </div>
+                    <div className={`p-1.5 rounded-lg ${p.isCameraEnabled ? 'text-emerald-400 bg-emerald-500/10' : 'text-rose-400 bg-rose-500/10'}`}>
+                      {p.isCameraEnabled ? <Video className="w-3.5 h-3.5" /> : <VideoOff className="w-3.5 h-3.5" />}
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
       <ConnectionStateToast />
     </div>
   )
@@ -531,6 +638,8 @@ function ControlBar({
   participantCount,
   chatOpen,
   onToggleChat,
+  participantsOpen,
+  onToggleParticipants,
   onLeave,
 }: {
   t: T
@@ -540,6 +649,8 @@ function ControlBar({
   participantCount: number
   chatOpen: boolean
   onToggleChat: () => void
+  participantsOpen: boolean
+  onToggleParticipants: () => void
   onLeave: () => void
 }) {
   const { localParticipant, isMicrophoneEnabled, isCameraEnabled, isScreenShareEnabled } = useLocalParticipant()
@@ -591,10 +702,20 @@ function ControlBar({
         )}
 
         {settings.show_participant_count && (
-          <div className="hidden sm:flex items-center gap-1.5 px-3 h-11 rounded-xl bg-white/5 text-zinc-200 text-sm font-bold mx-0.5">
+          <button
+            onClick={onToggleParticipants}
+            title={t.participants}
+            aria-label={t.participants}
+            aria-pressed={participantsOpen}
+            className={`flex items-center gap-1.5 px-3 h-11 rounded-xl text-sm font-bold mx-0.5 transition-colors ${
+              participantsOpen
+                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                : 'bg-white/5 text-zinc-200 hover:bg-white/10 border border-transparent'
+            }`}
+          >
             <Users className="w-4 h-4" />
             {participantCount}
-          </div>
+          </button>
         )}
 
         <div className="w-px h-7 bg-white/10 mx-0.5" />
