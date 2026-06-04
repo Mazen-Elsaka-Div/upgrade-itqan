@@ -12,6 +12,7 @@ import {
   AbortMultipartUploadCommand,
   ListPartsCommand,
   GetObjectCommand,
+  DeleteObjectCommand,
 } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
@@ -203,6 +204,23 @@ export function extractKeyFromUrl(urlStr: string): string | null {
     return key
   } catch {
     return null
+  }
+}
+
+export async function deleteRecordingObject(key: string): Promise<boolean> {
+  const ctx = getRecordingS3Client()
+  if (!ctx) return false
+  try {
+    await ctx.client.send(
+      new DeleteObjectCommand({
+        Bucket: ctx.config.bucket,
+        Key: key,
+      })
+    )
+    return true
+  } catch (err) {
+    console.error('[recordings-s3] deleteRecordingObject failed', err)
+    return false
   }
 }
 
