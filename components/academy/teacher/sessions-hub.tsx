@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
@@ -976,6 +976,34 @@ function RecordingCard({ r, onDelete }: { r: RecordingRow; onDelete: (id: string
   const title = r.title || KIND_LABEL[r.kind]
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [metaDuration, setMetaDuration] = useState<number | null>(null)
+  const [posterReady, setPosterReady] = useState(false)
+  const previewRef = useRef<HTMLVideoElement | null>(null)
+
+  const proxiedUrl = r.recording_url
+    ? `/api/video/recordings/watch?url=${encodeURIComponent(r.recording_url)}`
+    : null
+
+  // Pull duration from the media itself when the DB has none. WebM produced by
+  // MediaRecorder reports Infinity until we nudge currentTime past the end.
+  const handleLoadedMetadata = (e: React.SyntheticEvent<HTMLVideoElement>) => {
+    const video = e.currentTarget
+    const d = video.duration
+    if (Number.isFinite(d) && d > 0) {
+      setMetaDuration(Math.round(d))
+    } else {
+      // Force the browser to resolve the real duration of a streamed WebM.
+      const onTime = () => {
+        if (Number.isFinite(video.duration) && video.duration > 0) {
+          setMetaDuration(Math.round(video.duration))
+        }
+        video.removeEventListener('timeupdate', onTime)
+        try { video.currentTime = 0.1 } catch { /* ignore */ }
+      }
+      video.addEventListener('timeupdate', onTime)
+      try { video.currentTime = 1e6 } catch { /* ignore */ }
+    }
+  }
 
   const handleDelete = async () => {
     setDeleting(true)
@@ -984,15 +1012,28 @@ function RecordingCard({ r, onDelete }: { r: RecordingRow; onDelete: (id: string
     setConfirmOpen(false)
   }
 
+  const durationLabel = fmtDuration(r.duration_seconds ?? metaDuration)
+
   return (
     <Card className="hover:shadow-md transition-shadow overflow-hidden">
       <div className="relative">
-        {r.recording_url ? (
-          <VideoPlayerModal url={r.recording_url} title={title}>
-            <button className="block w-full aspect-video bg-secondary/30 grid place-items-center relative group focus:outline-none">
-              <PlayCircle className="w-12 h-12 text-muted-foreground opacity-60 group-hover:opacity-100 transition-opacity" />
-              <span className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
-                {fmtDuration(r.duration_seconds)}
+        {proxiedUrl ? (
+          <VideoPlayerModal url={r.recording_url!} title={title}>
+            <button className="block w-full aspect-video bg-secondary/30 grid place-items-center relative group focus:outline-none overflow-hidden">
+              <video
+                ref={previewRef}
+                src={`${proxiedUrl}#t=0.5`}
+                muted
+                playsInline
+                preload="metadata"
+                onLoadedMetadata={handleLoadedMetadata}
+                onLoadedData={() => setPosterReady(true)}
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+              <span className={`absolute inset-0 transition-colors ${posterReady ? 'bg-black/25 group-hover:bg-black/35' : ''}`} />
+              <PlayCircle className="w-12 h-12 relative z-10 text-white drop-shadow opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all" />
+              <span className="absolute bottom-2 right-2 z-10 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                {durationLabel}
               </span>
             </button>
           </VideoPlayerModal>
@@ -1000,7 +1041,7 @@ function RecordingCard({ r, onDelete }: { r: RecordingRow; onDelete: (id: string
           <div className="block aspect-video bg-secondary/30 grid place-items-center relative">
             <PlayCircle className="w-12 h-12 text-muted-foreground opacity-40" />
             <span className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
-              {fmtDuration(r.duration_seconds)}
+              {durationLabel}
             </span>
           </div>
         )}

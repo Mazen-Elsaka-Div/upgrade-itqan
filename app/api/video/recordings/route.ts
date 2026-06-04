@@ -94,9 +94,12 @@ export async function GET(req: NextRequest) {
     started_by_name: string | null
     participants_count: number
   }>(
-    `SELECT
+     `SELECT
        vs.id, vs.kind, vs.ref_id, vs.platform, vs.started_at, vs.ended_at,
-       vs.duration_seconds,
+       COALESCE(
+         vs.duration_seconds,
+         (SELECT duration_seconds FROM video_recordings WHERE session_id = vs.id AND status = 'completed' AND duration_seconds IS NOT NULL ORDER BY completed_at DESC NULLS LAST LIMIT 1)
+       ) AS duration_seconds,
        COALESCE(
          (SELECT recording_url FROM video_recordings WHERE session_id = vs.id AND status = 'completed' AND recording_url IS NOT NULL ORDER BY completed_at DESC NULLS LAST LIMIT 1),
          vs.recording_url
