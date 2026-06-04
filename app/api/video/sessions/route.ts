@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSession } from '@/lib/auth'
 import { query } from '@/lib/db'
 import { ADMIN_ROLES, type HalaqaPlatform } from '@/lib/halaqat'
+import { getRoomService, isLiveKitConfigured } from '@/lib/livekit'
 
 /**
  * GET /api/video/sessions?platform=academy|maqraa
@@ -83,5 +84,30 @@ export async function GET(req: NextRequest) {
     args
   )
 
-  return NextResponse.json({ data: rows })
+  let activeRoomNames = new Set<string>()
+  const liveDbRows = rows.filter((r) => !r.ended_at)
+  if (liveDbRows.length > 0 && isLiveKitConfigured()) {
+    const rs = getRoomService()
+    if (rs) {
+      try {
+        const roomNamesToCheck = liveDbRows.map((r) => r.room_name)
+        const lkRooms = await rs.listRooms(roomNamesToCheck)
+        lkRooms.forEach((r) => activeRoomNames.add(r.name))
+      } catch (err) {
+        console.error('[api/video/sessions] livekit listRooms failed', err)
+      }
+    }
+  }
+
+  // If a room is marked live in DB but is NOT active in LiveKit,
+  // we patch its ended_at in the response so it appears closed.
+  const patchedRows = rows.map((r) => {
+    if (!r.ended_at && isLiveKitConfigured() && !activeRoomNames.has(r.room_name)) {
+      // It's technically closed, webhook missed it or cron hasn't cleaned it.
+      return { ...r, ended_at: new Date().toISOString() } // Fake ended_at to fix UI
+    }
+    return r
+  })
+
+  return NextResponse.json({ data: patchedRows })
 }

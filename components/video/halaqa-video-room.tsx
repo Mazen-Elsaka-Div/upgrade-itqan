@@ -44,6 +44,8 @@ interface Props {
   exitHref: string
   /** Hex/Tailwind colour for the accent badge, e.g. 'emerald'. */
   accent?: 'emerald' | 'indigo' | 'amber' | 'rose'
+  /** Join as a hidden stealth admin */
+  stealth?: boolean
 }
 
 interface TokenResponse {
@@ -219,7 +221,7 @@ const ACCENTS: Record<NonNullable<Props['accent']>, { chip: string; gradient: st
   },
 }
 
-export function HalaqaVideoRoom({ kind, refId, title, subtitle, exitHref, accent = 'emerald' }: Props) {
+export function HalaqaVideoRoom({ kind, refId, title, subtitle, exitHref, accent = 'emerald', stealth }: Props) {
   const router = useRouter()
   const { locale } = useI18n()
   const lang: Locale = locale === 'en' ? 'en' : 'ar'
@@ -244,7 +246,7 @@ export function HalaqaVideoRoom({ kind, refId, title, subtitle, exitHref, accent
         const res = await fetch('/api/livekit/token', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ kind: apiKind, id: refId }),
+          body: JSON.stringify({ kind: apiKind, id: refId, stealth }),
         })
         const json = await res.json()
         if (!res.ok) throw new Error(json.error || t.tokenError)

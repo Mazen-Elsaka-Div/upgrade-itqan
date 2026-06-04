@@ -29,7 +29,7 @@ export function isLiveKitConfigured(): boolean {
   return !!(LIVEKIT_API_KEY && LIVEKIT_API_SECRET && LIVEKIT_URL)
 }
 
-export type LiveKitRole = 'host' | 'participant' | 'viewer'
+export type LiveKitRole = 'host' | 'participant' | 'viewer' | 'stealth'
 
 export interface MintTokenOptions {
   roomName: string
@@ -53,7 +53,7 @@ export async function mintLiveKitToken(opts: MintTokenOptions): Promise<string> 
     throw new Error('LiveKit credentials missing')
   }
   const role: LiveKitRole = opts.role || 'participant'
-  const canPublish = role !== 'viewer'
+  const canPublish = role !== 'viewer' && role !== 'stealth'
 
   const at = new AccessToken(LIVEKIT_API_KEY, LIVEKIT_API_SECRET, {
     identity: opts.identity,
@@ -70,6 +70,7 @@ export async function mintLiveKitToken(opts: MintTokenOptions): Promise<string> 
     canPublishData: canPublish,
     roomAdmin: role === 'host',
     roomCreate: role === 'host',
+    hidden: role === 'stealth',
   })
 
   return at.toJwt()

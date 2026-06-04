@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  let body: { kind?: string; id?: string }
+  let body: { kind?: string; id?: string; stealth?: boolean }
   try {
     body = await req.json()
   } catch {
@@ -93,7 +93,9 @@ export async function POST(req: NextRequest) {
     const isAdmin = adminRoles.includes(userRole)
     const isHost = ['teacher', 'reader'].includes(userRole)
 
-    if (isOwner || isAdmin || isHost) {
+    if (body.stealth && isAdmin) {
+      livekitRole = 'stealth'
+    } else if (isOwner || isAdmin || isHost) {
       livekitRole = 'host'
     } else {
       const enr = await query<{ id: string }>(
@@ -133,7 +135,11 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       )
     }
-    livekitRole = isReader ? 'host' : 'participant'
+    if (body.stealth && ['admin', 'reciter_supervisor', 'student_supervisor'].includes(userRole)) {
+      livekitRole = 'stealth'
+    } else {
+      livekitRole = isReader ? 'host' : 'participant'
+    }
     platform = 'maqraa'
     roomName = bookingRoomName(booking.id)
   } else {
@@ -155,7 +161,9 @@ export async function POST(req: NextRequest) {
     platform = 'academy'
     const isTeacher = s.teacher_id === userId
     const isAdmin = ['admin', 'academy_admin'].includes(userRole)
-    if (!isTeacher && !isAdmin) {
+    if (body.stealth && isAdmin) {
+      livekitRole = 'stealth'
+    } else if (!isTeacher && !isAdmin) {
       const enr = await query<{ id: string }>(
         `SELECT id FROM enrollments
          WHERE course_id = $1 AND student_id = $2 AND status = 'active'`,

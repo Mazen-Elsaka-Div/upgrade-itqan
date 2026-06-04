@@ -152,6 +152,15 @@ export function VideoSessionDetail({ sessionId, backHref }: Props) {
               <Download className="w-3.5 h-3.5 opacity-70" />
             </a>
           )}
+          {!s.ended_at && s.platform === 'academy' && (
+            <Link
+              href={`/academy/admin/video-settings/sessions/${sessionId}/monitor`}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 text-sm font-bold border border-emerald-500/20"
+              target="_blank"
+            >
+              <VideoIcon className="w-4 h-4" /> مراقبة خفية
+            </Link>
+          )}
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
