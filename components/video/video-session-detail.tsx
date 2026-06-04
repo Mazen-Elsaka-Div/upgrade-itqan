@@ -64,8 +64,6 @@ const KIND_LABEL: Record<string, string> = {
   course_session: 'درس مباشر',
 }
 
-import { VideoPlayerModal } from '@/components/video/video-player-modal'
-
 export function VideoSessionDetail({ sessionId, backHref }: Props) {
   const [info, setInfo] = useState<SessionInfo | null>(null)
   const [error, setError] = useState<string | null>(null)
