@@ -6,13 +6,13 @@ import {
   ArrowRight,
   Calendar,
   Clock,
-  Download,
   Loader2,
   PlayCircle,
   Star,
   Users,
   Video as VideoIcon,
 } from 'lucide-react'
+import { VideoPlayerModal } from '@/components/video/video-player-modal'
 
 interface Props {
   sessionId: string
@@ -142,15 +142,11 @@ export function VideoSessionDetail({ sessionId, backHref }: Props) {
             </p>
           </div>
           {s.recording_url && (
-            <a
-              href={s.recording_url}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-500 text-white text-sm font-bold hover:bg-indigo-600"
-            >
-              <PlayCircle className="w-4 h-4" /> تشغيل التسجيل
-              <Download className="w-3.5 h-3.5 opacity-70" />
-            </a>
+            <VideoPlayerModal url={s.recording_url} title={s.title || KIND_LABEL[s.kind] || s.kind}>
+              <button className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-500 text-white text-sm font-bold hover:bg-indigo-600">
+                <PlayCircle className="w-4 h-4" /> تشغيل التسجيل
+              </button>
+            </VideoPlayerModal>
           )}
           {!s.ended_at && s.platform === 'academy' && (
             <Link
