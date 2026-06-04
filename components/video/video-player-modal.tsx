@@ -75,15 +75,29 @@ export function VideoPlayerModal({ url, title, children }: Props) {
             <video
               src={signedUrl}
               controls
-              autoPlay
               playsInline
-              preload="auto"
+              preload="metadata"
               controlsList="nodownload"
+              onLoadedMetadata={() => setLoading(false)}
               onCanPlay={() => setLoading(false)}
               onPlaying={() => setLoading(false)}
-              onError={() => {
+              onError={(e) => {
+                const mediaError = e.currentTarget.error
+                console.log('[v0] recording playback error', {
+                  code: mediaError?.code,
+                  message: mediaError?.message,
+                  src: signedUrl,
+                })
                 setLoading(false)
-                setError('تعذّر تشغيل هذا التسجيل. قد يكون الملف غير مكتمل أو غير مدعوم في المتصفح.')
+                let msg = 'تعذّر تشغيل هذا التسجيل.'
+                if (mediaError?.code === 3) {
+                  msg = 'تعذّر فك تشفير الفيديو. قد يكون التسجيل غير مكتمل أو تالف.'
+                } else if (mediaError?.code === 4) {
+                  msg = 'صيغة الفيديو غير مدعومة في هذا المتصفح، أو تعذّر الوصول إلى الملف.'
+                } else if (mediaError?.code === 2) {
+                  msg = 'حدث خطأ في الشبكة أثناء تحميل التسجيل.'
+                }
+                setError(msg)
               }}
               className="w-full h-full max-h-[75vh] outline-none"
             />
