@@ -7,8 +7,10 @@ import {
   Sparkles, Target, Trash2, Trophy, Users, X,
   BookOpen, Star, Play, Send, ArrowLeft, BarChart3, Clock
 } from 'lucide-react'
+import { Gavel } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import MediaViewer from '@/components/media-viewer'
+import { JudgesManager } from '@/components/competitions/judges-manager'
 
 interface Competition {
   id: string
@@ -106,6 +108,7 @@ export default function AdminLibraryCompetitionsPage() {
   const [typeFilter, setTypeFilter] = useState('all')
   const [statusFilter, setStatusFilter] = useState('all')
   const [search, setSearch] = useState('')
+  const [judgesComp, setJudgesComp] = useState<Competition | null>(null)
   // Entries view
   const [selectedComp, setSelectedComp] = useState<Competition | null>(null)
   const [entries, setEntries] = useState<Entry[]>([])
@@ -536,13 +539,20 @@ export default function AdminLibraryCompetitionsPage() {
                       </div>
                     </div>
 
-                    <div className="flex flex-col gap-2 mt-4">
+                    <div className="flex flex-col gap-2 mt-4 sm:flex-row">
                       <button
                         onClick={() => fetchEntries(comp)}
-                        className="w-full flex items-center justify-center gap-2 py-2.5 border border-border rounded-xl text-sm font-bold hover:bg-muted/50 transition-colors"
+                        className="flex-1 flex items-center justify-center gap-2 py-2.5 border border-border rounded-xl text-sm font-bold hover:bg-muted/50 transition-colors"
                       >
                         <ClipboardCheck className="h-4 w-4" />
                         عرض المشاركات وتحكيمها
+                      </button>
+                      <button
+                        onClick={() => setJudgesComp(comp)}
+                        className="flex items-center justify-center gap-2 py-2.5 px-4 border border-border rounded-xl text-sm font-bold hover:bg-muted/50 transition-colors"
+                      >
+                        <Gavel className="h-4 w-4" />
+                        المحكّمون
                       </button>
                     </div>
                   </div>
@@ -552,6 +562,16 @@ export default function AdminLibraryCompetitionsPage() {
           </div>
         )}
       </section>
+
+      {/* Judges Manager */}
+      {judgesComp && (
+        <JudgesManager
+          apiBase="/api/admin/competitions"
+          competition={{ id: judgesComp.id, title: judgesComp.title }}
+          accent="primary"
+          onClose={() => setJudgesComp(null)}
+        />
+      )}
 
       {/* Create/Edit Modal */}
       {showModal && (
