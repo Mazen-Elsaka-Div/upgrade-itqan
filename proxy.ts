@@ -87,12 +87,22 @@ export default async function middleware(req: NextRequest) {
                             const res = await fetch(`${supabaseUrl}/rest/v1/users?id=eq.${sessionPayload.sub}&select=role,is_active,is_disabled,has_academy_access,has_quran_access,approval_status,must_change_password`, {
                                 headers: {
                                     'apikey': supabaseKey,
-                                    'Authorization': `Bearer ${supabaseKey}`
+                                    'Authorization': `Bearer ${supabaseKey}`,
+                                    'Accept': 'application/json'
                                 }
                             });
-                            
-                            if (res.ok) {
-                                const userRes = await res.json();
+
+                            // Only attempt to parse when the response is OK *and* actually
+                            // JSON. A gateway/CDN can return an HTML error page (starting with
+                            // "<!DOCTYPE") with a 2xx status, which would otherwise make
+                            // res.json() throw "Unexpected token '<'". Treat anything non-JSON
+                            // as "no DB result" and fall back to the cached session below.
+                            const contentType = res.headers.get('content-type') || ''
+                            const userRes = res.ok && contentType.includes('application/json')
+                                ? await res.json().catch(() => null)
+                                : null
+
+                            if (Array.isArray(userRes)) {
                                 if (userRes.length === 0 || userRes[0].is_disabled === true) {
                             // User deleted or disabled - invalidate session (#14: real-time suspension)
                             const response = NextResponse.redirect(new URL("/login", req.url))
