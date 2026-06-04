@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { GetObjectCommand } from '@aws-sdk/client-s3'
 import { getSession } from '@/lib/auth'
-import { getRecordingS3Client, extractKeyFromUrl } from '@/lib/recordings-s3'
+import {
+  getRecordingS3Client,
+  extractKeyFromUrl,
+  getSignedRecordingUrl,
+} from '@/lib/recordings-s3'
 
 export const dynamic = 'force-dynamic'
 
@@ -36,12 +40,20 @@ export async function GET(req: NextRequest) {
 
   const ctx = getRecordingS3Client()
   if (!ctx) {
-    // No S3 credentials configured – nothing we can sign/stream.
     return NextResponse.json({ error: 'Recording storage not configured' }, { status: 500 })
   }
 
-  const range = req.headers.get('range') || undefined
+  // Primary path: hand the browser a short-lived presigned URL and redirect to
+  // it. The browser then streams directly from S3, which natively supports
+  // Range requests / seeking and avoids piping large media through a
+  // serverless function (which is slow, memory-heavy, and can truncate).
+  const signed = await getSignedRecordingUrl(key)
+  if (signed) {
+    return NextResponse.redirect(signed, 302)
+  }
 
+  // Fallback: proxy-stream the object ourselves (used only if signing fails).
+  const range = req.headers.get('range') || undefined
   try {
     const res = await ctx.client.send(
       new GetObjectCommand({
@@ -50,12 +62,9 @@ export async function GET(req: NextRequest) {
         Range: range,
       })
     )
-
     if (!res.Body) {
       return NextResponse.json({ error: 'Empty object' }, { status: 404 })
     }
-    // AWS SDK returns a Node stream in the Node runtime; convert to a web
-    // ReadableStream so NextResponse can stream it to the browser.
     const body = (res.Body as any).transformToWebStream
       ? (res.Body as any).transformToWebStream()
       : (res.Body as any)
@@ -67,9 +76,7 @@ export async function GET(req: NextRequest) {
     if (res.ContentLength != null) headers.set('Content-Length', String(res.ContentLength))
     if (res.ContentRange) headers.set('Content-Range', res.ContentRange)
 
-    // S3 returns 206 (PartialContent) when a Range was satisfied.
     const status = res.ContentRange ? 206 : 200
-
     return new NextResponse(body as any, { status, headers })
   } catch (err: any) {
     const code = err?.$metadata?.httpStatusCode

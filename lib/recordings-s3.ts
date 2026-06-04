@@ -228,12 +228,15 @@ export async function getSignedRecordingUrl(key: string): Promise<string | null>
   const ctx = getRecordingS3Client()
   if (!ctx) return null
   try {
+    // `getSignedUrl` and the S3 client come from sibling @aws-sdk packages whose
+    // pinned patch versions ship slightly different @smithy/types, so the client
+    // type isn't structurally assignable. The runtime contract is identical.
     return await getSignedUrl(
-      ctx.client,
+      ctx.client as any,
       new GetObjectCommand({
         Bucket: ctx.config.bucket,
         Key: key,
-      }),
+      }) as any,
       { expiresIn: 3600 * 6 } // 6 hours
     )
   } catch (err) {
