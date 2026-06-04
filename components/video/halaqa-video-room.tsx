@@ -57,6 +57,7 @@ interface TokenResponse {
   videoSessionId: string | null
   settings: {
     recording_enabled: boolean
+    recording_auto_start: boolean
     allow_chat: boolean
     allow_screen_share: boolean
     allow_student_unmute: boolean
@@ -381,7 +382,7 @@ export function HalaqaVideoRoom({ kind, refId, title, subtitle, exitHref, accent
           <RoomAudioRenderer />
           {isHost && sessionId && data.settings.recording_enabled && (
             <div className="absolute top-2 ltr:left-2 rtl:right-2 z-20 pointer-events-auto">
-              <ClientRecorder sessionId={sessionId} enabled />
+              <ClientRecorder sessionId={sessionId} enabled autoStart={data.settings.recording_auto_start} />
             </div>
           )}
         </LiveKitRoom>

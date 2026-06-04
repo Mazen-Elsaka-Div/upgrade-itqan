@@ -267,6 +267,7 @@ export async function POST(req: NextRequest) {
       videoSessionId,
       settings: {
         recording_enabled: settings.recording_enabled,
+        recording_auto_start: settings.recording_auto_start,
         allow_chat: settings.allow_chat,
         allow_screen_share: settings.allow_screen_share,
         allow_student_unmute: settings.allow_student_unmute,
