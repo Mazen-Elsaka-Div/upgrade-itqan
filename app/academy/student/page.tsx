@@ -54,6 +54,7 @@ export default function AcademyStudentDashboard() {
   const [sessions, setSessions] = useState<UpcomingSession[]>([])
   const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
+  const [showAllSessions, setShowAllSessions] = useState(false)
 
   useEffect(() => {
     async function fetchData() {
@@ -61,7 +62,7 @@ export default function AcademyStudentDashboard() {
         const [statsRes, coursesRes, sessionsRes, tasksRes] = await Promise.all([
           fetch('/api/academy/student/stats'),
           fetch('/api/academy/student/courses?limit=3'),
-          fetch('/api/academy/student/sessions?limit=3&upcoming=true'),
+          fetch('/api/academy/student/sessions?limit=20&upcoming=true'),
           fetch('/api/academy/student/tasks?limit=3&pending=true')
         ])
 
@@ -261,7 +262,7 @@ export default function AcademyStudentDashboard() {
               </p>
             ) : (
               <div className="space-y-3">
-                {sessions.map((session) => (
+                {(showAllSessions ? sessions : sessions.slice(0, 4)).map((session) => (
                   <Link
                     key={session.id}
                     href={`/academy/student/sessions/${session.id}`}
@@ -272,6 +273,14 @@ export default function AcademyStudentDashboard() {
                     <p className="text-xs text-blue-600 mt-2">{formatDate(session.scheduled_at)}</p>
                   </Link>
                 ))}
+                {sessions.length > 4 && (
+                  <button
+                    onClick={() => setShowAllSessions(!showAllSessions)}
+                    className="w-full text-center text-sm text-blue-600 hover:text-blue-700 py-2 mt-2 border border-blue-100 dark:border-blue-900/50 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                  >
+                    {showAllSessions ? (t.academy?.showLess || 'عرض أقل') : (t.academy?.showMore || 'المزيد')}
+                  </button>
+                )}
               </div>
             )}
           </div>
