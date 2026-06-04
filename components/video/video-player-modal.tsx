@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -21,8 +21,41 @@ export function VideoPlayerModal({ url, title, children }: Props) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const videoRef = useRef<HTMLVideoElement | null>(null)
+  const durationFixedRef = useRef(false)
 
   const signedUrl = `/api/video/recordings/watch?url=${encodeURIComponent(url)}`
+
+  // WebM files produced by MediaRecorder ship without a duration in their
+  // metadata, so the browser reports `Infinity` and the controls show no
+  // total time / disable seeking. Forcing a seek to a huge timestamp makes
+  // the browser scan to the end and resolve the real duration; we then snap
+  // back to the start.
+  const handleLoadedMetadata = () => {
+    setLoading(false)
+    const v = videoRef.current
+    if (!v) return
+    if (v.duration === Infinity || Number.isNaN(v.duration)) {
+      durationFixedRef.current = true
+      const onDurationChange = () => {
+        if (Number.isFinite(v.duration) && v.duration > 0) {
+          v.removeEventListener('durationchange', onDurationChange)
+          // Snap back so playback starts at the beginning.
+          try {
+            v.currentTime = 0
+          } catch {
+            /* ignore */
+          }
+        }
+      }
+      v.addEventListener('durationchange', onDurationChange)
+      try {
+        v.currentTime = 1e7
+      } catch {
+        /* ignore */
+      }
+    }
+  }
 
   return (
     <Dialog
@@ -73,12 +106,13 @@ export function VideoPlayerModal({ url, title, children }: Props) {
               </div>
             )}
             <video
+              ref={videoRef}
               src={signedUrl}
               controls
               playsInline
               preload="metadata"
               controlsList="nodownload"
-              onLoadedMetadata={() => setLoading(false)}
+              onLoadedMetadata={handleLoadedMetadata}
               onCanPlay={() => setLoading(false)}
               onPlaying={() => setLoading(false)}
               onError={(e) => {
