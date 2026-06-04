@@ -1,39 +1,21 @@
 -- ============================================
 -- 046: DIAGNOSTIC ONLY (read-only) — لماذا "سجل الجلسات" فارغ؟
 -- ============================================
--- شغّل كل استعلام على الـ live DB وابعتلي النتائج.
--- مفيش أي تعديل على البيانات هنا — كله SELECT.
+-- استعلام واحد يرجّع كل الأرقام في صف واحد، عشان محرر الـ SQL
+-- يعرضها كلها مرة واحدة (بعض المحررات بتعرض نتيجة آخر استعلام فقط).
+-- كله SELECT — مفيش أي تعديل على البيانات.
 -- ============================================
 
--- (1) هل جدول video_sessions موجود وكام صف فيه إجمالاً؟
-SELECT COUNT(*) AS total_video_sessions FROM video_sessions;
+SELECT
+  (SELECT COUNT(*) FROM video_sessions)                                   AS total_video_sessions,
+  (SELECT COUNT(*) FROM video_sessions WHERE platform = 'academy')        AS academy_video_sessions,
+  (SELECT COUNT(*) FROM video_sessions WHERE platform = 'maqraa')         AS maqraa_video_sessions,
+  (SELECT COUNT(*) FROM video_sessions WHERE kind = 'course_session')     AS course_session_rows,
+  (SELECT COUNT(*) FROM video_sessions WHERE recording_status = 'recording') AS now_recording,
+  (SELECT COUNT(*) FROM video_sessions WHERE egress_id IS NOT NULL)       AS with_egress,
+  (SELECT COUNT(*) FROM course_sessions)                                  AS total_course_sessions,
+  (SELECT string_agg(DISTINCT platform, ', ') FROM video_sessions)        AS distinct_platforms;
 
--- (2) توزيع الصفوف حسب المنصّة والنوع (لو فاضي يبقى مفيش جلسات اتسجّلت أصلاً).
-SELECT platform, kind, COUNT(*) AS c
-FROM video_sessions
-GROUP BY platform, kind
-ORDER BY c DESC;
-
--- (3) آخر 10 جلسات (لو ظهرت صفوف هنا يبقى الإدراج شغّال والمشكلة في الفلترة/العرض).
-SELECT id, kind, platform, room_name, started_by,
-       started_at, ended_at, recording_status, egress_id
-FROM video_sessions
-ORDER BY started_at DESC
-LIMIT 10;
-
--- (4) قيم platform الموجودة فعلاً (نكشف أي اختلاف إملائي/مسافات مثل ' academy ').
-SELECT DISTINCT platform, length(platform) AS len
-FROM video_sessions;
-
--- (5) تأكيد إن أعمدة الإدراج كلها موجودة في الـ live (لو ناقص عمود الإدراج بيفشل بصمت).
-SELECT column_name, data_type, is_nullable
-FROM information_schema.columns
-WHERE table_name = 'video_sessions'
-ORDER BY ordinal_position;
-
--- (6) هل فيه جلسات دورات (course_session) في جدول الدورات تقدر تُبَث؟
-SELECT cs.id, cs.title, cs.status, cs.scheduled_at, c.teacher_id
-FROM course_sessions cs
-JOIN courses c ON c.id = cs.course_id
-ORDER BY cs.scheduled_at DESC NULLS LAST
-LIMIT 10;
+-- لو عايز تشوف آخر الصفوف فعلياً (شغّله لوحده لو محررك بيعرض نتيجة واحدة):
+-- SELECT id, kind, platform, room_name, started_by, started_at, ended_at, recording_status, egress_id
+-- FROM video_sessions ORDER BY started_at DESC LIMIT 10;
