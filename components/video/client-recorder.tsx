@@ -33,6 +33,8 @@ interface Props {
   sessionId: string
   /** Show the button (host UI only). */
   enabled: boolean
+  /** When true, begin recording automatically once the host's tracks are live. */
+  autoStart?: boolean
 }
 
 type RecState = 'off' | 'starting' | 'recording' | 'stopping' | 'fallback-recording'
@@ -51,11 +53,12 @@ const MIN_PART_BYTES = 5 * 1024 * 1024
 // granularity and recorder stability per the spec.
 const RECORDER_TIMESLICE_MS = 5000
 
-export function ClientRecorder({ sessionId, enabled }: Props) {
+export function ClientRecorder({ sessionId, enabled, autoStart = false }: Props) {
   const room = useRoomContext()
   const { localParticipant } = useLocalParticipant()
   const [state, setState] = useState<RecState>('off')
   const [error, setError] = useState<string | null>(null)
+  const autoStartedRef = useRef(false)
   const uploadCtxRef = useRef<UploadContext | null>(null)
   const partNumberRef = useRef(1)
   const bufferRef = useRef<Blob[]>([])
@@ -353,6 +356,30 @@ export function ClientRecorder({ sessionId, enabled }: Props) {
       setState('off')
     }
   }, [state, stopFallback])
+
+  // Auto-start recording when the platform setting is enabled. We poll until
+  // the host actually has a publishable audio/video track (camera/mic can take
+  // a moment after joining) and then kick off the recorder exactly once.
+  useEffect(() => {
+    if (!autoStart || autoStartedRef.current || state !== 'off') return
+    let cancelled = false
+    const tryStart = (): boolean => {
+      if (cancelled || autoStartedRef.current) return true
+      const stream = buildMergedStream()
+      if (!stream) return false
+      autoStartedRef.current = true
+      void start()
+      return true
+    }
+    if (tryStart()) return
+    const interval = setInterval(() => {
+      if (tryStart()) clearInterval(interval)
+    }, 1500)
+    return () => {
+      cancelled = true
+      clearInterval(interval)
+    }
+  }, [autoStart, state, buildMergedStream, start])
 
   // Best-effort upload of remaining parts on tab close. We can't await on a
   // page-unload, but MediaRecorder.stop is synchronous enough to surface the
