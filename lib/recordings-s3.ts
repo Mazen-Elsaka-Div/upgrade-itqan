@@ -13,6 +13,7 @@ import {
   ListPartsCommand,
   GetObjectCommand,
   DeleteObjectCommand,
+  HeadObjectCommand,
 } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
@@ -220,6 +221,27 @@ export async function deleteRecordingObject(key: string): Promise<boolean> {
     return true
   } catch (err) {
     console.error('[recordings-s3] deleteRecordingObject failed', err)
+    return false
+  }
+}
+
+/**
+ * Returns true if the object exists in the bucket. Used to avoid redirecting a
+ * viewer to a presigned URL for a key that was never finalised (or was
+ * deleted), which would otherwise surface a raw S3 "NoSuchKey" XML page.
+ */
+export async function recordingObjectExists(key: string): Promise<boolean> {
+  const ctx = getRecordingS3Client()
+  if (!ctx) return false
+  try {
+    await ctx.client.send(
+      new HeadObjectCommand({
+        Bucket: ctx.config.bucket,
+        Key: key,
+      })
+    )
+    return true
+  } catch {
     return false
   }
 }

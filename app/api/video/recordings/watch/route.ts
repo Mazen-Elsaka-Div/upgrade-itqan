@@ -5,6 +5,7 @@ import {
   getRecordingS3Client,
   extractKeyFromUrl,
   getSignedRecordingUrl,
+  recordingObjectExists,
 } from '@/lib/recordings-s3'
 
 export const dynamic = 'force-dynamic'
@@ -41,6 +42,17 @@ export async function GET(req: NextRequest) {
   const ctx = getRecordingS3Client()
   if (!ctx) {
     return NextResponse.json({ error: 'Recording storage not configured' }, { status: 500 })
+  }
+
+  // Confirm the object actually exists before handing back a URL. Otherwise a
+  // 302 to a presigned URL for a missing key drops the viewer onto S3's raw
+  // "NoSuchKey" XML error page.
+  const exists = await recordingObjectExists(key)
+  if (!exists) {
+    return NextResponse.json(
+      { error: 'التسجيل غير متاح. قد يكون لم يكتمل رفعه أو تم حذفه.' },
+      { status: 404 }
+    )
   }
 
   // Primary path: hand the browser a short-lived presigned URL and redirect to
