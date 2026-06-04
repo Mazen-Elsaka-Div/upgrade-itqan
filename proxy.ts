@@ -80,38 +80,34 @@ export default async function middleware(req: NextRequest) {
                 let dbUser: any = null
                 if (isSensitiveRoute && !academyPublicPaths.some(p => pathname.startsWith(p))) {
                     try {
-                        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-                        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-                        
-                        if (supabaseUrl && supabaseKey) {
-                            const res = await fetch(`${supabaseUrl}/rest/v1/users?id=eq.${sessionPayload.sub}&select=role,is_active,is_disabled,has_academy_access,has_quran_access,approval_status,must_change_password`, {
-                                headers: {
-                                    'apikey': supabaseKey,
-                                    'Authorization': `Bearer ${supabaseKey}`,
-                                    'Accept': 'application/json'
-                                }
-                            });
+                        // Query the live database directly (DATABASE_URL) via the shared pg
+                        // pool. The previous Supabase REST call was unreliable from the
+                        // middleware bundle — it resolved to the app's own host and returned an
+                        // HTML page, which made res.json() throw "Unexpected token '<'". A direct
+                        // query always targets the real live DB and never returns HTML.
+                        const { queryOne } = await import("@/lib/db")
+                        const userRow = await queryOne<{
+                            role: string
+                            is_active: boolean
+                            is_disabled: boolean
+                            has_academy_access: boolean
+                            has_quran_access: boolean
+                            approval_status: string
+                            must_change_password: boolean
+                        }>(
+                            `SELECT role, is_active, is_disabled, has_academy_access, has_quran_access, approval_status, must_change_password FROM users WHERE id = $1 LIMIT 1`,
+                            [sessionPayload.sub]
+                        )
 
-                            // Only attempt to parse when the response is OK *and* actually
-                            // JSON. A gateway/CDN can return an HTML error page (starting with
-                            // "<!DOCTYPE") with a 2xx status, which would otherwise make
-                            // res.json() throw "Unexpected token '<'". Treat anything non-JSON
-                            // as "no DB result" and fall back to the cached session below.
-                            const contentType = res.headers.get('content-type') || ''
-                            const userRes = res.ok && contentType.includes('application/json')
-                                ? await res.json().catch(() => null)
-                                : null
-
-                            if (Array.isArray(userRes)) {
-                                if (userRes.length === 0 || userRes[0].is_disabled === true) {
-                            // User deleted or disabled - invalidate session (#14: real-time suspension)
+                        // User deleted or disabled - invalidate session (#14: real-time suspension)
+                        if (!userRow || userRow.is_disabled === true) {
                             const response = NextResponse.redirect(new URL("/login", req.url))
                             response.cookies.delete("better-auth.session_token")
                             response.cookies.delete("auth-token")
                             return response
                         }
 
-                        dbUser = userRes[0]
+                        dbUser = userRow
 
                         if (dbUser.is_active === false && sessionPayload.role !== 'admin') {
                             const response = NextResponse.redirect(new URL("/login", req.url))
@@ -168,8 +164,6 @@ export default async function middleware(req: NextRequest) {
                             response.cookies.delete("better-auth.session_token")
                             response.cookies.delete("auth-token")
                             return response
-                        }
-                            }
                         }
                     } catch (dbErr) {
                         console.log("[v0] A-4 DB check failed, continuing with cached session:", dbErr)
