@@ -343,7 +343,7 @@ function OverviewTab({ stats, onViewAll }: { stats: Stats; onViewAll: () => void
         <StatCard
           icon={<Star className="w-4 h-4" />}
           label="متوسط التقييم"
-          value={stats.avg_rating != null ? `${stats.avg_rating.toFixed(2)} / 5` : '—'}
+          value={stats.avg_rating != null ? `${Number(stats.avg_rating).toFixed(2)} / 5` : '—'}
           hint={`${stats.rated_sessions} جلسة مقيّمة`}
           tone={stats.avg_rating && stats.avg_rating >= 4 ? 'success' : 'default'}
         />
@@ -697,7 +697,7 @@ function SessionLogTab({
                 )}
                 {s.avg_rating != null && (
                   <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/30">
-                    <Star className="w-2.5 h-2.5 fill-current" /> {s.avg_rating.toFixed(1)} ({s.ratings_count})
+                    <Star className="w-2.5 h-2.5 fill-current" /> {Number(s.avg_rating).toFixed(1)} ({s.ratings_count})
                   </span>
                 )}
               </div>

@@ -52,12 +52,12 @@ export async function GET(req: NextRequest) {
 
       query<{ count: string }>(`
         SELECT COUNT(*)::text as count FROM enrollments
-        WHERE created_at::date = CURRENT_DATE
+        WHERE enrolled_at::date = CURRENT_DATE
       `).catch(() => [{ count: '0' }]),
 
       query<{ count: string }>(`
         SELECT COUNT(*)::text as count FROM enrollments
-        WHERE created_at >= NOW() - INTERVAL '7 days'
+        WHERE enrolled_at >= NOW() - INTERVAL '7 days'
       `).catch(() => [{ count: '0' }]),
 
       query<{ count: string }>(`
