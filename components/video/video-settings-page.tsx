@@ -685,7 +685,7 @@ function SessionLogTab({
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border">
                   {KIND_LABEL[s.kind] || s.kind}
                 </span>
-                {!s.ended_at && (
+                {!s.ended_at && !s.recording_url && (
                   <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-700 dark:text-rose-300 border border-rose-500/30">
                     <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" /> مباشر
                   </span>

@@ -139,7 +139,7 @@ export function VideoSessionDetail({ sessionId, backHref }: Props) {
               <span className="inline-flex items-center px-3 py-1 rounded-full bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 text-xs font-bold tracking-wide">
                 {KIND_LABEL[s.kind] || s.kind}
               </span>
-              {!s.ended_at && (
+              {!s.ended_at && !s.recording_url && (
                 <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300">
                   <span className="w-2 h-2 rounded-full bg-rose-600 dark:bg-rose-400 animate-pulse" /> 
                   مباشر الآن
@@ -163,7 +163,7 @@ export function VideoSessionDetail({ sessionId, backHref }: Props) {
 
           {/* Action Buttons */}
           <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-            {!s.ended_at && s.platform === 'academy' && (
+            {!s.ended_at && !s.recording_url && s.platform === 'academy' && (
               <Link
                 href={`/academy/admin/video-settings/sessions/${sessionId}/monitor`}
                 className="inline-flex flex-1 md:flex-none justify-center items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 hover:bg-emerald-100 transition-colors text-sm font-bold shadow-sm"
