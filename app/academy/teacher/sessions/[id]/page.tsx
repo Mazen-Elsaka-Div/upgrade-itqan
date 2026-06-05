@@ -18,6 +18,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
+import { RecordingShareToggle } from './recording-share-toggle'
 
 interface SessionDetails {
   id: string
@@ -29,6 +30,7 @@ interface SessionDetails {
   is_public: boolean
   meeting_url: string | null
   recording_url: string | null
+  is_recording_shared: boolean
   course_name: string
   series_title: string | null
   [key: string]: unknown
@@ -245,6 +247,17 @@ export default async function SessionDetailsPage({ params }: { params: Promise<{
                     {sessionDetails.description}
                   </p>
                 </div>
+              </>
+            )}
+
+            {sessionDetails.recording_url && (
+              <>
+                <Separator />
+                <RecordingShareToggle 
+                  sessionId={sessionDetails.id}
+                  initialShared={sessionDetails.is_recording_shared || false}
+                  hasRecording={!!sessionDetails.recording_url}
+                />
               </>
             )}
           </CardContent>

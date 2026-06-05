@@ -21,7 +21,12 @@ export async function GET(req: NextRequest) {
             ORDER BY cs.scheduled_at ASC
         `, [session.sub])
 
-        return NextResponse.json({ data: rows })
+        const sanitizedRows = rows.map((r: any) => ({
+            ...r,
+            recording_url: r.is_recording_shared ? r.recording_url : null
+        }))
+
+        return NextResponse.json({ data: sanitizedRows })
     } catch (error) {
         console.error('[API] Error fetching student sessions:', error)
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
