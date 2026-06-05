@@ -130,12 +130,15 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
         [stagesCompleted, enrollment.id],
       )
       try {
-        const pathRow = await queryOne<{ title: string }>(
-          `SELECT title FROM tajweed_paths WHERE id = $1`,
+        const pathRow = await queryOne<{ title: string; subject: string }>(
+          `SELECT title, subject FROM tajweed_paths WHERE id = $1`,
           [id],
         )
+        // Academy subjects (fiqh/aqeedah/seerah/tafsir) belong to the academy
+        // certificates centre; the tajweed subject belongs to the maqraa side.
+        const certScope = pathRow?.subject === "tajweed" ? "maqraa" : "academy"
         await onPathCompleted({
-          scope: "maqraa",
+          scope: certScope,
           studentId: session!.sub,
           pathId: id,
           pathTitle: pathRow?.title || "",
