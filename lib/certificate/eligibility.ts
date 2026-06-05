@@ -119,6 +119,100 @@ export async function autoIssueRequest(
   }
 }
 
+/**
+ * Self-heal a student's certificates when they open their certificates page.
+ *
+ * This makes issuance fully automatic and resilient even if:
+ *   - the `auto_issue_on_eligibility` setting was never flipped on, or
+ *   - a completion happened on an older build before the eligibility hooks
+ *     existed (so no request was ever created).
+ *
+ * Steps (academy scope):
+ *   1. For every COMPLETED course / tajweed path / memorization path, make sure
+ *      an issuance request exists (idempotent — duplicates are skipped).
+ *   2. Issue, right now and without any admin step, every request that is ready
+ *      (`submitted` or `approved`). `data_required` requests are left alone so
+ *      the student can still type their name first (paths), after which the
+ *      submit handler auto-issues them.
+ *
+ * Entirely best-effort: any failure is swallowed so the page still renders.
+ */
+export async function reconcileStudentCertificates(
+  scope: CertificateScope,
+  studentId: string,
+): Promise<void> {
+  try {
+    if (scope === "academy") {
+      // 1a. Completed courses.
+      const courses = await query<{ course_id: string; title: string | null }>(
+        `SELECT e.course_id, c.title
+           FROM enrollments e
+           JOIN courses c ON c.id = e.course_id
+          WHERE e.student_id = $1
+            AND (e.status = 'COMPLETED' OR e.progress_percentage >= 100)`,
+        [studentId],
+      ).catch(() => [])
+      for (const c of courses) {
+        await onCourseCompleted({
+          scope,
+          studentId,
+          courseId: c.course_id,
+          courseTitle: c.title || "",
+        })
+      }
+
+      // 1b. Completed tajweed paths.
+      const tajweed = await query<{ path_id: string; title: string | null }>(
+        `SELECT e.path_id, p.title
+           FROM tajweed_path_enrollments e
+           JOIN tajweed_paths p ON p.id = e.path_id
+          WHERE e.student_id = $1 AND e.status = 'completed'`,
+        [studentId],
+      ).catch(() => [])
+      for (const p of tajweed) {
+        await onPathCompleted({
+          scope,
+          studentId,
+          pathId: p.path_id,
+          pathTitle: p.title || "",
+          pathType: "tajweed_path",
+        })
+      }
+
+      // 1c. Completed memorization paths.
+      const memo = await query<{ path_id: string; title: string | null }>(
+        `SELECT e.path_id, p.title
+           FROM memorization_path_enrollments e
+           JOIN memorization_paths p ON p.id = e.path_id
+          WHERE e.student_id = $1 AND e.status = 'completed'`,
+        [studentId],
+      ).catch(() => [])
+      for (const p of memo) {
+        await onPathCompleted({
+          scope,
+          studentId,
+          pathId: p.path_id,
+          pathTitle: p.title || "",
+          pathType: "memorization_path",
+        })
+      }
+    }
+
+    // 2. Issue any request that needs no further student input.
+    const ready = await query<{ id: string }>(
+      `SELECT id FROM certificate_issuance_requests
+        WHERE student_id = $1 AND scope = $2
+          AND status IN ('submitted', 'approved')`,
+      [studentId, scope],
+    ).catch(() => [])
+    for (const r of ready) {
+      await autoIssueRequest(r.id, scope)
+    }
+  } catch (err) {
+    console.error("[eligibility] reconcileStudentCertificates failed", err)
+  }
+}
+
 export interface EligibilityInput {
   scope: CertificateScope
   kind: CertificateKind

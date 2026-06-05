@@ -51,6 +51,7 @@ const getRoleConfig = (t: any): Record<'student' | 'reader' | 'admin' | 'student
       {
         title: t.shell.account,
         items: [
+          { href: '/student/family', label: 'ولي الأمر والعائلة', icon: Users },
           { href: '/student/notifications', label: t.student.notifications, icon: Bell },
           { href: '/student/profile', label: t.student.profile, icon: User },
         ]

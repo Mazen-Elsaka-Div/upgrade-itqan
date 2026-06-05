@@ -62,6 +62,7 @@ const getAcademyRoleConfig = (t: any, role: AcademyRole): { sections: NavSection
         {
           title: t.shell?.account || 'الحساب',
           items: [
+            { href: '/academy/student/family', label: t.academy?.guardianFamily || 'ولي الأمر والعائلة', icon: Users },
             { href: '/academy/student/notifications', label: t.student?.notifications || 'الإشعارات', icon: Bell },
             { href: '/academy/student/profile', label: t.student?.profile || 'الملف الشخصي', icon: User },
           ]
