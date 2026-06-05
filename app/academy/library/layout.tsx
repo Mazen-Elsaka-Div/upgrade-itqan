@@ -24,6 +24,7 @@ function hasAcademyRoleClaim(session: JWTPayload, role: string): boolean {
 
 const ACADEMY_ROLES = new Set([
   "admin",
+  "student",
   "academy_student",
   "academy_admin",
   "teacher",
