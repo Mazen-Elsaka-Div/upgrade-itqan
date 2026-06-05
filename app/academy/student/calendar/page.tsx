@@ -134,7 +134,7 @@ export default function AcademyCalendarPage() {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.5, ease: 'easeOut' }
-  }
+  } as const
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 pb-12" dir={isAr ? 'rtl' : 'ltr'}>
@@ -144,11 +144,17 @@ export default function AcademyCalendarPage() {
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/10 blur-3xl rounded-full -z-10 pointer-events-none" />
         
         <div className="space-y-3">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-wider backdrop-blur-sm">
+          <div className={cn(
+            "inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase backdrop-blur-sm",
+            isAr ? "tracking-normal" : "tracking-wider"
+          )}>
             <Sparkles className="w-4 h-4" />
             {isAr ? 'التقويم الأكاديمي' : 'Academic Calendar'}
           </div>
-          <h1 className="text-4xl lg:text-5xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-400">
+          <h1 className={cn(
+            "text-4xl lg:text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-400",
+            isAr ? "tracking-normal" : "tracking-tight"
+          )}>
             {isAr ? 'التقويم والمواعيد' : 'Calendar & Schedule'}
           </h1>
           <p className="text-muted-foreground font-medium max-w-xl">
@@ -319,7 +325,15 @@ export default function AcademyCalendarPage() {
             <CardContent className="p-6 sm:p-8 pt-0">
               <div className="grid grid-cols-7 gap-2 sm:gap-4 mb-4">
                 {dayNames.map(d => (
-                  <div key={d} className="text-center font-bold text-xs sm:text-sm text-muted-foreground uppercase tracking-widest">{d}</div>
+                  <div 
+                    key={d} 
+                    className={cn(
+                      "text-center font-bold text-xs sm:text-sm text-muted-foreground uppercase",
+                      isAr ? "tracking-normal" : "tracking-widest"
+                    )}
+                  >
+                    {d}
+                  </div>
                 ))}
               </div>
 
@@ -402,7 +416,10 @@ export default function AcademyCalendarPage() {
               <div className="absolute top-0 right-0 p-6 opacity-5 pointer-events-none transform translate-x-1/4 -translate-y-1/4">
                 <CalendarIcon className="w-32 h-32 text-foreground rotate-12" />
               </div>
-              <p className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-2 relative z-10 flex items-center gap-2">
+              <p className={cn(
+                "text-xs font-bold text-blue-600 dark:text-blue-400 uppercase mb-2 relative z-10 flex items-center gap-2",
+                isAr ? "tracking-normal" : "tracking-widest"
+              )}>
                 <LayoutDashboard className="w-4 h-4" />
                 {isAr ? 'تفاصيل اليوم' : 'Day Details'}
               </p>

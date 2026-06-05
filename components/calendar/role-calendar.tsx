@@ -118,11 +118,11 @@ export default function RoleCalendar({ apiUrl, pageTitle, pageBadge, showMarkDon
     <div className="max-w-7xl mx-auto space-y-8 pb-12" dir={isAr ? 'rtl' : 'ltr'}>
       {/* Page header */}
       <div className="space-y-2">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider mb-2">
+        <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase ${isAr ? 'tracking-normal' : 'tracking-wider'} mb-2`}>
           <CalendarIcon className="w-4 h-4" />
           {pageBadge}
         </div>
-        <h1 className="text-3xl lg:text-4xl font-black tracking-tight text-foreground">
+        <h1 className={`text-3xl lg:text-4xl font-black ${isAr ? 'tracking-normal' : 'tracking-tight'} text-foreground`}>
           {pageTitle}
         </h1>
       </div>
