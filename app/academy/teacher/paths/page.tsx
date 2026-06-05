@@ -1,13 +1,15 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import {
   Plus, Trash2, Edit2, BookOpen, X, Loader2, BarChart3,
   UserPlus, Users, Mic, Eye, EyeOff, Search, CheckSquare, Square, Check,
-  Layers
+  Layers, UploadCloud, ImageIcon
 } from 'lucide-react'
 
 interface Path {
@@ -56,6 +58,7 @@ const emptyForm = {
 }
 
 export default function TeacherPathsPage() {
+  const router = useRouter()
   const [paths, setPaths] = useState<Path[]>([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
@@ -63,6 +66,8 @@ export default function TeacherPathsPage() {
   const [form, setForm] = useState(emptyForm)
   const [saving, setSaving] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [uploadingThumb, setUploadingThumb] = useState(false)
+  const thumbInputRef = useRef<HTMLInputElement>(null)
 
   // Enroll-students modal state
   const [enrollPath, setEnrollPath] = useState<Path | null>(null)
@@ -202,6 +207,26 @@ export default function TeacherPathsPage() {
     }
   }
 
+  const handleThumbUpload = async (file: File) => {
+    setUploadingThumb(true)
+    try {
+      const fd = new FormData()
+      fd.append('image', file)
+      const res = await fetch('/api/upload', { method: 'POST', body: fd })
+      const json = await res.json()
+      if (res.ok && json.url) {
+        setForm((prev) => ({ ...prev, thumbnail_url: json.url }))
+        toast.success('تم رفع الصورة')
+      } else {
+        toast.error(json.error || 'فشل رفع الصورة')
+      }
+    } catch {
+      toast.error('حدث خطأ أثناء رفع الصورة')
+    } finally {
+      setUploadingThumb(false)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.title) return
@@ -215,10 +240,18 @@ export default function TeacherPathsPage() {
         body: JSON.stringify(form)
       })
       if (res.ok) {
+        const json = await res.json().catch(() => ({}))
         setShowModal(false)
+        if (!editItem && json?.data?.id) {
+          // Take the teacher straight to the new path so they can add its content
+          toast.success('تم إنشاء المسار، أضف محتواه الآن')
+          router.push(`/academy/teacher/paths/${json.data.id}`)
+          return
+        }
+        toast.success('تم حفظ التعديلات')
         fetchPaths()
       } else {
-        alert('حدث خطأ في الحفظ')
+        toast.error('حدث خطأ في الحفظ')
       }
     } finally {
       setSaving(false)
@@ -304,7 +337,7 @@ export default function TeacherPathsPage() {
           <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
             <BookOpen className="w-10 h-10 text-emerald-600/50" />
           </div>
-          <h2 className="text-xl font-bold mb-3">لا توجد مسارات تعليمية بعد</h2>
+          <h2 className="text-xl font-bold mb-3">لا توجد مسارات تعليمية ��عد</h2>
           <p className="text-muted-foreground font-medium mb-8 max-w-sm mx-auto leading-relaxed">
             المسار التعليمي هو سلسلة من الدورات. ابدأ بإنشاء مسارك الأول ثم أضف إليه الدورات من صفحة تفاصيل المسار.
           </p>
@@ -347,7 +380,7 @@ export default function TeacherPathsPage() {
                     href={`/academy/teacher/paths/${path.id}`} 
                     className="flex-1 flex items-center justify-center gap-2 py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold transition-colors shadow-sm"
                   >
-                    <BarChart3 className="w-4 h-4" /> الإحصائيات
+                    <Layers className="w-4 h-4" /> إدارة المسار
                   </Link>
                   <button
                     onClick={() => openEnroll(path)}
@@ -449,6 +482,50 @@ export default function TeacherPathsPage() {
                     onChange={e => setForm({ ...form, estimated_hours: Number(e.target.value) })}
                     className="w-full px-4 py-3 border border-border/60 rounded-xl bg-background/50 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium"
                   />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-sm font-bold text-foreground">صورة غلاف المسار (اختياري)</label>
+                  <input
+                    ref={thumbInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0]
+                      if (f) handleThumbUpload(f)
+                    }}
+                  />
+                  <div className="flex items-center gap-3">
+                    <div className="w-20 h-20 rounded-2xl border border-border/60 bg-muted/40 overflow-hidden shrink-0 flex items-center justify-center">
+                      {form.thumbnail_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={form.thumbnail_url || "/placeholder.svg"} alt="معاينة صورة الغلاف" className="w-full h-full object-cover" />
+                      ) : (
+                        <ImageIcon className="w-7 h-7 text-muted-foreground/40" />
+                      )}
+                    </div>
+                    <div className="flex-1 space-y-2">
+                      <button
+                        type="button"
+                        onClick={() => thumbInputRef.current?.click()}
+                        disabled={uploadingThumb}
+                        className="w-full flex items-center justify-center gap-2 px-4 py-3 border border-border/60 rounded-xl bg-background/50 hover:bg-muted/50 transition-colors text-sm font-medium disabled:opacity-60"
+                      >
+                        {uploadingThumb ? <Loader2 className="w-4 h-4 animate-spin" /> : <UploadCloud className="w-4 h-4" />}
+                        {uploadingThumb ? 'جاري الرفع...' : form.thumbnail_url ? 'تغيير الصورة' : 'رفع صورة من جهازك'}
+                      </button>
+                      {form.thumbnail_url && (
+                        <button
+                          type="button"
+                          onClick={() => setForm({ ...form, thumbnail_url: '' })}
+                          className="text-xs text-rose-500 hover:underline"
+                        >
+                          إزالة الصورة
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 </div>
                 
                 <div className="space-y-3 pt-2">

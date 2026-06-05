@@ -5,10 +5,11 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { 
   ArrowRight, Users, Award, TrendingUp, UserMinus, Percent, 
-  GraduationCap, Calendar, Clock, BarChart3, ChevronLeft, Loader2
+  GraduationCap, Calendar, BarChart3, Loader2, Layers
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
+import PathStagesManager from '@/components/paths/path-stages-manager'
 
 interface PathDetails {
   id: string
@@ -56,6 +57,7 @@ export default function TeacherPathStatsPage() {
   const pathId = params.id as string
   const [data, setData] = useState<StatsApiResponse['data'] | null>(null)
   const [loading, setLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState<'content' | 'stats'>('content')
 
   useEffect(() => {
     async function fetchStats() {
@@ -127,10 +129,42 @@ export default function TeacherPathStatsPage() {
         </div>
         <div className="flex items-center gap-2 bg-emerald-600/10 border border-emerald-500/10 rounded-2xl px-4 py-2.5 text-emerald-600 dark:text-emerald-400 text-sm font-semibold shrink-0">
           <GraduationCap className="w-5 h-5" />
-          {path.total_stages} دورة دراسية في المسار
+          {path.total_stages} مرحلة في المسار
         </div>
       </div>
 
+      {/* Tabs */}
+      <div className="flex items-center gap-1 p-1 bg-muted/50 border border-border rounded-2xl w-full sm:w-fit">
+        <button
+          onClick={() => setActiveTab('content')}
+          className={cn(
+            'flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-colors',
+            activeTab === 'content'
+              ? 'bg-card text-emerald-600 shadow-sm'
+              : 'text-muted-foreground hover:text-foreground',
+          )}
+        >
+          <Layers className="w-4 h-4" />
+          المحتوى والمراحل
+        </button>
+        <button
+          onClick={() => setActiveTab('stats')}
+          className={cn(
+            'flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-colors',
+            activeTab === 'stats'
+              ? 'bg-card text-emerald-600 shadow-sm'
+              : 'text-muted-foreground hover:text-foreground',
+          )}
+        >
+          <BarChart3 className="w-4 h-4" />
+          الإحصائيات والمتابعة
+        </button>
+      </div>
+
+      {activeTab === 'content' && <PathStagesManager pathId={path.id} />}
+
+      {activeTab === 'stats' && (
+      <div className="space-y-8">
       {/* Stats Grid Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6">
         {/* Enrolled */}
@@ -303,6 +337,8 @@ export default function TeacherPathStatsPage() {
           )}
         </div>
       </div>
+      </div>
+      )}
     </div>
   )
 }
