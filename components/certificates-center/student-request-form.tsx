@@ -225,8 +225,8 @@ export default function StudentCertificateRequestForm({
           </div>
           <p className="text-sm text-muted-foreground">
             {isAr
-              ? 'اكتب اسمك كما تريده أن يظهر على الشهادة بالضبط. سيتم إصدار شهادتك تلقائيًا فور الإرسال.'
-              : 'Type your name exactly as you want it on the certificate. Your certificate is issued automatically as soon as you submit.'}
+              ? 'اكتب اسمك كما تريده أن يظهر على الشهادة بالضبط. بعد الإرسال يراجع طلبك المدرّس المسؤول عن الدورة أو الإدارة، ثم تُصدر شهادتك.'
+              : 'Type your name exactly as you want it on the certificate. After you submit, the course teacher or an admin reviews your request, then your certificate is issued.'}
           </p>
 
           {request.rejection_reason && (
@@ -333,19 +333,19 @@ export default function StudentCertificateRequestForm({
               )}
               {request.status === 'rejected'
                 ? isAr
-                  ? 'إعادة الإرسال وإصدار الشهادة'
-                  : 'Resubmit & issue'
+                  ? 'إعادة الإرسال للاعتماد'
+                  : 'Resubmit for approval'
                 : isAr
-                  ? 'إصدار الشهادة'
-                  : 'Issue my certificate'}
+                  ? 'إرسال الطلب للاعتماد'
+                  : 'Submit for approval'}
             </Button>
           ) : (
             <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-4 flex items-center gap-3">
               <CheckCircle2 className="w-5 h-5 text-emerald-600" />
               <span className="text-sm font-medium text-emerald-800">
                 {isAr
-                  ? 'تم استلام بياناتك. ستجد شهادتك في "الشهادات الصادرة" بمجرد جاهزيتها.'
-                  : 'Your details were received. You will find your certificate under "Issued certificates" once it is ready.'}
+                  ? 'تم استلام بياناتك وطلبك الآن بانتظار اعتماد المدرّس المسؤول أو الإدارة. ستجد شهادتك في "الشهادات الصادرة" بمجرد اعتمادها.'
+                  : 'Your details were received and your request is now awaiting approval from the course teacher or an admin. You will find your certificate under "Issued certificates" once it is approved.'}
               </span>
             </div>
           )}
