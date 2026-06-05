@@ -143,62 +143,131 @@ export default function StudentTajweedPathDetail() {
   const pct = Math.round((completed / total) * 100)
 
   return (
-    <div className="space-y-6 p-4 sm:p-6 max-w-4xl mx-auto">
-      <Button asChild variant="ghost" size="sm" className="gap-2">
-        <Link href="/student/tajweed-paths">
-          <ArrowRight className="h-4 w-4 rtl:rotate-180" /> {tp.actions.backToPaths}
-        </Link>
-      </Button>
+    <div className="space-y-6 p-4 sm:p-6 max-w-5xl mx-auto pb-12">
+      <Link 
+        href="/student/tajweed-paths"
+        className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold text-muted-foreground hover:text-emerald-600 bg-muted/50 hover:bg-emerald-50 rounded-xl transition-colors w-fit border border-transparent hover:border-emerald-200"
+      >
+        <ArrowRight className="h-4 w-4 rtl:rotate-180" /> {tp.actions.backToPaths}
+      </Link>
 
-      <Card className="p-6">
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <GraduationCap className="h-6 w-6 text-emerald-600" />
-          {path.title}
-        </h1>
-        {path.description && (
-          <p className="text-sm text-muted-foreground mt-2">{path.description}</p>
-        )}
-        <div className="flex flex-wrap gap-2 mt-3">
-          <Badge variant="secondary">{path.total_stages} {tp.metadata.stagesUnit}</Badge>
-          {path.level && <Badge variant="outline">{tp.levels[path.level] || path.level}</Badge>}
-          {path.estimated_days && (
-            <Badge variant="outline">{path.estimated_days} {tp.metadata.estimatedDays}</Badge>
-          )}
-          {path.require_audio && (
-            <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100">
-              <Mic className="h-3 w-3 me-1" /> {tp.metadata.requireAudioBadge}
-            </Badge>
-          )}
-        </div>
-
-        {!enrollment ? (
-          <div className="mt-5 flex items-center justify-between gap-3 flex-wrap">
-            <p className="text-sm text-muted-foreground">
-              {tp.detail.enrollPrompt}
-            </p>
-            <Button onClick={enroll} disabled={enrolling} className="gap-2">
-              {enrolling ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
-              {tp.actions.startPath}
-            </Button>
-          </div>
-        ) : (
-          <div className="mt-5 space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">{tp.metadata.yourProgress}</span>
-              <span className="font-semibold">{completed}/{total} ({pct}%)</span>
-            </div>
-            <Progress value={pct} className="h-3" />
-            {enrollment.status === "completed" && (
-              <div className="mt-3 p-3 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center gap-2 text-emerald-900">
-                <Trophy className="h-5 w-5" />
-                <span className="font-semibold">{tp.metadata.pathCompleteCelebration}</span>
+      {/* Hero Card */}
+      <div className="relative overflow-hidden rounded-3xl bg-card border border-border/60 shadow-sm">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-teal-500/5 rounded-full blur-3xl pointer-events-none" />
+        
+        <div className="p-6 sm:p-8 relative z-10">
+          <div className="flex items-start justify-between gap-6 flex-wrap lg:flex-nowrap">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center shrink-0 border border-emerald-100 dark:border-emerald-500/20">
+                  <GraduationCap className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                {path.level && (
+                  <span className="px-3 py-1 bg-muted rounded-lg text-xs font-bold text-muted-foreground border border-border/50">
+                    {tp.levels[path.level] || path.level}
+                  </span>
+                )}
+                {path.require_audio && (
+                  <span className="px-3 py-1 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 rounded-lg text-xs font-bold flex items-center gap-1.5 border border-amber-200 dark:border-amber-500/20">
+                    <Mic className="h-3.5 w-3.5" /> {tp.metadata.requireAudioBadge}
+                  </span>
+                )}
               </div>
-            )}
-          </div>
-        )}
-      </Card>
+              
+              <h1 className="text-3xl font-black text-foreground mb-3 leading-tight">
+                {path.title}
+              </h1>
+              
+              {path.description && (
+                <p className="text-base text-muted-foreground leading-relaxed max-w-3xl mb-6">
+                  {path.description}
+                </p>
+              )}
+              
+              <div className="flex flex-wrap gap-3">
+                <div className="flex items-center gap-2 bg-muted/50 px-4 py-2 rounded-xl border border-border/50">
+                  <GraduationCap className="w-4 h-4 text-emerald-600" />
+                  <span className="text-sm font-bold">{path.total_stages} {tp.metadata.stagesUnit}</span>
+                </div>
+                {path.estimated_days && (
+                  <div className="flex items-center gap-2 bg-muted/50 px-4 py-2 rounded-xl border border-border/50">
+                    <Target className="w-4 h-4 text-emerald-600" />
+                    <span className="text-sm font-bold">{path.estimated_days} {tp.metadata.estimatedDays}</span>
+                  </div>
+                )}
+              </div>
+            </div>
 
-      <div className="space-y-2">
+            {/* Progress / Action Area */}
+            <div className="w-full lg:w-80 shrink-0 bg-muted/30 rounded-2xl p-6 border border-border/50">
+              {!enrollment ? (
+                <div className="text-center space-y-4">
+                  <div className="w-16 h-16 bg-white dark:bg-background rounded-full flex items-center justify-center mx-auto shadow-sm border border-border">
+                    <Lock className="w-8 h-8 text-muted-foreground/50" />
+                  </div>
+                  <div>
+                    <h3 className="font-black text-lg mb-1">جاهز للبدء؟</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {tp.detail.enrollPrompt}
+                    </p>
+                  </div>
+                  <Button 
+                    onClick={enroll} 
+                    disabled={enrolling} 
+                    className="w-full gap-2 bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/20 hover:shadow-xl hover:shadow-emerald-600/30 transition-all rounded-xl h-12 text-base font-bold"
+                  >
+                    {enrolling ? <Loader2 className="h-5 w-5 animate-spin" /> : <Play className="h-5 w-5" />}
+                    {tp.actions.startPath}
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  <div>
+                    <div className="flex justify-between items-end mb-3">
+                      <span className="text-sm font-bold text-muted-foreground">{tp.metadata.yourProgress}</span>
+                      <div className="text-end">
+                        <span className="text-2xl font-black text-foreground">{completed}</span>
+                        <span className="text-sm font-bold text-muted-foreground">/{total} {tp.metadata.stagesUnit}</span>
+                      </div>
+                    </div>
+                    <div className="w-full h-3 bg-muted rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-1000 relative"
+                        style={{ width: `${pct}%` }}
+                      >
+                        <div className="absolute inset-0 bg-white/20 animate-[shimmer_2s_infinite] -skew-x-12" />
+                      </div>
+                    </div>
+                    <div className="mt-2 text-end text-sm font-black text-emerald-600 dark:text-emerald-400">
+                      {pct}% مكتمل
+                    </div>
+                  </div>
+
+                  {enrollment.status === "completed" && (
+                    <div className="p-4 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/20 flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                        <Trophy className="h-5 w-5 text-emerald-50" />
+                      </div>
+                      <div>
+                        <div className="font-black">مبارك الإتمام!</div>
+                        <div className="text-xs text-emerald-100 font-medium mt-0.5">{tp.metadata.pathCompleteCelebration}</div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <h2 className="text-xl font-black flex items-center gap-2 mb-4">
+          <GraduationCap className="w-5 h-5 text-emerald-600" />
+          محتوى المسار
+        </h2>
+        
         {stages.map(stage => {
           const status = stage.progress?.status || "locked"
           const isLocked = !enrollment || status === "locked"
@@ -206,14 +275,19 @@ export default function StudentTajweedPathDetail() {
           const isExpanded = expandedStage === stage.id
 
           return (
-            <Card
+            <div
               key={stage.id}
-              className={
-                "transition-shadow " +
-                (isCompleted ? "border-emerald-300 bg-emerald-50/40 " : "") +
-                (isLocked ? "opacity-70 " : "")
-              }
+              className={cn(
+                "group rounded-2xl border transition-all duration-300 relative overflow-hidden",
+                isExpanded ? "bg-card shadow-md border-emerald-500/30" : "bg-card border-border/60 hover:border-border hover:shadow-sm",
+                isCompleted && !isExpanded && "bg-emerald-50/30 dark:bg-emerald-950/20 border-emerald-200/50 dark:border-emerald-800/30",
+                isLocked && "opacity-75"
+              )}
             >
+              {isExpanded && (
+                <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-emerald-400 to-teal-500" />
+              )}
+              
               <button
                 type="button"
                 onClick={() => {
@@ -222,145 +296,185 @@ export default function StudentTajweedPathDetail() {
                   if (!isExpanded) startStage(stage)
                 }}
                 disabled={isLocked}
-                className="w-full text-start p-4 flex items-center gap-3 disabled:cursor-not-allowed"
+                className="w-full text-start p-4 sm:p-5 flex items-center gap-4 disabled:cursor-not-allowed outline-none"
               >
                 <div
-                  className={
-                    "h-10 w-10 rounded-full flex items-center justify-center font-bold shrink-0 " +
-                    (isCompleted
-                      ? "bg-emerald-600 text-white"
+                  className={cn(
+                    "h-12 w-12 rounded-2xl flex items-center justify-center shrink-0 transition-colors border",
+                    isCompleted
+                      ? "bg-emerald-500 text-white border-emerald-600 shadow-md shadow-emerald-500/20"
                       : isLocked
-                        ? "bg-muted text-muted-foreground"
-                        : "bg-emerald-100 text-emerald-800")
-                  }
+                        ? "bg-muted text-muted-foreground border-border"
+                        : "bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-500/10 dark:border-emerald-500/20"
+                  )}
                 >
-                  {isCompleted ? <CheckCircle2 className="h-5 w-5" /> : isLocked ? <Lock className="h-4 w-4" /> : stage.position}
+                  {isCompleted ? <CheckCircle2 className="h-6 w-6" />
+                    : isLocked ? <Lock className="h-5 w-5" />
+                    : <span className="font-black text-lg">{stage.position}</span>}
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <div className="flex flex-wrap items-center gap-1.5">
+                  <div className="flex flex-wrap items-center gap-2 mb-1.5">
                     {!isLocked && !isCompleted && status === "unlocked" && (
-                      <Badge variant="outline" className="text-xs">
-                        <Unlock className="h-3 w-3 me-1" /> {tp.statuses.inProgress}
-                      </Badge>
+                      <span className="bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-md text-xs font-bold flex items-center gap-1 border border-amber-200 dark:border-amber-500/20">
+                        <Unlock className="w-3 h-3" /> {tp.statuses.inProgress}
+                      </span>
                     )}
                     {isCompleted && (
-                      <Badge className="bg-emerald-600 hover:bg-emerald-600 text-xs">{tp.statuses.completed}</Badge>
+                      <span className="bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-md text-xs font-bold flex items-center gap-1 border border-emerald-200 dark:border-emerald-500/20">
+                        <CheckCircle2 className="w-3 h-3" /> {tp.statuses.completed}
+                      </span>
                     )}
                     {status === "in_progress" && (
-                      <Badge variant="secondary" className="text-xs">{tp.statuses.inProgress}</Badge>
+                      <span className="bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-md text-xs font-bold flex items-center gap-1 border border-amber-200 dark:border-amber-500/20">
+                        <Target className="w-3 h-3" /> {tp.statuses.inProgress}
+                      </span>
                     )}
                   </div>
-                  <div className="font-semibold mt-1 truncate">{stage.title}</div>
-                  {stage.description && (
-                    <div className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
+                  <div className="font-black text-lg text-foreground truncate group-hover:text-emerald-600 transition-colors">
+                    {stage.title}
+                  </div>
+                  {stage.description && !isExpanded && (
+                    <div className="text-sm text-muted-foreground mt-1 line-clamp-1 opacity-80">
                       {stage.description}
                     </div>
                   )}
                 </div>
 
                 {!isLocked && (
-                  isExpanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" />
-                    : <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                  <div className={cn(
+                    "w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300",
+                    isExpanded ? "bg-muted rotate-180" : "bg-muted/50 group-hover:bg-muted"
+                  )}>
+                    <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                  </div>
                 )}
               </button>
 
               {isExpanded && !isLocked && (
-                <div className="border-t border-border p-4 space-y-4">
-                  {stage.description && (
-                    <div className="text-sm text-muted-foreground">{stage.description}</div>
-                  )}
-
-                  {stage.content && (
-                    <div className="bg-muted/30 rounded-lg p-4">
-                      <h4 className="text-sm font-semibold mb-2">{tp.detail.learningContent}</h4>
-                      <div className="text-sm whitespace-pre-wrap leading-relaxed">{stage.content}</div>
-                    </div>
-                  )}
-
-                  {stage.video_url && (
-                    <div>
-                      <h4 className="text-sm font-semibold mb-2 flex items-center gap-1">
-                        <Video className="h-4 w-4" /> {tp.detail.videoTutorial}
-                      </h4>
-                      <div className="aspect-video w-full rounded-lg overflow-hidden bg-black">
-                        <video src={stage.video_url} controls className="w-full h-full" />
+                <div className="border-t border-border/50 bg-muted/10 p-5 sm:p-6 animate-in slide-in-from-top-2 duration-200">
+                  <div className="max-w-4xl space-y-8">
+                    {stage.description && (
+                      <div className="text-base text-muted-foreground leading-relaxed">
+                        {stage.description}
                       </div>
-                    </div>
-                  )}
-
-                  {stage.pdf_url && (
-                    <div>
-                      <h4 className="text-sm font-semibold mb-2 flex items-center gap-1">
-                        <FileText className="h-4 w-4" /> {tp.detail.pdfFile}
-                      </h4>
-                      <TajweedPdfViewer src={stage.pdf_url} label={`${tp.detail.pdfFile} — ${stage.title}`} />
-                    </div>
-                  )}
-
-                  {stage.passage_text && (
-                    <div className="border-e-4 border-emerald-500 bg-emerald-50/40 p-3 rounded-md">
-                      <h4 className="text-sm font-semibold mb-1">{tp.detail.practicePassage}</h4>
-                      <div className="text-sm whitespace-pre-wrap leading-loose font-serif">
-                        {stage.passage_text}
-                      </div>
-                    </div>
-                  )}
-
-                  {stage.halaqa_name && stage.halaqa_id && (
-                    <div className="relative group overflow-hidden rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-emerald-50 to-teal-50/50 dark:from-emerald-950/20 dark:to-teal-900/10 p-5 sm:p-6 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/10 hover:border-emerald-500/30">
-                      <div className="absolute top-0 right-0 p-32 bg-emerald-500/10 blur-3xl rounded-full -z-10 group-hover:bg-emerald-500/20 transition-all duration-500" />
-                      <div className="flex flex-col sm:flex-row gap-5 items-start sm:items-center">
-                        <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center shrink-0 shadow-md transform group-hover:scale-105 transition-transform duration-300">
-                          <GraduationCap className="w-7 h-7" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="px-2 py-0.5 text-[10px] font-bold tracking-wider rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300 uppercase">
-                              حلقة تطبيقية
-                            </span>
-                          </div>
-                          <h4 className="text-base font-bold text-foreground truncate mb-1">
-                            {stage.halaqa_name}
-                          </h4>
-                          <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed line-clamp-2">
-                            انضم إلى هذه الحلقة المباشرة لتعزيز فهمك والتطبيق العملي مع نخبة من المقرئين المعتمدين.
-                          </p>
-                        </div>
-                        <div className="w-full sm:w-auto shrink-0 mt-2 sm:mt-0">
-                          <Link
-                            href={`/student/halaqat/${stage.halaqa_id}`}
-                            className="inline-flex items-center justify-center w-full sm:w-auto px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-emerald-600 to-teal-600 rounded-xl shadow-md hover:shadow-lg hover:from-emerald-500 hover:to-teal-500 transition-all duration-300 group/btn"
-                          >
-                            الانضمام للحلقة
-                            <ArrowRight className="w-4 h-4 ml-0 mr-2 rtl:rotate-180 transform group-hover/btn:-translate-x-1 transition-transform" />
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {stage.progress?.audio_url && (
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-1">{tp.detail.yourPreviousRecording}</p>
-                      <audio src={stage.progress.audio_url} controls className="w-full" />
-                    </div>
-                  )}
-
-                  <div className="flex flex-wrap gap-2 pt-2">
-                    {!isCompleted ? (
-                      <Button onClick={() => openComplete(stage)} className="gap-2">
-                        <CheckCircle2 className="h-4 w-4" /> {tp.actions.completeStage}
-                      </Button>
-                    ) : (
-                      <Button onClick={() => openComplete(stage)} variant="outline" className="gap-2">
-                        <Mic className="h-4 w-4" /> {tp.actions.updateRecording}
-                      </Button>
                     )}
+
+                    {stage.content && (
+                      <div className="bg-card border border-border/50 rounded-2xl p-5 shadow-sm">
+                        <h4 className="text-sm font-bold mb-3 flex items-center gap-2 text-emerald-700 dark:text-emerald-400">
+                          <BookOpen className="w-4 h-4" />
+                          {tp.detail.learningContent}
+                        </h4>
+                        <div className="text-sm whitespace-pre-wrap leading-relaxed">
+                          {stage.content}
+                        </div>
+                      </div>
+                    )}
+
+                    {stage.video_url && (
+                      <div className="bg-card border border-border/50 rounded-2xl p-5 shadow-sm">
+                        <h4 className="text-sm font-bold mb-3 flex items-center gap-2 text-emerald-700 dark:text-emerald-400">
+                          <Video className="w-4 h-4" />
+                          {tp.detail.videoTutorial}
+                        </h4>
+                        <div className="aspect-video w-full rounded-xl overflow-hidden bg-black shadow-inner">
+                          <video src={stage.video_url} controls className="w-full h-full" />
+                        </div>
+                      </div>
+                    )}
+
+                    {stage.pdf_url && (
+                      <div className="bg-card border border-border/50 rounded-2xl p-5 shadow-sm">
+                        <h4 className="text-sm font-bold mb-3 flex items-center gap-2 text-emerald-700 dark:text-emerald-400">
+                          <FileText className="w-4 h-4" />
+                          {tp.detail.pdfFile}
+                        </h4>
+                        <div className="rounded-xl overflow-hidden border border-border/50">
+                          <TajweedPdfViewer src={stage.pdf_url} label={`${tp.detail.pdfFile} — ${stage.title}`} />
+                        </div>
+                      </div>
+                    )}
+
+                    {stage.passage_text && (
+                      <div className="bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/50 rounded-2xl p-5 shadow-sm">
+                        <h4 className="text-sm font-bold mb-3 flex items-center gap-2 text-emerald-700 dark:text-emerald-400">
+                          <Mic className="w-4 h-4" />
+                          {tp.detail.practicePassage}
+                        </h4>
+                        <div className="text-lg whitespace-pre-wrap leading-loose font-serif text-foreground/90 p-4 bg-white/50 dark:bg-black/20 rounded-xl">
+                          {stage.passage_text}
+                        </div>
+                      </div>
+                    )}
+
+                    {stage.halaqa_name && stage.halaqa_id && (
+                      <div className="relative group overflow-hidden rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-emerald-50 to-teal-50/50 dark:from-emerald-950/20 dark:to-teal-900/10 p-5 sm:p-6 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/10 hover:border-emerald-500/30">
+                        <div className="absolute top-0 right-0 p-32 bg-emerald-500/10 blur-3xl rounded-full -z-10 group-hover:bg-emerald-500/20 transition-all duration-500" />
+                        <div className="flex flex-col sm:flex-row gap-5 items-start sm:items-center">
+                          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center shrink-0 shadow-md transform group-hover:scale-105 transition-transform duration-300">
+                            <GraduationCap className="w-7 h-7" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="px-2 py-0.5 text-[10px] font-bold tracking-wider rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300 uppercase">
+                                حلقة تطبيقية
+                              </span>
+                            </div>
+                            <h4 className="text-base font-bold text-foreground truncate mb-1">
+                              {stage.halaqa_name}
+                            </h4>
+                            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed line-clamp-2">
+                              انضم إلى هذه الحلقة المباشرة لتعزيز فهمك والتطبيق العملي مع نخبة من المقرئين المعتمدين.
+                            </p>
+                          </div>
+                          <div className="w-full sm:w-auto shrink-0 mt-2 sm:mt-0">
+                            <Link
+                              href={`/student/halaqat/${stage.halaqa_id}`}
+                              className="inline-flex items-center justify-center w-full sm:w-auto px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-emerald-600 to-teal-600 rounded-xl shadow-md hover:shadow-lg hover:from-emerald-500 hover:to-teal-500 transition-all duration-300 group/btn"
+                            >
+                              الانضمام للحلقة
+                              <ArrowRight className="w-4 h-4 ml-0 mr-2 rtl:rotate-180 transform group-hover/btn:-translate-x-1 transition-transform" />
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {stage.progress?.audio_url && (
+                      <div className="bg-card border border-border/50 rounded-2xl p-5 shadow-sm">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Mic className="w-4 h-4 text-emerald-600" />
+                          <span className="font-bold text-sm">{tp.detail.yourPreviousRecording}</span>
+                        </div>
+                        <audio src={stage.progress.audio_url} controls className="w-full h-10" />
+                      </div>
+                    )}
+
+                    <div className="pt-2 flex flex-wrap gap-3">
+                      {!isCompleted ? (
+                        <Button 
+                          onClick={() => openComplete(stage)} 
+                          className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-lg shadow-emerald-600/20"
+                        >
+                          <CheckCircle2 className="h-5 w-5" />
+                          {tp.actions.completeStage}
+                        </Button>
+                      ) : (
+                        <Button 
+                          onClick={() => openComplete(stage)} 
+                          variant="outline" 
+                          className="gap-2 rounded-xl bg-background"
+                        >
+                          <Mic className="h-4 w-4" />
+                          {tp.actions.updateRecording}
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
               )}
-            </Card>
+            </div>
           )
         })}
       </div>

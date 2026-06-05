@@ -196,66 +196,131 @@ export default function StudentMemorizationPathDetail() {
   const pct = Math.round((completed / total) * 100)
 
   return (
-    <div className="space-y-6 p-4 sm:p-6 max-w-4xl mx-auto">
-      <Button asChild variant="ghost" size="sm" className="gap-2">
-        <Link href="/student/memorization-paths">
-          <ArrowRight className="h-4 w-4 rtl:rotate-180" /> رجوع للمسارات
-        </Link>
-      </Button>
+    <div className="space-y-6 p-4 sm:p-6 max-w-5xl mx-auto pb-12">
+      <Link 
+        href="/student/memorization-paths"
+        className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold text-muted-foreground hover:text-emerald-600 bg-muted/50 hover:bg-emerald-50 rounded-xl transition-colors w-fit border border-transparent hover:border-emerald-200"
+      >
+        <ArrowRight className="h-4 w-4 rtl:rotate-180" /> رجوع للمسارات
+      </Link>
 
-      <Card className="p-6">
-        <div className="flex items-start justify-between gap-4 flex-wrap">
-          <div className="flex-1 min-w-0">
-            <h1 className="text-2xl font-bold flex items-center gap-2">
-              <BookOpen className="h-6 w-6 text-emerald-600" />
-              {path.title}
-            </h1>
-            {path.description && (
-              <p className="text-sm text-muted-foreground mt-2">{path.description}</p>
-            )}
-            <div className="flex flex-wrap gap-2 mt-3">
-              <Badge variant="secondary">{path.total_units} وحدة</Badge>
-              {path.level && <Badge variant="outline">{path.level}</Badge>}
-              {path.estimated_days && (
-                <Badge variant="outline">{path.estimated_days} يوماً متوقع</Badge>
+      {/* Hero Card */}
+      <div className="relative overflow-hidden rounded-3xl bg-card border border-border/60 shadow-sm">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-teal-500/5 rounded-full blur-3xl pointer-events-none" />
+        
+        <div className="p-6 sm:p-8 relative z-10">
+          <div className="flex items-start justify-between gap-6 flex-wrap lg:flex-nowrap">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center shrink-0 border border-emerald-100 dark:border-emerald-500/20">
+                  <BookOpen className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                {path.level && (
+                  <span className="px-3 py-1 bg-muted rounded-lg text-xs font-bold text-muted-foreground border border-border/50">
+                    {path.level}
+                  </span>
+                )}
+                {path.require_audio && (
+                  <span className="px-3 py-1 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 rounded-lg text-xs font-bold flex items-center gap-1.5 border border-amber-200 dark:border-amber-500/20">
+                    <Mic className="h-3.5 w-3.5" /> يتطلب تسجيل صوتي
+                  </span>
+                )}
+              </div>
+              
+              <h1 className="text-3xl font-black text-foreground mb-3 leading-tight">
+                {path.title}
+              </h1>
+              
+              {path.description && (
+                <p className="text-base text-muted-foreground leading-relaxed max-w-3xl mb-6">
+                  {path.description}
+                </p>
               )}
-              {path.require_audio && (
-                <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100">
-                  <Mic className="h-3 w-3 me-1" /> يتطلب تسجيل صوتي
-                </Badge>
+              
+              <div className="flex flex-wrap gap-3">
+                <div className="flex items-center gap-2 bg-muted/50 px-4 py-2 rounded-xl border border-border/50">
+                  <BookOpen className="w-4 h-4 text-emerald-600" />
+                  <span className="text-sm font-bold">{path.total_units} وحدة</span>
+                </div>
+                {path.estimated_days && (
+                  <div className="flex items-center gap-2 bg-muted/50 px-4 py-2 rounded-xl border border-border/50">
+                    <Target className="w-4 h-4 text-emerald-600" />
+                    <span className="text-sm font-bold">{path.estimated_days} يوماً متوقع</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Progress / Action Area */}
+            <div className="w-full lg:w-80 shrink-0 bg-muted/30 rounded-2xl p-6 border border-border/50">
+              {!enrollment ? (
+                <div className="text-center space-y-4">
+                  <div className="w-16 h-16 bg-white dark:bg-background rounded-full flex items-center justify-center mx-auto shadow-sm border border-border">
+                    <Lock className="w-8 h-8 text-muted-foreground/50" />
+                  </div>
+                  <div>
+                    <h3 className="font-black text-lg mb-1">جاهز للبدء؟</h3>
+                    <p className="text-sm text-muted-foreground">
+                      اشترك في المسار لتبدأ الحفظ، وستفتح الوحدة الأولى مباشرة.
+                    </p>
+                  </div>
+                  <Button 
+                    onClick={enroll} 
+                    disabled={enrolling} 
+                    className="w-full gap-2 bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/20 hover:shadow-xl hover:shadow-emerald-600/30 transition-all rounded-xl h-12 text-base font-bold"
+                  >
+                    {enrolling ? <Loader2 className="h-5 w-5 animate-spin" /> : <Play className="h-5 w-5" />}
+                    ابدأ المسار الآن
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  <div>
+                    <div className="flex justify-between items-end mb-3">
+                      <span className="text-sm font-bold text-muted-foreground">التقدم الإجمالي</span>
+                      <div className="text-end">
+                        <span className="text-2xl font-black text-foreground">{completed}</span>
+                        <span className="text-sm font-bold text-muted-foreground">/{total} وحدة</span>
+                      </div>
+                    </div>
+                    <div className="w-full h-3 bg-muted rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-1000 relative"
+                        style={{ width: `${pct}%` }}
+                      >
+                        <div className="absolute inset-0 bg-white/20 animate-[shimmer_2s_infinite] -skew-x-12" />
+                      </div>
+                    </div>
+                    <div className="mt-2 text-end text-sm font-black text-emerald-600 dark:text-emerald-400">
+                      {pct}% مكتمل
+                    </div>
+                  </div>
+
+                  {enrollment.status === "completed" && (
+                    <div className="p-4 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/20 flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                        <Trophy className="h-5 w-5 text-emerald-50" />
+                      </div>
+                      <div>
+                        <div className="font-black">مبارك الإتمام!</div>
+                        <div className="text-xs text-emerald-100 font-medium mt-0.5">لقد أتممت هذا المسار بنجاح.</div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           </div>
         </div>
+      </div>
 
-        {!enrollment ? (
-          <div className="mt-5 flex items-center justify-between gap-3 flex-wrap">
-            <p className="text-sm text-muted-foreground">
-              اشترك في المسار لتبدأ الحفظ، وستفتح الوحدة الأولى مباشرة.
-            </p>
-            <Button onClick={enroll} disabled={enrolling} className="gap-2">
-              {enrolling ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
-              ابدأ المسار
-            </Button>
-          </div>
-        ) : (
-          <div className="mt-5 space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">تقدمك</span>
-              <span className="font-semibold">{completed}/{total} ({pct}%)</span>
-            </div>
-            <Progress value={pct} className="h-3" />
-            {enrollment.status === "completed" && (
-              <div className="mt-3 p-3 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center gap-2 text-emerald-900">
-                <Trophy className="h-5 w-5" />
-                <span className="font-semibold">أتممت المسار — تبارك الله</span>
-              </div>
-            )}
-          </div>
-        )}
-      </Card>
-
-      <div className="space-y-2">
+      <div className="space-y-4">
+        <h2 className="text-xl font-black flex items-center gap-2 mb-4">
+          <BookOpen className="w-5 h-5 text-emerald-600" />
+          محتوى المسار
+        </h2>
+        
         {units.map(unit => {
           const status = unit.progress?.status || "locked"
           const isLocked = !enrollment || status === "locked"
@@ -263,14 +328,19 @@ export default function StudentMemorizationPathDetail() {
           const isExpanded = expandedUnit === unit.id
 
           return (
-            <Card
+            <div
               key={unit.id}
-              className={
-                "transition-shadow " +
-                (isCompleted ? "border-emerald-300 bg-emerald-50/40 " : "") +
-                (isLocked ? "opacity-70 " : "")
-              }
+              className={cn(
+                "group rounded-2xl border transition-all duration-300 relative overflow-hidden",
+                isExpanded ? "bg-card shadow-md border-emerald-500/30" : "bg-card border-border/60 hover:border-border hover:shadow-sm",
+                isCompleted && !isExpanded && "bg-emerald-50/30 dark:bg-emerald-950/20 border-emerald-200/50 dark:border-emerald-800/30",
+                isLocked && "opacity-75"
+              )}
             >
+              {isExpanded && (
+                <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-emerald-400 to-teal-500" />
+              )}
+              
               <button
                 type="button"
                 onClick={() => {
@@ -279,88 +349,130 @@ export default function StudentMemorizationPathDetail() {
                   if (!isExpanded) startUnit(unit)
                 }}
                 disabled={isLocked}
-                className="w-full text-start p-4 flex items-center gap-3 disabled:cursor-not-allowed"
+                className="w-full text-start p-4 sm:p-5 flex items-center gap-4 disabled:cursor-not-allowed outline-none"
               >
                 <div
-                  className={
-                    "h-10 w-10 rounded-full flex items-center justify-center shrink-0 " +
-                    (isCompleted
-                      ? "bg-emerald-600 text-white"
+                  className={cn(
+                    "h-12 w-12 rounded-2xl flex items-center justify-center shrink-0 transition-colors border",
+                    isCompleted
+                      ? "bg-emerald-500 text-white border-emerald-600 shadow-md shadow-emerald-500/20"
                       : isLocked
-                        ? "bg-muted text-muted-foreground"
-                        : "bg-emerald-100 text-emerald-700")
-                  }
+                        ? "bg-muted text-muted-foreground border-border"
+                        : "bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-500/10 dark:border-emerald-500/20"
+                  )}
                 >
-                  {isCompleted ? <CheckCircle2 className="h-5 w-5" />
-                    : isLocked ? <Lock className="h-4 w-4" />
-                    : <Unlock className="h-4 w-4" />}
+                  {isCompleted ? <CheckCircle2 className="h-6 w-6" />
+                    : isLocked ? <Lock className="h-5 w-5" />
+                    : <span className="font-black text-lg">{unit.position}</span>}
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono text-muted-foreground">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span className="text-xs font-black text-muted-foreground bg-muted px-2 py-0.5 rounded-md">
                       الوحدة {unit.position}
                     </span>
-                    <Badge variant="outline" className="text-xs">
+                    <span className="text-xs font-bold text-muted-foreground border border-border/50 px-2 py-0.5 rounded-md">
                       {TYPE_LABELS[unit.unit_type] || unit.unit_type}
-                    </Badge>
+                    </span>
                     {isCompleted && (
-                      <Badge className="bg-emerald-600 hover:bg-emerald-600 text-xs">مكتمل</Badge>
+                      <span className="bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-md text-xs font-bold flex items-center gap-1 border border-emerald-200 dark:border-emerald-500/20">
+                        <CheckCircle2 className="w-3 h-3" /> مكتمل
+                      </span>
                     )}
                     {status === "in_progress" && (
-                      <Badge variant="secondary" className="text-xs">قيد العمل</Badge>
+                      <span className="bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-md text-xs font-bold flex items-center gap-1 border border-amber-200 dark:border-amber-500/20">
+                        <Target className="w-3 h-3" /> قيد العمل
+                      </span>
                     )}
                   </div>
-                  <div className="font-semibold mt-1 truncate">{unit.title}</div>
-                  {unit.description && (
-                    <div className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
+                  <div className="font-black text-lg text-foreground truncate group-hover:text-emerald-600 transition-colors">
+                    {unit.title}
+                  </div>
+                  {unit.description && !isExpanded && (
+                    <div className="text-sm text-muted-foreground mt-1 line-clamp-1 opacity-80">
                       {unit.description}
                     </div>
                   )}
                 </div>
 
                 {!isLocked && (
-                  isExpanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" />
-                    : <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                  <div className={cn(
+                    "w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300",
+                    isExpanded ? "bg-muted rotate-180" : "bg-muted/50 group-hover:bg-muted"
+                  )}>
+                    <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                  </div>
                 )}
               </button>
 
               {isExpanded && !isLocked && (
-                <div className="border-t border-border p-4 space-y-3">
-                  {unit.description && (
-                    <div className="text-sm text-muted-foreground">{unit.description}</div>
-                  )}
-                  <div className="text-xs text-muted-foreground flex flex-wrap gap-3">
-                    <span>المدة المتوقعة: {unit.estimated_minutes} دقيقة</span>
-                    {unit.progress?.attempts ? (
-                      <span>عدد المحاولات: {unit.progress.attempts}</span>
-                    ) : null}
-                  </div>
-
-                  {unit.progress?.audio_url && (
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-1">تسجيلك السابق:</p>
-                      <audio src={unit.progress.audio_url} controls className="w-full" />
+                <div className="border-t border-border/50 bg-muted/10 p-5 sm:p-6 animate-in slide-in-from-top-2 duration-200">
+                  <div className="max-w-3xl space-y-6">
+                    {unit.description && (
+                      <div className="text-base text-muted-foreground leading-relaxed">
+                        {unit.description}
+                      </div>
+                    )}
+                    
+                    <div className="flex flex-wrap gap-4">
+                      <div className="bg-background border border-border rounded-xl p-3 flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center">
+                          <Target className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                        </div>
+                        <div>
+                          <div className="text-xs text-muted-foreground font-bold">المدة المتوقعة</div>
+                          <div className="font-black">{unit.estimated_minutes} دقيقة</div>
+                        </div>
+                      </div>
+                      
+                      {unit.progress?.attempts ? (
+                        <div className="bg-background border border-border rounded-xl p-3 flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center">
+                            <Trophy className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                          </div>
+                          <div>
+                            <div className="text-xs text-muted-foreground font-bold">المحاولات السابقة</div>
+                            <div className="font-black">{unit.progress.attempts} محاولات</div>
+                          </div>
+                        </div>
+                      ) : null}
                     </div>
-                  )}
 
-                  <div className="flex flex-wrap gap-2 pt-2">
-                    {!isCompleted && (
-                      <Button onClick={() => openComplete(unit)} className="gap-2">
-                        <CheckCircle2 className="h-4 w-4" />
-                        إتمام الوحدة
-                      </Button>
+                    {unit.progress?.audio_url && (
+                      <div className="bg-background border border-border p-4 rounded-xl">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Mic className="w-4 h-4 text-emerald-600" />
+                          <span className="font-bold text-sm">تسجيلك المعتمد لهذه الوحدة</span>
+                        </div>
+                        <audio src={unit.progress.audio_url} controls className="w-full h-10" />
+                      </div>
                     )}
-                    {isCompleted && (
-                      <Button onClick={() => openComplete(unit)} variant="outline" className="gap-2">
-                        <Mic className="h-4 w-4" />
-                        تحديث التسجيل
-                      </Button>
-                    )}
+
+                    <div className="pt-2 flex flex-wrap gap-3">
+                      {!isCompleted && (
+                        <Button 
+                          onClick={() => openComplete(unit)} 
+                          className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-lg shadow-emerald-600/20"
+                        >
+                          <CheckCircle2 className="h-5 w-5" />
+                          إتمام الوحدة
+                        </Button>
+                      )}
+                      {isCompleted && (
+                        <Button 
+                          onClick={() => openComplete(unit)} 
+                          variant="outline" 
+                          className="gap-2 rounded-xl bg-background"
+                        >
+                          <Mic className="h-4 w-4" />
+                          تحديث التسجيل
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
               )}
-            </Card>
+            </div>
           )
         })}
       </div>

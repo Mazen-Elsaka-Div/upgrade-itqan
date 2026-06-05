@@ -62,7 +62,7 @@ export default function TeacherDashboard() {
           fetch('/api/academy/teacher/stats'),
           fetch('/api/academy/teacher/courses?limit=4'),
           fetch('/api/academy/teacher/submissions?limit=5&pending=true'),
-          fetch('/api/academy/teacher/sessions?limit=10&upcoming=true') // Fetch up to 10 to show scrolling
+          fetch('/api/academy/teacher/sessions?limit=3&upcoming=true') // Fetch up to 3 upcoming sessions
         ])
 
         if (statsRes.ok) setStats(await statsRes.json())
