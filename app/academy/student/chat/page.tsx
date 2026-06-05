@@ -246,8 +246,8 @@ function StudentChatPageInner() {
   // Fetch messages for active conversation
   useEffect(() => {
     if (!activeConv) return
-    const fetchMsgs = async () => {
-      setLoadingMsgs(true)
+    const fetchMsgs = async (isBackground = false) => {
+      if (!isBackground) setLoadingMsgs(true)
       try {
         const res = await fetch(`/api/academy/conversations/${activeConv.id}/messages`)
         const data = await res.json()
@@ -262,14 +262,14 @@ function StudentChatPageInner() {
       } catch {
         // ignore
       } finally {
-        setLoadingMsgs(false)
+        if (!isBackground) setLoadingMsgs(false)
       }
     }
 
     fetchMsgs()
 
     // Polling setup (every 5 seconds)
-    const interval = setInterval(fetchMsgs, 5000)
+    const interval = setInterval(() => fetchMsgs(true), 5000)
     return () => clearInterval(interval)
   }, [activeConv])
 

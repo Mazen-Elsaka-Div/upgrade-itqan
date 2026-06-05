@@ -199,7 +199,7 @@ export default function PublicLibraryPage() {
             {books.map((book) => (
               <Link
                 key={book.id}
-                href={`/library/${book.id}`}
+                href={`/academy/library/${book.id}`}
                 className="group focus:outline-none h-full"
               >
                 <div className="h-full flex flex-col bg-card border border-border/40 rounded-3xl overflow-hidden hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] hover:shadow-primary/10 hover:-translate-y-1.5 transition-all duration-500 group-focus-visible:ring-2 ring-primary ring-offset-2 ring-offset-background">
