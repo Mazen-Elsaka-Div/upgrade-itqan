@@ -134,6 +134,22 @@ export async function POST(req: NextRequest) {
       const isTeacher = session.role === "teacher"
       const isStudent = session.role === "student"
 
+      const ownerColumn = isStudent ? "student_id" : isTeacher ? "teacher_id" : "parent_id"
+
+      // Reuse an existing support ticket for this user instead of creating a
+      // duplicate one. This makes the "Support" button idempotent: first click
+      // opens (creates) the ticket, subsequent clicks just re-open it.
+      const existingTicket = await queryOne<{ id: string }>(
+        `SELECT id FROM academy_conversations
+           WHERE is_ticket = true AND ${ownerColumn} = $1
+           ORDER BY created_at DESC
+           LIMIT 1`,
+        [session.sub]
+      )
+      if (existingTicket) {
+        return NextResponse.json({ conversationId: existingTicket.id, existing: true }, { status: 200 })
+      }
+
       const result = await query(
           `INSERT INTO academy_conversations (student_id, teacher_id, parent_id, is_ticket, ticket_status) VALUES ($1, $2, $3, true, 'open') RETURNING id`,
           [isStudent ? session.sub : null, isTeacher ? session.sub : null, isParent ? session.sub : null]

@@ -57,6 +57,21 @@ export async function POST(req: NextRequest) {
 
         // Create a ticket (Support Ticket)
         if (isTicket) {
+            const ownerColumn = session.role === "reader" ? "reader_id" : "student_id"
+
+            // Reuse an existing support ticket so repeated clicks don't create
+            // duplicates: first click opens (creates) it, later clicks re-open it.
+            const existingTicket = await query<{ id: string }>(
+                `SELECT id FROM conversations
+                   WHERE is_ticket = true AND ${ownerColumn} = $1
+                   ORDER BY created_at DESC
+                   LIMIT 1`,
+                [session.sub]
+            )
+            if (existingTicket.length > 0) {
+                return NextResponse.json({ conversationId: existingTicket[0].id, existing: true })
+            }
+
             const result = await query(
                 `INSERT INTO conversations (student_id, reader_id, is_ticket, ticket_status) VALUES ($1, $2, true, 'open') RETURNING id`,
                 [session.role === "student" ? session.sub : null, session.role === "reader" ? session.sub : null]

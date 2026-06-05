@@ -7,7 +7,7 @@ import { shouldShowDateDivider } from '@/lib/chat-date'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Search, Send, User, Loader2, ArrowRight, MessageSquarePlus, X, BookOpen, Shield } from 'lucide-react'
+import { Search, Send, User, Loader2, ArrowRight, MessageSquarePlus, X, BookOpen, Shield, Trash2 } from 'lucide-react'
 import { useI18n } from '@/lib/i18n/context'
 
 interface Conversation {
@@ -64,6 +64,8 @@ function StudentChatPageInner() {
   const [teachersLoading, setTeachersLoading] = useState(false)
   const [startingChatWith, setStartingChatWith] = useState<string | null>(null)
   const [newSearch, setNewSearch] = useState('')
+  const [openingTicket, setOpeningTicket] = useState(false)
+  const [deletingConvId, setDeletingConvId] = useState<string | null>(null)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -73,12 +75,14 @@ function StudentChatPageInner() {
       const data = await res.json()
       if (res.ok) {
         setConversations(data.conversations || [])
+        return data.conversations || []
       }
     } catch {
       // ignore
     } finally {
       setLoadingConv(false)
     }
+    return []
   }
 
   // Fetch conversations
@@ -175,6 +179,17 @@ function StudentChatPageInner() {
   }
 
   const handleCreateTicket = async () => {
+    // Prevent the double-click from creating duplicate tickets.
+    if (openingTicket) return
+
+    // If a support ticket already exists locally, just open it (2nd click → open).
+    const existingTicket = conversations.find(c => c.is_ticket)
+    if (existingTicket) {
+      setActiveConv(existingTicket)
+      return
+    }
+
+    setOpeningTicket(true)
     try {
       const res = await fetch('/api/academy/conversations', {
         method: 'POST',
@@ -186,13 +201,11 @@ function StudentChatPageInner() {
         alert(data?.error || (isAr ? 'تعذر فتح التذكرة' : 'Could not open ticket'))
         return
       }
-      await fetchConversations()
-      setConversations(prev => {
-        const found = prev.find(c => c.id === data.conversationId)
-        if (found) setActiveConv(found)
-        return prev
-      })
-      if (!conversations.find(c => c.id === data.conversationId)) {
+      const list = await fetchConversations()
+      const found = (list as Conversation[]).find(c => c.id === data.conversationId)
+      if (found) {
+        setActiveConv(found)
+      } else {
         setActiveConv({
           id: data.conversationId,
           other_user_id: 'admin',
@@ -206,6 +219,27 @@ function StudentChatPageInner() {
       }
     } catch {
       // ignore
+    } finally {
+      setOpeningTicket(false)
+    }
+  }
+
+  const handleDeleteConversation = async (convId: string) => {
+    if (!confirm(isAr ? 'هل تريد حذف هذه المحادثة نهائياً؟' : 'Delete this conversation permanently?')) return
+    setDeletingConvId(convId)
+    try {
+      const res = await fetch(`/api/academy/conversations/${convId}`, { method: 'DELETE' })
+      if (res.ok) {
+        setConversations(prev => prev.filter(c => c.id !== convId))
+        setActiveConv(prev => (prev?.id === convId ? null : prev))
+      } else {
+        const data = await res.json().catch(() => ({}))
+        alert(data?.error || (isAr ? 'تعذر حذف المحادثة' : 'Could not delete conversation'))
+      }
+    } catch {
+      // ignore
+    } finally {
+      setDeletingConvId(null)
     }
   }
 
@@ -308,10 +342,11 @@ function StudentChatPageInner() {
               </Button>
               <Button
                 onClick={handleCreateTicket}
+                disabled={openingTicket}
                 variant="outline"
-                className="flex-1 justify-center gap-2 rounded-xl border-blue-200 text-blue-700 hover:bg-blue-50 px-2"
+                className="flex-1 justify-center gap-2 rounded-xl border-blue-200 text-blue-700 hover:bg-blue-50 px-2 disabled:opacity-60"
               >
-                <Shield className="w-4 h-4" />
+                {openingTicket ? <Loader2 className="w-4 h-4 animate-spin" /> : <Shield className="w-4 h-4" />}
                 <span className="truncate">{isAr ? 'الدعم' : 'Support'}</span>
               </Button>
             </div>
@@ -403,6 +438,16 @@ function StudentChatPageInner() {
                     </span>
                   )}
                 </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleDeleteConversation(activeConv.id)}
+                  disabled={deletingConvId === activeConv.id}
+                  title={isAr ? 'حذف المحادثة' : 'Delete conversation'}
+                  className={`${isAr ? 'mr-auto' : 'ml-auto'} shrink-0 text-muted-foreground hover:text-red-600 hover:bg-red-500/10`}
+                >
+                  {deletingConvId === activeConv.id ? <Loader2 className="w-5 h-5 animate-spin" /> : <Trash2 className="w-5 h-5" />}
+                </Button>
               </div>
 
               {/* Chat Messages */}
