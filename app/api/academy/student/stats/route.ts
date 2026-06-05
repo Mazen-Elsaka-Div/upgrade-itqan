@@ -40,6 +40,17 @@ export async function GET(req: NextRequest) {
             [session.sub]
         )
 
+        // Average grade across graded submissions (academic performance signal)
+        const avgGradeRes = await query<{ avg: string | null }>(
+            `SELECT AVG(ts.score)::numeric(5,1) AS avg
+             FROM task_submissions ts
+             WHERE ts.student_id = $1
+               AND ts.status = 'graded'
+               AND ts.score IS NOT NULL`,
+            [session.sub]
+        )
+        const avgGrade = avgGradeRes[0]?.avg != null ? parseFloat(avgGradeRes[0].avg) : null
+
         const stats = {
             enrolled_courses,
             completed_courses,
@@ -47,9 +58,12 @@ export async function GET(req: NextRequest) {
             total_points: points.total_points,
             current_level: points.level,
             streak_days: points.streak_days,
+            longest_streak: points.longest_streak,
             upcoming_sessions: parseInt(upcomingSessions[0]?.count || '0'),
             badges_earned: points.badges_earned,
             unlocked_features: points.unlocked_features,
+            level_progress: points.level_progress,
+            avg_grade: avgGrade,
         }
 
         return NextResponse.json(stats)

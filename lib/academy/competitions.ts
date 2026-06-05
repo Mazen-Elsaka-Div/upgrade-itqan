@@ -117,6 +117,81 @@ export async function getJudgeAssignments(judgeId: string) {
   return assigned
 }
 
+// Roles allowed to be assigned as competition judges.
+export const JUDGE_ROLES = ['teacher', 'reader'] as const
+
+export interface JudgeRow {
+  id: string
+  judge_id: string
+  assigned_at: string
+  name: string | null
+  email: string | null
+  role: string
+  avatar_url: string | null
+}
+
+export interface CandidateJudge {
+  id: string
+  name: string | null
+  email: string | null
+  role: string
+  avatar_url: string | null
+}
+
+/** Judges currently assigned to a competition. */
+export async function getCompetitionJudges(competitionId: string): Promise<JudgeRow[]> {
+  return query<JudgeRow>(
+    `SELECT cj.id, cj.judge_id, cj.assigned_at,
+            u.name, u.email, u.role, u.avatar_url
+     FROM competition_judges cj
+     JOIN users u ON u.id = cj.judge_id
+     WHERE cj.competition_id = $1
+     ORDER BY cj.assigned_at ASC`,
+    [competitionId]
+  )
+}
+
+/**
+ * Users eligible to be assigned as judges (teachers + reciters). Optional
+ * free-text search on name/email. Capped to keep the picker responsive.
+ */
+export async function getCandidateJudges(search?: string): Promise<CandidateJudge[]> {
+  const params: any[] = []
+  let sql = `SELECT id, name, email, role, avatar_url
+             FROM users
+             WHERE role = ANY($1)`
+  params.push(JUDGE_ROLES as unknown as string[])
+  if (search && search.trim()) {
+    params.push(`%${search.trim()}%`)
+    sql += ` AND (name ILIKE $${params.length} OR email ILIKE $${params.length})`
+  }
+  sql += ` ORDER BY name ASC NULLS LAST LIMIT 100`
+  return query<CandidateJudge>(sql, params)
+}
+
+export async function addCompetitionJudge(competitionId: string, judgeId: string) {
+  const user = await queryOne<{ role: string }>(`SELECT role FROM users WHERE id = $1`, [judgeId])
+  if (!user) return { success: false as const, error: 'المستخدم غير موجود' }
+  if (!(JUDGE_ROLES as readonly string[]).includes(user.role)) {
+    return { success: false as const, error: 'يمكن تعيين المدرّسين أو المقرئين فقط كمحكّمين' }
+  }
+  await query(
+    `INSERT INTO competition_judges (competition_id, judge_id)
+     VALUES ($1, $2)
+     ON CONFLICT (competition_id, judge_id) DO NOTHING`,
+    [competitionId, judgeId]
+  )
+  return { success: true as const }
+}
+
+export async function removeCompetitionJudge(competitionId: string, judgeId: string) {
+  await query(
+    `DELETE FROM competition_judges WHERE competition_id = $1 AND judge_id = $2`,
+    [competitionId, judgeId]
+  )
+  return { success: true as const }
+}
+
 export async function evaluateEntry(entryId: string, judgeId: string, evaluation: { score: number; tajweedScores: any; feedback: string | null }) {
   try {
     const entry = await queryOne<{ competition_id: string }>(

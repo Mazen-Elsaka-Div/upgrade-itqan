@@ -23,8 +23,10 @@ import {
   ArrowLeft,
   Clock,
 } from 'lucide-react'
+import { Gavel } from 'lucide-react'
 import MediaViewer from '@/components/media-viewer'
 import { cn } from '@/lib/utils'
+import { JudgesManager } from '@/components/competitions/judges-manager'
 
 interface Entry {
   id: string
@@ -184,6 +186,7 @@ export default function AdminCompetitionsPage() {
   const [typeFilter, setTypeFilter] = useState('all')
   const [statusFilter, setStatusFilter] = useState('all')
   const [search, setSearch] = useState('')
+  const [judgesComp, setJudgesComp] = useState<Competition | null>(null)
   // Entries view
   const [selectedComp, setSelectedComp] = useState<Competition | null>(null)
   const [entries, setEntries] = useState<Entry[]>([])
@@ -635,13 +638,20 @@ export default function AdminCompetitionsPage() {
                       {comp.winner_name && <span className="rounded-full bg-amber-50 px-3 py-1 font-bold text-amber-700">الفائز: {comp.winner_name}</span>}
                       {comp.min_verses ? <span className="rounded-full bg-muted px-3 py-1">حد الآيات: {comp.min_verses}</span> : null}
                     </div>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="mt-4 flex flex-wrap gap-2">
                       <button
                         onClick={() => fetchEntries(comp)}
-                        className="flex-1 mt-4 flex items-center justify-center gap-2 py-2.5 border border-border rounded-xl text-sm font-bold hover:bg-muted/50 transition-colors"
+                        className="flex-1 flex items-center justify-center gap-2 py-2.5 border border-border rounded-xl text-sm font-bold hover:bg-muted/50 transition-colors"
                       >
                         <ClipboardCheck className="h-4 w-4" />
                         عرض المشاركات وتحكيمها
+                      </button>
+                      <button
+                        onClick={() => setJudgesComp(comp)}
+                        className="flex items-center justify-center gap-2 py-2.5 px-4 border border-border rounded-xl text-sm font-bold hover:bg-muted/50 transition-colors"
+                      >
+                        <Gavel className="h-4 w-4" />
+                        المحكّمون
                       </button>
                     </div>
                   </div>
@@ -651,6 +661,15 @@ export default function AdminCompetitionsPage() {
           </div>
         )}
       </section>
+
+      {judgesComp && (
+        <JudgesManager
+          apiBase="/api/academy/admin/competitions"
+          competition={{ id: judgesComp.id, title: judgesComp.title }}
+          accent="emerald"
+          onClose={() => setJudgesComp(null)}
+        />
+      )}
 
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm" onClick={(event) => event.target === event.currentTarget && setShowModal(false)}>
