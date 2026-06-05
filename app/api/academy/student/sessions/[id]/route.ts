@@ -33,6 +33,7 @@ export async function GET(
       meeting_platform: string | null
       status: string
       recording_url: string | null
+      is_recording_shared: boolean
       notes: string | null
       attachments: string | null
     }>(
@@ -53,6 +54,7 @@ export async function GET(
          cs.meeting_platform,
          cs.status,
          cs.recording_url,
+         cs.is_recording_shared,
          cs.notes,
          cs.attachments
        FROM course_sessions cs
@@ -67,6 +69,10 @@ export async function GET(
 
     if (!sessionData) {
       return NextResponse.json({ error: 'Session not found' }, { status: 404 })
+    }
+
+    if (!sessionData.is_recording_shared) {
+      sessionData.recording_url = null
     }
 
     // Get attendees count

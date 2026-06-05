@@ -14,10 +14,13 @@ import {
   CheckCircle2,
   Radio,
   Timer,
+  Video,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
+import { RecordingShareToggle } from './recording-share-toggle'
+import { cn } from '@/lib/utils'
 
 interface SessionDetails {
   id: string
@@ -29,6 +32,7 @@ interface SessionDetails {
   is_public: boolean
   meeting_url: string | null
   recording_url: string | null
+  is_recording_shared: boolean
   course_name: string
   series_title: string | null
   [key: string]: unknown
@@ -125,188 +129,247 @@ export default async function SessionDetailsPage({ params }: { params: Promise<{
       icon: Calendar,
       label: 'التاريخ',
       value: dateLabel,
+      color: 'text-blue-500',
+      bg: 'bg-blue-100 dark:bg-blue-900/30'
     },
     {
       icon: Clock,
       label: 'الوقت',
       value: timeLabel,
+      color: 'text-purple-500',
+      bg: 'bg-purple-100 dark:bg-purple-900/30'
     },
     {
       icon: Timer,
       label: 'المدة',
       value: `${sessionDetails.duration_minutes} دقيقة`,
+      color: 'text-orange-500',
+      bg: 'bg-orange-100 dark:bg-orange-900/30'
     },
     {
       icon: Globe2,
-      label: 'نوع الجلسة',
-      value: sessionDetails.is_public ? 'عامة' : 'خاصة بالطلاب',
+      label: 'النوع',
+      value: sessionDetails.is_public ? 'عامة' : 'خاصة',
+      color: 'text-emerald-500',
+      bg: 'bg-emerald-100 dark:bg-emerald-900/30'
     },
   ]
 
+  const statusConfig: Record<string, { gradient: string; shadow: string; label: string; icon: any; pulse?: boolean }> = {
+    scheduled: {
+      gradient: 'from-blue-600 to-indigo-600',
+      shadow: 'shadow-blue-500/30',
+      label: 'مجدولة',
+      icon: Clock
+    },
+    in_progress: {
+      gradient: 'from-red-600 to-orange-600',
+      shadow: 'shadow-red-500/30',
+      label: 'مباشر الآن',
+      icon: Radio,
+      pulse: true
+    },
+    completed: {
+      gradient: 'from-emerald-500 to-teal-600',
+      shadow: 'shadow-emerald-500/30',
+      label: 'مكتملة',
+      icon: CheckCircle2
+    },
+    cancelled: {
+      gradient: 'from-slate-600 to-slate-800',
+      shadow: 'shadow-slate-500/30',
+      label: 'ملغاة',
+      icon: Globe2
+    },
+  }
+
+  const currentStatus = isActive ? 'in_progress' : sessionDetails.status as keyof typeof statusConfig
+  const statusInfo = statusConfig[currentStatus] || statusConfig.scheduled
+  const StatusIcon = statusInfo.icon
+
   return (
-    <div className="space-y-6" dir="rtl">
+    <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in duration-700 pb-12 relative" dir="rtl">
+      {/* Background Ornaments */}
+      <div className={cn("absolute top-0 right-0 w-[500px] h-[500px] blur-[120px] rounded-full -z-10 pointer-events-none opacity-20", isActive ? "bg-red-500" : "bg-blue-500")} />
+
       {/* Back link */}
       <Link
         href="/academy/teacher/schedule"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-muted-foreground transition-all hover:text-foreground hover:bg-slate-100 dark:hover:bg-slate-800/50 backdrop-blur-sm -ml-2"
       >
         <ArrowRight className="h-4 w-4" />
         العودة إلى الجدول
       </Link>
 
-      {/* Hero header */}
-      <div className="relative overflow-hidden rounded-2xl border bg-primary p-6 text-primary-foreground sm:p-8">
-        <div className="relative z-10 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="space-y-3">
-            <Badge
-              variant="secondary"
-              className="gap-1.5 border-0 bg-primary-foreground/15 text-primary-foreground hover:bg-primary-foreground/20"
-            >
-              {isCompleted ? (
-                <CheckCircle2 className="h-3.5 w-3.5" />
-              ) : (
-                <Radio className="h-3.5 w-3.5" />
-              )}
-              {isCompleted ? 'مكتملة' : isActive ? 'نشطة حالياً' : 'مجدولة'}
-            </Badge>
-            <h1 className="text-2xl font-bold leading-tight text-balance sm:text-3xl">
-              {sessionDetails.title}
-            </h1>
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-primary-foreground/80">
-              <span className="inline-flex items-center gap-1.5">
-                <Layers className="h-4 w-4" />
-                {sessionDetails.course_name}
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <Calendar className="h-4 w-4" />
-                {dateLabel}
-              </span>
-            </div>
-          </div>
-          <div className="flex shrink-0 items-center gap-3 rounded-xl bg-primary-foreground/10 px-4 py-3">
-            <Users className="h-5 w-5 text-primary-foreground/70" />
-            <div>
-              <p className="text-2xl font-bold leading-none">{attendance.length}</p>
-              <p className="mt-1 text-xs text-primary-foreground/70">إجمالي الحضور</p>
-            </div>
-          </div>
-        </div>
-        {/* decorative accent bar */}
-        <div className="absolute inset-y-0 left-0 w-1.5 bg-accent" aria-hidden="true" />
-      </div>
-
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Details */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="text-lg">تفاصيل الجلسة</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Info grid */}
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              {infoItems.map((item) => (
-                <div
-                  key={item.label}
-                  className="rounded-xl border bg-muted/30 p-4 transition-colors hover:bg-muted/50"
-                >
-                  <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                    <item.icon className="h-4.5 w-4.5" />
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+        {/* Main Column */}
+        <div className="lg:col-span-2 space-y-8">
+          {/* Hero header */}
+          <div className={cn(
+            "relative overflow-hidden rounded-3xl border-2 transition-all duration-500 shadow-xl",
+            isActive ? "border-red-500/50 shadow-red-500/10" : "border-border/50 shadow-blue-900/5"
+          )}>
+            <div className={cn("relative p-8 md:p-10 bg-gradient-to-l text-white overflow-hidden", statusInfo.gradient)}>
+              <div className="absolute inset-0 bg-[url('/noise.png')] opacity-10 mix-blend-overlay" />
+              <div className="absolute top-0 left-0 w-64 h-64 bg-white/10 blur-[80px] rounded-full" />
+              
+              <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+                <div className="space-y-4 flex-1">
+                  <div className="flex items-center gap-3 mb-2 flex-wrap">
+                    <Badge
+                      className={cn("gap-1.5 border border-white/20 bg-white/20 text-white hover:bg-white/30 backdrop-blur-md px-4 py-1.5 rounded-full shadow-sm", statusInfo.shadow)}
+                    >
+                      <StatusIcon className={cn("h-4 w-4", statusInfo.pulse && "animate-pulse")} />
+                      {statusInfo.label}
+                    </Badge>
                   </div>
-                  <p className="text-xs text-muted-foreground">{item.label}</p>
-                  <p className="mt-0.5 text-sm font-semibold leading-snug">{item.value}</p>
-                </div>
-              ))}
-            </div>
-
-            {sessionDetails.series_title && (
-              <>
-                <Separator />
-                <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent/15 text-accent">
-                    <Layers className="h-4.5 w-4.5" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">السلسلة</p>
-                    <p className="text-sm font-semibold">{sessionDetails.series_title}</p>
+                  <h1 className="text-3xl font-black leading-tight text-balance sm:text-4xl drop-shadow-sm">
+                    {sessionDetails.title}
+                  </h1>
+                  <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-medium text-white/90">
+                    <span className="inline-flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-lg backdrop-blur-sm">
+                      <Layers className="h-4.5 w-4.5 opacity-80" />
+                      {sessionDetails.course_name}
+                    </span>
+                    <span className="inline-flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-lg backdrop-blur-sm">
+                      <Calendar className="h-4.5 w-4.5 opacity-80" />
+                      {dateLabel}
+                    </span>
                   </div>
                 </div>
-              </>
-            )}
-
-            {sessionDetails.description && (
-              <>
-                <Separator />
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                    <FileText className="h-4 w-4" />
-                    وصف الجلسة
+                <div className="flex shrink-0 flex-col items-center justify-center gap-2 rounded-2xl bg-white/20 backdrop-blur-md border border-white/20 shadow-lg px-6 py-5 min-w-[120px]">
+                  <Users className="h-7 w-7 text-white opacity-90" />
+                  <div className="text-center mt-1">
+                    <p className="text-3xl font-black leading-none drop-shadow-sm">{attendance.length}</p>
+                    <p className="mt-1.5 text-xs font-bold text-white/80 tracking-wide">إجمالي الحضور</p>
                   </div>
-                  <p className="rounded-xl bg-muted/30 p-4 text-sm leading-relaxed text-foreground/90">
-                    {sessionDetails.description}
-                  </p>
                 </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Attendance */}
-        <Card className="lg:col-span-1">
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between text-lg">
-              <span className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-primary" />
-                سجل الحضور
-              </span>
-              {attendance.length > 0 && (
-                <Badge variant="secondary" className="font-mono">
-                  {attendance.length}
-                </Badge>
-              )}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {attendance.length > 0 ? (
-              <div className="max-h-[460px] space-y-2 overflow-y-auto pl-1">
-                {attendance.map((record) => (
+              </div>
+            </div>
+            
+            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-6 md:p-8 space-y-8">
+              {/* Info grid */}
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                {infoItems.map((item) => (
                   <div
-                    key={record.id}
-                    className="flex items-center gap-3 rounded-xl border bg-card p-3 transition-colors hover:bg-muted/40"
+                    key={item.label}
+                    className="flex flex-col rounded-2xl border border-border/50 bg-card p-4 transition-all hover:shadow-md hover:-translate-y-1"
                   >
-                    <Avatar className="h-9 w-9 shrink-0">
-                      <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
-                        {getInitials(record.full_name)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium">{record.full_name}</p>
-                      <p className="truncate text-xs text-muted-foreground">{record.email}</p>
+                    <div className={cn("mb-3 flex h-12 w-12 items-center justify-center rounded-xl shrink-0", item.bg, item.color)}>
+                      <item.icon className="h-6 w-6" />
                     </div>
-                    <div className="shrink-0 text-left">
-                      <p className="text-[11px] text-muted-foreground">انضم</p>
-                      <p className="font-mono text-xs font-medium">
-                        {new Date(record.joined_at).toLocaleTimeString('ar-EG', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </p>
-                    </div>
+                    <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-1">{item.label}</p>
+                    <p className="text-sm font-black leading-snug truncate">{item.value}</p>
                   </div>
                 ))}
               </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center rounded-xl border border-dashed py-12 text-center">
-                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-                  <Users className="h-6 w-6 text-muted-foreground/50" />
+
+              {sessionDetails.series_title && (
+                <>
+                  <Separator className="bg-border/50" />
+                  <div className="flex items-center gap-4 p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/30 border border-border/50">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400">
+                      <Layers className="h-6 w-6" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">السلسلة التابع لها</p>
+                      <p className="text-lg font-black">{sessionDetails.series_title}</p>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {sessionDetails.description && (
+                <>
+                  <Separator className="bg-border/50" />
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2 text-lg font-black">
+                      <FileText className="h-5 w-5 text-blue-500" />
+                      وصف الجلسة
+                    </div>
+                    <p className="rounded-2xl border border-border/50 bg-slate-50 dark:bg-slate-800/30 p-6 text-base leading-relaxed text-muted-foreground font-medium shadow-sm">
+                      {sessionDetails.description}
+                    </p>
+                  </div>
+                </>
+              )}
+
+              {sessionDetails.recording_url && (
+                <>
+                  <Separator className="bg-border/50" />
+                  <RecordingShareToggle 
+                    sessionId={sessionDetails.id}
+                    initialShared={sessionDetails.is_recording_shared || false}
+                    hasRecording={!!sessionDetails.recording_url}
+                  />
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Sidebar / Attendance Column */}
+        <div className="lg:col-span-1 space-y-6">
+          <Card className="rounded-3xl border-2 border-border/50 shadow-xl shadow-blue-900/5 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl overflow-hidden sticky top-6">
+            <CardHeader className="border-b border-border/50 bg-slate-50/50 dark:bg-slate-800/30 pb-5">
+              <CardTitle className="flex items-center justify-between text-xl font-black">
+                <span className="flex items-center gap-3">
+                  <div className="p-2 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
+                    <Users className="h-5 w-5" />
+                  </div>
+                  سجل الحضور
+                </span>
+                {attendance.length > 0 && (
+                  <Badge variant="secondary" className="font-bold px-3 py-1 text-sm bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300">
+                    {attendance.length} طالب
+                  </Badge>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              {attendance.length > 0 ? (
+                <div className="max-h-[500px] overflow-y-auto divide-y divide-border/50 scrollbar-thin scrollbar-thumb-muted">
+                  {attendance.map((record, idx) => (
+                    <div
+                      key={record.id}
+                      className="flex items-center gap-4 p-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50 animate-in fade-in slide-in-from-bottom-2"
+                      style={{ animationDelay: `${idx * 50}ms` }}
+                    >
+                      <Avatar className="h-12 w-12 shrink-0 ring-2 ring-background shadow-sm">
+                        <AvatarFallback className="bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/50 dark:to-indigo-900/50 text-sm font-bold text-blue-700 dark:text-blue-300">
+                          {getInitials(record.full_name)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-base font-bold">{record.full_name}</p>
+                        <p className="truncate text-xs font-medium text-muted-foreground mt-0.5">{record.email}</p>
+                      </div>
+                      <div className="shrink-0 text-left bg-slate-100 dark:bg-slate-800 rounded-lg px-2.5 py-1.5">
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase mb-0.5">انضمام</p>
+                        <p className="font-mono text-xs font-bold text-foreground">
+                          {new Date(record.joined_at).toLocaleTimeString('ar-EG', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <p className="text-sm font-medium">لا يوجد حضور بعد</p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  لم يتم تسجيل أي حضور لهذه الجلسة حتى الآن.
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+              ) : (
+                <div className="flex flex-col items-center justify-center p-12 text-center">
+                  <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 dark:bg-slate-800 shadow-inner">
+                    <Users className="h-8 w-8 text-slate-400" />
+                  </div>
+                  <p className="text-lg font-black">لا يوجد حضور بعد</p>
+                  <p className="mt-2 text-sm font-medium text-muted-foreground max-w-[200px] leading-relaxed">
+                    لم يقم أي طالب بتسجيل الدخول أو الانضمام لهذه الجلسة حتى الآن.
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   )

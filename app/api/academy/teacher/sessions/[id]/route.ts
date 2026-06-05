@@ -34,6 +34,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
             status,
             max_students,
             is_public,
+            is_recording_shared,
             series_title,
             announce_to_students,
         } = body
@@ -88,6 +89,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
                 fields.push(`public_join_token = COALESCE(public_join_token, $${counter++})`)
                 values.push(randomUUID().replaceAll('-', ''))
             }
+        }
+        if (is_recording_shared !== undefined) {
+            fields.push(`is_recording_shared = $${counter++}`)
+            values.push(!!is_recording_shared)
         }
         if (typeof series_title === 'string' && series_title.trim()) {
             const series = await query<{ id: string }>(`
