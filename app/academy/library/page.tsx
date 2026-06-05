@@ -204,8 +204,7 @@ export default function PublicLibraryPage() {
               >
                 <div className="h-full flex flex-col bg-card border border-border/40 rounded-3xl overflow-hidden hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] hover:shadow-primary/10 hover:-translate-y-1.5 transition-all duration-500 group-focus-visible:ring-2 ring-primary ring-offset-2 ring-offset-background">
                   {/* Image Container */}
-                  <div className="relative aspect-[3/4] overflow-hidden bg-muted/30 p-4 sm:p-6 flex items-center justify-center">
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-50" />
+                  <div className="relative aspect-[3/4] overflow-hidden p-4 sm:p-6 flex items-center justify-center bg-transparent">
                     <div className="relative w-full h-full rounded-md sm:rounded-lg overflow-hidden shadow-md shadow-black/10 border border-black/5 group-hover:shadow-2xl group-hover:shadow-black/20 transition-all duration-500 group-hover:scale-105">
                       {/* Spine highlight */}
                       <div className="absolute top-0 bottom-0 right-0 w-1.5 bg-gradient-to-l from-white/40 to-transparent z-10 mix-blend-overlay" />
