@@ -69,11 +69,50 @@ export default function StudentCoursesArchivePage() {
         return r.json()
       }),
       fetch(`/api/academy/student/paths/enrolled`).then((r) => (r.ok ? r.json() : { data: [] })),
+      // Tajweed/academy structured paths live in a separate system; include
+      // the completed ones so they show up in the achievements archive too.
+      fetch(`/api/student/tajweed-paths?scope=enrolled`).then((r) => (r.ok ? r.json() : { paths: [] })),
     ])
-      .then(([coursesRes, pathsRes]) => {
+      .then(([coursesRes, pathsRes, tajweedRes]) => {
         setCourses(coursesRes.data || [])
-        // Only completed paths belong in the archive.
-        setPaths((pathsRes.data || []).filter((p: ArchivedPath) => (p.progress_percent ?? 0) >= 100))
+
+        const subjectLabels: Record<string, string> = {
+          fiqh: 'الفقه',
+          aqeedah: 'العقيدة',
+          seerah: 'السيرة النبوية',
+          tafsir: 'التفسير',
+          tajweed: 'التجويد',
+        }
+
+        // Legacy learning_paths archive entries.
+        const legacyPaths: ArchivedPath[] = (pathsRes.data || []).filter(
+          (p: ArchivedPath) => (p.progress_percent ?? 0) >= 100,
+        )
+
+        // Completed tajweed_paths enrollments mapped into the archive shape.
+        const tajweedPaths: ArchivedPath[] = (tajweedRes.paths || [])
+          .filter((p: any) => p.enrollment_status === 'completed')
+          .map((p: any) => ({
+            path_id: p.id,
+            path_title: p.title,
+            description: p.description ?? null,
+            thumbnail_url: p.thumbnail_url ?? null,
+            subject: subjectLabels[p.subject] || p.subject || null,
+            level: p.level ?? null,
+            completed_courses: p.stages_completed ?? 0,
+            total_courses: p.total_stages ?? 0,
+            progress_percent: 100,
+            started_at: p.started_at ?? null,
+          }))
+
+        // De-dupe by path_id (legacy + tajweed never collide, but be safe).
+        const seen = new Set<string>()
+        const merged = [...tajweedPaths, ...legacyPaths].filter((p) => {
+          if (seen.has(p.path_id)) return false
+          seen.add(p.path_id)
+          return true
+        })
+        setPaths(merged)
       })
       .catch((e) => {
         setCourses([])

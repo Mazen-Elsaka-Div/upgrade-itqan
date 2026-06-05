@@ -1,0 +1,415 @@
+"use client"
+
+import { useState, useEffect } from 'react'
+import { useParams, useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { toast } from 'sonner'
+import { cn } from '@/lib/utils'
+import {
+  BookOpen, PlayCircle, CheckCircle2, Lock, ArrowRight, ArrowLeft,
+  ExternalLink, GraduationCap, FileText, Award, ChevronRight,
+} from 'lucide-react'
+
+interface PathStage {
+  id: string
+  path_id: string
+  position: number
+  title: string
+  description?: string
+  content?: string
+  video_url?: string
+  pdf_url?: string
+  passage_text?: string
+  course_id?: string
+  course_title?: string
+  course_thumbnail_url?: string
+  course_progress?: number
+  course_status?: string
+  halaqa_id?: string
+  halaqa_name?: string
+  lesson_title?: string
+  progress: {
+    status: 'locked' | 'unlocked' | 'in_progress' | 'completed'
+    audio_url?: string
+    notes?: string
+  }
+}
+
+interface TajweedPath {
+  id: string
+  title: string
+  subject: string
+}
+
+interface Enrollment {
+  id: string
+  status: 'active' | 'paused' | 'completed' | 'dropped'
+}
+
+export default function StudentPathStagePage() {
+  const params = useParams()
+  const router = useRouter()
+  const pathId = params.id as string
+  const stageId = params.stageId as string
+
+  const [path, setPath] = useState<TajweedPath | null>(null)
+  const [stages, setStages] = useState<PathStage[]>([])
+  const [enrollment, setEnrollment] = useState<Enrollment | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [completing, setCompleting] = useState(false)
+
+  const fetchDetails = async () => {
+    try {
+      const res = await fetch(`/api/student/tajweed-paths/${pathId}`)
+      if (res.ok) {
+        const data = await res.json()
+        setPath(data.path)
+        setStages(data.stages || [])
+        setEnrollment(data.enrollment)
+      } else {
+        toast.error('فشل في تحميل المرحلة')
+      }
+    } catch (error) {
+      console.error('Error fetching stage:', error)
+      toast.error('حدث خطأ أثناء تحميل البيانات')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (pathId) fetchDetails()
+  }, [pathId])
+
+  const stage = stages.find((s) => s.id === stageId) || null
+  const stageIdx = stages.findIndex((s) => s.id === stageId)
+  const prevStage = stageIdx > 0 ? stages[stageIdx - 1] : null
+  const nextStage = stageIdx >= 0 && stageIdx < stages.length - 1 ? stages[stageIdx + 1] : null
+
+  const handleComplete = async () => {
+    if (!stage) return
+    setCompleting(true)
+    try {
+      const res = await fetch(`/api/student/tajweed-paths/${pathId}/stages/${stage.id}/complete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        if (data.finished) {
+          toast.success('تهانينا! أكملت المسار بالكامل')
+        } else {
+          toast.success('تهانينا! تم إكمال المرحلة بنجاح')
+        }
+        await fetchDetails()
+        if (data.finished) {
+          router.push(`/academy/student/path/${pathId}`)
+        } else if (data.next_stage_id) {
+          router.push(`/academy/student/path/${pathId}/stage/${data.next_stage_id}`)
+        }
+      } else {
+        toast.error(data.error || 'لا يمكن إكمال المرحلة حالياً')
+      }
+    } catch (error) {
+      console.error('Complete stage error:', error)
+      toast.error('خطأ في الاتصال بالخادم')
+    } finally {
+      setCompleting(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[500px] space-y-4">
+        <div className="w-12 h-12 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+        <p className="text-muted-foreground animate-pulse text-sm">جاري تحميل المرحلة...</p>
+      </div>
+    )
+  }
+
+  // Not enrolled or stage missing → bounce to path detail.
+  if (!path || !stage || !enrollment || enrollment.status === 'dropped') {
+    return (
+      <div className="text-center py-16 space-y-4 max-w-md mx-auto">
+        <h2 className="text-2xl font-bold text-destructive">المرحلة غير متاحة</h2>
+        <p className="text-muted-foreground">
+          عذراً، لم نتمكن من فتح هذه المرحلة. قد تكون غير مسجل في المسار أو أن المرحلة غير موجودة.
+        </p>
+        <Link
+          href={`/academy/student/path/${pathId}`}
+          className="inline-flex items-center gap-2 text-emerald-600 font-semibold hover:underline"
+        >
+          <ArrowRight className="w-4 h-4 rtl:rotate-180" />
+          العودة لصفحة المسار
+        </Link>
+      </div>
+    )
+  }
+
+  const isLocked = stage.progress?.status === 'locked'
+  const isCompleted = stage.progress?.status === 'completed'
+
+  if (isLocked) {
+    return (
+      <div className="text-center py-16 space-y-4 max-w-md mx-auto">
+        <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto">
+          <Lock className="w-8 h-8 text-slate-400" />
+        </div>
+        <h2 className="text-2xl font-bold text-foreground">هذه المرحلة مقفولة</h2>
+        <p className="text-muted-foreground">يجب إكمال المراحل السابقة أولاً للوصول إلى هذه المرحلة.</p>
+        <Link
+          href={`/academy/student/path/${pathId}`}
+          className="inline-flex items-center gap-2 text-emerald-600 font-semibold hover:underline"
+        >
+          <ArrowRight className="w-4 h-4 rtl:rotate-180" />
+          العودة لصفحة المسار
+        </Link>
+      </div>
+    )
+  }
+
+  const courseDone = Number(stage.course_progress || 0) === 100 || stage.course_status === 'completed'
+  const canComplete = !stage.course_id || courseDone
+
+  return (
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      {/* Breadcrumb */}
+      <nav className="flex items-center gap-1.5 text-sm text-muted-foreground flex-wrap">
+        <Link href="/academy/student/path" className="hover:text-emerald-600 transition-colors">المسارات</Link>
+        <ChevronRight className="w-3.5 h-3.5 rtl:rotate-180" />
+        <Link href={`/academy/student/path/${pathId}`} className="hover:text-emerald-600 transition-colors line-clamp-1">
+          {path.title}
+        </Link>
+        <ChevronRight className="w-3.5 h-3.5 rtl:rotate-180" />
+        <span className="text-foreground font-semibold">المرحلة {stageIdx + 1}</span>
+      </nav>
+
+      {/* Stage Header */}
+      <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 shadow-sm">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+            المرحلة {stageIdx + 1} من {stages.length}
+          </span>
+          {isCompleted ? (
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 text-xs font-bold">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              مكتملة
+            </span>
+          ) : (
+            <span className="px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-600 text-xs font-bold">
+              قيد التعلم
+            </span>
+          )}
+        </div>
+        <h1 className="text-2xl sm:text-3xl font-extrabold mt-3 text-foreground leading-snug">{stage.title}</h1>
+        {stage.description && (
+          <p className="text-muted-foreground mt-2 leading-relaxed">{stage.description}</p>
+        )}
+      </div>
+
+      {/* Stage Content */}
+      {stage.content && (
+        <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 shadow-sm space-y-3">
+          <h2 className="text-lg font-bold flex items-center gap-2">
+            <BookOpen className="w-5 h-5 text-emerald-600" />
+            محتوى المرحلة
+          </h2>
+          <div className="text-sm text-foreground/95 leading-relaxed whitespace-pre-line">
+            {stage.content}
+          </div>
+        </div>
+      )}
+
+      {/* Passage text */}
+      {stage.passage_text && (
+        <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 shadow-sm space-y-3">
+          <h2 className="text-lg font-bold flex items-center gap-2">
+            <FileText className="w-5 h-5 text-emerald-600" />
+            النص المرجعي
+          </h2>
+          <div className="text-base text-foreground leading-loose whitespace-pre-line bg-muted/30 p-5 rounded-2xl border border-border/40">
+            {stage.passage_text}
+          </div>
+        </div>
+      )}
+
+      {/* Resources */}
+      {(stage.video_url || stage.pdf_url) && (
+        <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 shadow-sm space-y-4">
+          <h2 className="text-lg font-bold flex items-center gap-2">
+            <PlayCircle className="w-5 h-5 text-emerald-600" />
+            مصادر المرحلة
+          </h2>
+          <div className="flex flex-wrap gap-3">
+            {stage.video_url && (
+              <a
+                href={stage.video_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400 font-semibold hover:underline bg-emerald-500/5 px-4 py-2.5 rounded-xl border border-emerald-500/10"
+              >
+                <PlayCircle className="w-4 h-4" />
+                مشاهدة الفيديو المرفق
+              </a>
+            )}
+            {stage.pdf_url && (
+              <a
+                href={stage.pdf_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 font-semibold hover:underline bg-blue-500/5 px-4 py-2.5 rounded-xl border border-blue-500/10"
+              >
+                <FileText className="w-4 h-4" />
+                تحميل الملف المرفق (PDF)
+              </a>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Linked course requirement */}
+      {stage.course_id && (
+        <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 shadow-sm space-y-4">
+          <h2 className="text-lg font-bold flex items-center gap-2">
+            <BookOpen className="w-5 h-5 text-emerald-600" />
+            الدورة المرتبطة بالمرحلة
+          </h2>
+          <div className="flex flex-col sm:flex-row gap-4 sm:items-center justify-between bg-muted/30 p-4 rounded-2xl border border-border/40">
+            <div className="flex gap-4 items-center min-w-0">
+              <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 bg-slate-200 dark:bg-slate-700 relative">
+                {stage.course_thumbnail_url ? (
+                  <img src={stage.course_thumbnail_url || "/placeholder.svg"} alt={stage.course_title} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <BookOpen className="w-6 h-6 text-slate-400" />
+                  </div>
+                )}
+              </div>
+              <div className="min-w-0">
+                <h3 className="font-bold text-foreground truncate">{stage.course_title || 'دورة أكاديمية مرتبطة'}</h3>
+                <div className="flex items-center gap-2 mt-1.5">
+                  <div className="h-1.5 w-28 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                    <div
+                      className={cn('h-full rounded-full', courseDone ? 'bg-emerald-500' : 'bg-amber-500')}
+                      style={{ width: `${Number(stage.course_progress || 0)}%` }}
+                    />
+                  </div>
+                  <span className={cn('text-xs font-bold', courseDone ? 'text-emerald-600' : 'text-amber-600')}>
+                    {Number(stage.course_progress || 0)}%
+                  </span>
+                </div>
+              </div>
+            </div>
+            <Link
+              href={`/academy/student/courses/${stage.course_id}`}
+              className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 text-sm font-bold rounded-xl bg-white dark:bg-slate-950 text-foreground border border-border hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors shrink-0"
+            >
+              صفحة الدورة
+              <ExternalLink className="w-4 h-4" />
+            </Link>
+          </div>
+          {!courseDone && (
+            <p className="text-xs text-amber-600 font-medium">
+              يجب إكمال الدورة المرتبطة بنسبة 100% قبل أن تتمكن من اعتماد إكمال هذه المرحلة.
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Linked halaqa */}
+      {stage.halaqa_id && (
+        <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 shadow-sm space-y-4">
+          <h2 className="text-lg font-bold flex items-center gap-2">
+            <GraduationCap className="w-5 h-5 text-emerald-600" />
+            الحلقة التطبيقية
+          </h2>
+          <div className="flex flex-col sm:flex-row gap-4 sm:items-center justify-between bg-emerald-50/60 dark:bg-emerald-950/30 p-4 rounded-2xl border border-emerald-200/50 dark:border-emerald-800/50">
+            <div className="flex gap-4 items-center min-w-0">
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center shrink-0">
+                <GraduationCap className="w-7 h-7" />
+              </div>
+              <h3 className="font-bold text-foreground truncate">{stage.halaqa_name}</h3>
+            </div>
+            <Link
+              href={`/academy/student/halaqat/${stage.halaqa_id}`}
+              className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 text-sm font-bold rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:from-emerald-500 hover:to-teal-500 transition-all shadow-md shrink-0"
+            >
+              الذهاب للحلقة
+              <ArrowRight className="w-4 h-4 rtl:rotate-180" />
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {/* Completion action */}
+      {!isCompleted && (
+        <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 className="text-lg font-bold text-foreground">اعتماد إكمال المرحلة</h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              {canComplete
+                ? 'بمجرد اعتماد الإكمال، سيتم فتح المرحلة التالية تلقائياً.'
+                : 'أكمل متطلبات هذه المرحلة أولاً لتتمكن من اعتمادها.'}
+            </p>
+          </div>
+          <button
+            onClick={handleComplete}
+            disabled={completing || !canComplete}
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-emerald-600 text-white font-bold text-sm hover:bg-emerald-700 active:bg-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-md shrink-0"
+          >
+            {completing ? (
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <CheckCircle2 className="w-4 h-4" />
+            )}
+            اعتماد الإكمال
+          </button>
+        </div>
+      )}
+
+      {isCompleted && (
+        <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-3xl p-6 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0">
+            <CheckCircle2 className="w-5 h-5" />
+          </div>
+          <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">
+            أكملت هذه المرحلة بنجاح. يمكنك مراجعتها في أي وقت.
+          </p>
+        </div>
+      )}
+
+      {/* Prev / Next navigation */}
+      <div className="flex items-center justify-between gap-3 pt-2">
+        {prevStage ? (
+          <Link
+            href={`/academy/student/path/${pathId}/stage/${prevStage.id}`}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-card border border-border text-sm font-bold text-foreground hover:bg-muted/50 transition-colors"
+          >
+            <ArrowRight className="w-4 h-4 rtl:rotate-180" />
+            المرحلة السابقة
+          </Link>
+        ) : (
+          <span />
+        )}
+        {nextStage && nextStage.progress?.status !== 'locked' ? (
+          <Link
+            href={`/academy/student/path/${pathId}/stage/${nextStage.id}`}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-card border border-border text-sm font-bold text-foreground hover:bg-muted/50 transition-colors"
+          >
+            المرحلة التالية
+            <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
+          </Link>
+        ) : (
+          <Link
+            href={`/academy/student/path/${pathId}`}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-card border border-border text-sm font-bold text-foreground hover:bg-muted/50 transition-colors"
+          >
+            <Award className="w-4 h-4" />
+            عرض كل المراحل
+          </Link>
+        )}
+      </div>
+    </div>
+  )
+}
