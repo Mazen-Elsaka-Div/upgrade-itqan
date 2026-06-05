@@ -17,13 +17,13 @@ export async function GET(req: NextRequest) {
         COUNT(DISTINCT l.id)::int as total_lessons,
         COUNT(DISTINCT e.id)::int as total_enrolled,
         COUNT(DISTINCT CASE WHEN e.status = 'pending' THEN e.id END)::int as pending_requests,
-        c.created_at
+        c.created_at, c.scope
       FROM courses c
       LEFT JOIN categories cat ON c.category_id = cat.id
       LEFT JOIN lessons l ON l.course_id = c.id
       LEFT JOIN enrollments e ON e.course_id = c.id
       WHERE c.teacher_id = $1
-      GROUP BY c.id, c.title, c.description, c.thumbnail_url, c.level, c.status, c.category_id, cat.name, c.is_active, c.rejection_reason, c.reviewed_at, c.submitted_for_review_at, c.created_at
+      GROUP BY c.id, c.title, c.description, c.thumbnail_url, c.level, c.status, c.category_id, cat.name, c.is_active, c.rejection_reason, c.reviewed_at, c.submitted_for_review_at, c.created_at, c.scope
       ORDER BY c.created_at DESC
     `
     const rows = await query<any>(q, [session.sub])
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
   
   try {
     const body = await req.json()
-    const { title, description, thumbnail_url, level, category_id } = body
+    const { title, description, thumbnail_url, level, category_id, scope } = body
 
     if (!title || !level) {
       return NextResponse.json({ error: 'Title and level are required' }, { status: 400 })
@@ -56,11 +56,11 @@ export async function POST(req: NextRequest) {
     const courseSpecialization = teacherSpecs.length > 0 ? teacherSpecs[0].specialization : null
 
     const q = `
-      INSERT INTO courses (title, description, thumbnail_url, level, status, category_id, teacher_id, specialization, created_at)
-      VALUES ($1, $2, $3, $4, 'draft', $5, $6, $7, NOW())
+      INSERT INTO courses (title, description, thumbnail_url, level, status, category_id, teacher_id, specialization, scope, created_at)
+      VALUES ($1, $2, $3, $4, 'draft', $5, $6, $7, $8, NOW())
       RETURNING *
     `
-    const params = [title, description || null, thumbnail_url || null, level, category_id || null, session.sub, courseSpecialization]
+    const params = [title, description || null, thumbnail_url || null, level, category_id || null, session.sub, courseSpecialization, scope || 'public']
     const rows = await query<any>(q, params)
     
     return NextResponse.json({ data: rows[0] }, { status: 201 })

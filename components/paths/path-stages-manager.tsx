@@ -354,6 +354,9 @@ export default function PathStagesManager({ pathId }: { pathId: string }) {
                     <option value="">— اختر الدورة —</option>
                     {entities.courses.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
                   </select>
+                  <div className="mt-2 text-left">
+                    <a href="/academy/teacher/courses/new?scope=path_only" target="_blank" className="text-xs font-bold text-emerald-600 hover:text-emerald-700 underline underline-offset-2">أو أنشئ دورة مخصصة لهذا المسار</a>
+                  </div>
                 </div>
               )}
               {form.stage_type === 'halaqa' && (
@@ -371,6 +374,9 @@ export default function PathStagesManager({ pathId }: { pathId: string }) {
                     <option value="">— اختر الحلقة —</option>
                     {entities.halaqat.map(h => <option key={h.id} value={h.id}>{h.title}</option>)}
                   </select>
+                  <div className="mt-2 text-left">
+                    <a href="/academy/teacher/halaqat?new=true&scope=path_only" target="_blank" className="text-xs font-bold text-blue-600 hover:text-blue-700 underline underline-offset-2">أو أنشئ حلقة مخصصة لهذا المسار</a>
+                  </div>
                 </div>
               )}
               {form.stage_type === 'lesson' && (

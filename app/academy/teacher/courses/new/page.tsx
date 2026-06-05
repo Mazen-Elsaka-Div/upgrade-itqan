@@ -25,7 +25,8 @@ export default function NewCoursePage() {
     description: '',
     thumbnail_url: '',
     level: 'beginner',
-    category_id: ''
+    category_id: '',
+    scope: 'public'
   })
   
   const [error, setError] = useState('')
@@ -51,6 +52,13 @@ export default function NewCoursePage() {
       }
     }
     fetchData()
+
+    // Read initial scope from URL query parameters
+    const searchParams = new URLSearchParams(window.location.search)
+    const initialScope = searchParams.get('scope')
+    if (initialScope === 'path_only' || initialScope === 'public') {
+      setFormData(prev => ({ ...prev, scope: initialScope }))
+    }
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -180,6 +188,40 @@ export default function NewCoursePage() {
                   <option key={cat.id} value={cat.id}>{cat.name}</option>
                 ))}
               </select>
+            </div>
+            
+            <div className="space-y-2 sm:col-span-2">
+              <label className="text-sm font-bold text-foreground block mb-2">رؤية الدورة</label>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <label className="flex items-center gap-2 p-3 border border-border rounded-lg bg-background cursor-pointer hover:border-blue-500/50 flex-1 transition-colors">
+                  <input 
+                    type="radio" 
+                    name="scope" 
+                    value="public" 
+                    checked={formData.scope === 'public'} 
+                    onChange={e => setFormData({...formData, scope: 'public'})}
+                    className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                  />
+                  <div>
+                    <p className="font-bold text-sm">دورة عامة</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">تظهر لجميع الطلاب في تصفح الدورات</p>
+                  </div>
+                </label>
+                <label className="flex items-center gap-2 p-3 border border-border rounded-lg bg-background cursor-pointer hover:border-emerald-500/50 flex-1 transition-colors">
+                  <input 
+                    type="radio" 
+                    name="scope" 
+                    value="path_only" 
+                    checked={formData.scope === 'path_only'} 
+                    onChange={e => setFormData({...formData, scope: 'path_only'})}
+                    className="w-4 h-4 text-emerald-600 focus:ring-emerald-500"
+                  />
+                  <div>
+                    <p className="font-bold text-sm text-emerald-700 dark:text-emerald-400">مخصصة لمسار فقط</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">مخفية، وتظهر فقط للطلاب الملتحقين بالمسار</p>
+                  </div>
+                </label>
+              </div>
             </div>
           </div>
 

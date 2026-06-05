@@ -130,6 +130,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     ['meeting_link', body.meeting_link],
     ['scheduled_at', body.scheduled_at],
     ['duration_minutes', body.duration_minutes],
+    ['scope', body.scope],
     ['is_active', body.is_active],
   ]
   for (const [col, val] of fields) {

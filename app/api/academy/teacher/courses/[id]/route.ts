@@ -88,7 +88,7 @@ export async function PUT(
   try {
     const courseId = (await params).id;
     const body = await req.json()
-    const { title, description, thumbnail_url, level, category_id, status } = body
+    const { title, description, thumbnail_url, level, category_id, status, scope } = body
 
     // Ownership check for teachers; admins/academy_admins can update any course.
     if (session.role === 'teacher') {
@@ -127,6 +127,7 @@ export async function PUT(
       level,
       category_id,
       statusToSet,
+      scope,
       courseId,
     ]
     if (session.role === 'teacher') updateParams.push(session.sub)
@@ -141,10 +142,11 @@ export async function PUT(
         level = COALESCE($4, level),
         category_id = COALESCE($5, category_id),
         status = COALESCE($6, status),
+        scope = COALESCE($7, scope),
         rejection_reason = CASE WHEN $${submitFlagIdx}::boolean THEN NULL ELSE rejection_reason END,
         submitted_for_review_at = CASE WHEN $${submitFlagIdx}::boolean THEN NOW() ELSE submitted_for_review_at END,
         updated_at = NOW()
-      WHERE id = $7 ${session.role === 'teacher' ? 'AND teacher_id = $8' : ''}
+      WHERE id = $8 ${session.role === 'teacher' ? 'AND teacher_id = $9' : ''}
       RETURNING *
     `
     const result = await query<any>(updateQuery, updateParams)

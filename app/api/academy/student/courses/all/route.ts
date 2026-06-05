@@ -83,6 +83,7 @@ export async function GET(req: NextRequest) {
       LEFT JOIN enrollments e_me ON e_me.course_id = c.id AND e_me.student_id = $1
       WHERE (c.status = 'published' OR c.is_published = true)
         AND COALESCE(c.is_active, TRUE) = TRUE
+        AND COALESCE(c.scope, 'public') = 'public'
       ${whereExtra}
       GROUP BY c.id, c.title, c.description, c.thumbnail_url, c.difficulty_level, c.level, c.status, cat.name, c.category_id, u.name, c.created_at
       ORDER BY c.created_at DESC

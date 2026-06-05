@@ -96,6 +96,7 @@ const emptyForm = {
   meeting_link: '',
   scheduled_at: '',
   duration_minutes: 60,
+  scope: 'public'
 }
 
 function formatRelativeFromNow(value: string | null): string | null {
@@ -163,6 +164,13 @@ export function HalaqatList({
 
   useEffect(() => {
     fetchData()
+    // Check if we should open modal automatically based on URL params
+    const searchParams = new URLSearchParams(window.location.search)
+    if (searchParams.get('new') === 'true' && canEdit) {
+      const initialScope = searchParams.get('scope')
+      setForm(prev => ({ ...prev, scope: initialScope === 'path_only' ? 'path_only' : 'public' }))
+      setShowModal(true)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [platform, scope])
 
@@ -201,6 +209,7 @@ export function HalaqatList({
       meeting_link: h.meeting_link || '',
       scheduled_at: h.scheduled_at ? h.scheduled_at.slice(0, 16) : '',
       duration_minutes: h.duration_minutes || 60,
+      scope: (h as any).scope || 'public'
     })
     setShowModal(true)
   }
@@ -455,6 +464,11 @@ function HalaqaCard({
           >
             {h.is_active !== false ? 'نشطة' : 'متوقفة'}
           </span>
+          {(h as any).scope === 'path_only' && (
+            <span className="shrink-0 text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-full font-black border bg-indigo-50 text-indigo-700 border-indigo-200/50 dark:bg-indigo-900/30 dark:text-indigo-400">
+              مسار فقط
+            </span>
+          )}
         </div>
 
         {h.description && (
@@ -620,6 +634,40 @@ function HalaqaFormModal({
                 className="input"
               />
             </Field>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-bold text-foreground block mb-2">رؤية الحلقة</label>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <label className="flex items-center gap-2 p-3 border border-border rounded-lg bg-background cursor-pointer hover:border-blue-500/50 flex-1 transition-colors">
+                <input 
+                  type="radio" 
+                  name="scope" 
+                  value="public" 
+                  checked={form.scope === 'public'} 
+                  onChange={e => setForm({...form, scope: 'public'})}
+                  className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                />
+                <div>
+                  <p className="font-bold text-sm">حلقة عامة</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">متاحة لجميع الطلاب</p>
+                </div>
+              </label>
+              <label className="flex items-center gap-2 p-3 border border-border rounded-lg bg-background cursor-pointer hover:border-emerald-500/50 flex-1 transition-colors">
+                <input 
+                  type="radio" 
+                  name="scope" 
+                  value="path_only" 
+                  checked={form.scope === 'path_only'} 
+                  onChange={e => setForm({...form, scope: 'path_only'})}
+                  className="w-4 h-4 text-emerald-600 focus:ring-emerald-500"
+                />
+                <div>
+                  <p className="font-bold text-sm text-emerald-700 dark:text-emerald-400">مخصصة لمسار</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">لطلاب المسارات فقط</p>
+                </div>
+              </label>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">

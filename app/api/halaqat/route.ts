@@ -61,6 +61,9 @@ export async function GET(req: NextRequest) {
       WHERE hs.halaqah_id = h.id AND hs.student_id = $2 AND hs.is_active = TRUE
     )`
     params.push(session.sub)
+  } else {
+    // If browsing all, hide path_only halaqat
+    whereExtra = `AND COALESCE(h.scope, 'public') = 'public'`
   }
 
   const rows = await query<any>(
@@ -164,13 +167,14 @@ export async function POST(req: NextRequest) {
   const durationMinutes = body.duration_minutes
     ? Math.max(5, Math.min(360, Number(body.duration_minutes)))
     : 60
+  const scope = body.scope || 'public'
 
   const inserted = await query<any>(
     `INSERT INTO halaqat (
        name, description, teacher_id, gender, max_students, meeting_link,
-       platform, scheduled_at, duration_minutes, is_active, created_at
+       platform, scheduled_at, duration_minutes, scope, is_active, created_at
      )
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, TRUE, NOW())
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, TRUE, NOW())
      RETURNING *`,
     [
       name,
@@ -182,6 +186,7 @@ export async function POST(req: NextRequest) {
       platform,
       scheduledAt,
       durationMinutes,
+      scope,
     ]
   )
   const row = inserted[0]
