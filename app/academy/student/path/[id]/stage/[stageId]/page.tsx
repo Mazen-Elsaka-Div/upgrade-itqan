@@ -27,7 +27,12 @@ interface PathStage {
   course_status?: string
   halaqa_id?: string
   halaqa_name?: string
+  lesson_id?: string
   lesson_title?: string
+  lesson_description?: string
+  lesson_video_url?: string
+  lesson_audio_url?: string
+  lesson_transcript?: string
   progress: {
     status: 'locked' | 'unlocked' | 'in_progress' | 'completed'
     audio_url?: string
@@ -170,7 +175,7 @@ export default function StudentPathStagePage() {
   }
 
   const courseDone = Number(stage.course_progress || 0) === 100 || stage.course_status === 'completed'
-  const canComplete = !stage.course_id || courseDone
+  const canComplete = (!stage.course_id || stage.lesson_id) ? true : courseDone
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
@@ -234,6 +239,56 @@ export default function StudentPathStagePage() {
         </div>
       )}
 
+      {/* Lesson Content (If it's a lesson from a course) */}
+      {stage.lesson_id && (
+        <div className="space-y-6">
+          {/* Lesson Video */}
+          {stage.lesson_video_url && (
+            <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 shadow-sm space-y-4">
+              <h2 className="text-lg font-bold flex items-center gap-2">
+                <PlayCircle className="w-5 h-5 text-emerald-600" />
+                فيديو الدرس ({stage.lesson_title})
+              </h2>
+              <div className="aspect-video bg-black rounded-2xl overflow-hidden shadow-inner border border-border/50">
+                <iframe
+                  src={stage.lesson_video_url.replace('watch?v=', 'embed/')}
+                  title="Lesson Video"
+                  className="w-full h-full"
+                  allowFullScreen
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Lesson Audio */}
+          {stage.lesson_audio_url && (
+            <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 shadow-sm space-y-4">
+              <h2 className="text-lg font-bold flex items-center gap-2">
+                <PlayCircle className="w-5 h-5 text-emerald-600" />
+                مقطع صوتي
+              </h2>
+              <audio controls className="w-full">
+                <source src={stage.lesson_audio_url} type="audio/mpeg" />
+                متصفحك لا يدعم مشغل الصوت.
+              </audio>
+            </div>
+          )}
+
+          {/* Lesson Transcript */}
+          {stage.lesson_transcript && (
+            <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 shadow-sm space-y-4">
+              <h2 className="text-lg font-bold flex items-center gap-2">
+                <FileText className="w-5 h-5 text-emerald-600" />
+                نص الدرس
+              </h2>
+              <div className="prose prose-emerald max-w-none text-foreground/90 whitespace-pre-wrap bg-muted/30 p-6 rounded-2xl border border-border/40">
+                {stage.lesson_transcript}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Resources */}
       {(stage.video_url || stage.pdf_url) && (
         <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 shadow-sm space-y-4">
@@ -268,8 +323,8 @@ export default function StudentPathStagePage() {
         </div>
       )}
 
-      {/* Linked course requirement */}
-      {stage.course_id && (
+      {/* Linked course requirement (Only if it's a full course stage, NOT a specific lesson) */}
+      {stage.course_id && !stage.lesson_id && (
         <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 shadow-sm space-y-4">
           <h2 className="text-lg font-bold flex items-center gap-2">
             <BookOpen className="w-5 h-5 text-emerald-600" />

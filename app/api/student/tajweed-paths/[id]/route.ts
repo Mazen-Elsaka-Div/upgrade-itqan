@@ -35,7 +35,11 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
               ce.status AS course_status,
               h.name AS halaqa_name,
               h.is_active AS halaqa_is_active,
-              l.title AS lesson_title
+              l.title AS lesson_title,
+              l.description AS lesson_description,
+              l.video_url AS lesson_video_url,
+              l.audio_url AS lesson_audio_url,
+              l.transcript_text AS lesson_transcript
        FROM tajweed_path_stages s
        LEFT JOIN courses c ON c.id = s.course_id
        LEFT JOIN enrollments ce ON ce.course_id = s.course_id AND ce.student_id = $2
