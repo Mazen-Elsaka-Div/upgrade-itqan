@@ -7,7 +7,7 @@ import { shouldShowDateDivider } from '@/lib/chat-date'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Search, Send, User, Loader2, ArrowRight, UserPlus, X, Shield } from 'lucide-react'
+import { Search, Send, User, Loader2, ArrowRight, UserPlus, X, Shield, Trash2 } from 'lucide-react'
 import { useI18n } from '@/lib/i18n/context'
 
 interface Student {
@@ -51,6 +51,7 @@ function ChatContent() {
   const [loadingStudents, setLoadingStudents] = useState(false)
   const [studentSearch, setStudentSearch] = useState('')
   const [creatingConv, setCreatingConv] = useState(false)
+  const [deletingConvId, setDeletingConvId] = useState<string | null>(null)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -155,6 +156,15 @@ function ChatContent() {
 
 
   const handleCreateTicket = async () => {
+    if (creatingConv) return
+
+    // If a support ticket already exists, just open it (2nd click → open).
+    const existingTicket = conversations.find(c => c.is_ticket)
+    if (existingTicket) {
+      setActiveConv(existingTicket)
+      return
+    }
+
     setCreatingConv(true)
     try {
       const res = await fetch('/api/academy/conversations', {
@@ -174,6 +184,25 @@ function ChatContent() {
       // ignore
     } finally {
       setCreatingConv(false)
+    }
+  }
+
+  const handleDeleteConversation = async (convId: string) => {
+    if (!confirm(isAr ? 'هل تريد حذف هذه المحادثة نهائياً؟' : 'Delete this conversation permanently?')) return
+    setDeletingConvId(convId)
+    try {
+      const res = await fetch(`/api/academy/conversations/${convId}`, { method: 'DELETE' })
+      if (res.ok) {
+        setConversations(prev => prev.filter(c => c.id !== convId))
+        setActiveConv(prev => (prev?.id === convId ? null : prev))
+      } else {
+        const data = await res.json().catch(() => ({}))
+        alert(data?.error || (isAr ? 'تعذر حذف المحادثة' : 'Could not delete conversation'))
+      }
+    } catch {
+      // ignore
+    } finally {
+      setDeletingConvId(null)
     }
   }
 
@@ -368,6 +397,16 @@ function ChatContent() {
                     </span>
                   )}
                 </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleDeleteConversation(activeConv.id)}
+                  disabled={deletingConvId === activeConv.id}
+                  title={isAr ? 'حذف المحادثة' : 'Delete conversation'}
+                  className={`${isAr ? 'mr-auto' : 'ml-auto'} shrink-0 text-muted-foreground hover:text-red-600 hover:bg-red-500/10`}
+                >
+                  {deletingConvId === activeConv.id ? <Loader2 className="w-5 h-5 animate-spin" /> : <Trash2 className="w-5 h-5" />}
+                </Button>
               </div>
 
               {/* Chat Messages */}
