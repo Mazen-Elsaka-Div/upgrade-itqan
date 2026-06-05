@@ -78,145 +78,208 @@ export default function BadgesPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Award className="w-7 h-7 text-yellow-500" />
-          {t.academy?.badges || 'الشارات'}
-        </h1>
-        <p className="text-muted-foreground mt-1">
-          {t.academy?.badgesDesc || 'اجمع الشارات وأظهر إنجازاتك'}
-        </p>
-      </div>
+    <div className="space-y-10 pb-12">
+      {/* Hero / Progress Section */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-900 via-purple-900 to-indigo-950 text-white p-8 sm:p-12 shadow-2xl border border-indigo-500/20">
+        {/* Abstract Background Elements */}
+        <div className="absolute right-0 top-0 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -left-10 -bottom-10 w-48 h-48 bg-purple-500/20 rounded-full blur-2xl pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/5 to-transparent pointer-events-none" />
 
-      {/* Progress Overview */}
-      <div className="bg-gradient-to-l from-yellow-500 to-yellow-600 rounded-2xl p-6 text-white">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <p className="text-yellow-100 text-sm">{t.academy?.badgesEarned || 'الشارات المكتسبة'}</p>
-            <p className="text-4xl font-bold">{earnedBadges} / {totalBadges}</p>
+        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-10">
+          <div className="space-y-4 max-w-xl text-center md:text-start">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 text-xs font-bold rounded-full bg-white/10 backdrop-blur-md border border-white/10">
+              <Award className="w-4 h-4 text-yellow-400" />
+              <span className="text-indigo-100">لوحة الشرف والإنجازات</span>
+            </div>
+            <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
+              أوسمة <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-500">التميز</span>
+            </h1>
+            <p className="text-indigo-200/80 text-base sm:text-lg font-medium leading-relaxed">
+              اجمع الشارات، وتجاوز التحديات، وارتقِ في مسيرتك القرآنية والعلمية. كل شارة تروي قصة نجاحك.
+            </p>
           </div>
-          <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center">
-            <Trophy className="w-10 h-10 text-yellow-200" />
+
+          <div className="flex flex-col items-center shrink-0 w-full md:w-auto relative group">
+            {/* Glow effect */}
+            <div className="absolute inset-0 bg-yellow-500/20 blur-xl rounded-full group-hover:bg-yellow-500/30 transition-colors duration-500" />
+            
+            <div className="relative bg-white/10 backdrop-blur-xl border border-white/20 p-8 rounded-[2rem] flex flex-col items-center justify-center text-center shadow-2xl min-w-[200px] overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-400 to-yellow-600" />
+              <Trophy className="w-16 h-16 text-yellow-400 mb-4 drop-shadow-[0_0_15px_rgba(250,204,21,0.5)]" />
+              <div className="flex items-baseline gap-1 mb-2">
+                <span className="text-5xl font-black text-white">{earnedBadges}</span>
+                <span className="text-xl font-bold text-indigo-300">/ {totalBadges}</span>
+              </div>
+              <span className="text-sm font-bold text-indigo-200">شارة مكتسبة</span>
+              
+              {/* Progress Bar inside card */}
+              <div className="w-full h-2 bg-black/40 rounded-full overflow-hidden mt-6">
+                <div 
+                  className="h-full bg-gradient-to-r from-yellow-500 to-yellow-300 rounded-full transition-all duration-1000 relative"
+                  style={{ width: `${totalBadges ? (earnedBadges / totalBadges) * 100 : 0}%` }}
+                >
+                  <div className="absolute inset-0 bg-white/30 animate-[shimmer_2s_infinite] -skew-x-12" />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-
-        <div className="h-3 bg-white/20 rounded-full overflow-hidden">
-          <div 
-            className="h-full bg-white rounded-full transition-all"
-            style={{ width: `${totalBadges ? (earnedBadges / totalBadges) * 100 : 0}%` }}
-          />
-        </div>
-        <p className="text-sm text-yellow-100 mt-2">
-          {Math.round((earnedBadges / totalBadges) * 100) || 0}% {t.academy?.completed || 'مكتمل'}
-        </p>
       </div>
 
       {/* Badge Categories */}
-      {categories.map((category) => (
-        <div key={category.name} className="bg-card rounded-xl border border-border p-6">
-          <h2 className="font-bold mb-4 flex items-center gap-2">
-            <Award className="w-5 h-5 text-yellow-500" />
-            {category.name}
-          </h2>
+      <div className="space-y-12">
+        {categories.map((category, idx) => (
+          <div key={category.name} className="space-y-6">
+            <div className="flex items-center gap-4">
+              <div className="h-px flex-1 bg-border/60" />
+              <h2 className="text-xl font-black text-foreground flex items-center gap-2 bg-card px-4 py-2 rounded-2xl border border-border shadow-sm">
+                <Award className="w-5 h-5 text-indigo-500" />
+                {category.name}
+              </h2>
+              <div className="h-px flex-1 bg-border/60" />
+            </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {category.badges.map((badge) => {
-              const BadgeIcon = getBadgeIcon(badge.criteria_type)
-              
-              return (
-                <button
-                  key={badge.id}
-                  onClick={() => setSelectedBadge(badge)}
-                  className={cn(
-                    "p-4 rounded-xl border-2 transition-all text-center",
-                    badge.is_earned
-                      ? "border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 hover:shadow-lg"
-                      : "border-border bg-muted/30 opacity-60 hover:opacity-80"
-                  )}
-                >
-                  <div className={cn(
-                    "w-16 h-16 rounded-full mx-auto mb-3 flex items-center justify-center",
-                    badge.is_earned
-                      ? "bg-yellow-200 dark:bg-yellow-800"
-                      : "bg-muted"
-                  )}>
-                    {badge.is_earned ? (
-                      badge.icon_url || badge.icon?.startsWith('http') ? (
-                        <img src={badge.icon_url || badge.icon || ''} alt={badge.name} className="w-10 h-10" />
-                      ) : badge.icon ? (
-                        <span className="text-3xl">{badge.icon}</span>
-                      ) : (
-                        <BadgeIcon className="w-8 h-8 text-yellow-600" />
-                      )
-                    ) : (
-                      <Lock className="w-6 h-6 text-muted-foreground" />
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-6">
+              {category.badges.map((badge) => {
+                const BadgeIcon = getBadgeIcon(badge.criteria_type)
+                
+                return (
+                  <button
+                    key={badge.id}
+                    onClick={() => setSelectedBadge(badge)}
+                    className={cn(
+                      "group relative w-full aspect-[4/5] rounded-[2rem] p-4 flex flex-col items-center justify-center transition-all duration-500",
+                      badge.is_earned
+                        ? "bg-gradient-to-b from-yellow-50 to-amber-100/50 dark:from-yellow-900/20 dark:to-amber-900/10 border-2 border-yellow-400/50 hover:border-yellow-400 hover:shadow-[0_10px_30px_-10px_rgba(250,204,21,0.4)] hover:-translate-y-2"
+                        : "bg-muted/30 border-2 border-dashed border-border hover:bg-muted/50 hover:border-border/80"
                     )}
-                  </div>
-                  <p className="font-medium text-sm truncate">{badge.name}</p>
-                  {badge.is_earned && (
-                    <p className="text-xs text-green-600 mt-1 flex items-center justify-center gap-1">
-                      <CheckCircle2 className="w-3 h-3" />
-                      {t.academy?.earned || 'مكتسبة'}
+                  >
+                    {/* Earned Background Glow */}
+                    {badge.is_earned && (
+                      <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/0 via-yellow-400/5 to-amber-500/10 rounded-[2rem] pointer-events-none" />
+                    )}
+
+                    <div className={cn(
+                      "relative w-20 h-20 sm:w-24 sm:h-24 rounded-full mb-4 flex items-center justify-center transition-transform duration-500 group-hover:scale-110",
+                      badge.is_earned
+                        ? "bg-gradient-to-br from-yellow-100 to-yellow-300 dark:from-yellow-800 dark:to-yellow-600 shadow-xl shadow-yellow-500/20"
+                        : "bg-muted shadow-inner"
+                    )}>
+                      {badge.is_earned ? (
+                        <div className="absolute inset-0 rounded-full border border-white/40 border-t-white/80" />
+                      ) : null}
+
+                      {badge.is_earned ? (
+                        badge.icon_url || badge.icon?.startsWith('http') ? (
+                          <img src={badge.icon_url || badge.icon || ''} alt={badge.name} className="w-12 h-12 sm:w-14 sm:h-14 object-contain drop-shadow-md" />
+                        ) : badge.icon ? (
+                          <span className="text-4xl sm:text-5xl drop-shadow-md">{badge.icon}</span>
+                        ) : (
+                          <BadgeIcon className="w-10 h-10 sm:w-12 sm:h-12 text-yellow-600 dark:text-yellow-100 drop-shadow-md" />
+                        )
+                      ) : (
+                        <Lock className="w-8 h-8 text-muted-foreground/50" />
+                      )}
+
+                      {/* Small Checkmark Badge for Earned */}
+                      {badge.is_earned && (
+                        <div className="absolute -bottom-1 -right-1 bg-green-500 text-white rounded-full p-1 border-2 border-white dark:border-slate-900 shadow-md">
+                          <CheckCircle2 className="w-4 h-4" />
+                        </div>
+                      )}
+                    </div>
+
+                    <p className={cn(
+                      "font-bold text-center text-sm sm:text-base leading-tight mb-1",
+                      badge.is_earned ? "text-foreground" : "text-muted-foreground"
+                    )}>
+                      {badge.name}
                     </p>
-                  )}
-                </button>
-              )
-            })}
+                    
+                    {!badge.is_earned && (
+                      <p className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wider">
+                        {t.academy?.locked || 'مقفلة'}
+                      </p>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+
+        {categories.length === 0 && (
+          <div className="bg-card border border-border border-dashed rounded-3xl p-16 flex flex-col items-center justify-center text-center">
+            <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-6">
+              <Award className="w-10 h-10 text-muted-foreground opacity-50" />
+            </div>
+            <h3 className="text-xl font-bold text-foreground mb-2">لا توجد شارات حالياً</h3>
+            <p className="text-muted-foreground max-w-md mx-auto">
+              سيتم إضافة شارات وإنجازات جديدة قريباً لتتمكن من المنافسة عليها.
+            </p>
+          </div>
+        )}
+      </div>
 
       {/* Badge Detail Modal */}
       {selectedBadge && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+          {/* Backdrop with blur */}
           <div 
-            className="absolute inset-0 bg-black/50" 
+            className="absolute inset-0 bg-background/80 backdrop-blur-sm transition-opacity"
             onClick={() => setSelectedBadge(null)} 
           />
-          <div className="relative bg-card rounded-xl border border-border p-6 w-full max-w-sm text-center">
+          
+          <div className="relative bg-card rounded-[2.5rem] border border-border p-8 w-full max-w-md text-center shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] animate-in fade-in zoom-in-95 duration-300 overflow-hidden">
+            
+            {/* Modal Background Effect for Earned Badges */}
+            {selectedBadge.is_earned && (
+              <div className="absolute -top-32 -inset-x-10 h-64 bg-gradient-to-b from-yellow-400/20 to-transparent pointer-events-none blur-2xl" />
+            )}
+
             <div className={cn(
-              "w-24 h-24 rounded-full mx-auto mb-4 flex items-center justify-center",
+              "relative w-32 h-32 rounded-full mx-auto mb-6 flex items-center justify-center transition-transform",
               selectedBadge.is_earned
-                ? "bg-yellow-200 dark:bg-yellow-800"
-                : "bg-muted"
+                ? "bg-gradient-to-br from-yellow-100 to-yellow-300 dark:from-yellow-800 dark:to-yellow-600 shadow-2xl shadow-yellow-500/30 scale-110"
+                : "bg-muted shadow-inner"
             )}>
+              {selectedBadge.is_earned && (
+                <div className="absolute inset-0 rounded-full border-2 border-white/40 border-t-white/80" />
+              )}
               {selectedBadge.is_earned ? (
                 selectedBadge.icon_url || selectedBadge.icon?.startsWith('http') ? (
-                  <img src={selectedBadge.icon_url || selectedBadge.icon || ''} alt={selectedBadge.name} className="w-14 h-14" />
+                  <img src={selectedBadge.icon_url || selectedBadge.icon || ''} alt={selectedBadge.name} className="w-20 h-20 object-contain drop-shadow-xl" />
                 ) : selectedBadge.icon ? (
-                  <span className="text-4xl">{selectedBadge.icon}</span>
+                  <span className="text-6xl drop-shadow-xl">{selectedBadge.icon}</span>
                 ) : (
-                  <Award className="w-12 h-12 text-yellow-600" />
+                  <Award className="w-16 h-16 text-yellow-600 dark:text-yellow-100 drop-shadow-xl" />
                 )
               ) : (
-                <Lock className="w-10 h-10 text-muted-foreground" />
+                <Lock className="w-12 h-12 text-muted-foreground/50" />
               )}
             </div>
 
-            <h2 className="text-xl font-bold mb-2">{selectedBadge.name}</h2>
-            <p className="text-muted-foreground mb-4">{selectedBadge.description}</p>
+            <h2 className="text-2xl font-black mb-3">{selectedBadge.name}</h2>
+            <p className="text-muted-foreground mb-6 leading-relaxed text-sm sm:text-base">{selectedBadge.description}</p>
 
             {selectedBadge.is_earned ? (
-              <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 mb-4">
-                <p className="text-green-600 text-sm flex items-center justify-center gap-2">
-                  <CheckCircle2 className="w-4 h-4" />
+              <div className="bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-2xl p-4 mb-8">
+                <p className="text-green-700 dark:text-green-400 font-bold flex items-center justify-center gap-2">
+                  <CheckCircle2 className="w-5 h-5" />
                   {t.academy?.earnedOn || 'تم الحصول عليها في'} {formatDate(selectedBadge.earned_at!)}
                 </p>
               </div>
             ) : (
-              <div className="bg-muted rounded-lg p-3 mb-4">
-                <p className="text-sm text-muted-foreground">
-                  {selectedBadge.points_required && (
-                    <>
-                      {t.academy?.requires || 'يتطلب'} {selectedBadge.points_required} {t.academy?.points || 'نقطة'}
-                    </>
-                  )}
-                  {selectedBadge.criteria_value && !selectedBadge.points_required && (
-                    <>
-                      {t.academy?.requires || 'يتطلب'} {selectedBadge.criteria_value} {selectedBadge.criteria_type}
-                    </>
+              <div className="bg-muted/50 rounded-2xl p-4 mb-8 border border-border/50">
+                <p className="text-sm font-bold text-muted-foreground flex items-center justify-center gap-2">
+                  <Lock className="w-4 h-4" />
+                  {selectedBadge.points_required ? (
+                    <>يتطلب {selectedBadge.points_required} نقطة لفتح هذه الشارة</>
+                  ) : selectedBadge.criteria_value ? (
+                    <>يتطلب إكمال {selectedBadge.criteria_value} من {selectedBadge.criteria_type}</>
+                  ) : (
+                    <>هذه الشارة مقفلة حالياً</>
                   )}
                 </p>
               </div>
@@ -224,7 +287,7 @@ export default function BadgesPage() {
 
             <button
               onClick={() => setSelectedBadge(null)}
-              className="px-6 py-2 bg-muted hover:bg-muted/80 rounded-lg transition-colors"
+              className="w-full py-4 bg-muted hover:bg-foreground hover:text-background rounded-xl font-bold transition-all duration-300"
             >
               {t.close || 'إغلاق'}
             </button>
