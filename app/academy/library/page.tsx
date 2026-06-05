@@ -111,7 +111,7 @@ export default function PublicLibraryPage() {
   )
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-background" dir="rtl">
+    <div className="min-h-screen flex flex-col bg-background" dir="rtl">
 
 
       <div className="container mx-auto px-4 py-8 flex-1 flex flex-col relative z-20">
