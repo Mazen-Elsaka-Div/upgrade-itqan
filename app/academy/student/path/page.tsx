@@ -89,8 +89,11 @@ export default function StudentLearningPathPage() {
     ? paths 
     : paths.filter(p => p.subject === activeTab)
 
-  const myPaths = filteredPaths.filter(p => p.enrollment_status === 'active')
-  const availablePaths = filteredPaths.filter(p => p.enrollment_status !== 'active')
+  const myPaths = filteredPaths.filter(p => p.enrollment_status === 'active' || p.enrollment_status === 'paused')
+  const completedPaths = filteredPaths.filter(p => p.enrollment_status === 'completed')
+  // Available = paths the student is NOT enrolled in. Completed/active paths are
+  // shown in their own sections and must not reappear as "available".
+  const availablePaths = filteredPaths.filter(p => !p.enrollment_status)
 
   return (
     <div className="space-y-10 py-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -213,6 +216,70 @@ export default function StudentLearningPathPage() {
         </div>
       )}
 
+      {/* Completed Paths Section */}
+      {completedPaths.length > 0 && (
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="flex items-center gap-3 border-r-4 border-emerald-600 pr-4">
+            <h2 className="text-2xl font-bold text-foreground">مسارات أكملتها</h2>
+            <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">
+              {completedPaths.length} مسار
+            </span>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {completedPaths.map((path) => (
+              <Link
+                key={path.id}
+                href={`/academy/student/path/${path.id}`}
+                className="group relative flex flex-col justify-between bg-card hover:bg-slate-50/50 dark:hover:bg-slate-900/50 rounded-3xl border border-emerald-500/30 hover:border-emerald-500/50 transition-all duration-300 shadow-sm hover:shadow-xl hover:-translate-y-1.5 overflow-hidden"
+              >
+                <div className="p-6 sm:p-8 space-y-5">
+                  <div className="flex justify-between items-center gap-2">
+                    <div className="flex items-center gap-1.5">
+                      <Layers className="w-4 h-4 text-emerald-600" />
+                      <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400">
+                        {subjectLabels[path.subject] || path.subject}
+                      </span>
+                    </div>
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-bold rounded-md bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+                      <Award className="w-3 h-3" />
+                      مكتمل
+                    </span>
+                  </div>
+
+                  <div>
+                    <h3 className="font-extrabold text-xl group-hover:text-emerald-600 transition-colors leading-snug">
+                      {path.title}
+                    </h3>
+                    {path.description && (
+                      <p className="text-sm text-muted-foreground mt-2 line-clamp-2 leading-relaxed">
+                        {path.description}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2 bg-emerald-500/5 p-4 rounded-2xl border border-emerald-500/10">
+                    <Award className="w-5 h-5 text-emerald-600 shrink-0" />
+                    <p className="text-xs text-emerald-700 dark:text-emerald-400 font-semibold leading-relaxed">
+                      أكملت جميع المراحل · الشهادة متاحة في مركز الشهادات
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-emerald-600/5 px-6 sm:px-8 py-4 flex justify-between items-center border-t border-emerald-600/10 group-hover:bg-emerald-600 group-hover:text-white transition-colors duration-300">
+                  <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400 group-hover:text-white transition-colors">
+                    مراجعة المسار
+                  </span>
+                  <div className="w-8 h-8 rounded-full bg-emerald-600/10 group-hover:bg-white/20 flex items-center justify-center transition-colors">
+                    <ChevronLeft className="w-4 h-4 text-emerald-700 dark:text-emerald-400 group-hover:text-white group-hover:-translate-x-0.5 transition-all" />
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Available Paths Section */}
       <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100 fill-mode-both">
         <div className="flex items-center gap-3 border-r-4 border-emerald-600 pr-4">
@@ -307,7 +374,7 @@ export default function StudentLearningPathPage() {
             </div>
             <h3 className="text-lg font-bold text-foreground">لا توجد مسارات متاحة</h3>
             <p className="text-sm text-muted-foreground mt-2 max-w-md leading-relaxed">
-              عذراً، لا توجد حالياً مسارات أكاديمية متاحة في هذا التخصص، أو أنك قد سجلت مسبقاً في كافة المسارات.
+              عذراً، لا توجد حالياً مسارات أكاديمية متاحة ف�� هذا التخصص، أو أنك قد سجلت مسبقاً في كافة المسارات.
             </p>
           </div>
         )}

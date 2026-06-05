@@ -200,7 +200,6 @@ export default function StudentPathDetailPage() {
     fiqh: 'الفقه الإسلامي',
     aqeedah: 'العقيدة الإسلامية',
     seerah: 'السيرة النبوية',
-    seerah: 'السيرة النبوية',
     tafsir: 'التفسير وعلوم القرآن',
     tajweed: 'التجويد والمقرأة'
   }
@@ -212,7 +211,11 @@ export default function StudentPathDetailPage() {
     return type
   }
 
-  const isEnrolled = enrollment && enrollment.status === 'active'
+  // A student is "in" the path as long as they have an enrollment that is
+  // not dropped. Completed / paused enrollments must still see the curriculum
+  // (otherwise completing a path wrongly bounces them to the sign-up screen).
+  const isEnrolled = enrollment && enrollment.status !== 'dropped'
+  const isPathCompleted = enrollment?.status === 'completed'
 
   if (!isEnrolled) {
     // ==========================================
@@ -494,6 +497,42 @@ export default function StudentPathDetailPage() {
         العودة لقائمة المسارات الأكاديمية
       </Link>
 
+      {/* Completion Celebration Banner */}
+      {isPathCompleted && (
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-700 via-emerald-800 to-teal-900 text-white p-6 sm:p-8 shadow-xl border border-emerald-700/50">
+          <div className="absolute -right-16 -top-16 w-56 h-56 rounded-full bg-emerald-400/20 blur-3xl pointer-events-none" />
+          <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+            <div className="flex items-start gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center shrink-0 border border-white/20">
+                <Award className="w-7 h-7 text-amber-300" />
+              </div>
+              <div>
+                <h2 className="text-xl sm:text-2xl font-extrabold leading-snug">مبارك! أكملت هذا المسار بالكامل</h2>
+                <p className="text-emerald-100/90 mt-1.5 text-sm leading-relaxed max-w-xl">
+                  أتممت جميع مراحل المسار بنجاح. شهادتك أصبحت متاحة في مركز الشهادات، ويمكنك مراجعة المسار في أي وقت من الأرشيف.
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3 shrink-0">
+              <Link
+                href="/academy/student/certificates"
+                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-white text-emerald-800 font-bold text-sm hover:bg-emerald-50 transition-colors shadow-md"
+              >
+                <Award className="w-4 h-4" />
+                شهادتي
+              </Link>
+              <Link
+                href="/academy/student/courses/archive"
+                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-white font-bold text-sm hover:bg-white/20 transition-colors"
+              >
+                <BookMarked className="w-4 h-4" />
+                أرشيف إنجازاتي
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header Profile Dashboard */}
       <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
@@ -502,7 +541,9 @@ export default function StudentPathDetailPage() {
           </span>
           <h1 className="text-2xl font-bold mt-2 text-foreground">{path.title}</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            أنت مسجل في هذا المسار، تابع تقدمك في المراحل الموضحة أدناه
+            {isPathCompleted
+              ? 'لقد أكملت هذا المسار. يمكنك مراجعة أي مرحلة من المراحل أدناه في أي وقت'
+              : 'أنت مسجل في هذا المسار، تابع تقدمك في المراحل الموضحة أدناه'}
           </p>
         </div>
 
@@ -582,6 +623,15 @@ export default function StudentPathDetailPage() {
                         <p className="text-sm text-muted-foreground mt-1.5 max-w-2xl leading-relaxed">
                           {stage.description}
                         </p>
+                      )}
+                      {!isStageLocked && (
+                        <Link
+                          href={`/academy/student/path/${pathId}/stage/${stage.id}`}
+                          className="inline-flex items-center gap-1.5 mt-3 px-4 py-2 rounded-xl bg-emerald-600/10 text-emerald-700 dark:text-emerald-400 text-xs font-bold hover:bg-emerald-600 hover:text-white transition-colors"
+                        >
+                          {isStageCompleted ? 'مراجعة المرحلة' : 'دخول المرحلة'}
+                          <ArrowRight className="w-3.5 h-3.5 rtl:rotate-180" />
+                        </Link>
                       )}
                     </div>
 
