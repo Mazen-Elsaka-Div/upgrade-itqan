@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getSession } from "@/lib/auth"
 import { query, queryOne } from "@/lib/db"
 import { getAllSettings, type CertificateScope } from "@/lib/certificates"
-import { autoIssueRequest } from "@/lib/certificate/eligibility"
+import { autoIssueRequest, reconcileStudentCertificates } from "@/lib/certificate/eligibility"
 
 export interface StudentSpec {
   scope: CertificateScope
@@ -22,6 +22,11 @@ export function makeStudentCertificatesGet(spec: StudentSpec) {
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
+
+    // Self-heal before reading: make sure completed courses/paths have an
+    // issuance request, and auto-issue any request that's ready — no admin
+    // step required. Best-effort so it never blocks the page.
+    await reconcileStudentCertificates(spec.scope, session.sub)
 
     try {
       const requests = await query<{
