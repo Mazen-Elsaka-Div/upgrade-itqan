@@ -96,7 +96,7 @@ export default function StudentPointsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
@@ -124,14 +124,19 @@ export default function StudentPointsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Star className="w-7 h-7 text-amber-500" />
-          نقاطي
-        </h1>
+      <div className="bg-gradient-to-l from-amber-600 to-orange-500 rounded-2xl p-6 text-white shadow-lg shadow-amber-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold flex items-center gap-2">
+            <Star className="w-7 h-7" />
+            نقاطي
+          </h1>
+          <p className="text-white/85 mt-1.5 text-sm leading-relaxed">
+            اكسب النقاط عبر إنجاز المهام والدروس وحضور الجلسات وارتقِ في المستويات
+          </p>
+        </div>
         <Link
           href="/academy/student/leaderboard"
-          className="text-sm text-blue-600 hover:underline flex items-center gap-1"
+          className="inline-flex items-center gap-1.5 bg-white/15 hover:bg-white/25 transition-colors px-4 py-2 rounded-xl text-sm font-bold w-max"
         >
           <Trophy className="w-4 h-4" />
           لوحة المتصدرين
@@ -243,7 +248,7 @@ export default function StudentPointsPage() {
             {data.badges.length === 0 ? (
               <div className="text-center py-4">
                 <p className="text-muted-foreground mb-2">لم تحصل على شارات بعد — اجمع نقاط أكثر!</p>
-                <Link href="/academy/student/badges" className="text-sm text-blue-600 hover:underline">
+                <Link href="/academy/student/badges" className="text-sm text-amber-600 dark:text-amber-400 hover:underline font-medium">
                   تصفح كل الشارات المتاحة
                 </Link>
               </div>
@@ -265,7 +270,7 @@ export default function StudentPointsPage() {
                     <span className="text-xs font-bold text-amber-600">+{b.points_awarded}</span>
                   </div>
                 ))}
-                <Link href="/academy/student/badges" className="block text-center text-sm text-blue-600 hover:underline mt-3">
+                <Link href="/academy/student/badges" className="block text-center text-sm text-amber-600 dark:text-amber-400 hover:underline font-medium mt-3">
                   عرض كل الشارات
                 </Link>
               </div>

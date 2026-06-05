@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server"
 import { getSession } from "@/lib/auth"
 import { query } from "@/lib/db"
 import { onCourseCompleted } from "@/lib/certificate/eligibility"
+import { awardLessonPoints, awardCourseCompletePoints } from "@/lib/academy/gamification"
+import { createNotification } from "@/lib/notifications"
 
 export async function POST(
   req: NextRequest,
@@ -16,14 +18,15 @@ export async function POST(
     const { lessonId } = await params
 
     // 1) Find the lesson's course
-    const lessons = await query<{ course_id: string }>(
-      `SELECT course_id FROM lessons WHERE id = $1`,
+    const lessons = await query<{ course_id: string; title: string | null }>(
+      `SELECT course_id, title FROM lessons WHERE id = $1`,
       [lessonId],
     )
     if (lessons.length === 0) {
       return NextResponse.json({ error: "الدرس غير موجود" }, { status: 404 })
     }
     const courseId = lessons[0].course_id
+    const lessonTitle = lessons[0].title || undefined
 
     // 2) Find the active enrollment for this student in this course
     //    Teachers / admins can view but cannot mark a student's lesson as complete here.
@@ -43,7 +46,17 @@ export async function POST(
     }
     const enrollmentId = enrollments[0].id
 
-    // 3) Upsert into lesson_progress (uses unique constraint on (enrollment_id, lesson_id))
+    // 3) Was this lesson already completed before? (used to award points only once)
+    const priorProgress = await query<{ is_completed: boolean }>(
+      `SELECT is_completed FROM lesson_progress WHERE enrollment_id = $1 AND lesson_id = $2`,
+      [enrollmentId, lessonId],
+    )
+    const wasLessonCompleted = priorProgress[0]?.is_completed === true
+    // We only reach this point when the enrollment status is 'active' (guarded
+    // above), so the course has not been completed yet.
+    const wasCourseCompleted = false
+
+    // 3b) Upsert into lesson_progress (uses unique constraint on (enrollment_id, lesson_id))
     await query(
       `INSERT INTO lesson_progress (enrollment_id, lesson_id, is_completed, is_in_progress, completed_at, updated_at)
        VALUES ($1, $2, TRUE, FALSE, NOW(), NOW())
@@ -120,6 +133,40 @@ export async function POST(
       } catch (e) {
         console.warn("[course-complete] eligibility hook failed", e)
       }
+    }
+
+    // 6) Gamification: award points for finishing a lesson (once) and for
+    //    completing the whole course (once). Never fatal to the request.
+    const newBadges: string[] = []
+    try {
+      if (!wasLessonCompleted) {
+        const r = await awardLessonPoints(session.sub, lessonId, lessonTitle)
+        newBadges.push(...r.new_badges)
+      }
+      if (newProgress >= 100 && !wasCourseCompleted) {
+        const courseRow = await query<{ title: string }>(
+          `SELECT title FROM courses WHERE id = $1`,
+          [courseId],
+        )
+        const r = await awardCourseCompletePoints(
+          session.sub,
+          courseId,
+          courseRow[0]?.title,
+        )
+        newBadges.push(...r.new_badges)
+      }
+      for (const badgeType of newBadges) {
+        await createNotification({
+          userId: session.sub,
+          type: "general",
+          title: "🏅 شارة جديدة!",
+          message: `حصلت على شارة جديدة بفضل إنجازاتك (${badgeType}).`,
+          category: "general",
+          link: "/academy/student/badges",
+        }).catch(() => { /* non-fatal */ })
+      }
+    } catch (pointsErr) {
+      console.error("[Gamification] Failed to award lesson/course points:", pointsErr)
     }
 
     return NextResponse.json({ 
