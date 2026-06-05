@@ -35,6 +35,7 @@ export async function PATCH(
     const allowed = [
       "title", "description", "content", "video_url",
       "pdf_url", "passage_text", "estimated_minutes",
+      "stage_type", "course_id", "halaqa_id", "lesson_id"
     ] as const
     const sets: string[] = []
     const values: unknown[] = []
@@ -52,7 +53,8 @@ export async function PATCH(
       `UPDATE tajweed_path_stages SET ${sets.join(", ")}
          WHERE id = $${i++} AND path_id = $${i}
        RETURNING id, position, title, description, content,
-                 video_url, pdf_url, passage_text, estimated_minutes, created_at`,
+                 video_url, pdf_url, passage_text, estimated_minutes, created_at,
+                 stage_type, course_id, halaqa_id, lesson_id`,
       values,
     )
     if (updated.length === 0) return NextResponse.json({ error: "المرحلة غير موجودة" }, { status: 404 })

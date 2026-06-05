@@ -30,11 +30,18 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 
   try {
     const stages = await query(
-      `SELECT id, position, title, description, content,
-              video_url, pdf_url, passage_text, estimated_minutes, created_at
-         FROM tajweed_path_stages
-        WHERE path_id = $1
-        ORDER BY position ASC`,
+      `SELECT s.id, s.position, s.title, s.description, s.content,
+              s.video_url, s.pdf_url, s.passage_text, s.estimated_minutes, s.created_at,
+              s.stage_type, s.course_id, s.halaqa_id, s.lesson_id,
+              c.title as course_title,
+              h.title as halaqa_title,
+              l.title as lesson_title
+         FROM tajweed_path_stages s
+         LEFT JOIN courses c ON s.course_id = c.id
+         LEFT JOIN halaqat h ON s.halaqa_id = h.id
+         LEFT JOIN lessons l ON s.lesson_id = l.id
+        WHERE s.path_id = $1
+        ORDER BY s.position ASC`,
       [id],
     )
     return NextResponse.json({ data: stages })
@@ -68,10 +75,12 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const inserted = await query(
       `INSERT INTO tajweed_path_stages (
           path_id, position, title, description, content,
-          video_url, pdf_url, passage_text, estimated_minutes
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+          video_url, pdf_url, passage_text, estimated_minutes,
+          stage_type, course_id, halaqa_id, lesson_id
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
         RETURNING id, position, title, description, content,
-                  video_url, pdf_url, passage_text, estimated_minutes, created_at`,
+                  video_url, pdf_url, passage_text, estimated_minutes, created_at,
+                  stage_type, course_id, halaqa_id, lesson_id`,
       [
         id,
         position,
@@ -82,6 +91,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         body.pdf_url || null,
         body.passage_text || null,
         body.estimated_minutes || 30,
+        body.stage_type || 'custom',
+        body.course_id || null,
+        body.halaqa_id || null,
+        body.lesson_id || null,
       ],
     )
 

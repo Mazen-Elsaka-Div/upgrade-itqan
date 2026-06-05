@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import {
   Plus, Trash2, Edit2, X, Loader2, GripVertical, Clock,
-  Video, FileText, BookOpen, ChevronDown, ChevronUp, UploadCloud, Layers,
+  Video, FileText, BookOpen, ChevronDown, ChevronUp, UploadCloud, Layers, Users
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -17,6 +17,13 @@ interface Stage {
   pdf_url: string | null
   passage_text: string | null
   estimated_minutes: number
+  stage_type: 'custom' | 'course' | 'halaqa' | 'lesson'
+  course_id: string | null
+  halaqa_id: string | null
+  lesson_id: string | null
+  course_title?: string
+  halaqa_title?: string
+  lesson_title?: string
 }
 
 interface StageForm {
@@ -27,11 +34,16 @@ interface StageForm {
   pdf_url: string
   passage_text: string
   estimated_minutes: number
+  stage_type: 'custom' | 'course' | 'halaqa' | 'lesson'
+  course_id: string
+  halaqa_id: string
+  lesson_id: string
 }
 
 const emptyStage: StageForm = {
   title: '', description: '', content: '', video_url: '',
   pdf_url: '', passage_text: '', estimated_minutes: 30,
+  stage_type: 'custom', course_id: '', halaqa_id: '', lesson_id: ''
 }
 
 export default function PathStagesManager({ pathId }: { pathId: string }) {
@@ -44,7 +56,18 @@ export default function PathStagesManager({ pathId }: { pathId: string }) {
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [expanded, setExpanded] = useState<string | null>(null)
   const [uploadingPdf, setUploadingPdf] = useState(false)
+  const [entities, setEntities] = useState<{courses: any[], halaqat: any[], lessons: any[]}>({courses: [], halaqat: [], lessons: []})
   const pdfInputRef = useRef<HTMLInputElement>(null)
+
+  const fetchEntities = async () => {
+    try {
+      const res = await fetch(`/api/academy/teacher/paths/entities`)
+      if (res.ok) {
+        const json = await res.json()
+        setEntities(json.data || {courses: [], halaqat: [], lessons: []})
+      }
+    } catch {}
+  }
 
   const fetchStages = async () => {
     try {
@@ -62,7 +85,7 @@ export default function PathStagesManager({ pathId }: { pathId: string }) {
     }
   }
 
-  useEffect(() => { fetchStages() }, [pathId])
+  useEffect(() => { fetchStages(); fetchEntities() }, [pathId])
 
   const openAdd = () => {
     setEditId(null)
@@ -80,6 +103,10 @@ export default function PathStagesManager({ pathId }: { pathId: string }) {
       pdf_url: s.pdf_url || '',
       passage_text: s.passage_text || '',
       estimated_minutes: s.estimated_minutes || 30,
+      stage_type: s.stage_type || 'custom',
+      course_id: s.course_id || '',
+      halaqa_id: s.halaqa_id || '',
+      lesson_id: s.lesson_id || ''
     })
     setShowForm(true)
   }
@@ -207,6 +234,9 @@ export default function PathStagesManager({ pathId }: { pathId: string }) {
                     <h4 className="font-bold text-sm text-foreground truncate">{s.title}</h4>
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-[11px] text-muted-foreground">
                       <span className="inline-flex items-center gap-1"><Clock className="w-3 h-3" /> {s.estimated_minutes} د</span>
+                      {s.stage_type === 'course' && <span className="inline-flex items-center gap-1 text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 px-1.5 py-0.5 rounded border border-emerald-100 dark:border-emerald-900/30"><BookOpen className="w-3 h-3" /> دورة: {s.course_title}</span>}
+                      {s.stage_type === 'halaqa' && <span className="inline-flex items-center gap-1 text-blue-600 bg-blue-50 dark:bg-blue-900/20 px-1.5 py-0.5 rounded border border-blue-100 dark:border-blue-900/30"><Users className="w-3 h-3" /> حلقة: {s.halaqa_title}</span>}
+                      {s.stage_type === 'lesson' && <span className="inline-flex items-center gap-1 text-amber-600 bg-amber-50 dark:bg-amber-900/20 px-1.5 py-0.5 rounded border border-amber-100 dark:border-amber-900/30"><Video className="w-3 h-3" /> درس: {s.lesson_title}</span>}
                       {s.video_url && <span className="inline-flex items-center gap-1 text-rose-500"><Video className="w-3 h-3" /> فيديو</span>}
                       {s.pdf_url && <span className="inline-flex items-center gap-1 text-blue-500"><FileText className="w-3 h-3" /> ملف</span>}
                       {s.passage_text && <span className="inline-flex items-center gap-1 text-emerald-600"><BookOpen className="w-3 h-3" /> مقطع</span>}
@@ -282,17 +312,84 @@ export default function PathStagesManager({ pathId }: { pathId: string }) {
               </button>
             </div>
             <form onSubmit={handleSubmit} className="p-5 space-y-4">
-              <div>
-                <label className="text-sm font-bold block mb-1.5">عنوان المرحلة <span className="text-rose-500">*</span></label>
-                <input
-                  required
-                  type="text"
-                  value={form.title}
-                  onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  placeholder="مثال: المرحلة الأولى — أحكام النون الساكنة"
-                  className="w-full px-3 py-2.5 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-bold block mb-1.5">نوع المرحلة <span className="text-rose-500">*</span></label>
+                  <select
+                    value={form.stage_type}
+                    onChange={(e) => setForm({ ...form, stage_type: e.target.value as any })}
+                    className="w-full px-3 py-2.5 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-emerald-500 appearance-none font-bold"
+                  >
+                    <option value="custom">محتوى مخصص (افتراضي)</option>
+                    <option value="course">دورة كاملة</option>
+                    <option value="halaqa">حلقة تفاعلية</option>
+                    <option value="lesson">درس ضمن دورة</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-sm font-bold block mb-1.5">عنوان المرحلة <span className="text-rose-500">*</span></label>
+                  <input
+                    required
+                    type="text"
+                    value={form.title}
+                    onChange={(e) => setForm({ ...form, title: e.target.value })}
+                    placeholder={form.stage_type === 'custom' ? "مثال: المرحلة الأولى — أحكام النون الساكنة" : "عنوان يظهر في المسار"}
+                    className="w-full px-3 py-2.5 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
               </div>
+
+              {form.stage_type === 'course' && (
+                <div className="bg-emerald-50/50 dark:bg-emerald-900/10 p-4 rounded-xl border border-emerald-100 dark:border-emerald-900/30">
+                  <label className="text-sm font-bold block mb-1.5 text-emerald-800 dark:text-emerald-300">اختر الدورة <span className="text-rose-500">*</span></label>
+                  <select
+                    required
+                    value={form.course_id}
+                    onChange={(e) => {
+                      const c = entities.courses.find((x: any) => x.id === e.target.value)
+                      setForm({ ...form, course_id: e.target.value, title: c && form.title === '' ? c.title : form.title })
+                    }}
+                    className="w-full px-3 py-2.5 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  >
+                    <option value="">— اختر الدورة —</option>
+                    {entities.courses.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
+                  </select>
+                </div>
+              )}
+              {form.stage_type === 'halaqa' && (
+                <div className="bg-blue-50/50 dark:bg-blue-900/10 p-4 rounded-xl border border-blue-100 dark:border-blue-900/30">
+                  <label className="text-sm font-bold block mb-1.5 text-blue-800 dark:text-blue-300">اختر الحلقة <span className="text-rose-500">*</span></label>
+                  <select
+                    required
+                    value={form.halaqa_id}
+                    onChange={(e) => {
+                      const h = entities.halaqat.find((x: any) => x.id === e.target.value)
+                      setForm({ ...form, halaqa_id: e.target.value, title: h && form.title === '' ? h.title : form.title })
+                    }}
+                    className="w-full px-3 py-2.5 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  >
+                    <option value="">— اختر الحلقة —</option>
+                    {entities.halaqat.map(h => <option key={h.id} value={h.id}>{h.title}</option>)}
+                  </select>
+                </div>
+              )}
+              {form.stage_type === 'lesson' && (
+                <div className="bg-amber-50/50 dark:bg-amber-900/10 p-4 rounded-xl border border-amber-100 dark:border-amber-900/30">
+                  <label className="text-sm font-bold block mb-1.5 text-amber-800 dark:text-amber-300">اختر الدرس <span className="text-rose-500">*</span></label>
+                  <select
+                    required
+                    value={form.lesson_id}
+                    onChange={(e) => {
+                      const l = entities.lessons.find((x: any) => x.id === e.target.value)
+                      setForm({ ...form, lesson_id: e.target.value, title: l && form.title === '' ? l.title : form.title })
+                    }}
+                    className="w-full px-3 py-2.5 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  >
+                    <option value="">— اختر الدرس —</option>
+                    {entities.lessons.map(l => <option key={l.id} value={l.id}>{l.title} ({l.course_title})</option>)}
+                  </select>
+                </div>
+              )}
               <div>
                 <label className="text-sm font-bold block mb-1.5">وصف مختصر</label>
                 <textarea
