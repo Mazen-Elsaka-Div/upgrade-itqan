@@ -144,7 +144,7 @@ export default function StudentTajweedPathDetail() {
   const pct = Math.round((completed / total) * 100)
 
   return (
-    <div className="space-y-6 p-4 sm:p-6 max-w-5xl mx-auto pb-12">
+    <div className="space-y-8 pb-12">
       <Link 
         href="/student/tajweed-paths"
         className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold text-muted-foreground hover:text-emerald-600 bg-muted/50 hover:bg-emerald-50 rounded-xl transition-colors w-fit border border-transparent hover:border-emerald-200"

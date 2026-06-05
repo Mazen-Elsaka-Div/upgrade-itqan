@@ -1,0 +1,133 @@
+
+> my-project@0.1.0 dev
+> next dev
+
+▲ Next.js 16.2.4 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.56.1:3000
+- Environments: .env.local
+✓ Ready in 1358ms
+⚠ `eslint` configuration in next.config.mjs is no longer supported. See more info here: https://nextjs.org/docs/app/api-reference/cli/next#next-lint-options
+⚠ Invalid next.config.mjs options detected: 
+⚠     Unrecognized key(s) in object: 'eslint'
+⚠ See more info here: https://nextjs.org/docs/messages/invalid-next-config
+
+○ Compiling / ...
+[DB] Connected to database at: aws-1-eu-west-3.pooler.supabase.com:6543
+ GET / 200 in 8.9s (next.js: 7.5s, proxy.ts: 23ms, application-code: 1415ms)
+[DB] Connected to database at: aws-1-eu-west-3.pooler.supabase.com:6543
+[browser] Please ensure that the container has a non-static position, like 'relative', 'fixed', or 'absolute' to ensure scroll offset is calculated correctly. (file://D:/Workspace/Itqan Upgrade/.next/dev/static/chunks/09do_next_dist_0y9hd5u._.js:2431:13)
+ GET /api/homepage 200 in 793ms (next.js: 593ms, proxy.ts: 40ms, application-code: 161ms)
+ GET /api/auth/me 200 in 1303ms (next.js: 677ms, proxy.ts: 35ms, application-code: 591ms)
+ POST /api/admin/analytics 200 in 360ms (next.js: 208ms, proxy.ts: 10ms, application-code: 142ms)
+ GET /login 200 in 667ms (next.js: 626ms, proxy.ts: 8ms, application-code: 33ms)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior (file://D:/Workspace/Itqan Upgrade/.next/dev/static/chunks/09do_next_dist_0y9hd5u._.js:2431:13)
+ GET /api/auth/me 200 in 92ms (next.js: 4ms, proxy.ts: 13ms, application-code: 75ms)
+ GET /api/auth/me 200 in 79ms (next.js: 3ms, proxy.ts: 5ms, application-code: 71ms)
+ POST /api/admin/analytics 200 in 80ms (next.js: 3ms, proxy.ts: 6ms, application-code: 72ms)
+ POST /api/auth/login 200 in 643ms (next.js: 164ms, proxy.ts: 6ms, application-code: 474ms)
+[DB] Connected to database at: aws-1-eu-west-3.pooler.supabase.com:6543
+ GET /academy/student 200 in 1547ms (next.js: 1274ms, proxy.ts: 75ms, application-code: 198ms)
+ GET /api/public-settings 200 in 371ms (next.js: 189ms, proxy.ts: 39ms, application-code: 143ms)
+ GET /api/academy/student/courses?limit=3 200 in 1087ms (next.js: 258ms, proxy.ts: 105ms, application-code: 724ms)
+ GET /api/unread-counts 200 in 658ms (next.js: 240ms, proxy.ts: 22ms, application-code: 397ms)
+ GET /api/academy/student/tasks?limit=4&pending=true 200 in 1166ms (next.js: 172ms, proxy.ts: 767ms, application-code: 227ms)
+ GET /api/academy/student/sessions?limit=20&upcoming=true 200 in 1179ms (next.js: 296ms, proxy.ts: 769ms, application-code: 114ms)
+ GET /api/auth/me 200 in 100ms (next.js: 5ms, proxy.ts: 11ms, application-code: 85ms)
+ GET /api/academy/student/points 200 in 1269ms (next.js: 227ms, proxy.ts: 763ms, application-code: 279ms)
+ GET /api/auth/me 200 in 96ms (next.js: 8ms, proxy.ts: 11ms, application-code: 77ms)
+ GET /api/academy/student/stats 200 in 1317ms (next.js: 351ms, proxy.ts: 110ms, application-code: 856ms)
+ POST /api/admin/analytics 200 in 135ms (next.js: 9ms, proxy.ts: 28ms, application-code: 98ms)
+ GET /api/academy/student/certificates/pending-count 200 in 1373ms (next.js: 1214ms, proxy.ts: 78ms, application-code: 81ms)
+ GET /student 200 in 1773ms (next.js: 1514ms, proxy.ts: 14ms, application-code: 244ms)
+ GET /api/auth/me 200 in 153ms (next.js: 36ms, proxy.ts: 40ms, application-code: 77ms)
+ GET /api/public-settings 200 in 23ms (next.js: 5ms, proxy.ts: 11ms, application-code: 7ms)
+ GET /api/unread-counts 200 in 416ms (next.js: 4ms, proxy.ts: 11ms, application-code: 401ms)
+ POST /api/auth/heartbeat 200 in 646ms (next.js: 322ms, proxy.ts: 45ms, application-code: 279ms)
+ GET /api/recitations 200 in 703ms (next.js: 456ms, proxy.ts: 46ms, application-code: 202ms)
+ GET /api/student/wird-settings 200 in 761ms (next.js: 621ms, proxy.ts: 39ms, application-code: 101ms)
+ GET /api/public-settings 200 in 85ms (next.js: 43ms, proxy.ts: 33ms, application-code: 8ms)
+ POST /api/auth/heartbeat 200 in 141ms (next.js: 17ms, proxy.ts: 41ms, application-code: 83ms)
+ GET /api/auth/me 200 in 159ms (next.js: 36ms, proxy.ts: 37ms, application-code: 86ms)
+ GET /api/recitations 200 in 85ms (next.js: 4ms, proxy.ts: 10ms, application-code: 72ms)
+ GET /api/student/wird-settings 200 in 81ms (next.js: 4ms, proxy.ts: 8ms, application-code: 69ms)
+ GET /api/auth/me 200 in 138ms (next.js: 5ms, proxy.ts: 10ms, application-code: 124ms)
+ GET /api/unread-counts 200 in 261ms (next.js: 7ms, proxy.ts: 13ms, application-code: 240ms)
+ GET /api/student/certificates/pending-count 200 in 360ms (next.js: 237ms, proxy.ts: 13ms, application-code: 110ms)
+ GET /api/auth/me 200 in 99ms (next.js: 4ms, proxy.ts: 8ms, application-code: 88ms)
+ POST /api/admin/analytics 200 in 94ms (next.js: 4ms, proxy.ts: 12ms, application-code: 78ms)
+ GET /api/student/progress-report 200 in 1170ms (next.js: 489ms, proxy.ts: 40ms, application-code: 641ms)
+ GET /api/student/certificates/pending-count 200 in 111ms (next.js: 15ms, proxy.ts: 24ms, application-code: 72ms)
+ GET /api/auth/me 200 in 110ms (next.js: 18ms, proxy.ts: 26ms, application-code: 67ms)
+ GET /api/prayer-times 200 in 1488ms (next.js: 566ms, proxy.ts: 40ms, application-code: 882ms)
+ GET /api/prayer-times 200 in 96ms (next.js: 3ms, proxy.ts: 9ms, application-code: 83ms)
+ GET /api/student/progress-report 200 in 542ms (next.js: 10ms, proxy.ts: 20ms, application-code: 512ms)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior (file://D:/Workspace/Itqan Upgrade/.next/dev/static/chunks/09do_next_dist_0y9hd5u._.js:2431:13)
+ GET /student/tajweed-paths 200 in 1167ms (next.js: 1099ms, proxy.ts: 30ms, application-code: 38ms)
+ GET /api/auth/me 200 in 129ms (next.js: 12ms, proxy.ts: 35ms, application-code: 82ms)
+ POST /api/admin/analytics 200 in 115ms (next.js: 8ms, proxy.ts: 11ms, application-code: 97ms)
+ GET /api/student/tajweed-paths?scope=all&subject_scope=tajweed 200 in 424ms (next.js: 221ms, proxy.ts: 46ms, application-code: 157ms)
+ GET /api/student/tajweed-paths?scope=enrolled&subject_scope=tajweed 200 in 413ms (next.js: 224ms, proxy.ts: 40ms, application-code: 149ms)
+ GET /api/student/tajweed-paths?scope=all&subject_scope=tajweed 200 in 614ms (next.js: 5ms, proxy.ts: 10ms, application-code: 598ms)
+ GET /api/student/tajweed-paths?scope=enrolled&subject_scope=tajweed 200 in 629ms (next.js: 10ms, proxy.ts: 10ms, application-code: 609ms)
+ GET /student/memorization-paths 200 in 1241ms (next.js: 1070ms, proxy.ts: 11ms, application-code: 160ms)
+ GET /api/auth/me 200 in 84ms (next.js: 6ms, proxy.ts: 8ms, application-code: 70ms)
+ GET /api/student/memorization-paths?scope=enrolled 200 in 453ms (next.js: 278ms, proxy.ts: 9ms, application-code: 166ms)
+ GET /api/student/memorization-paths?scope=all 200 in 514ms (next.js: 306ms, proxy.ts: 7ms, application-code: 201ms)
+ GET /api/student/memorization-paths?scope=enrolled 200 in 149ms (next.js: 3ms, proxy.ts: 7ms, application-code: 140ms)
+ GET /api/student/memorization-paths?scope=all 200 in 166ms (next.js: 3ms, proxy.ts: 6ms, application-code: 158ms)
+ POST /api/admin/analytics 200 in 83ms (next.js: 3ms, proxy.ts: 6ms, application-code: 74ms)
+✓ Compiled in 1494ms
+⚠ Fast Refresh had to perform a full reload when ./lib/i18n/locales/ar.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+[DB] Connected to database at: aws-1-eu-west-3.pooler.supabase.com:6543
+ GET /student/memorization-paths 200 in 888ms (next.js: 255ms, proxy.ts: 133ms, application-code: 499ms)
+ GET /student/memorization-paths 200 in 403ms (next.js: 9ms, proxy.ts: 12ms, application-code: 382ms)
+[DB] Connected to database at: aws-1-eu-west-3.pooler.supabase.com:6543
+ GET /api/student/memorization-paths?scope=all 200 in 885ms (next.js: 79ms, proxy.ts: 60ms, application-code: 746ms)
+ GET /api/student/memorization-paths?scope=enrolled 200 in 884ms (next.js: 84ms, proxy.ts: 57ms, application-code: 743ms)
+ GET /api/auth/me 200 in 1712ms (next.js: 359ms, proxy.ts: 51ms, application-code: 1302ms)
+ GET /api/public-settings 200 in 1727ms (next.js: 222ms, proxy.ts: 54ms, application-code: 1450ms)
+ POST /api/auth/heartbeat 200 in 1734ms (next.js: 126ms, proxy.ts: 55ms, application-code: 1553ms)
+ GET /api/auth/me 200 in 105ms (next.js: 10ms, proxy.ts: 13ms, application-code: 82ms)
+ GET /api/unread-counts 200 in 1834ms (next.js: 559ms, proxy.ts: 41ms, application-code: 1234ms)
+ POST /api/admin/analytics 200 in 155ms (next.js: 57ms, proxy.ts: 17ms, application-code: 81ms)
+ GET /api/student/certificates/pending-count 200 in 214ms (next.js: 129ms, proxy.ts: 14ms, application-code: 71ms)
+✓ Compiled in 1782ms
+⚠ Fast Refresh had to perform a full reload when ./lib/i18n/locales/en.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+[DB] Connected to database at: aws-1-eu-west-3.pooler.supabase.com:6543
+ GET /student/memorization-paths 200 in 1886ms (next.js: 197ms, proxy.ts: 185ms, application-code: 1504ms)
+ GET /student/memorization-paths 200 in 1688ms (next.js: 22ms, proxy.ts: 831ms, application-code: 835ms)
+[DB] Connected to database at: aws-1-eu-west-3.pooler.supabase.com:6543
+ POST /api/auth/heartbeat 200 in 398ms (next.js: 137ms, proxy.ts: 67ms, application-code: 195ms)
+ GET /api/public-settings 200 in 433ms (next.js: 203ms, proxy.ts: 60ms, application-code: 170ms)
+ GET /api/auth/me 200 in 442ms (next.js: 302ms, proxy.ts: 59ms, application-code: 81ms)
+ GET /api/student/memorization-paths?scope=all 200 in 477ms (next.js: 80ms, proxy.ts: 65ms, application-code: 332ms)
+ GET /api/student/memorization-paths?scope=enrolled 200 in 513ms (next.js: 148ms, proxy.ts: 57ms, application-code: 308ms)
+ GET /api/auth/me 200 in 94ms (next.js: 3ms, proxy.ts: 14ms, application-code: 76ms)
+ GET /api/unread-counts 200 in 687ms (next.js: 361ms, proxy.ts: 39ms, application-code: 287ms)
+ POST /api/admin/analytics 200 in 249ms (next.js: 81ms, proxy.ts: 16ms, application-code: 152ms)
+ GET /api/student/certificates/pending-count 200 in 184ms (next.js: 107ms, proxy.ts: 8ms, application-code: 69ms)
+ GET /api/unread-counts 200 in 224ms (next.js: 8ms, proxy.ts: 10ms, application-code: 207ms)
+ GET /api/student/certificates/pending-count 200 in 86ms (next.js: 4ms, proxy.ts: 8ms, application-code: 74ms)
+ GET /api/unread-counts 200 in 676ms (next.js: 6ms, proxy.ts: 12ms, application-code: 659ms)
+ GET /api/student/certificates/pending-count 200 in 84ms (next.js: 3ms, proxy.ts: 6ms, application-code: 76ms)
+ GET /api/unread-counts 200 in 1499ms (next.js: 10ms, proxy.ts: 9ms, application-code: 1480ms)
+ GET /api/student/certificates/pending-count 200 in 409ms (next.js: 5ms, proxy.ts: 6ms, application-code: 398ms)
+ POST /api/auth/heartbeat 200 in 134ms (next.js: 21ms, proxy.ts: 13ms, application-code: 100ms)
+ GET /api/unread-counts 200 in 225ms (next.js: 12ms, proxy.ts: 12ms, application-code: 201ms)
+ GET /api/student/certificates/pending-count 200 in 82ms (next.js: 3ms, proxy.ts: 9ms, application-code: 70ms)
+ GET /api/unread-counts 200 in 206ms (next.js: 6ms, proxy.ts: 8ms, application-code: 192ms)
+ GET /api/student/certificates/pending-count 200 in 98ms (next.js: 11ms, proxy.ts: 6ms, application-code: 81ms)
+ GET /api/unread-counts 200 in 206ms (next.js: 5ms, proxy.ts: 9ms, application-code: 192ms)
+ GET /api/student/certificates/pending-count 200 in 86ms (next.js: 4ms, proxy.ts: 6ms, application-code: 76ms)
+ GET /api/unread-counts 200 in 208ms (next.js: 5ms, proxy.ts: 10ms, application-code: 193ms)
+ GET /api/student/certificates/pending-count 200 in 86ms (next.js: 4ms, proxy.ts: 6ms, application-code: 75ms)
+ POST /api/auth/heartbeat 200 in 249ms (next.js: 36ms, proxy.ts: 19ms, application-code: 195ms)
+ GET /api/unread-counts 200 in 310ms (next.js: 19ms, proxy.ts: 19ms, application-code: 272ms)
+ GET /api/student/certificates/pending-count 200 in 340ms (next.js: 24ms, proxy.ts: 7ms, application-code: 309ms)
+ GET /api/unread-counts 200 in 396ms (next.js: 9ms, proxy.ts: 147ms, application-code: 240ms)
+ GET /api/student/certificates/pending-count 200 in 142ms (next.js: 16ms, proxy.ts: 27ms, application-code: 99ms)
+ GET /api/unread-counts 200 in 304ms (next.js: 7ms, proxy.ts: 44ms, application-code: 254ms)
+ GET /api/student/certificates/pending-count 200 in 148ms (next.js: 6ms, proxy.ts: 7ms, application-code: 134ms)
+ GET /api/unread-counts 200 in 233ms (next.js: 7ms, proxy.ts: 24ms, application-code: 201ms)
+ GET /api/student/certificates/pending-count 200 in 97ms (next.js: 4ms, proxy.ts: 10ms, application-code: 83ms)

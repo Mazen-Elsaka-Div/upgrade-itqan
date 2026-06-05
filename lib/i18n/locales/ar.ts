@@ -347,6 +347,13 @@ export const ar = {
     submitRecitation: 'تسجيل تلاوة',
     newRecitation: 'تسجيل تلاوة جديدة',
     recitations: 'التلاوات',
+    myRecitations: 'تلاواتي',
+    myRecitationsDesc: 'سجل جميع تلاواتك السابقة وحالتها وملاحظات المقرئين',
+    statusPending: 'قيد المراجعة',
+    statusInReview: 'قيد المراجعة',
+    statusMastered: 'متقن',
+    statusNeedsSession: 'تحتاج جلسة تصحيح',
+    statusBooked: 'تم حجز موعد',
     booking: 'حجز موعد',
     sessions: 'جلساتي',
     notifications: 'الإشعارات',
@@ -1640,4 +1647,62 @@ export const ar = {
     skip: 'تخطي',
     submit: 'إرسال',
   },
+  // Tajweed Paths
+  tajweedPaths: {
+    tajweedTitle: 'مسارات التجويد',
+    studentSubtitleTajweed: 'تدرج في تعلم أحكام التجويد من التأسيس حتى الإتقان',
+    migrationMissingStudent: 'النظام جاهز لكن قاعدة البيانات تحتاج تشغيل ميجريشن أولاً — راسل الإدارة لو ظهرت لك هذه الرسالة.',
+    searchPlaceholder: 'ابحث عن مسار...',
+    emptyEnrolled: 'اكتشف مسارات التجويد المتاحة في علامة التبويب "تصفح المسارات" وابدأ رحلتك القرآنية اليوم.',
+    emptyPublished: 'لا توجد مسارات مطابقة للبحث',
+    tabs: {
+      myPaths: 'مساراتي',
+      browse: 'تصفح المسارات'
+    },
+    levels: {
+      beginner: 'مبتدئ',
+      intermediate: 'متوسط',
+      advanced: 'متقدم'
+    },
+    metadata: {
+      requireAudioBadge: 'يتطلب تسجيل',
+      stagesUnit: 'مرحلة',
+      estimatedDays: 'يوم متوقع',
+      estimatedDaysLabel: 'المدة المتوقعة',
+      daysSuffix: 'يوماً',
+      progress: 'التقدم المنجز',
+      yourProgress: 'التقدم الإجمالي',
+      pathCompleteCelebration: 'لقد أتممت هذا المسار بنجاح.'
+    },
+    detail: {
+      enrollPrompt: 'اشترك في المسار لتبدأ التعلم، وستفتح المرحلة الأولى مباشرة.',
+      learningContent: 'المحتوى التعليمي',
+      videoTutorial: 'فيديو توضيحي',
+      pdfFile: 'ملف PDF',
+      practicePassage: 'تطبيق عملي',
+      yourPreviousRecording: 'تسجيلك المعتمد لهذه المرحلة',
+      completeDialogTitle: 'إتمام المرحلة',
+      requireAudioDescription: 'يلزم تسجيل صوتي قبل إتمام المرحلة — سجّل تسجيلاً جديداً أو اربط تسجيلاً سابقاً.',
+      optionalAudioDescription: 'يمكنك تسجيل صوت لإثبات الحفظ أو ربط تسجيل سابق (اختياري)، ثم اضغط إتمام.',
+      audioRecorderLabel: 'سجّل التلاوة للتطبيق',
+      completeFailed: 'تعذّر إتمام المرحلة'
+    },
+    actions: {
+      startPath: 'ابدأ المسار الآن',
+      start: 'استكشاف وابدأ',
+      backToPaths: 'رجوع للمسارات',
+      continueLearning: 'متابعة المسار',
+      review: 'مراجعة المسار',
+      completeStage: 'إتمام المرحلة',
+      updateRecording: 'تحديث التسجيل',
+      cancel: 'إلغاء',
+      pass: 'تأكيد الإتمام'
+    },
+    statuses: {
+      inProgress: 'قيد العمل',
+      completed: 'مكتمل',
+      paused: 'متوقف'
+    }
+  }
 }
+

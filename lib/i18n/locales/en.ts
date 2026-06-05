@@ -352,6 +352,7 @@ export const en = {
     myRecitations: 'My Recitations',
     myRecitationsDesc: 'All the recordings you have sent and their statuses',
     recitations: 'Recitations Log',
+    tajweedPaths: 'Tajweed Paths',
     booking: 'Book Session',
     sessions: 'My Sessions',
     notifications: 'Notifications',
