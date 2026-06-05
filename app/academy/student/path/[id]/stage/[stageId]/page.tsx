@@ -33,6 +33,12 @@ interface PathStage {
   lesson_video_url?: string
   lesson_audio_url?: string
   lesson_transcript?: string
+  lesson_attachments?: {
+    id: string
+    file_name: string
+    file_url: string
+    file_type: string
+  }[]
   progress: {
     status: 'locked' | 'unlocked' | 'in_progress' | 'completed'
     audio_url?: string
@@ -283,6 +289,30 @@ export default function StudentPathStagePage() {
               </h2>
               <div className="prose prose-emerald max-w-none text-foreground/90 whitespace-pre-wrap bg-muted/30 p-6 rounded-2xl border border-border/40">
                 {stage.lesson_transcript}
+              </div>
+            </div>
+          )}
+
+          {/* Lesson Attachments */}
+          {stage.lesson_attachments && stage.lesson_attachments.length > 0 && (
+            <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 shadow-sm space-y-4">
+              <h2 className="text-lg font-bold flex items-center gap-2">
+                <FileText className="w-5 h-5 text-emerald-600" />
+                مرفقات الدرس
+              </h2>
+              <div className="flex flex-wrap gap-3">
+                {stage.lesson_attachments.map((att) => (
+                  <a
+                    key={att.id}
+                    href={att.file_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 font-semibold hover:underline bg-blue-500/5 px-4 py-2.5 rounded-xl border border-blue-500/10"
+                  >
+                    <FileText className="w-4 h-4" />
+                    {att.file_name || 'تحميل المرفق'}
+                  </a>
+                ))}
               </div>
             </div>
           )}

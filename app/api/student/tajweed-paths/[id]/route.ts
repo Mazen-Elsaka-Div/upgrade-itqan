@@ -69,7 +69,29 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
     const stagesWithProgress = stages.map(s => ({
       ...s,
       progress: enrollment ? (progressByStage[s.id] || { status: "locked" }) : { status: "locked" },
+      lesson_attachments: [] // Will populate below
     }))
+
+    // Fetch lesson attachments if any
+    const lessonIds = stages.map(s => s.lesson_id).filter(Boolean)
+    if (lessonIds.length > 0) {
+      const attachmentsRows = (await query<any>(
+        `SELECT * FROM lesson_attachments WHERE lesson_id = ANY($1) ORDER BY display_order ASC, created_at ASC`,
+        [lessonIds]
+      )) as any[]
+      
+      const attachmentsByLesson = attachmentsRows.reduce((acc: any, row: any) => {
+        if (!acc[row.lesson_id]) acc[row.lesson_id] = []
+        acc[row.lesson_id].push(row)
+        return acc
+      }, {})
+
+      for (const s of stagesWithProgress) {
+        if (s.lesson_id && attachmentsByLesson[s.lesson_id]) {
+          s.lesson_attachments = attachmentsByLesson[s.lesson_id]
+        }
+      }
+    }
 
     return NextResponse.json({ path, stages: stagesWithProgress, enrollment })
   } catch (err) {
