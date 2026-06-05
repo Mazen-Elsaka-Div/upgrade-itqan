@@ -391,20 +391,36 @@ export default function PathStagesManager({ pathId }: { pathId: string }) {
                 </div>
               )}
               {form.stage_type === 'lesson' && (
-                <div className="bg-amber-50/50 dark:bg-amber-900/10 p-4 rounded-xl border border-amber-100 dark:border-amber-900/30">
-                  <label className="text-sm font-bold block mb-1.5 text-amber-800 dark:text-amber-300">اختر الدرس <span className="text-rose-500">*</span></label>
-                  <select
-                    required
-                    value={form.lesson_id}
-                    onChange={(e) => {
-                      const l = entities.lessons.find((x: any) => x.id === e.target.value)
-                      setForm({ ...form, lesson_id: e.target.value, title: l && form.title === '' ? l.title : form.title })
-                    }}
-                    className="w-full px-3 py-2.5 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  >
-                    <option value="">— اختر الدرس —</option>
-                    {entities.lessons.map(l => <option key={l.id} value={l.id}>{l.title} ({l.course_title})</option>)}
-                  </select>
+                <div className="bg-amber-50/50 dark:bg-amber-900/10 p-4 rounded-xl border border-amber-100 dark:border-amber-900/30 space-y-4">
+                  <div>
+                    <label className="text-sm font-bold block mb-1.5 text-amber-800 dark:text-amber-300">اختر الدورة أولاً <span className="text-rose-500">*</span></label>
+                    <select
+                      value={form.course_id}
+                      onChange={(e) => setForm({ ...form, course_id: e.target.value, lesson_id: '' })}
+                      className="w-full px-3 py-2.5 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    >
+                      <option value="">— اختر الدورة —</option>
+                      {entities.courses.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-sm font-bold block mb-1.5 text-amber-800 dark:text-amber-300">اختر الدرس <span className="text-rose-500">*</span></label>
+                    <select
+                      required
+                      disabled={!form.course_id}
+                      value={form.lesson_id}
+                      onChange={(e) => {
+                        const l = entities.lessons.find((x: any) => x.id === e.target.value)
+                        setForm({ ...form, lesson_id: e.target.value, title: l && form.title === '' ? l.title : form.title })
+                      }}
+                      className="w-full px-3 py-2.5 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50"
+                    >
+                      <option value="">— اختر الدرس —</option>
+                      {entities.lessons
+                        .filter(l => l.course_id === form.course_id)
+                        .map(l => <option key={l.id} value={l.id}>{l.title}</option>)}
+                    </select>
+                  </div>
                 </div>
               )}
               {form.stage_type === 'custom' && (

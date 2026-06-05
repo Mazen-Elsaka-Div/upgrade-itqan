@@ -29,7 +29,7 @@ export async function GET(_req: NextRequest) {
     let lessons: any[] = []
     try {
       lessons = await query(
-        `SELECT l.id, l.title, c.title as course_title 
+        `SELECT l.id, l.title, c.title as course_title, l.course_id
          FROM lessons l
          JOIN courses c ON l.course_id = c.id
          WHERE c.teacher_id = $1 
