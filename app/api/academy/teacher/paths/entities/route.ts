@@ -33,7 +33,7 @@ export async function GET(_req: NextRequest) {
          FROM lessons l
          JOIN courses c ON l.course_id = c.id
          WHERE c.teacher_id = $1 
-         ORDER BY l.position ASC`,
+         ORDER BY l.order_index ASC`,
         [session.sub]
       )
     } catch {
