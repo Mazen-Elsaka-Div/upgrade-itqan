@@ -84,12 +84,6 @@ export async function autoIssueRequest(
       return { issued: false, pdf_url: null, reason: "no_template" }
     }
 
-    await query(
-      `UPDATE certificate_issuance_requests
-          SET status = 'approved', approved_at = COALESCE(approved_at, NOW())
-        WHERE id = $1`,
-      [requestId],
-    )
     const result = await issueCertificateForRequest({
       request_id: requestId,
       scope,
@@ -97,7 +91,7 @@ export async function autoIssueRequest(
     })
     await query(
       `UPDATE certificate_issuance_requests
-          SET status = 'issued', issued_at = NOW()
+          SET status = 'issued', approved_at = COALESCE(approved_at, NOW()), issued_at = NOW()
         WHERE id = $1`,
       [requestId],
     )
