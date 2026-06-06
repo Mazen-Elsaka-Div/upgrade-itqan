@@ -176,16 +176,12 @@ export function makeTeacherRequestPatch() {
           )
           const result = await autoIssueRequest(id, "academy")
           if (!result.issued) {
-            const isNoTemplate = result.reason === "no_template"
+            const errMsg = (result as any).error || (result as any).reason || "تأكد من وجود قالب شهادة افتراضي للدورات.";
             return NextResponse.json(
               {
-                error: isNoTemplate
-                  ? "تعذر إصدار الشهادة: لا يوجد قالب شهادة افتراضي للدورات. عيّن قالبًا افتراضيًا من إعدادات الشهادات ثم أعد المحاولة."
-                  : "تعذر إصدار ملف الشهادة بسبب خطأ في التوليد. حاول مرة أخرى، وإذا تكرر الخطأ تواصل مع الدعم الفني.",
-                reason: result.reason || "unknown",
-                issued: false,
+                error: `تعذر إصدار الشهادة. السبب: ${errMsg}`,
               },
-              { status: 200 },
+              { status: 500 },
             )
           }
           const row = await queryOne(

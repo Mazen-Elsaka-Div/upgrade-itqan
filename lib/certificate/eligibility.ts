@@ -113,9 +113,7 @@ export async function autoIssueRequest(
     return { issued: true, pdf_url: result.pdf_url }
   } catch (err) {
     console.error("[eligibility] autoIssueRequest failed", err)
-    const message =
-      err instanceof Error ? err.message : "unknown_render_error"
-    return { issued: false, pdf_url: null, reason: `render_failed: ${message}` }
+    return { issued: false, pdf_url: null, error: err instanceof Error ? err.message : String(err) }
   }
 }
 
