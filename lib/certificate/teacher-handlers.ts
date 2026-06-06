@@ -140,85 +140,97 @@ export function makeTeacherRequestPatch() {
     req: NextRequest,
     { params }: { params: Promise<{ id: string }> },
   ) {
-    const session = await getSession()
-    if (!session || !requireRole(session, ["teacher", "admin", "academy_admin"])) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-    const { id } = await params
-    const body = await req.json().catch(() => null)
-    if (!body?.action) {
-      return NextResponse.json({ error: "Missing action" }, { status: 400 })
-    }
+    try {
+      const session = await getSession()
+      if (!session || !requireRole(session, ["teacher", "admin", "academy_admin"])) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      }
+      const { id } = await params
+      const body = await req.json().catch(() => null)
+      if (!body?.action) {
+        return NextResponse.json({ error: "Missing action" }, { status: 400 })
+      }
 
-    const existing = await loadOwnedCourseRequest(id, session)
-    if (!existing) {
+      const existing = await loadOwnedCourseRequest(id, session)
+      if (!existing) {
+        return NextResponse.json(
+          { error: "Not found or not permitted" },
+          { status: 404 },
+        )
+      }
+
+      switch (body.action) {
+        case "approve": {
+          if (!["submitted", "approved"].includes(existing.status)) {
+            return NextResponse.json(
+              { error: "Cannot approve in current status" },
+              { status: 400 },
+            )
+          }
+          // Record who approved, then issue (approve → render → issue → notify).
+          await query(
+            `UPDATE certificate_issuance_requests
+                SET approved_by = $2, approved_at = COALESCE(approved_at, NOW())
+              WHERE id = $1`,
+            [id, session.sub],
+          )
+          const result = await autoIssueRequest(id, "academy")
+          if (!result.issued) {
+            return NextResponse.json(
+              {
+                error:
+                  "تعذر إصدار الشهادة. تأكد من وجود قالب شهادة افتراضي للدورات.",
+                issued: false,
+              },
+              { status: 200 },
+            )
+          }
+          const row = await queryOne(
+            `SELECT * FROM certificate_issuance_requests WHERE id = $1`,
+            [id],
+          )
+          return NextResponse.json({ request: row, issued: true })
+        }
+        case "reject": {
+          if (!["submitted", "approved"].includes(existing.status)) {
+            return NextResponse.json(
+              { error: "Cannot reject in current status" },
+              { status: 400 },
+            )
+          }
+          const reason = (body.reason || "").toString().trim() || null
+          const [row] = await query(
+            `UPDATE certificate_issuance_requests
+                SET status = 'rejected', rejection_reason = $2,
+                    approved_by = $3, approved_at = NOW()
+              WHERE id = $1 RETURNING *`,
+            [id, reason, session.sub],
+          )
+          await createNotification({
+            userId: existing.student_id,
+            type: "general",
+            title: "تم رفض طلب الشهادة",
+            message: reason
+              ? `سبب الرفض: ${reason}`
+              : "تم رفض طلب إصدار شهادتك. يمكنك مراجعة البيانات وإعادة الإرسال.",
+            category: "system",
+            link: "/academy/student/certificates",
+            dedupKey: `cert-rejected:${id}:${Date.now()}`,
+          }).catch(() => {})
+          return NextResponse.json({ request: row })
+        }
+        default:
+          return NextResponse.json({ error: "Unknown action" }, { status: 400 })
+      }
+    } catch (err) {
+      console.error("[teacher-handlers] PATCH failed", err)
       return NextResponse.json(
-        { error: "Not found or not permitted" },
-        { status: 404 },
+        {
+          error:
+            "حدث خطأ غير متوقع أثناء تنفيذ الإجراء. حاول مرة أخرى.",
+        },
+        { status: 500 },
       )
-    }
-
-    switch (body.action) {
-      case "approve": {
-        if (!["submitted", "approved"].includes(existing.status)) {
-          return NextResponse.json(
-            { error: "Cannot approve in current status" },
-            { status: 400 },
-          )
-        }
-        // Record who approved, then issue (approve → render → issue → notify).
-        await query(
-          `UPDATE certificate_issuance_requests
-              SET approved_by = $2, approved_at = COALESCE(approved_at, NOW())
-            WHERE id = $1`,
-          [id, session.sub],
-        )
-        const result = await autoIssueRequest(id, "academy")
-        if (!result.issued) {
-          return NextResponse.json(
-            {
-              error:
-                "تعذر إصدار الشهادة. تأكد من وجود قالب شهادة افتراضي للدورات.",
-            },
-            { status: 500 },
-          )
-        }
-        const row = await queryOne(
-          `SELECT * FROM certificate_issuance_requests WHERE id = $1`,
-          [id],
-        )
-        return NextResponse.json({ request: row, issued: true })
-      }
-      case "reject": {
-        if (!["submitted", "approved"].includes(existing.status)) {
-          return NextResponse.json(
-            { error: "Cannot reject in current status" },
-            { status: 400 },
-          )
-        }
-        const reason = (body.reason || "").toString().trim() || null
-        const [row] = await query(
-          `UPDATE certificate_issuance_requests
-              SET status = 'rejected', rejection_reason = $2,
-                  approved_by = $3, approved_at = NOW()
-            WHERE id = $1 RETURNING *`,
-          [id, reason, session.sub],
-        )
-        await createNotification({
-          userId: existing.student_id,
-          type: "general",
-          title: "تم رفض طلب الشهادة",
-          message: reason
-            ? `سبب الرفض: ${reason}`
-            : "تم رفض طلب إصدار شهادتك. يمكنك مراجعة البيانات وإعادة الإرسال.",
-          category: "system",
-          link: "/academy/student/certificates",
-          dedupKey: `cert-rejected:${id}:${Date.now()}`,
-        }).catch(() => {})
-        return NextResponse.json({ request: row })
-      }
-      default:
-        return NextResponse.json({ error: "Unknown action" }, { status: 400 })
     }
   }
 }
