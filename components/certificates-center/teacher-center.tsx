@@ -87,12 +87,40 @@ export default function TeacherCertificatesCenter() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action, reason }),
       })
-      const d = await res.json().catch(() => null)
+      // Read as text first so we still surface non-JSON errors (e.g. a
+      // serverless 500/timeout from the PDF renderer).
+      const raw = await res.text()
+      let d: { error?: string; issued?: boolean } | null = null
+      try {
+        d = raw ? JSON.parse(raw) : null
+      } catch {
+        d = null
+      }
       if (!res.ok) {
-        alert(d?.error || (isAr ? 'فشل تنفيذ الإجراء' : 'Action failed'))
+        console.log('[v0] cert action failed', { status: res.status, raw })
+        alert(
+          d?.error ||
+            (isAr
+              ? `فشل تنفيذ الإجراء (${res.status}). ${raw ? raw.slice(0, 200) : ''}`
+              : `Action failed (${res.status}). ${raw ? raw.slice(0, 200) : ''}`),
+        )
         return
       }
+      if (action === 'approve' && d && d.issued === false) {
+        alert(
+          isAr
+            ? 'تم الاعتماد لكن تعذّر إصدار ملف الشهادة. تأكد من وجود قالب افتراضي للدورات وحاول مرة أخرى.'
+            : 'Approved, but the certificate file could not be generated. Make sure a default course template exists and try again.',
+        )
+      }
       load(tab)
+    } catch (err) {
+      console.log('[v0] cert action threw', err)
+      alert(
+        isAr
+          ? 'حدث خطأ غير متوقع أثناء تنفيذ الإجراء. حاول مرة أخرى.'
+          : 'An unexpected error occurred. Please try again.',
+      )
     } finally {
       setBusyId(null)
     }

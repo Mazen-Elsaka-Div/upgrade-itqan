@@ -77,6 +77,10 @@ export async function autoIssueRequest(
     }
     if (!templateId) {
       // No template configured at all — cannot auto-issue.
+      console.error(
+        "[eligibility] autoIssueRequest: no default template for",
+        { scope, kind: req.kind, language: req.language },
+      )
       return { issued: false, pdf_url: null }
     }
 
