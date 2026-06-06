@@ -123,19 +123,18 @@ function CenterInner({
       className="max-w-6xl mx-auto space-y-8 pb-12"
       dir={isAr ? 'rtl' : 'ltr'}
     >
-      <div id="data-required" className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div className="space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider mb-2">
-            <Award className="w-4 h-4" />
-            {isAr ? title_ar : title_en}
-          </div>
-          <h1 className="text-3xl lg:text-4xl font-black tracking-tight text-foreground text-balance">
-            {isAr ? title_ar : title_en}
-          </h1>
-          <p className="text-muted-foreground font-medium max-w-2xl text-pretty">
-            {isAr ? subtitle_ar : subtitle_en}
-          </p>
+      {/* ─── Header ────────────────────────────────────────────────── */}
+      <div className="flex flex-col gap-4 max-w-3xl">
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 text-primary text-xs font-bold uppercase tracking-wider w-fit shadow-sm shadow-primary/5 ring-1 ring-primary/10">
+          <Award className="w-4 h-4" />
+          {isAr ? title_ar : title_en}
         </div>
+        <h1 className="text-3xl lg:text-4xl font-black tracking-tight text-foreground text-balance">
+          {isAr ? title_ar : title_en}
+        </h1>
+        <p className="text-muted-foreground text-lg font-medium max-w-2xl text-pretty leading-relaxed">
+          {isAr ? subtitle_ar : subtitle_en}
+        </p>
       </div>
 
       {/* ─── Action required ───────────────────────────────────────── */}
@@ -190,18 +189,19 @@ function CenterInner({
         count={data.issued.length}
       >
         {data.issued.length === 0 ? (
-          <Card className="border border-border/50 shadow-sm bg-card overflow-hidden rounded-xl">
-            <CardContent className="p-16 text-center space-y-6">
-              <div className="w-24 h-24 bg-primary/5 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Award className="w-12 h-12 text-primary/40" />
+          <Card className="rounded-3xl border-0 shadow-sm bg-gradient-to-b from-muted/30 to-muted/10 overflow-hidden relative group">
+            <div className="absolute inset-0 bg-grid-black/[0.02] dark:bg-grid-white/[0.02]" />
+            <CardContent className="p-16 text-center space-y-6 relative z-10">
+              <div className="w-20 h-20 bg-background shadow-xl shadow-black/5 rounded-3xl flex items-center justify-center mx-auto mb-6 rotate-3 group-hover:rotate-6 transition-transform duration-500 ring-1 ring-border/50">
+                <Award className="w-10 h-10 text-primary/60" />
               </div>
-              <h3 className="text-2xl font-black text-foreground text-balance">
+              <h3 className="text-2xl font-black text-foreground tracking-tight text-balance">
                 {isAr ? 'لا توجد شهادات حتى الآن' : 'No certificates yet'}
               </h3>
-              <p className="text-muted-foreground font-medium leading-relaxed max-w-sm mx-auto text-pretty">
+              <p className="text-muted-foreground font-medium leading-relaxed max-w-md mx-auto text-pretty">
                 {isAr
-                  ? 'أكمل الدورات والمسارات والمسابقات لتحصل على شهادات معتمدة.'
-                  : 'Finish courses, paths, and competitions to earn approved certificates.'}
+                  ? 'أكمل الدورات والمسارات والمسابقات بنجاح لتحصل على شهاداتك المعتمدة هنا.'
+                  : 'Finish courses, paths, and competitions to earn your approved certificates here.'}
               </p>
             </CardContent>
           </Card>
@@ -259,16 +259,16 @@ function Section({
 }) {
   const cls = TONE_CLASSES[tone]
   return (
-    <section className="space-y-4">
+    <section className="space-y-6">
       <header className="flex items-center gap-3">
         <span
-          className={`w-9 h-9 rounded-lg flex items-center justify-center ${cls.bg} ${cls.text}`}
+          className={`w-10 h-10 rounded-2xl flex items-center justify-center ${cls.bg} ${cls.text} ring-1 ring-inset ring-black/5 dark:ring-white/5`}
         >
-          <Icon className="w-4 h-4" />
+          <Icon className="w-5 h-5" />
         </span>
-        <h2 className="text-xl font-black tracking-tight text-balance">{title}</h2>
-        <span className="text-sm font-bold text-muted-foreground tabular-nums">
-          ({count})
+        <h2 className="text-2xl font-black tracking-tight text-balance">{title}</h2>
+        <span className="flex items-center justify-center min-w-8 h-8 px-2 rounded-full bg-muted text-sm font-bold text-muted-foreground tabular-nums">
+          {count}
         </span>
       </header>
       {children}
