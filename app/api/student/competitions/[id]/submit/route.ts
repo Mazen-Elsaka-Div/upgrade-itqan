@@ -25,11 +25,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     const { submission_url, notes, verses_count } = await req.json()
 
-    await submitEntry(id, session.sub, {
+    const result = await submitEntry(id, session.sub, {
       submission_url: submission_url || null,
       notes: notes || null,
       verses_count: Number(verses_count) || 0,
     })
+    if (!result.success) {
+      return NextResponse.json({ error: result.error }, { status: 400 })
+    }
 
     return NextResponse.json({ success: true })
   } catch (error) {

@@ -80,9 +80,12 @@ export async function getCompetition(id: string) {
 }
 
 export async function joinCompetition(competitionId: string, studentId: string) {
+  // Joining only registers participation. `submitted_at` stays NULL until the
+  // student actually submits, so a joined-but-not-submitted entry is never
+  // mistaken for a submission (and never shows a bogus submission date).
   return query(`
-    INSERT INTO competition_entries (competition_id, student_id, status, submitted_at)
-    VALUES ($1, $2, 'pending', NOW())
+    INSERT INTO competition_entries (competition_id, student_id, status)
+    VALUES ($1, $2, 'pending')
     ON CONFLICT (competition_id, student_id) DO NOTHING
     RETURNING *
   `, [competitionId, studentId])
@@ -92,16 +95,40 @@ export async function submitEntry(competitionId: string, studentId: string, data
   submission_url?: string | null
   notes?: string | null
   verses_count?: number
-}) {
-  // First join if not already joined
+}): Promise<{ success: true; data: any } | { success: false; error: string }> {
+  const comp = await queryOne<{ status: string; min_verses: number | null }>(
+    `SELECT status, min_verses FROM competitions WHERE id = $1`,
+    [competitionId]
+  )
+  if (!comp) return { success: false, error: 'المسابقة غير موجودة' }
+  if (comp.status !== 'active') return { success: false, error: 'المسابقة غير نشطة' }
+
+  const minVerses = Number(comp.min_verses) || 0
+  const verses = Number(data.verses_count) || 0
+  if (minVerses > 0 && verses < minVerses) {
+    return { success: false, error: `الحد الأدنى للمشاركة هو ${minVerses} آية` }
+  }
+
+  // Block re-submission once an entry has already been judged.
+  const existing = await queryOne<{ status: string }>(
+    `SELECT status FROM competition_entries WHERE competition_id = $1 AND student_id = $2`,
+    [competitionId, studentId]
+  )
+  if (existing && (existing.status === 'evaluated' || existing.status === 'winner')) {
+    return { success: false, error: 'تم تقييم مشاركتك بالفعل ولا يمكن تعديلها' }
+  }
+
+  // Ensure the participation row exists, then record the actual submission.
   await joinCompetition(competitionId, studentId)
-  
-  return query(`
+
+  const rows = await query<any>(`
     UPDATE competition_entries
     SET submission_url = $3, notes = $4, verses_count = $5, status = 'pending', submitted_at = NOW()
     WHERE competition_id = $1 AND student_id = $2
     RETURNING *
-  `, [competitionId, studentId, data.submission_url || null, data.notes || null, data.verses_count || 0])
+  `, [competitionId, studentId, data.submission_url || null, data.notes || null, verses])
+
+  return { success: true, data: rows[0] }
 }
 
 export async function getJudgeAssignments(judgeId: string) {
@@ -195,6 +222,11 @@ export async function removeCompetitionJudge(competitionId: string, judgeId: str
 
 export async function evaluateEntry(entryId: string, judgeId: string, evaluation: { score: number; tajweedScores: any; feedback: string | null }) {
   try {
+    const score = Number(evaluation.score)
+    if (!Number.isFinite(score) || score < 0 || score > 100) {
+      return { success: false, error: 'الدرجة يجب أن تكون بين 0 و 100' }
+    }
+
     const entry = await queryOne<{ competition_id: string }>(
       `SELECT competition_id FROM competition_entries WHERE id = $1`,
       [entryId]
@@ -219,7 +251,7 @@ export async function evaluateEntry(entryId: string, judgeId: string, evaluation
       `UPDATE competition_entries
        SET score = $1, tajweed_scores = $2, feedback = $3, status = 'evaluated', evaluated_at = NOW(), evaluated_by = $4
        WHERE id = $5`,
-      [evaluation.score, JSON.stringify(evaluation.tajweedScores), evaluation.feedback, judgeId, entryId]
+      [score, JSON.stringify(evaluation.tajweedScores), evaluation.feedback, judgeId, entryId]
     )
     
     return { success: true }
