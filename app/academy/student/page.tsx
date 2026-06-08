@@ -10,6 +10,8 @@ import {
   CheckCircle2, GraduationCap, Activity as ActivityIcon,
   Video, Sparkles, ArrowUpRight, Medal,
 } from 'lucide-react'
+import { AdhkarWidget } from '@/components/adhkar-widget'
+import { PrayerTimesDialog } from '@/components/prayer-times-dialog'
 
 const LEVEL_LABELS: Record<string, string> = {
   beginner: 'مبتدئ',
@@ -197,6 +199,16 @@ export default function AcademyStudentDashboard() {
           <p className="text-white/80 mb-5 text-sm leading-relaxed">
             {t.academy?.continueJourney || 'واصل رحلتك التعليمية واكسب المزيد من النقاط'}
           </p>
+          <div className="mb-5">
+            <PrayerTimesDialog
+              trigger={
+                <button className="inline-flex items-center gap-2 bg-white/15 hover:bg-white/25 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition-colors backdrop-blur-sm border border-white/20">
+                  <Clock className="w-4 h-4" />
+                  مواقيت الصلاة
+                </button>
+              }
+            />
+          </div>
           <div className="flex items-center gap-6 flex-wrap">
             <div className="flex items-center gap-2">
               <Flame className="w-5 h-5 text-orange-300" />
@@ -389,6 +401,9 @@ export default function AcademyStudentDashboard() {
 
         {/* Sidebar */}
         <div className="space-y-6">
+          {/* Morning/Evening Adhkar */}
+          <AdhkarWidget />
+
           {/* Upcoming Sessions */}
           <div className="bg-card rounded-2xl border border-border p-6">
             <div className="flex items-center justify-between mb-4">
