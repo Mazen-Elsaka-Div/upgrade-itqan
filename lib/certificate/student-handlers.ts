@@ -36,13 +36,19 @@ async function notifyApproversOfSubmission(
   )
   if (!req) return
 
+  const adminLink =
+    scope === "academy"
+      ? "/academy/admin/certificates"
+      : "/admin/certificates-center"
+  const teacherLink = "/academy/teacher/certificates"
   const title = "طلب شهادة بانتظار الاعتماد"
   const message = `${req.student_name || "طالب"} أكمل بياناته لشهادة «${
     req.source_label || "—"
   }» وبانتظار اعتمادك.`
 
-  // userId -> target link
-  const recipients = new Map<string, string>()
+  // Admins get the admin center link; course/path owners get the teacher link.
+  const adminRecipients = new Set<string>()
+  const ownerRecipients = new Set<string>()
 
   // Scope admins.
   const adminRoles =
@@ -51,9 +57,7 @@ async function notifyApproversOfSubmission(
     `SELECT id FROM users WHERE role = ANY($1)`,
     [adminRoles],
   ).catch(() => [])
-  
-  const adminLink = scope === "academy" ? "/academy/admin/certificates" : "/admin/certificates-center"
-  admins.forEach((a) => recipients.set(a.id, adminLink))
+  admins.forEach((a) => adminRecipients.add(a.id))
 
   // The course teacher, when the source is a course.
   if (req.source_table === "courses" && req.source_id) {
@@ -61,16 +65,31 @@ async function notifyApproversOfSubmission(
       `SELECT teacher_id FROM courses WHERE id = $1`,
       [req.source_id],
     ).catch(() => null)
-    
-    if (teacher?.teacher_id) {
-      const teacherLink = scope === "academy" ? "/academy/teacher/certificates" : "/teacher/certificates"
-      if (!recipients.has(teacher.teacher_id)) {
-        recipients.set(teacher.teacher_id, teacherLink)
-      }
-    }
+    if (teacher?.teacher_id) ownerRecipients.add(teacher.teacher_id)
   }
 
-  for (const [userId, link] of recipients.entries()) {
+  // The path manager/creator, when the source is a tajweed path.
+  if (req.source_table === "tajweed_paths" && req.source_id) {
+    const path = await queryOne<{
+      created_by: string | null
+      manager_id: string | null
+    }>(
+      `SELECT created_by, manager_id FROM tajweed_paths WHERE id = $1`,
+      [req.source_id],
+    ).catch(() => null)
+    if (path?.created_by) ownerRecipients.add(path.created_by)
+    if (path?.manager_id) ownerRecipients.add(path.manager_id)
+  }
+
+  // Avoid double-notifying someone who is both an admin and the owner.
+  for (const id of ownerRecipients) adminRecipients.delete(id)
+
+  const deliveries: Array<{ userId: string; link: string }> = [
+    ...[...adminRecipients].map((userId) => ({ userId, link: adminLink })),
+    ...[...ownerRecipients].map((userId) => ({ userId, link: teacherLink })),
+  ]
+
+  for (const { userId, link } of deliveries) {
     await query(
       `INSERT INTO notifications (user_id, title, message, type, link, created_at)
        VALUES ($1, $2, $3, 'certificate', $4, NOW())`,

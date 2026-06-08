@@ -17,10 +17,15 @@ import { autoIssueRequest } from "@/lib/certificate/eligibility"
 const ADMIN_ROLES = ["admin", "academy_admin"]
 
 /**
- * Resolve a course request and verify the caller may act on it.
+ * Resolve a request and verify the caller may act on it.
+ * Teachers may act on:
+ *   - course-kind requests for courses they own (courses.teacher_id)
+ *   - path-kind requests for tajweed paths they manage
+ *     (tajweed_paths.created_by / manager_id)
+ * Admins may act on any academy request.
  * Returns the request row when allowed, otherwise null.
  */
-async function loadOwnedCourseRequest(
+async function loadOwnedRequest(
   requestId: string,
   session: { sub: string; role?: string },
 ) {
@@ -31,23 +36,40 @@ async function loadOwnedCourseRequest(
     kind: string
     source_table: string | null
     source_id: string | null
-    teacher_id: string | null
+    course_teacher_id: string | null
+    path_created_by: string | null
+    path_manager_id: string | null
   }>(
     `SELECT r.id, r.student_id, r.status, r.kind,
-            r.source_table, r.source_id, c.teacher_id
+            r.source_table, r.source_id,
+            c.teacher_id   AS course_teacher_id,
+            tp.created_by  AS path_created_by,
+            tp.manager_id  AS path_manager_id
        FROM certificate_issuance_requests r
        LEFT JOIN courses c
          ON r.source_table = 'courses' AND c.id = r.source_id
+       LEFT JOIN tajweed_paths tp
+         ON r.source_table = 'tajweed_paths' AND tp.id = r.source_id
       WHERE r.id = $1 AND r.scope = 'academy'`,
     [requestId],
   )
   if (!req) return null
-  // Only course-kind requests are in a teacher's remit.
-  if (req.source_table !== "courses" || !req.source_id) return null
+
   const isAdmin = ADMIN_ROLES.includes(session.role || "")
-  const isOwner = req.teacher_id === session.sub
-  if (!isAdmin && !isOwner) return null
-  return req
+  if (isAdmin) return req
+
+  // Course requests: must own the course.
+  if (req.source_table === "courses" && req.source_id) {
+    return req.course_teacher_id === session.sub ? req : null
+  }
+  // Path requests: must manage the path.
+  if (req.source_table === "tajweed_paths" && req.source_id) {
+    const owns =
+      req.path_created_by === session.sub ||
+      req.path_manager_id === session.sub
+    return owns ? req : null
+  }
+  return null
 }
 
 // =====================================================================
@@ -65,17 +87,24 @@ export function makeTeacherRequestsListGet() {
 
     const isAdmin = ADMIN_ROLES.includes(session.role || "")
 
+    // Teacher remit covers course requests (courses they own) and tajweed
+    // path requests (paths they created or manage). Admins see everything.
     const filters: string[] = [
       "r.scope = 'academy'",
-      "r.kind = 'course'",
-      "r.source_table = 'courses'",
+      "r.source_table IN ('courses', 'tajweed_paths')",
     ]
     const params: unknown[] = []
 
-    // Teachers are scoped to the courses they own; admins see everything.
     if (!isAdmin) {
       params.push(session.sub)
-      filters.push(`c.teacher_id = $${params.length}`)
+      const p = `$${params.length}`
+      filters.push(
+        `(
+          (r.source_table = 'courses' AND c.teacher_id = ${p})
+          OR
+          (r.source_table = 'tajweed_paths' AND (tp.created_by = ${p} OR tp.manager_id = ${p}))
+        )`,
+      )
     }
     if (status && status !== "all") {
       params.push(status)
@@ -84,14 +113,17 @@ export function makeTeacherRequestsListGet() {
 
     const rows = await query(
       `SELECT r.id, r.status, r.kind, r.language, r.data,
-              r.source_label, r.source_id,
+              r.source_label, r.source_id, r.source_table,
               r.rejection_reason, r.certificate_number, r.pdf_url,
               r.requested_at, r.submitted_at, r.approved_at, r.issued_at,
               u.name AS student_name, u.email AS student_email,
-              c.title AS course_title
+              COALESCE(c.title, tp.title, r.source_label) AS course_title
          FROM certificate_issuance_requests r
          JOIN users u ON u.id = r.student_id
-         LEFT JOIN courses c ON c.id = r.source_id
+         LEFT JOIN courses c
+           ON r.source_table = 'courses' AND c.id = r.source_id
+         LEFT JOIN tajweed_paths tp
+           ON r.source_table = 'tajweed_paths' AND tp.id = r.source_id
         WHERE ${filters.join(" AND ")}
         ORDER BY
           CASE r.status
@@ -106,12 +138,20 @@ export function makeTeacherRequestsListGet() {
       params,
     ).catch(() => [])
 
-    const countFilters = ["scope = 'academy'", "kind = 'course'"]
+    const countFilters = [
+      "scope = 'academy'",
+      "source_table IN ('courses', 'tajweed_paths')",
+    ]
     const countParams: unknown[] = []
     if (!isAdmin) {
       countParams.push(session.sub)
+      const p = `$${countParams.length}`
       countFilters.push(
-        `source_id IN (SELECT id FROM courses WHERE teacher_id = $${countParams.length})`,
+        `(
+          (source_table = 'courses' AND source_id IN (SELECT id FROM courses WHERE teacher_id = ${p}))
+          OR
+          (source_table = 'tajweed_paths' AND source_id IN (SELECT id FROM tajweed_paths WHERE created_by = ${p} OR manager_id = ${p}))
+        )`,
       )
     }
     const counts = await query<{ status: string; count: string }>(
@@ -151,7 +191,7 @@ export function makeTeacherRequestPatch() {
         return NextResponse.json({ error: "Missing action" }, { status: 400 })
       }
 
-      const existing = await loadOwnedCourseRequest(id, session)
+      const existing = await loadOwnedRequest(id, session)
       if (!existing) {
         return NextResponse.json(
           { error: "Not found or not permitted" },

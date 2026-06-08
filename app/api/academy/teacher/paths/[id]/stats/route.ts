@@ -81,6 +81,27 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       LIMIT 10
     `, [id, path.total_stages])
 
+    // 5. Fetch ALL enrolled students (full roster for the teacher)
+    const allStudents = await query<any>(`
+      SELECT 
+        u.id as student_id,
+        u.name as student_name,
+        u.email as student_email,
+        u.image as student_image,
+        tpe.status,
+        tpe.stages_completed,
+        tpe.started_at,
+        tpe.completed_at,
+        tpe.last_activity_at,
+        CASE WHEN $2 > 0 THEN ROUND((tpe.stages_completed::float / $2) * 100) ELSE 0 END::int as progress_percent
+      FROM tajweed_path_enrollments tpe
+      JOIN users u ON u.id = tpe.student_id
+      WHERE tpe.path_id = $1
+      ORDER BY 
+        CASE tpe.status WHEN 'active' THEN 0 WHEN 'completed' THEN 1 ELSE 2 END,
+        tpe.last_activity_at DESC NULLS LAST
+    `, [id, path.total_stages])
+
     return NextResponse.json({
       data: {
         path: {
@@ -90,7 +111,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
         },
         stats: generalStats,
         funnel: funnelStages,
-        top_students: topStudents
+        top_students: topStudents,
+        students: allStudents
       }
     })
   } catch (error) {
