@@ -86,7 +86,7 @@ export default function TeacherCertificatesRequestsPage() {
               اعتماد شهادات الطلاب
             </h1>
             <p className="text-slate-500 dark:text-slate-400 max-w-xl">
-              قم بمراجعة واعتماد طلبات الشهادات المقدمة من طلابك في الدورات التي تدرسها.
+              قم بمراجعة واعتماد طلبات الشهادات المقدمة من طلابك في الدورات والمسارات التي تشرف عليها.
             </p>
           </div>
         </div>

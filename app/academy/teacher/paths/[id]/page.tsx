@@ -49,7 +49,21 @@ interface StatsApiResponse {
     stats: PathStats
     funnel: FunnelStage[]
     top_students: TopStudent[]
+    students: RosterStudent[]
   }
+}
+
+interface RosterStudent {
+  student_id: string
+  student_name: string
+  student_email: string
+  student_image?: string
+  status: 'active' | 'completed' | 'dropped'
+  stages_completed: number
+  started_at: string | null
+  completed_at: string | null
+  last_activity_at: string | null
+  progress_percent: number
 }
 
 export default function TeacherPathStatsPage() {
@@ -105,6 +119,7 @@ export default function TeacherPathStatsPage() {
   }
 
   const { path, stats, funnel, top_students } = data
+  const students = data.students || []
   const totalEnrolled = stats.enrolled_students || 0
   const completionRate = totalEnrolled > 0 
     ? Math.round((stats.completed_students / totalEnrolled) * 100) 
@@ -337,8 +352,86 @@ export default function TeacherPathStatsPage() {
           )}
         </div>
       </div>
+
+      {/* Full students roster */}
+      <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+        <div>
+          <h2 className="text-xl font-bold flex items-center gap-2">
+            <Users className="w-5 h-5 text-emerald-600" />
+            جميع الطلاب المسجلين ({students.length})
+          </h2>
+          <p className="text-xs text-muted-foreground mt-1">قائمة كاملة بكل الطلاب في المسار وحالتهم ونسبة تقدمهم.</p>
+        </div>
+
+        {students.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-12">لا يوجد طلاب مسجلين في هذا المسار بعد.</p>
+        ) : (
+          <div className="overflow-x-auto -mx-2 sm:mx-0">
+            <table className="w-full min-w-[640px] text-sm">
+              <thead>
+                <tr className="text-right text-xs text-muted-foreground border-b border-border">
+                  <th className="font-semibold py-3 px-3">الطالب</th>
+                  <th className="font-semibold py-3 px-3">الحالة</th>
+                  <th className="font-semibold py-3 px-3">المراحل المكتملة</th>
+                  <th className="font-semibold py-3 px-3">نسبة التقدم</th>
+                  <th className="font-semibold py-3 px-3">آخر نشاط</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/60">
+                {students.map((s) => (
+                  <tr key={s.student_id} className="hover:bg-muted/20 transition-colors">
+                    <td className="py-3 px-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full bg-emerald-600/10 text-emerald-600 dark:text-emerald-400 font-bold text-xs flex items-center justify-center shrink-0 overflow-hidden">
+                          {s.student_image ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={s.student_image || "/placeholder.svg"} alt={s.student_name} className="w-full h-full object-cover" />
+                          ) : (
+                            (s.student_name || '?').charAt(0)
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-bold text-foreground truncate">{s.student_name}</p>
+                          <p className="text-[11px] text-muted-foreground truncate">{s.student_email}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-3 px-3">
+                      <StatusPill status={s.status} />
+                    </td>
+                    <td className="py-3 px-3 font-semibold">
+                      {s.stages_completed} / {path.total_stages}
+                    </td>
+                    <td className="py-3 px-3">
+                      <div className="flex items-center gap-2">
+                        <div className="h-1.5 w-20 bg-secondary rounded-full overflow-hidden">
+                          <div className="h-full bg-emerald-600 rounded-full" style={{ width: `${s.progress_percent}%` }} />
+                        </div>
+                        <span className="text-xs font-bold text-emerald-600">{s.progress_percent}%</span>
+                      </div>
+                    </td>
+                    <td className="py-3 px-3 text-xs text-muted-foreground">
+                      {s.last_activity_at ? new Date(s.last_activity_at).toLocaleDateString('ar-EG') : '—'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
       </div>
       )}
     </div>
   )
+}
+
+function StatusPill({ status }: { status: 'active' | 'completed' | 'dropped' }) {
+  if (status === 'completed') {
+    return <span className="inline-block text-[11px] font-bold px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400">خريج</span>
+  }
+  if (status === 'dropped') {
+    return <span className="inline-block text-[11px] font-bold px-2.5 py-1 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400">منسحب</span>
+  }
+  return <span className="inline-block text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">نشط</span>
 }
