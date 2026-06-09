@@ -5,7 +5,7 @@ import Link from "next/link"
 import { useParams } from "next/navigation"
 import {
   ArrowRight, GraduationCap, Eye, EyeOff, Loader2, Plus, Save, Trash2,
-  Users, CheckCircle2, Clock, ChevronUp, ChevronDown, BarChart3,
+  Users, CheckCircle2, Clock, ChevronUp, ChevronDown, BarChart3, Video, FileText,
 } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
@@ -23,7 +23,15 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
 import { toast } from "sonner"
+import FileUploader from "@/components/academy/file-uploader"
 import { useI18n } from "@/lib/i18n/context"
+
+function toYouTubeEmbed(url: string): string | null {
+  if (url.includes("youtube.com/watch?v=")) return `https://www.youtube.com/embed/${url.split("v=")[1]?.split("&")[0]}`
+  if (url.includes("youtu.be/")) return `https://www.youtube.com/embed/${url.split("youtu.be/")[1]?.split("?")[0]}`
+  if (url.includes("youtube.com/embed/")) return url
+  return null
+}
 
 type Stage = {
   id: string
@@ -412,7 +420,7 @@ export default function ReaderTajweedPathDetailPage() {
       </Tabs>
 
       <Dialog open={stageDialog.open} onOpenChange={o => setStageDialog({ open: o })}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{stageDialog.stage ? "تعديل المرحلة" : "إضافة مرحلة جديدة"}</DialogTitle>
             <DialogDescription>المرحلة عبارة عن درس مستقل — أضف الشرح والمحتوى والمرفقات.</DialogDescription>
@@ -430,14 +438,52 @@ export default function ReaderTajweedPathDetailPage() {
               <Label>{tp.stageForm.content}</Label>
               <Textarea rows={5} value={stageForm.content} onChange={e => setStageForm({ ...stageForm, content: e.target.value })} placeholder={tp.stageForm.contentPlaceholder} />
             </div>
-            <div className="space-y-1">
-              <Label>{tp.stageForm.videoUrl}</Label>
-              <Input value={stageForm.video_url} onChange={e => setStageForm({ ...stageForm, video_url: e.target.value })} placeholder="https://..." />
+
+            {/* Video: upload a file OR paste a URL (YouTube/Vimeo/direct) — same as a course lesson */}
+            <div className="md:col-span-2 space-y-2 rounded-2xl border border-border/60 bg-muted/20 p-4">
+              <Label className="flex items-center gap-2">
+                <Video className="h-4 w-4 text-primary" /> {tp.stageForm.videoUrl}
+              </Label>
+              <Input
+                dir="ltr"
+                value={stageForm.video_url}
+                onChange={e => setStageForm({ ...stageForm, video_url: e.target.value })}
+                placeholder="https://youtube.com/... أو ارفع ملف بالأسفل"
+              />
+              <FileUploader
+                accept="video/*"
+                value={null}
+                onChange={(url) => url && setStageForm({ ...stageForm, video_url: url })}
+              />
+              {stageForm.video_url && (
+                <div className="relative rounded-xl overflow-hidden bg-black aspect-video border border-border">
+                  {toYouTubeEmbed(stageForm.video_url) ? (
+                    <iframe src={toYouTubeEmbed(stageForm.video_url)!} className="w-full h-full" allowFullScreen title="preview" />
+                  ) : (
+                    <video src={stageForm.video_url} controls className="w-full h-full" />
+                  )}
+                </div>
+              )}
             </div>
-            <div className="space-y-1">
-              <Label>{tp.stageForm.pdfUrl}</Label>
-              <Input value={stageForm.pdf_url} onChange={e => setStageForm({ ...stageForm, pdf_url: e.target.value })} placeholder="https://..." />
+
+            {/* PDF / file attachment: upload OR paste a URL */}
+            <div className="md:col-span-2 space-y-2 rounded-2xl border border-border/60 bg-muted/20 p-4">
+              <Label className="flex items-center gap-2">
+                <FileText className="h-4 w-4 text-primary" /> {tp.stageForm.pdfUrl}
+              </Label>
+              <Input
+                dir="ltr"
+                value={stageForm.pdf_url}
+                onChange={e => setStageForm({ ...stageForm, pdf_url: e.target.value })}
+                placeholder="https://... أو ارفع ملف بالأسفل"
+              />
+              <FileUploader
+                accept=".pdf,.doc,.docx,.ppt,.pptx"
+                value={stageForm.pdf_url || null}
+                onChange={(url) => setStageForm({ ...stageForm, pdf_url: url || "" })}
+              />
             </div>
+
             <div className="md:col-span-2 space-y-1">
               <Label>{tp.stageForm.passageText}</Label>
               <Textarea rows={3} value={stageForm.passage_text} onChange={e => setStageForm({ ...stageForm, passage_text: e.target.value })} placeholder={tp.stageForm.passagePlaceholder} />
