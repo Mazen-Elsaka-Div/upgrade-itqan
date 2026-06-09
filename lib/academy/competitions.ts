@@ -349,3 +349,108 @@ export async function awardCompetitionWinner(competitionId: string, studentId: s
   await query(`UPDATE competitions SET status = 'ended' WHERE id = $1`, [competitionId])
   return awardCompetitionRank(competitionId, studentId, 1)
 }
+
+export interface RankPreviewRow {
+  entry_id: string
+  student_id: string
+  student_name: string | null
+  score: number | null
+  rank: number
+  is_winner: boolean
+}
+
+/**
+ * Compute the proposed ranking for a competition WITHOUT writing anything.
+ * Evaluated entries are ordered by score (desc), then earliest submission as a
+ * tie-breaker. The top `award_top_n` (default 3, capped at 3 for points) are
+ * flagged as winners. Used to preview results before the judge confirms.
+ */
+export async function previewCompetitionResults(competitionId: string): Promise<{
+  ready: boolean
+  pending: number
+  topN: number
+  ranking: RankPreviewRow[]
+}> {
+  const comp = await queryOne<{ award_top_n: number | null }>(
+    `SELECT award_top_n FROM competitions WHERE id = $1`,
+    [competitionId],
+  )
+  const topN = Math.max(1, Number(comp?.award_top_n) || 3)
+
+  const pendingRow = await queryOne<{ count: string }>(
+    `SELECT COUNT(*)::text AS count FROM competition_entries
+      WHERE competition_id = $1 AND submission_url IS NOT NULL AND status = 'pending'`,
+    [competitionId],
+  )
+  const pending = Number(pendingRow?.count ?? 0)
+
+  const evaluated = await query<{ id: string; student_id: string; student_name: string | null; score: number | null }>(
+    `SELECT ce.id, ce.student_id, u.name AS student_name, ce.score
+       FROM competition_entries ce
+       JOIN users u ON u.id = ce.student_id
+      WHERE ce.competition_id = $1
+        AND ce.status IN ('evaluated', 'winner')
+        AND ce.score IS NOT NULL
+      ORDER BY ce.score DESC, ce.submitted_at ASC`,
+    [competitionId],
+  )
+
+  const ranking: RankPreviewRow[] = evaluated.map((e, i) => ({
+    entry_id: e.id,
+    student_id: e.student_id,
+    student_name: e.student_name,
+    score: e.score,
+    rank: i + 1,
+    is_winner: i < topN,
+  }))
+
+  return { ready: evaluated.length > 0, pending, topN, ranking }
+}
+
+/**
+ * Finalize a competition: persist the ranks computed from scores, mark the
+ * winners, award points to the top finishers, and close the competition.
+ * Idempotent on points (awardCompetitionRank guards against double-paying).
+ */
+export async function finalizeCompetitionResults(
+  competitionId: string,
+): Promise<{ success: boolean; error?: string; winners?: number; ranked?: number }> {
+  try {
+    const { ready, ranking } = await previewCompetitionResults(competitionId)
+    if (!ready) {
+      return { success: false, error: 'لا توجد مشاركات مُقيّمة لاعتماد نتائجها' }
+    }
+
+    // Reset any previous winner flags so re-finalizing reflects the latest scores.
+    await query(
+      `UPDATE competition_entries SET status = 'evaluated'
+        WHERE competition_id = $1 AND status = 'winner'`,
+      [competitionId],
+    )
+
+    // Persist every entry's computed rank.
+    for (const row of ranking) {
+      await query(
+        `UPDATE competition_entries SET rank = $1 WHERE id = $2`,
+        [row.rank, row.entry_id],
+      )
+    }
+
+    // Award points + winner status for the top finishers (only ranks 1-3 earn points).
+    let winners = 0
+    for (const row of ranking) {
+      if (row.is_winner) {
+        await awardCompetitionRank(competitionId, row.student_id, row.rank)
+        winners++
+      }
+    }
+
+    // Close the competition once results are official.
+    await query(`UPDATE competitions SET status = 'ended' WHERE id = $1`, [competitionId])
+
+    return { success: true, winners, ranked: ranking.length }
+  } catch (error) {
+    console.error('Error finalizing competition results:', error)
+    return { success: false, error: 'حدث خطأ أثناء اعتماد النتائج' }
+  }
+}
