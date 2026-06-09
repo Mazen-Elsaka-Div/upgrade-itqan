@@ -267,147 +267,201 @@ export default function ReaderTajweedPathDetailPage() {
   if (!path) return <div className="p-6 text-center text-muted-foreground">{tp.notFound}</div>
 
   return (
-    <div className="space-y-6 p-4 sm:p-6">
-      <Button asChild variant="ghost" size="sm" className="gap-2">
-        <Link href="/reader/learning-paths">
-          <ArrowRight className="h-4 w-4 rtl:rotate-180" /> رجوع للقائمة
-        </Link>
-      </Button>
-      <div>
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <span className="inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-primary/10 text-primary shrink-0">
-            <GraduationCap className="h-5 w-5" />
-          </span>
-          {path.title}
-        </h1>
-        <div className="flex flex-wrap gap-2 mt-2">
-          <Badge variant="secondary">{stages.length} مرحلة</Badge>
-          <Badge variant="outline" className="border-primary/30 text-primary">{tp.levels[path.level] || path.level}</Badge>
-          {path.is_published ? (
-            <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/15">
-              <Eye className="h-3 w-3 me-1" /> {tp.statuses.published}
+    <div className="space-y-8 max-w-6xl mx-auto pb-12 p-4 sm:p-6">
+      {/* Top Header with Back Button */}
+      <div className="flex items-center justify-between pb-6 border-b border-border/50">
+        <div className="space-y-3">
+          <Button asChild variant="ghost" size="sm" className="gap-2 -ms-2 text-muted-foreground hover:text-foreground">
+            <Link href="/reader/learning-paths">
+              <ArrowRight className="h-4 w-4 rtl:rotate-180" /> رجوع للقائمة
+            </Link>
+          </Button>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-3">
+            <span className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 text-primary">
+              <GraduationCap className="h-6 w-6" />
+            </span>
+            {path.title}
+          </h1>
+          <div className="flex flex-wrap items-center gap-2 mt-2">
+            <Badge variant="secondary" className="bg-muted text-muted-foreground hover:bg-muted/80 font-semibold">
+              {stages.length} مرحلة
             </Badge>
-          ) : (
-            <Badge variant="outline"><EyeOff className="h-3 w-3 me-1" /> {tp.statuses.draft}</Badge>
-          )}
+            <Badge variant="secondary" className="bg-primary/5 text-primary hover:bg-primary/10 border-primary/10 font-semibold">
+              {tp.levels[path.level] || path.level}
+            </Badge>
+            {path.is_published ? (
+              <div className="shrink-0 bg-emerald-50 text-emerald-700 border border-emerald-200/50 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800/50 px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center gap-1.5">
+                <Eye className="h-3.5 w-3.5" /> {tp.statuses.published}
+              </div>
+            ) : (
+              <div className="shrink-0 bg-muted text-muted-foreground border border-border/50 px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center gap-1.5">
+                <EyeOff className="h-3.5 w-3.5" /> {tp.statuses.draft}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Card className="p-4">
-          <div className="text-xs text-muted-foreground flex items-center gap-1"><Users className="h-3 w-3" /> {tp.metadata.enrolledPlural}</div>
-          <div className="text-2xl font-bold mt-1">{stats?.enrolled || "0"}</div>
-        </Card>
-        <Card className="p-4">
-          <div className="text-xs text-muted-foreground flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> {tp.metadata.completed}</div>
-          <div className="text-2xl font-bold mt-1 text-emerald-600 dark:text-emerald-400">{stats?.completed || "0"}</div>
-        </Card>
-        <Card className="p-4">
-          <div className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="h-3 w-3" /> {tp.metadata.active}</div>
-          <div className="text-2xl font-bold mt-1">{stats?.active || "0"}</div>
-        </Card>
-        <Card className="p-4">
-          <div className="text-xs text-muted-foreground">{tp.metadata.avgStages}</div>
-          <div className="text-2xl font-bold mt-1">{stats?.avg_completed_stages || "0"}</div>
-        </Card>
+      {/* Path Overall Stats Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[
+          { label: tp.metadata.enrolledPlural, value: stats?.enrolled || "0", icon: Users, tone: "text-blue-600 dark:text-blue-400 bg-blue-500/10 border-blue-500/20" },
+          { label: tp.metadata.completed, value: stats?.completed || "0", icon: CheckCircle2, tone: "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20" },
+          { label: tp.metadata.active, value: stats?.active || "0", icon: Clock, tone: "text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/20" },
+          { label: tp.metadata.avgStages, value: stats?.avg_completed_stages || "0", icon: BarChart3, tone: "text-violet-600 dark:text-violet-400 bg-violet-500/10 border-violet-500/20" },
+        ].map((s, i) => (
+          <div key={i} className="bg-card border border-border/50 rounded-xl p-5 flex items-center gap-4 shadow-sm hover:shadow transition-shadow">
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border ${s.tone}`}>
+              <s.icon className="h-6 w-6" />
+            </div>
+            <div>
+              <div className="text-2xl font-black text-foreground leading-none mb-1">{s.value}</div>
+              <div className="text-xs font-medium text-muted-foreground">{s.label}</div>
+            </div>
+          </div>
+        ))}
       </div>
 
-      <Tabs defaultValue="stages" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="stages">{tp.tabs.stages} ({stages.length})</TabsTrigger>
-          <TabsTrigger value="funnel">{tp.tabs.funnel}</TabsTrigger>
-          <TabsTrigger value="settings">{tp.tabs.settings}</TabsTrigger>
+      <Tabs defaultValue="stages" className="space-y-6">
+        <TabsList className="bg-muted/50 p-1 rounded-xl">
+          <TabsTrigger value="stages" className="rounded-lg">{tp.tabs.stages} ({stages.length})</TabsTrigger>
+          <TabsTrigger value="funnel" className="rounded-lg">{tp.tabs.funnel}</TabsTrigger>
+          <TabsTrigger value="settings" className="rounded-lg">{tp.tabs.settings}</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="stages">
-          <div className="flex justify-between items-center mb-3 gap-3 flex-wrap">
-            <p className="text-sm text-muted-foreground">
+        <TabsContent value="stages" className="space-y-6 mt-0">
+          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-muted/20 border border-border/50 p-4 rounded-xl">
+            <div className="text-sm text-muted-foreground">
               كل مرحلة هي درس مستقل (شرح/فيديو/ملف/نص) — تُفتح للطالب بعد اجتياز المرحلة السابقة.
-            </p>
-            <Button onClick={openAddStage} size="sm" className="gap-2">
-              <Plus className="h-4 w-4" /> إضافة مرحلة
+            </div>
+            <Button onClick={openAddStage} className="gap-2 shadow-sm rounded-lg whitespace-nowrap">
+              <Plus className="h-4 w-4" /> إضافة مرحلة جديدة
             </Button>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-4">
             {stages.map(s => (
-              <Card key={s.id} className="p-4 hover:shadow-md transition-shadow">
-                <div className="flex items-start gap-3">
-                  <div className="bg-primary/10 text-primary rounded-2xl w-9 h-9 flex items-center justify-center font-bold shrink-0">
-                    {s.position}
+              <div key={s.id} className="bg-card border border-border/60 rounded-xl shadow-sm p-5 flex flex-col sm:flex-row sm:items-start gap-4 transition-all hover:shadow-md hover:border-border">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary border border-primary/20 flex items-center justify-center font-black text-xl shrink-0">
+                  {s.position}
+                </div>
+                <div className="flex-1 min-w-0 pt-1">
+                  <div className="flex items-center gap-2 flex-wrap mb-1.5">
+                    <h3 className="font-bold text-lg text-foreground leading-tight">{s.title}</h3>
+                    <Badge variant="outline" className="text-[10px] font-semibold text-muted-foreground bg-muted/50 border-border/50">
+                      {s.estimated_minutes} {tp.metadata.minutesShort}
+                    </Badge>
+                    {s.video_url && <Badge variant="secondary" className="text-[10px] bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-500/20">{tp.metadata.videoBadge}</Badge>}
+                    {s.pdf_url && <Badge variant="secondary" className="text-[10px] bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20">{tp.metadata.pdfBadge}</Badge>}
+                    {s.passage_text && <Badge variant="secondary" className="text-[10px] bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">نص للقراءة</Badge>}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="font-semibold">{s.title}</h3>
-                      <Badge variant="outline" className="text-xs">{s.estimated_minutes} {tp.metadata.minutesShort}</Badge>
-                      {s.video_url && <Badge variant="secondary" className="text-xs">{tp.metadata.videoBadge}</Badge>}
-                      {s.pdf_url && <Badge variant="secondary" className="text-xs">{tp.metadata.pdfBadge}</Badge>}
-                      {s.passage_text && <Badge variant="secondary" className="text-xs">نص للقراءة</Badge>}
-                    </div>
-                    {s.description && (<p className="text-sm text-muted-foreground mt-1 line-clamp-2">{s.description}</p>)}
-                  </div>
-                  <div className="flex gap-1 shrink-0 items-center">
-                    <Button variant="ghost" size="icon" disabled={s.position <= 1} onClick={() => reorderStage(s, "up")} title={tp.actions.moveUp}>
+                  {s.description && (<p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">{s.description}</p>)}
+                </div>
+                <div className="flex sm:flex-col gap-1 shrink-0 bg-muted/30 p-1.5 rounded-lg border border-border/50 items-center justify-center">
+                  <div className="flex gap-1">
+                    <Button variant="ghost" size="icon" disabled={s.position <= 1} onClick={() => reorderStage(s, "up")} title={tp.actions.moveUp} className="h-8 w-8 rounded-md">
                       <ChevronUp className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" disabled={s.position >= stages.length} onClick={() => reorderStage(s, "down")} title={tp.actions.moveDown}>
+                    <Button variant="ghost" size="icon" disabled={s.position >= stages.length} onClick={() => reorderStage(s, "down")} title={tp.actions.moveDown} className="h-8 w-8 rounded-md">
                       <ChevronDown className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="sm" onClick={() => openEditStage(s)}>{tp.actions.edit}</Button>
-                    <Button variant="ghost" size="icon" onClick={() => deleteStage(s)} className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                  </div>
+                  <div className="w-px h-6 sm:w-full sm:h-px bg-border/50 my-1 hidden sm:block"></div>
+                  <div className="flex gap-1">
+                    <Button variant="ghost" size="sm" onClick={() => openEditStage(s)} className="h-8 px-2 text-xs font-semibold rounded-md hover:bg-primary/10 hover:text-primary">
+                      {tp.actions.edit}
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={() => deleteStage(s)} className="h-8 w-8 rounded-md text-destructive hover:text-destructive hover:bg-destructive/20">
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
-              </Card>
+              </div>
             ))}
             {stages.length === 0 && (
-              <Card className="p-12 text-center">
-                <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 text-primary mb-3">
-                  <Plus className="h-7 w-7" />
+              <div className="flex flex-col items-center justify-center py-16 px-4 bg-card/50 border border-dashed border-border rounded-xl">
+                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4 text-muted-foreground">
+                  <BookOpen className="h-8 w-8" />
                 </div>
-                <h3 className="font-bold">لا توجد مراحل بعد</h3>
-                <p className="text-sm text-muted-foreground mt-1 mb-4">أضف أول مرحلة (درس) لهذا المسار.</p>
-                <Button onClick={openAddStage} size="sm" className="gap-2">
+                <h3 className="text-xl font-bold mb-2">لا توجد مراحل بعد</h3>
+                <p className="text-muted-foreground text-center mb-6">أضف أول مرحلة (درس) لهذا المسار ليبدأ الطلاب التعلم.</p>
+                <Button onClick={openAddStage} className="gap-2 rounded-lg">
                   <Plus className="h-4 w-4" /> إضافة مرحلة
                 </Button>
-              </Card>
+              </div>
             )}
           </div>
         </TabsContent>
 
-        <TabsContent value="funnel">
+        <TabsContent value="funnel" className="mt-0 space-y-6">
           {!funnel ? (
-            <Card className="p-10 text-center text-muted-foreground">
-              <Loader2 className="h-5 w-5 animate-spin inline-block" />
-            </Card>
+            <div className="py-16 flex justify-center border border-dashed border-border rounded-xl bg-card/50">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
           ) : (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                <Card className="p-4">
-                  <div className="text-xs text-muted-foreground">{tp.metadata.avgStages}</div>
-                  <div className="text-2xl font-bold mt-1">{funnel.overall?.avg_stages_completed || "0"}</div>
-                </Card>
-                <Card className="p-4">
-                  <div className="text-xs text-muted-foreground">{tp.metadata.avgProgress}</div>
-                  <div className="text-2xl font-bold mt-1">{funnel.overall?.avg_progress_percent || "0"}%</div>
-                </Card>
-                <Card className="p-4">
-                  <div className="text-xs text-muted-foreground">{tp.metadata.completionRate}</div>
-                  <div className="text-2xl font-bold mt-1 text-emerald-600 dark:text-emerald-400">
-                    {(() => {
-                      const e = parseInt(funnel.overall?.enrolled || "0", 10)
-                      const c = parseInt(funnel.overall?.completed || "0", 10)
-                      return e ? Math.round((c / e) * 100) : 0
-                    })()}%
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-1 space-y-6">
+                {/* Funnel Summary Stats */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
+                  <div className="bg-card border border-border/50 rounded-xl p-5 shadow-sm">
+                    <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{tp.metadata.avgStages}</div>
+                    <div className="text-3xl font-black mt-2 text-foreground">{funnel.overall?.avg_stages_completed || "0"}</div>
                   </div>
-                </Card>
+                  <div className="bg-card border border-border/50 rounded-xl p-5 shadow-sm">
+                    <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{tp.metadata.avgProgress}</div>
+                    <div className="text-3xl font-black mt-2 text-foreground">{funnel.overall?.avg_progress_percent || "0"}%</div>
+                  </div>
+                  <div className="bg-card border border-emerald-500/20 bg-emerald-500/5 rounded-xl p-5 shadow-sm sm:col-span-2 lg:col-span-1">
+                    <div className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">{tp.metadata.completionRate}</div>
+                    <div className="text-4xl font-black mt-2 text-emerald-600 dark:text-emerald-400">
+                      {(() => {
+                        const e = parseInt(funnel.overall?.enrolled || "0", 10)
+                        const c = parseInt(funnel.overall?.completed || "0", 10)
+                        return e ? Math.round((c / e) * 100) : 0
+                      })()}%
+                    </div>
+                  </div>
+                </div>
+
+                {/* Top Students */}
+                <div className="bg-card border border-border/50 rounded-xl p-5 shadow-sm">
+                  <h3 className="font-bold text-lg mb-4 flex items-center gap-2 border-b border-border/50 pb-3">
+                    <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                      <Users className="h-4 w-4" />
+                    </span>
+                    {tp.metadata.topStudentsTitle}
+                  </h3>
+                  <div className="space-y-3">
+                    {(funnel.top_students || []).map((s: any, idx: number) => (
+                      <div key={s.id} className="flex items-center justify-between gap-3 bg-muted/30 p-3 rounded-lg border border-border/50">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="w-6 text-center text-xs font-bold text-muted-foreground shrink-0">{idx + 1}</div>
+                          <div className="min-w-0">
+                            <div className="font-semibold text-sm truncate text-foreground">{s.name || s.email}</div>
+                            <div className="text-[10px] text-muted-foreground truncate">{s.email}</div>
+                          </div>
+                        </div>
+                        <Badge variant="secondary" className="shrink-0 text-[10px] bg-primary/10 text-primary border-primary/20">
+                          {s.stages_completed} {tp.metadata.stagesUnit}
+                        </Badge>
+                      </div>
+                    ))}
+                    {(!funnel.top_students || funnel.top_students.length === 0) && (
+                      <div className="text-sm text-muted-foreground text-center py-6 italic">{tp.emptyEnrollments}</div>
+                    )}
+                  </div>
+                </div>
               </div>
-              <Card className="p-4">
-                <h3 className="font-semibold mb-3 flex items-center gap-2">
-                  <BarChart3 className="h-4 w-4" /> {tp.metadata.funnelTitle}
+
+              {/* Stage Funnel Chart */}
+              <div className="lg:col-span-2 bg-card border border-border/50 rounded-xl p-5 shadow-sm">
+                <h3 className="font-bold text-lg mb-6 flex items-center gap-2 border-b border-border/50 pb-3">
+                  <span className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+                    <BarChart3 className="h-4 w-4" />
+                  </span>
+                  {tp.metadata.funnelTitle}
                 </h3>
-                <div className="space-y-3">
+                <div className="space-y-6">
                   {(funnel.per_stage || []).map((row: any) => {
                     const total = parseInt(funnel.overall?.enrolled || "0", 10) || 1
                     const completed = parseInt(row.completed || "0", 10)
@@ -415,115 +469,132 @@ export default function ReaderTajweedPathDetailPage() {
                     const pctCompleted = Math.round((completed / total) * 100)
                     const pctStarted = Math.round((started / total) * 100)
                     return (
-                      <div key={row.stage_id} className="space-y-1">
-                        <div className="flex justify-between text-xs">
-                          <span className="font-medium">{row.position}. {row.title}</span>
-                          <span className="text-muted-foreground">{tp.metadata.funnelStarted} {started}/{total} ({pctStarted}%) · {tp.metadata.funnelPassed} {completed} ({pctCompleted}%)</span>
+                      <div key={row.stage_id} className="space-y-2">
+                        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-1">
+                          <div className="font-bold text-sm text-foreground">
+                            <span className="text-muted-foreground me-1">{row.position}.</span> {row.title}
+                          </div>
+                          <div className="text-xs font-medium text-muted-foreground bg-muted/50 px-2 py-0.5 rounded flex gap-2">
+                            <span>بدأ: {started} ({pctStarted}%)</span>
+                            <span className="text-border/50">|</span>
+                            <span className="text-emerald-600 dark:text-emerald-400">أتمّ: {completed} ({pctCompleted}%)</span>
+                          </div>
                         </div>
-                        <Progress value={pctCompleted} className="h-2" />
+                        <div className="h-3 w-full bg-muted rounded-full overflow-hidden flex relative border border-border/50">
+                          <div className="absolute top-0 bottom-0 start-0 bg-blue-500/30 transition-all duration-500" style={{ width: `${pctStarted}%` }}></div>
+                          <div className="absolute top-0 bottom-0 start-0 bg-emerald-500 transition-all duration-500" style={{ width: `${pctCompleted}%` }}></div>
+                        </div>
                       </div>
                     )
                   })}
                   {(!funnel.per_stage || funnel.per_stage.length === 0) && (
-                    <div className="text-sm text-muted-foreground text-center py-6">{tp.emptyFunnel}</div>
-                  )}
-                </div>
-              </Card>
-              <Card className="p-4">
-                <h3 className="font-semibold mb-3 flex items-center gap-2"><Users className="h-4 w-4" /> {tp.metadata.topStudentsTitle}</h3>
-                <div className="space-y-2">
-                  {(funnel.top_students || []).map((s: any) => (
-                    <div key={s.id} className="flex items-center justify-between gap-2 text-sm border-b last:border-b-0 pb-2 last:pb-0">
-                      <div className="min-w-0">
-                        <div className="font-medium truncate">{s.name || s.email}</div>
-                        <div className="text-xs text-muted-foreground truncate">{s.email}</div>
-                      </div>
-                      <Badge variant="outline">{s.stages_completed} {tp.metadata.stagesUnit}</Badge>
+                    <div className="text-sm text-muted-foreground text-center py-12 italic border border-dashed border-border rounded-xl">
+                      {tp.emptyFunnel}
                     </div>
-                  ))}
-                  {(!funnel.top_students || funnel.top_students.length === 0) && (
-                    <div className="text-sm text-muted-foreground text-center py-4">{tp.emptyEnrollments}</div>
                   )}
                 </div>
-              </Card>
+              </div>
             </div>
           )}
         </TabsContent>
 
-        <TabsContent value="settings">
-          <Card className="p-6 max-w-xl space-y-4">
-            <div className="space-y-1"><Label>{tp.form.title}</Label><Input value={edit.title} onChange={e => setEdit({ ...edit, title: e.target.value })} /></div>
-            <div className="space-y-1"><Label>{tp.form.description}</Label><Textarea rows={3} value={edit.description} onChange={e => setEdit({ ...edit, description: e.target.value })} /></div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <Label>{tp.form.level}</Label>
-                <Select value={edit.level} onValueChange={v => setEdit({ ...edit, level: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="beginner">{tp.levels.beginner}</SelectItem>
-                    <SelectItem value="intermediate">{tp.levels.intermediate}</SelectItem>
-                    <SelectItem value="advanced">{tp.levels.advanced}</SelectItem>
-                  </SelectContent>
-                </Select>
+        <TabsContent value="settings" className="mt-0">
+          <div className="bg-card border border-border/50 rounded-xl p-6 shadow-sm max-w-2xl space-y-6">
+            <h3 className="font-bold text-lg border-b border-border/50 pb-3 flex items-center gap-2">
+              إعدادات المسار
+            </h3>
+            <div className="space-y-5">
+              <div className="space-y-1.5">
+                <Label className="font-semibold">{tp.form.title}</Label>
+                <Input value={edit.title} onChange={e => setEdit({ ...edit, title: e.target.value })} className="h-11 rounded-lg focus-visible:ring-primary/20" />
               </div>
-              <div className="space-y-1"><Label>{tp.form.estimatedDaysLabel}</Label><Input type="number" value={edit.estimated_days} onChange={e => setEdit({ ...edit, estimated_days: e.target.value })} /></div>
+              <div className="space-y-1.5">
+                <Label className="font-semibold">{tp.form.description}</Label>
+                <Textarea rows={3} value={edit.description} onChange={e => setEdit({ ...edit, description: e.target.value })} className="resize-none rounded-lg focus-visible:ring-primary/20" />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div className="space-y-1.5">
+                  <Label className="font-semibold">{tp.form.level}</Label>
+                  <Select value={edit.level} onValueChange={v => setEdit({ ...edit, level: v })}>
+                    <SelectTrigger className="h-11 rounded-lg focus:ring-primary/20"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="beginner">{tp.levels.beginner}</SelectItem>
+                      <SelectItem value="intermediate">{tp.levels.intermediate}</SelectItem>
+                      <SelectItem value="advanced">{tp.levels.advanced}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="font-semibold">{tp.form.estimatedDaysLabel}</Label>
+                  <Input type="number" value={edit.estimated_days} onChange={e => setEdit({ ...edit, estimated_days: e.target.value })} className="h-11 rounded-lg focus-visible:ring-primary/20" />
+                </div>
+              </div>
+              
+              <div className="space-y-3 pt-2">
+                <div className="flex items-start gap-3 rounded-xl border border-border/50 bg-muted/10 p-4">
+                  <input id="rt_req_aud_e" type="checkbox" className="mt-1 h-4 w-4 accent-primary rounded" checked={edit.require_audio} onChange={e => setEdit({ ...edit, require_audio: e.target.checked })} />
+                  <div>
+                    <Label htmlFor="rt_req_aud_e" className="cursor-pointer font-semibold text-base block">{tp.form.requireAudioShort}</Label>
+                    <p className="text-xs text-muted-foreground mt-0.5">يتطلب من الطالب رفع تسجيل صوتي لاجتياز كل مرحلة.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 rounded-xl border border-border/50 bg-emerald-500/5 p-4">
+                  <input id="rt_pub_e" type="checkbox" className="mt-1 h-4 w-4 accent-emerald-600 rounded" checked={edit.is_published} onChange={e => setEdit({ ...edit, is_published: e.target.checked })} />
+                  <div>
+                    <Label htmlFor="rt_pub_e" className="cursor-pointer font-semibold text-base text-emerald-800 dark:text-emerald-400 block">{tp.form.publishedToggle}</Label>
+                    <p className="text-xs text-emerald-600/80 dark:text-emerald-400/80 mt-0.5">سيتمكن الطلاب من رؤية المسار والاشتراك فيه.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-border/50">
+                <Button onClick={savePath} disabled={saving} className="gap-2 rounded-lg font-bold w-full sm:w-auto min-w-[140px] h-11">
+                  {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                  {tp.actions.save}
+                </Button>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <input id="rt_req_aud_e" type="checkbox" className="h-4 w-4" checked={edit.require_audio} onChange={e => setEdit({ ...edit, require_audio: e.target.checked })} />
-              <Label htmlFor="rt_req_aud_e" className="cursor-pointer">{tp.form.requireAudioShort}</Label>
-            </div>
-            <div className="flex items-center gap-2">
-              <input id="rt_pub_e" type="checkbox" className="h-4 w-4" checked={edit.is_published} onChange={e => setEdit({ ...edit, is_published: e.target.checked })} />
-              <Label htmlFor="rt_pub_e" className="cursor-pointer">{tp.form.publishedToggle}</Label>
-            </div>
-            <Button onClick={savePath} disabled={saving} className="gap-2">
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-              {tp.actions.save}
-            </Button>
-          </Card>
+          </div>
         </TabsContent>
       </Tabs>
 
+      {/* Stage Form Dialog */}
       <Dialog open={stageDialog.open} onOpenChange={o => setStageDialog({ open: o })}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{stageDialog.stage ? "تعديل المرحلة" : "إضافة مرحلة جديدة"}</DialogTitle>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl">
+          <DialogHeader className="border-b border-border/50 pb-4 mb-2">
+            <DialogTitle className="text-xl">{stageDialog.stage ? "تعديل المرحلة" : "إضافة مرحلة جديدة"}</DialogTitle>
             <DialogDescription>المرحلة عبارة عن درس مستقل — أضف الشرح والمحتوى والمرفقات.</DialogDescription>
           </DialogHeader>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-2">
-            {/* Stage type: a normal lesson OR a Quran recitation task */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 py-2">
+            {/* Stage type */}
             <div className="md:col-span-2 space-y-2">
-              <Label>نوع المرحلة</Label>
-              <div className="grid grid-cols-2 gap-2">
+              <Label className="font-semibold text-base">نوع المرحلة</Label>
+              <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
                   onClick={() => setStageForm({ ...stageForm, stage_type: "custom" })}
-                  className={`flex items-center gap-2 rounded-xl border p-3 text-sm font-bold transition-colors ${stageForm.stage_type !== "recitation" ? "border-primary bg-primary/10 text-primary" : "border-border bg-background text-muted-foreground hover:bg-muted/50"}`}
+                  className={`flex items-center justify-center gap-2 rounded-xl border-2 p-4 text-sm font-bold transition-all ${stageForm.stage_type !== "recitation" ? "border-primary bg-primary/5 text-primary shadow-sm" : "border-border/50 bg-muted/10 text-muted-foreground hover:bg-muted/30"}`}
                 >
-                  <BookOpen className="h-4 w-4" /> درس (شرح/فيديو/ملف)
+                  <BookOpen className="h-5 w-5" /> درس (شرح/فيديو/ملف)
                 </button>
                 <button
                   type="button"
                   onClick={() => setStageForm({ ...stageForm, stage_type: "recitation" })}
-                  className={`flex items-center gap-2 rounded-xl border p-3 text-sm font-bold transition-colors ${stageForm.stage_type === "recitation" ? "border-primary bg-primary/10 text-primary" : "border-border bg-background text-muted-foreground hover:bg-muted/50"}`}
+                  className={`flex items-center justify-center gap-2 rounded-xl border-2 p-4 text-sm font-bold transition-all ${stageForm.stage_type === "recitation" ? "border-emerald-500 bg-emerald-500/5 text-emerald-700 dark:text-emerald-400 shadow-sm" : "border-border/50 bg-muted/10 text-muted-foreground hover:bg-muted/30"}`}
                 >
-                  <Mic className="h-4 w-4" /> تلاوة / تسجيل
+                  <Mic className="h-5 w-5" /> تلاوة / تسميع
                 </button>
               </div>
             </div>
 
             {stageForm.stage_type === "recitation" ? (
               <>
-                {/* Recitation target selector */}
-                <div className="md:col-span-2 space-y-2 rounded-2xl border border-border/60 bg-muted/20 p-4">
-                  <Label className="flex items-center gap-2">
-                    <Mic className="h-4 w-4 text-primary" /> المطلوب تلاوته
+                <div className="md:col-span-2 space-y-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-5">
+                  <Label className="flex items-center gap-2 font-bold text-emerald-800 dark:text-emerald-400">
+                    <Mic className="h-5 w-5" /> المطلوب تلاوته
                   </Label>
-                  <Select
-                    value={stageForm.recitation_mode}
-                    onValueChange={v => setStageForm({ ...stageForm, recitation_mode: v })}
-                  >
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                  <Select value={stageForm.recitation_mode} onValueChange={v => setStageForm({ ...stageForm, recitation_mode: v })}>
+                    <SelectTrigger className="h-11 rounded-lg bg-background border-emerald-500/20 focus:ring-emerald-500/20"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="surah">سورة كاملة</SelectItem>
                       <SelectItem value="ayah">آيات محددة (من - إلى)</SelectItem>
@@ -532,168 +603,140 @@ export default function ReaderTajweedPathDetailPage() {
                     </SelectContent>
                   </Select>
 
-                  {(stageForm.recitation_mode === "surah" || stageForm.recitation_mode === "ayah") && (
-                    <div className="space-y-1">
-                      <Label className="text-xs text-muted-foreground">السورة</Label>
-                      <Select
-                        value={String(stageForm.surah_number)}
-                        onValueChange={v => {
-                          const n = parseInt(v, 10)
-                          const s = SURAHS.find(x => x.number === n)
-                          setStageForm({ ...stageForm, surah_number: n, ayah_from: 1, ayah_to: s?.verses || 1 })
-                        }}
-                      >
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent className="max-h-72">
-                          {SURAHS.map(s => (
-                            <SelectItem key={s.number} value={String(s.number)}>
-                              {s.number}. {s.name} ({s.verses} آية)
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
-
-                  {stageForm.recitation_mode === "ayah" && (
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1">
-                        <Label className="text-xs text-muted-foreground">من الآية</Label>
-                        <Input
-                          type="number" min="1"
-                          max={SURAHS.find(s => s.number === stageForm.surah_number)?.verses || 1}
-                          value={stageForm.ayah_from}
-                          onChange={e => setStageForm({ ...stageForm, ayah_from: parseInt(e.target.value, 10) || 1 })}
-                        />
+                  {/* Settings based on recitation_mode */}
+                  <div className="space-y-4 pt-2 border-t border-emerald-500/10">
+                    {(stageForm.recitation_mode === "surah" || stageForm.recitation_mode === "ayah") && (
+                      <div className="space-y-1.5">
+                        <Label className="text-sm font-semibold">السورة</Label>
+                        <Select
+                          value={String(stageForm.surah_number)}
+                          onValueChange={v => {
+                            const n = parseInt(v, 10)
+                            const s = SURAHS.find(x => x.number === n)
+                            setStageForm({ ...stageForm, surah_number: n, ayah_from: 1, ayah_to: s?.verses || 1 })
+                          }}
+                        >
+                          <SelectTrigger className="h-11 rounded-lg bg-background"><SelectValue /></SelectTrigger>
+                          <SelectContent className="max-h-72">
+                            {SURAHS.map(s => (
+                              <SelectItem key={s.number} value={String(s.number)}>
+                                {s.number}. {s.name} ({s.verses} آية)
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
-                      <div className="space-y-1">
-                        <Label className="text-xs text-muted-foreground">إلى الآية</Label>
-                        <Input
-                          type="number" min="1"
-                          max={SURAHS.find(s => s.number === stageForm.surah_number)?.verses || 1}
-                          value={stageForm.ayah_to}
-                          onChange={e => setStageForm({ ...stageForm, ayah_to: parseInt(e.target.value, 10) || 1 })}
-                        />
-                      </div>
-                    </div>
-                  )}
+                    )}
 
-                  {stageForm.recitation_mode === "juz" && (
-                    <div className="space-y-1">
-                      <Label className="text-xs text-muted-foreground">الجزء</Label>
-                      <Select
-                        value={String(stageForm.juz_number)}
-                        onValueChange={v => setStageForm({ ...stageForm, juz_number: parseInt(v, 10) })}
-                      >
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent className="max-h-72">
-                          {Array.from({ length: 30 }, (_, i) => i + 1).map(j => (
-                            <SelectItem key={j} value={String(j)}>{juzName(j)}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
-
-                  {stageForm.recitation_mode === "page" && (
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1">
-                        <Label className="text-xs text-muted-foreground">من صفحة</Label>
-                        <Input type="number" min="1" max="604" value={stageForm.page_from}
-                          onChange={e => setStageForm({ ...stageForm, page_from: parseInt(e.target.value, 10) || 1 })} />
+                    {stageForm.recitation_mode === "ayah" && (
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                          <Label className="text-sm font-semibold">من الآية</Label>
+                          <Input type="number" min="1" max={SURAHS.find(s => s.number === stageForm.surah_number)?.verses || 1} value={stageForm.ayah_from} onChange={e => setStageForm({ ...stageForm, ayah_from: parseInt(e.target.value, 10) || 1 })} className="h-11 rounded-lg bg-background" />
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label className="text-sm font-semibold">إلى الآية</Label>
+                          <Input type="number" min="1" max={SURAHS.find(s => s.number === stageForm.surah_number)?.verses || 1} value={stageForm.ayah_to} onChange={e => setStageForm({ ...stageForm, ayah_to: parseInt(e.target.value, 10) || 1 })} className="h-11 rounded-lg bg-background" />
+                        </div>
                       </div>
-                      <div className="space-y-1">
-                        <Label className="text-xs text-muted-foreground">إلى صفحة</Label>
-                        <Input type="number" min="1" max="604" value={stageForm.page_to}
-                          onChange={e => setStageForm({ ...stageForm, page_to: parseInt(e.target.value, 10) || 1 })} />
-                      </div>
-                    </div>
-                  )}
+                    )}
 
-                  <p className="text-xs text-muted-foreground">
-                    عنوان المرحلة سيُولّد تلقائياً: <span className="font-bold text-foreground">{recitationLabel(stageForm)}</span>
-                  </p>
+                    {stageForm.recitation_mode === "juz" && (
+                      <div className="space-y-1.5">
+                        <Label className="text-sm font-semibold">الجزء</Label>
+                        <Select value={String(stageForm.juz_number)} onValueChange={v => setStageForm({ ...stageForm, juz_number: parseInt(v, 10) })}>
+                          <SelectTrigger className="h-11 rounded-lg bg-background"><SelectValue /></SelectTrigger>
+                          <SelectContent className="max-h-72">
+                            {Array.from({ length: 30 }, (_, i) => i + 1).map(j => (
+                              <SelectItem key={j} value={String(j)}>{juzName(j)}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+
+                    {stageForm.recitation_mode === "page" && (
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                          <Label className="text-sm font-semibold">من صفحة</Label>
+                          <Input type="number" min="1" max="604" value={stageForm.page_from} onChange={e => setStageForm({ ...stageForm, page_from: parseInt(e.target.value, 10) || 1 })} className="h-11 rounded-lg bg-background" />
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label className="text-sm font-semibold">إلى صفحة</Label>
+                          <Input type="number" min="1" max="604" value={stageForm.page_to} onChange={e => setStageForm({ ...stageForm, page_to: parseInt(e.target.value, 10) || 1 })} className="h-11 rounded-lg bg-background" />
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="bg-emerald-500/10 p-3 rounded-lg border border-emerald-500/20 text-sm">
+                      عنوان المرحلة سيُولّد تلقائياً: <strong className="text-emerald-800 dark:text-emerald-400 ms-1">{recitationLabel(stageForm)}</strong>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="md:col-span-2 space-y-1">
-                  <Label>{tp.stageForm.description} (تعليمات للطالب)</Label>
-                  <Textarea rows={3} value={stageForm.description} onChange={e => setStageForm({ ...stageForm, description: e.target.value })} placeholder="مثال: راعِ أحكام التجويد وأرسل تلاوتك" />
+                <div className="md:col-span-2 space-y-1.5">
+                  <Label className="font-semibold">{tp.stageForm.description} (تعليمات للطالب)</Label>
+                  <Textarea rows={3} value={stageForm.description} onChange={e => setStageForm({ ...stageForm, description: e.target.value })} placeholder="مثال: راعِ أحكام التجويد وأرسل تلاوتك" className="resize-none rounded-lg focus-visible:ring-primary/20" />
                 </div>
               </>
             ) : (
               <>
-            <div className="md:col-span-2 space-y-1">
-              <Label>{tp.stageForm.title}</Label>
-              <Input value={stageForm.title} onChange={e => setStageForm({ ...stageForm, title: e.target.value })} placeholder={tp.stageForm.titlePlaceholder} />
-            </div>
-            <div className="md:col-span-2 space-y-1">
-              <Label>{tp.stageForm.description}</Label>
-              <Textarea rows={2} value={stageForm.description} onChange={e => setStageForm({ ...stageForm, description: e.target.value })} />
-            </div>
-            <div className="md:col-span-2 space-y-1">
-              <Label>{tp.stageForm.content}</Label>
-              <Textarea rows={5} value={stageForm.content} onChange={e => setStageForm({ ...stageForm, content: e.target.value })} placeholder={tp.stageForm.contentPlaceholder} />
-            </div>
+                <div className="md:col-span-2 space-y-1.5">
+                  <Label className="font-semibold">{tp.stageForm.title}</Label>
+                  <Input value={stageForm.title} onChange={e => setStageForm({ ...stageForm, title: e.target.value })} placeholder={tp.stageForm.titlePlaceholder} className="h-11 rounded-lg focus-visible:ring-primary/20" />
+                </div>
+                <div className="md:col-span-2 space-y-1.5">
+                  <Label className="font-semibold">{tp.stageForm.description}</Label>
+                  <Textarea rows={2} value={stageForm.description} onChange={e => setStageForm({ ...stageForm, description: e.target.value })} className="resize-none rounded-lg focus-visible:ring-primary/20" />
+                </div>
+                <div className="md:col-span-2 space-y-1.5">
+                  <Label className="font-semibold">{tp.stageForm.content}</Label>
+                  <Textarea rows={5} value={stageForm.content} onChange={e => setStageForm({ ...stageForm, content: e.target.value })} placeholder={tp.stageForm.contentPlaceholder} className="rounded-lg focus-visible:ring-primary/20" />
+                </div>
 
-            {/* Video: upload a file OR paste a URL (YouTube/Vimeo/direct) — same as a course lesson */}
-            <div className="md:col-span-2 space-y-2 rounded-2xl border border-border/60 bg-muted/20 p-4">
-              <Label className="flex items-center gap-2">
-                <Video className="h-4 w-4 text-primary" /> {tp.stageForm.videoUrl}
-              </Label>
-              <Input
-                dir="ltr"
-                value={stageForm.video_url}
-                onChange={e => setStageForm({ ...stageForm, video_url: e.target.value })}
-                placeholder="https://youtube.com/... أو ارفع ملف بالأسفل"
-              />
-              <FileUploader
-                accept="video/*"
-                value={null}
-                onChange={(url) => url && setStageForm({ ...stageForm, video_url: url })}
-              />
-              {stageForm.video_url && (
-                <div className="relative rounded-xl overflow-hidden bg-black aspect-video border border-border">
-                  {toYouTubeEmbed(stageForm.video_url) ? (
-                    <iframe src={toYouTubeEmbed(stageForm.video_url)!} className="w-full h-full" allowFullScreen title="preview" />
-                  ) : (
-                    <video src={stageForm.video_url} controls className="w-full h-full" />
+                <div className="md:col-span-2 space-y-3 rounded-xl border border-border/50 bg-muted/10 p-5">
+                  <Label className="flex items-center gap-2 font-semibold">
+                    <Video className="h-5 w-5 text-blue-500" /> {tp.stageForm.videoUrl}
+                  </Label>
+                  <Input dir="ltr" value={stageForm.video_url} onChange={e => setStageForm({ ...stageForm, video_url: e.target.value })} placeholder="https://youtube.com/... أو ارفع ملف بالأسفل" className="h-11 rounded-lg bg-background" />
+                  <div className="bg-background rounded-lg p-1 border border-border/50">
+                    <FileUploader accept="video/*" value={null} onChange={(url) => url && setStageForm({ ...stageForm, video_url: url })} />
+                  </div>
+                  {stageForm.video_url && (
+                    <div className="relative rounded-xl overflow-hidden bg-black aspect-video border border-border shadow-sm mt-3">
+                      {toYouTubeEmbed(stageForm.video_url) ? (
+                        <iframe src={toYouTubeEmbed(stageForm.video_url)!} className="w-full h-full" allowFullScreen title="preview" />
+                      ) : (
+                        <video src={stageForm.video_url} controls className="w-full h-full" />
+                      )}
+                    </div>
                   )}
                 </div>
-              )}
-            </div>
 
-            {/* PDF / file attachment: upload OR paste a URL */}
-            <div className="md:col-span-2 space-y-2 rounded-2xl border border-border/60 bg-muted/20 p-4">
-              <Label className="flex items-center gap-2">
-                <FileText className="h-4 w-4 text-primary" /> {tp.stageForm.pdfUrl}
-              </Label>
-              <Input
-                dir="ltr"
-                value={stageForm.pdf_url}
-                onChange={e => setStageForm({ ...stageForm, pdf_url: e.target.value })}
-                placeholder="https://... أو ارفع ملف بالأسفل"
-              />
-              <FileUploader
-                accept=".pdf,.doc,.docx,.ppt,.pptx"
-                value={stageForm.pdf_url || null}
-                onChange={(url) => setStageForm({ ...stageForm, pdf_url: url || "" })}
-              />
-            </div>
+                <div className="md:col-span-2 space-y-3 rounded-xl border border-border/50 bg-muted/10 p-5">
+                  <Label className="flex items-center gap-2 font-semibold">
+                    <FileText className="h-5 w-5 text-amber-500" /> {tp.stageForm.pdfUrl}
+                  </Label>
+                  <Input dir="ltr" value={stageForm.pdf_url} onChange={e => setStageForm({ ...stageForm, pdf_url: e.target.value })} placeholder="https://... أو ارفع ملف بالأسفل" className="h-11 rounded-lg bg-background" />
+                  <div className="bg-background rounded-lg p-1 border border-border/50">
+                    <FileUploader accept=".pdf,.doc,.docx,.ppt,.pptx" value={stageForm.pdf_url || null} onChange={(url) => setStageForm({ ...stageForm, pdf_url: url || "" })} />
+                  </div>
+                </div>
 
-            <div className="md:col-span-2 space-y-1">
-              <Label>{tp.stageForm.passageText}</Label>
-              <Textarea rows={3} value={stageForm.passage_text} onChange={e => setStageForm({ ...stageForm, passage_text: e.target.value })} placeholder={tp.stageForm.passagePlaceholder} />
-            </div>
+                <div className="md:col-span-2 space-y-1.5">
+                  <Label className="font-semibold">{tp.stageForm.passageText}</Label>
+                  <Textarea rows={3} value={stageForm.passage_text} onChange={e => setStageForm({ ...stageForm, passage_text: e.target.value })} placeholder={tp.stageForm.passagePlaceholder} className="resize-none rounded-lg focus-visible:ring-primary/20" />
+                </div>
               </>
             )}
-            <div className="space-y-1">
-              <Label>{tp.stageForm.estimatedMinutes}</Label>
-              <Input type="number" min="1" value={stageForm.estimated_minutes} onChange={e => setStageForm({ ...stageForm, estimated_minutes: parseInt(e.target.value, 10) || 30 })} />
+            <div className="space-y-1.5">
+              <Label className="font-semibold">{tp.stageForm.estimatedMinutes}</Label>
+              <Input type="number" min="1" value={stageForm.estimated_minutes} onChange={e => setStageForm({ ...stageForm, estimated_minutes: parseInt(e.target.value, 10) || 30 })} className="h-11 rounded-lg focus-visible:ring-primary/20" />
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setStageDialog({ open: false })}>{tp.actions.cancel}</Button>
-            <Button onClick={saveStage} disabled={savingStage || (stageForm.stage_type !== "recitation" && !stageForm.title.trim())} className="gap-2">
+          <DialogFooter className="pt-4 border-t border-border/50 mt-4 gap-2 sm:gap-0">
+            <Button variant="ghost" onClick={() => setStageDialog({ open: false })} className="rounded-lg font-semibold">{tp.actions.cancel}</Button>
+            <Button onClick={saveStage} disabled={savingStage || (stageForm.stage_type !== "recitation" && !stageForm.title.trim())} className="gap-2 rounded-lg font-bold min-w-[120px]">
               {savingStage && <Loader2 className="h-4 w-4 animate-spin" />}
               {stageDialog.stage ? tp.actions.saveChanges : tp.actions.addStageVerb}
             </Button>
