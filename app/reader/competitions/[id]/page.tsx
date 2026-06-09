@@ -2,7 +2,7 @@
 
 import { useState, useEffect, use } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Loader2, Play, CheckCircle, Clock, Star, Send, Trophy, Award } from 'lucide-react'
+import { ArrowRight, Loader2, Play, CheckCircle, Clock, Star, Send, Trophy, Award, Medal, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import MediaViewer from '@/components/media-viewer'
 
@@ -12,6 +12,15 @@ interface Competition {
   type: string
   status: string
   tajweed_rules: string[] | null
+}
+
+interface RankPreviewRow {
+  entry_id: string
+  student_id: string
+  student_name: string | null
+  score: number | null
+  rank: number
+  is_winner: boolean
 }
 
 interface Entry {
@@ -27,7 +36,8 @@ interface Entry {
   verses_count: number
   submitted_at: string
   evaluated_at: string | null
-  evaluator_name: string | null
+  evaluated_by_name: string | null
+  rank: number | null
 }
 
 const TAJWEED_RULES = [
@@ -56,6 +66,40 @@ export default function ReaderCompetitionDetailPage({ params }: { params: Promis
   }>({ score: 0, tajweed_scores: {}, feedback: '' })
   const [submitting, setSubmitting] = useState(false)
   const [filter, setFilter] = useState<'all' | 'pending' | 'evaluated'>('all')
+  const [resultsPreview, setResultsPreview] = useState<{ ready: boolean; pending: number; topN: number; ranking: RankPreviewRow[] } | null>(null)
+  const [showResults, setShowResults] = useState(false)
+  const [loadingPreview, setLoadingPreview] = useState(false)
+  const [finalizing, setFinalizing] = useState(false)
+
+  const openResults = async () => {
+    setShowResults(true)
+    setLoadingPreview(true)
+    try {
+      const res = await fetch(`/api/reader/competitions/${id}/finalize`)
+      if (res.ok) setResultsPreview(await res.json())
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setLoadingPreview(false)
+    }
+  }
+
+  const confirmResults = async () => {
+    setFinalizing(true)
+    try {
+      const res = await fetch(`/api/reader/competitions/${id}/finalize`, { method: 'POST' })
+      if (res.ok) {
+        setShowResults(false)
+        setResultsPreview(null)
+        loadData()
+      } else {
+        const data = await res.json()
+        alert(data.error || 'حدث خطأ أثناء اعتماد النتائج')
+      }
+    } finally {
+      setFinalizing(false)
+    }
+  }
 
   const loadData = async () => {
     try {
@@ -94,7 +138,9 @@ export default function ReaderCompetitionDetailPage({ params }: { params: Promis
       let finalScore = evalForm.score
       if (competition?.type === 'tajweed' && Object.keys(evalForm.tajweed_scores).length > 0) {
         const values = Object.values(evalForm.tajweed_scores)
-        finalScore = values.length > 0 ? Math.round(values.reduce((a, b) => a + b, 0) / values.length * 10) / 10 : 0
+        // Each rule is scored out of 10; the average (0-10) is scaled to a /100 final score
+        // so tajweed entries use the same scale as every other competition type.
+        finalScore = values.length > 0 ? Math.round((values.reduce((a, b) => a + b, 0) / values.length) * 10 * 10) / 10 : 0
       }
 
       const res = await fetch(`/api/reader/competitions/entries/${evaluatingId}/evaluate`, {
@@ -161,16 +207,33 @@ export default function ReaderCompetitionDetailPage({ params }: { params: Promis
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">{competition.title}</h1>
           <p className="text-muted-foreground mt-2">مراجعة وتقييم مشاركات الطلاب في هذه المسابقة.</p>
+          {competition.status === 'ended' && (
+            <span className="inline-flex items-center gap-1.5 mt-3 text-xs font-bold bg-yellow-50 text-yellow-700 border border-yellow-200/60 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800/50 px-3 py-1 rounded-full">
+              <Trophy className="w-3.5 h-3.5" /> تم اعتماد النتائج
+            </span>
+          )}
         </div>
-        <div className="flex gap-4">
-          <div className="flex flex-col items-center justify-center bg-card border border-border/50 shadow-sm rounded-xl px-6 py-3 min-w-[120px]">
-            <span className="text-3xl font-bold text-amber-600 dark:text-amber-500">{pendingCount}</span>
-            <span className="text-xs font-medium text-muted-foreground mt-1">بانتظار التقييم</span>
+        <div className="flex flex-col items-stretch gap-3">
+          <div className="flex gap-4">
+            <div className="flex flex-col items-center justify-center bg-card border border-border/50 shadow-sm rounded-xl px-6 py-3 min-w-[120px]">
+              <span className="text-3xl font-bold text-amber-600 dark:text-amber-500">{pendingCount}</span>
+              <span className="text-xs font-medium text-muted-foreground mt-1">بانتظار التقييم</span>
+            </div>
+            <div className="flex flex-col items-center justify-center bg-card border border-border/50 shadow-sm rounded-xl px-6 py-3 min-w-[120px]">
+              <span className="text-3xl font-bold text-emerald-600 dark:text-emerald-500">{evaluatedCount}</span>
+              <span className="text-xs font-medium text-muted-foreground mt-1">تم التقييم</span>
+            </div>
           </div>
-          <div className="flex flex-col items-center justify-center bg-card border border-border/50 shadow-sm rounded-xl px-6 py-3 min-w-[120px]">
-            <span className="text-3xl font-bold text-emerald-600 dark:text-emerald-500">{evaluatedCount}</span>
-            <span className="text-xs font-medium text-muted-foreground mt-1">تم التقييم</span>
-          </div>
+          {/* Finalize: enabled once at least one entry is evaluated. */}
+          {evaluatedCount > 0 && (
+            <button
+              onClick={openResults}
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-sm hover:shadow"
+            >
+              <Trophy className="w-4 h-4" />
+              {competition.status === 'ended' ? 'مراجعة / إعادة اعتماد النتائج' : 'اعتماد النتائج وإعلان الفائزين'}
+            </button>
+          )}
         </div>
       </div>
 
@@ -264,6 +327,17 @@ export default function ReaderCompetitionDetailPage({ params }: { params: Promis
                           <span className="text-sm text-muted-foreground">/ 100</span>
                         </div>
                       </div>
+                      {entry.rank !== null && entry.rank <= 3 && (
+                        <span className={cn(
+                          "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold shrink-0",
+                          entry.rank === 1 ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400" :
+                          entry.rank === 2 ? "bg-slate-200 text-slate-700 dark:bg-slate-700/40 dark:text-slate-300" :
+                          "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400"
+                        )}>
+                          <Medal className="w-3.5 h-3.5" />
+                          {entry.rank === 1 ? 'المركز الأول' : entry.rank === 2 ? 'المركز الثاني' : 'المركز الثالث'}
+                        </span>
+                      )}
                     </div>
                     
                     {entry.feedback && (
@@ -273,9 +347,9 @@ export default function ReaderCompetitionDetailPage({ params }: { params: Promis
                       </div>
                     )}
                     
-                    {entry.evaluator_name && (
+                    {entry.evaluated_by_name && (
                       <div className="text-xs text-muted-foreground bg-background px-3 py-1.5 rounded-md border border-border/50 text-center shrink-0">
-                        المُقيّم: <span className="font-medium text-foreground">{entry.evaluator_name}</span>
+                        المُقيّم: <span className="font-medium text-foreground">{entry.evaluated_by_name}</span>
                       </div>
                     )}
                   </div>
@@ -382,6 +456,86 @@ export default function ReaderCompetitionDetailPage({ params }: { params: Promis
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Results / finalize modal */}
+      {showResults && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => !finalizing && setShowResults(false)}>
+          <div className="bg-card border border-border rounded-2xl shadow-xl w-full max-w-lg max-h-[85vh] overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-5 border-b border-border/60">
+              <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                <Trophy className="w-5 h-5 text-primary" />
+                اعتماد نتائج المسابقة
+              </h3>
+              <button onClick={() => !finalizing && setShowResults(false)} className="text-muted-foreground hover:text-foreground transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-5 overflow-y-auto">
+              {loadingPreview ? (
+                <div className="flex items-center justify-center py-10">
+                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                </div>
+              ) : !resultsPreview || resultsPreview.ranking.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8 text-sm">لا توجد مشاركات مُقيّمة بعد لاعتماد نتائجها.</p>
+              ) : (
+                <div className="space-y-4">
+                  {resultsPreview.pending > 0 && (
+                    <div className="flex items-start gap-2 text-xs bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border border-amber-200/60 dark:border-amber-800/50 rounded-lg p-3">
+                      <Clock className="w-4 h-4 shrink-0 mt-0.5" />
+                      <span>يوجد {resultsPreview.pending} مشاركة لم تُقيَّم بعد. يمكنك الاعتماد الآن وستُحتسب المُقيَّمة فقط، أو إكمال التقييم أولاً.</span>
+                    </div>
+                  )}
+                  <p className="text-sm text-muted-foreground">
+                    سيتم ترتيب المشاركات حسب الدرجة، وإعلان أفضل <span className="font-bold text-foreground">{resultsPreview.topN}</span> كفائزين ومنحهم النقاط.
+                  </p>
+                  <div className="space-y-2">
+                    {resultsPreview.ranking.map(row => (
+                      <div key={row.entry_id} className={cn(
+                        "flex items-center justify-between gap-3 rounded-xl border p-3",
+                        row.is_winner ? "border-primary/40 bg-primary/5" : "border-border/50 bg-muted/20"
+                      )}>
+                        <div className="flex items-center gap-3">
+                          <span className={cn(
+                            "w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0",
+                            row.rank === 1 ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400" :
+                            row.rank === 2 ? "bg-slate-200 text-slate-700 dark:bg-slate-700/40 dark:text-slate-300" :
+                            row.rank === 3 ? "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400" :
+                            "bg-muted text-muted-foreground"
+                          )}>
+                            {row.rank}
+                          </span>
+                          <span className="text-sm font-medium text-foreground">{row.student_name || 'طالب'}</span>
+                          {row.is_winner && <Medal className="w-4 h-4 text-primary" />}
+                        </div>
+                        <span className="text-sm font-bold text-foreground">{row.score} <span className="text-xs font-normal text-muted-foreground">/ 100</span></span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center justify-end gap-3 p-5 border-t border-border/60">
+              <button
+                onClick={() => setShowResults(false)}
+                disabled={finalizing}
+                className="px-5 py-2.5 rounded-xl text-sm font-bold text-muted-foreground hover:bg-muted hover:text-foreground transition-colors disabled:opacity-50"
+              >
+                إلغاء
+              </button>
+              <button
+                onClick={confirmResults}
+                disabled={finalizing || loadingPreview || !resultsPreview || resultsPreview.ranking.length === 0}
+                className="inline-flex items-center justify-center gap-2 min-w-[160px] px-5 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl text-sm font-bold transition-all shadow-sm disabled:opacity-50"
+              >
+                {finalizing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trophy className="w-4 h-4" />}
+                تأكيد واعتماد النتائج
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
