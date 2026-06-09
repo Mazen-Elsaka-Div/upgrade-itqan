@@ -139,7 +139,16 @@ export default function ReaderCompetitionDetailPage({ params }: { params: Promis
   if (!competition) {
     return (
       <div className="text-center py-16">
-        return (
+        <p className="text-muted-foreground">لم يتم العثور على المسابقة.</p>
+        <Link href="/reader/competitions" className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline mt-4">
+          <ArrowRight className="w-4 h-4" />
+          العودة للمسابقات
+        </Link>
+      </div>
+    )
+  }
+
+  return (
     <div className="space-y-8 max-w-5xl mx-auto pb-12">
       {/* Back */}
       <Link href="/reader/competitions" className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors mb-2">
