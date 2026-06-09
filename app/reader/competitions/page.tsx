@@ -54,34 +54,42 @@ export default function ReaderCompetitionsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 max-w-5xl mx-auto pb-12">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6 pb-6 border-b border-border/50">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <ClipboardCheck className="w-7 h-7 text-emerald-600" />
+          <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-3">
+            <ClipboardCheck className="w-8 h-8 text-primary" />
             تحكيم المسابقات
           </h1>
-          <p className="text-muted-foreground mt-1">قيّم مشاركات الطلاب في المسابقات</p>
+          <p className="text-muted-foreground mt-2">قيّم مشاركات الطلاب في المسابقات واسند الدرجات النهائية.</p>
         </div>
         {totalPending > 0 && (
-          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl px-4 py-3 flex items-center gap-2">
-            <Clock className="w-5 h-5 text-amber-600" />
-            <span className="text-sm font-medium text-amber-800 dark:text-amber-300">
-              {totalPending} مشاركة بانتظار التقييم
-            </span>
+          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200/50 dark:border-amber-800/50 rounded-xl px-5 py-3 flex items-center gap-3 shadow-sm min-w-[200px]">
+            <Clock className="w-5 h-5 text-amber-600 dark:text-amber-500" />
+            <div>
+              <span className="block text-xl font-bold text-amber-700 dark:text-amber-400 leading-none mb-1">
+                {totalPending}
+              </span>
+              <span className="text-xs font-medium text-amber-600 dark:text-amber-500">
+                مشاركة بانتظار التقييم
+              </span>
+            </div>
           </div>
         )}
       </div>
 
       {/* Competition List */}
       {competitions.length === 0 ? (
-        <div className="bg-card border border-border rounded-xl p-16 text-center">
-          <Trophy className="w-14 h-14 mx-auto mb-4 text-muted-foreground opacity-30" />
-          <p className="text-muted-foreground font-medium">لا توجد مسابقات مسندة إليك حالياً</p>
+        <div className="flex flex-col items-center justify-center py-16 px-4 bg-card/50 border border-dashed border-border rounded-xl">
+          <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-4">
+            <Trophy className="w-6 h-6 text-muted-foreground" />
+          </div>
+          <h3 className="text-lg font-semibold mb-1">لا توجد مسابقات</h3>
+          <p className="text-muted-foreground text-sm">لا توجد مسابقات مسندة إليك لتحكيمها في الوقت الحالي.</p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="grid gap-4">
           {competitions.map(comp => {
             const startDate = new Date(comp.start_date).toLocaleDateString('ar-EG', { day: 'numeric', month: 'long' })
             const endDate = new Date(comp.end_date).toLocaleDateString('ar-EG', { day: 'numeric', month: 'long' })
@@ -90,37 +98,44 @@ export default function ReaderCompetitionsPage() {
               <Link
                 key={comp.id}
                 href={`/reader/competitions/${comp.id}`}
-                className="block bg-card border border-border rounded-xl p-5 hover:shadow-md transition-all"
+                className="group block bg-card border border-border/50 rounded-xl p-6 shadow-sm transition-colors hover:border-primary/30"
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                  <div className="flex-1 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-muted text-muted-foreground border border-border/50">
                         {TYPE_LABELS[comp.type] || comp.type}
                       </span>
                       <span className={cn(
-                        "px-2 py-0.5 rounded-full text-xs font-medium",
-                        comp.status === 'active' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+                        "px-2.5 py-0.5 rounded-full text-xs font-semibold border",
+                        comp.status === 'active' 
+                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200/50 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800/50' 
+                          : 'bg-muted text-muted-foreground border-border/50'
                       )}>
                         {comp.status === 'active' ? 'نشطة' : 'منتهية'}
                       </span>
                     </div>
-                    <h3 className="text-lg font-bold">{comp.title}</h3>
-                    <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1"><Calendar className="w-4 h-4" /> {startDate} — {endDate}</span>
-                      <span className="flex items-center gap-1"><Users className="w-4 h-4" /> {comp.participants_count} مشارك</span>
+                    
+                    <div>
+                      <h3 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">{comp.title}</h3>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                      <span className="flex items-center gap-1.5"><Calendar className="w-4 h-4" /> {startDate} — {endDate}</span>
+                      <span className="flex items-center gap-1.5"><Users className="w-4 h-4" /> {comp.participants_count} مشارك</span>
                     </div>
                   </div>
-                  <div className="flex flex-col items-center gap-1">
+
+                  <div className="md:pl-4 md:border-l border-border/50 min-w-[140px] flex items-center justify-center">
                     {(comp.pending_count || 0) > 0 ? (
-                      <div className="bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-full px-3 py-1.5 text-center">
-                        <span className="text-xl font-bold">{comp.pending_count}</span>
-                        <p className="text-[10px]">بانتظار التقييم</p>
+                      <div className="flex flex-col items-center justify-center">
+                        <span className="text-2xl font-bold text-amber-600 dark:text-amber-500">{comp.pending_count}</span>
+                        <span className="text-xs font-medium text-amber-700/70 dark:text-amber-400/70 mt-1">بانتظار التقييم</span>
                       </div>
                     ) : (
-                      <div className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full px-3 py-1.5 text-center">
-                        <Star className="w-5 h-5 mx-auto" />
-                        <p className="text-[10px]">تم التقييم</p>
+                      <div className="flex flex-col items-center justify-center text-emerald-600 dark:text-emerald-500">
+                        <Star className="w-6 h-6 mb-1" />
+                        <span className="text-xs font-medium opacity-80">مكتملة التقييم</span>
                       </div>
                     )}
                   </div>

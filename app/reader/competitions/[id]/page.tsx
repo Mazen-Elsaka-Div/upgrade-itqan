@@ -139,46 +139,43 @@ export default function ReaderCompetitionDetailPage({ params }: { params: Promis
   if (!competition) {
     return (
       <div className="text-center py-16">
-        <p className="text-muted-foreground">المسابقة غير موجودة</p>
-      </div>
-    )
-  }
-
-  return (
-    <div className="space-y-6">
+        return (
+    <div className="space-y-8 max-w-5xl mx-auto pb-12">
       {/* Back */}
-      <Link href="/reader/competitions" className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
+      <Link href="/reader/competitions" className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors mb-2">
         <ArrowRight className="w-4 h-4" />
         العودة للمسابقات
       </Link>
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 pb-6 border-b border-border/50">
         <div>
-          <h1 className="text-2xl font-bold">{competition.title}</h1>
-          <p className="text-muted-foreground mt-1">تقييم مشاركات الطلاب</p>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">{competition.title}</h1>
+          <p className="text-muted-foreground mt-2">مراجعة وتقييم مشاركات الطلاب في هذه المسابقة.</p>
         </div>
-        <div className="flex gap-3">
-          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl px-4 py-2 text-center">
-            <span className="text-2xl font-bold text-amber-600">{pendingCount}</span>
-            <p className="text-xs text-amber-700 dark:text-amber-400">بانتظار التقييم</p>
+        <div className="flex gap-4">
+          <div className="flex flex-col items-center justify-center bg-card border border-border/50 shadow-sm rounded-xl px-6 py-3 min-w-[120px]">
+            <span className="text-3xl font-bold text-amber-600 dark:text-amber-500">{pendingCount}</span>
+            <span className="text-xs font-medium text-muted-foreground mt-1">بانتظار التقييم</span>
           </div>
-          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl px-4 py-2 text-center">
-            <span className="text-2xl font-bold text-green-600">{evaluatedCount}</span>
-            <p className="text-xs text-green-700 dark:text-green-400">تم تقييمها</p>
+          <div className="flex flex-col items-center justify-center bg-card border border-border/50 shadow-sm rounded-xl px-6 py-3 min-w-[120px]">
+            <span className="text-3xl font-bold text-emerald-600 dark:text-emerald-500">{evaluatedCount}</span>
+            <span className="text-xs font-medium text-muted-foreground mt-1">تم التقييم</span>
           </div>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="flex gap-2">
+      <div className="inline-flex items-center p-1 bg-muted/50 rounded-lg border border-border/50">
         {(['all', 'pending', 'evaluated'] as const).map(f => (
           <button
             key={f}
             onClick={() => setFilter(f)}
             className={cn(
-              "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
-              filter === f ? "bg-emerald-600 text-white" : "bg-muted text-muted-foreground hover:bg-muted/80"
+              "px-5 py-2 rounded-md text-sm font-medium transition-all duration-200",
+              filter === f 
+                ? "bg-background text-foreground shadow-sm" 
+                : "text-muted-foreground hover:text-foreground hover:bg-background/50"
             )}
           >
             {f === 'all' ? `الكل (${entries.length})` : f === 'pending' ? `بانتظار (${pendingCount})` : `تم التقييم (${evaluatedCount})`}
@@ -188,63 +185,91 @@ export default function ReaderCompetitionDetailPage({ params }: { params: Promis
 
       {/* Entries */}
       {filteredEntries.length === 0 ? (
-        <div className="bg-card border border-border rounded-xl p-12 text-center">
-          <CheckCircle className="w-12 h-12 mx-auto mb-3 text-muted-foreground opacity-30" />
-          <p className="text-muted-foreground">لا توجد مشاركات {filter === 'pending' ? 'بانتظار التقييم' : ''}</p>
+        <div className="flex flex-col items-center justify-center py-16 px-4 bg-card/50 border border-dashed border-border rounded-xl">
+          <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-4">
+            <CheckCircle className="w-6 h-6 text-muted-foreground" />
+          </div>
+          <h3 className="text-lg font-semibold mb-1">لا توجد مشاركات</h3>
+          <p className="text-muted-foreground text-sm">
+            {filter === 'pending' ? 'لا توجد مشاركات بانتظار التقييم حالياً.' : 'لم يتم العثور على أي مشاركات تطابق بحثك.'}
+          </p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="grid gap-4">
           {filteredEntries.map(entry => (
-            <div key={entry.id} className="bg-card border border-border rounded-xl p-5">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-bold">{entry.student_name}</h3>
-                    <span className={cn(
-                      "px-2 py-0.5 rounded-full text-xs font-medium",
-                      entry.status === 'pending' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
-                      entry.status === 'winner' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
-                      'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                    )}>
-                      {entry.status === 'pending' ? 'قيد التقييم' : entry.status === 'winner' ? 'فائز 🏆' : 'تم التقييم'}
-                    </span>
+            <div key={entry.id} className="bg-card border border-border/50 rounded-xl p-6 shadow-sm transition-colors hover:border-primary/20">
+              <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
+                <div className="flex-1 space-y-4">
+                  <div>
+                    <div className="flex items-center gap-3 mb-1">
+                      <h3 className="text-lg font-bold text-foreground">{entry.student_name}</h3>
+                      <span className={cn(
+                        "px-2.5 py-0.5 rounded-full text-xs font-semibold border",
+                        entry.status === 'pending' ? 'bg-amber-50 text-amber-700 border-amber-200/50 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800/50' :
+                        entry.status === 'winner' ? 'bg-yellow-50 text-yellow-700 border-yellow-200/50 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800/50' :
+                        'bg-emerald-50 text-emerald-700 border-emerald-200/50 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800/50'
+                      )}>
+                        {entry.status === 'pending' ? 'قيد التقييم' : entry.status === 'winner' ? 'فائز 🏆' : 'تم التقييم'}
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">{entry.student_email}</p>
                   </div>
-                  <p className="text-sm text-muted-foreground">{entry.student_email}</p>
 
                   {entry.submission_url && (
-                    <div className="mt-3">
+                    <div className="max-w-md rounded-lg overflow-hidden border border-border/50 bg-muted/20">
                       <MediaViewer url={entry.submission_url} />
                     </div>
                   )}
 
-                  {entry.verses_count > 0 && (
-                    <p className="text-sm text-muted-foreground mt-1">عدد الآيات: {entry.verses_count}</p>
-                  )}
-                  {entry.notes && (
-                    <p className="text-sm text-muted-foreground mt-1">ملاحظات الطالب: {entry.notes}</p>
-                  )}
+                  <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+                    {entry.verses_count > 0 && (
+                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <span className="font-medium text-foreground">عدد الآيات:</span> {entry.verses_count}
+                      </div>
+                    )}
+                    {entry.notes && (
+                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <span className="font-medium text-foreground">ملاحظات:</span> {entry.notes}
+                      </div>
+                    )}
+                  </div>
 
                   {entry.score !== null && (
-                    <div className="mt-2 flex items-center gap-2">
-                      <span className="text-sm font-medium">الدرجة:</span>
-                      <span className="text-lg font-bold text-amber-600">{entry.score}</span>
-                      {entry.evaluator_name && (
-                        <span className="text-xs text-muted-foreground">— بواسطة {entry.evaluator_name}</span>
+                    <div className="bg-muted/30 rounded-lg p-4 border border-border/50">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold text-foreground">الدرجة النهائية:</span>
+                          <span className="text-xl font-bold text-primary">{entry.score}</span>
+                          <span className="text-sm text-muted-foreground">/ 100</span>
+                        </div>
+                        {entry.evaluator_name && (
+                          <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-md">
+                            المُقيّم: {entry.evaluator_name}
+                          </span>
+                        )}
+                      </div>
+                      {entry.feedback && (
+                        <p className="text-sm text-muted-foreground leading-relaxed mt-3 pt-3 border-t border-border/50">
+                          <span className="font-medium text-foreground block mb-1">الملاحظات:</span>
+                          {entry.feedback}
+                        </p>
                       )}
                     </div>
                   )}
-                  {entry.feedback && (
-                    <p className="text-sm mt-1 text-muted-foreground">الملاحظات: {entry.feedback}</p>
-                  )}
                 </div>
 
-                <div>
+                <div className="md:pl-4 md:border-l border-border/50 flex flex-col gap-2 min-w-[140px]">
                   {entry.submission_url && (
                     <button
                       onClick={() => startEvaluate(entry)}
-                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold transition-colors"
+                      className={cn(
+                        "w-full px-4 py-2 rounded-lg text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20",
+                        entry.status === 'pending' 
+                          ? "bg-primary text-primary-foreground hover:bg-primary/90" 
+                          : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                      )}
                     >
-                      {entry.status === 'pending' ? 'قيّم' : 'أعد التقييم'}
+                      {entry.status === 'pending' ? 'بدء التقييم' : 'تعديل التقييم'}
                     </button>
                   )}
                 </div>
@@ -252,16 +277,20 @@ export default function ReaderCompetitionDetailPage({ params }: { params: Promis
 
               {/* Evaluation Form */}
               {evaluatingId === entry.id && (
-                <form onSubmit={handleEvaluate} className="mt-4 pt-4 border-t border-border space-y-4">
+                <form onSubmit={handleEvaluate} className="mt-6 pt-6 border-t border-border space-y-6">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-lg font-semibold text-foreground">نموذج التقييم</h4>
+                  </div>
+                  
                   {competition.type === 'tajweed' ? (
-                    <div>
-                      <p className="text-sm font-medium mb-3">تقييم أحكام التجويد (من 10):</p>
-                      <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-3">
+                      <label className="text-sm font-semibold text-foreground">تقييم أحكام التجويد (من 10)</label>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                         {(competition.tajweed_rules || TAJWEED_RULES.map(r => r.key)).map(ruleKey => {
                           const ruleLabel = TAJWEED_RULES.find(r => r.key === ruleKey)?.label || ruleKey
                           return (
-                            <div key={ruleKey} className="flex items-center gap-2">
-                              <label className="text-sm flex-1">{ruleLabel}</label>
+                            <div key={ruleKey} className="flex items-center justify-between p-3 rounded-lg border border-border/50 bg-muted/10 hover:bg-muted/20 transition-colors">
+                              <label className="text-sm font-medium text-muted-foreground">{ruleLabel}</label>
                               <input
                                 type="number"
                                 min={0}
@@ -272,7 +301,7 @@ export default function ReaderCompetitionDetailPage({ params }: { params: Promis
                                   ...prev,
                                   tajweed_scores: { ...prev.tajweed_scores, [ruleKey]: parseFloat(e.target.value) || 0 },
                                 }))}
-                                className="w-20 px-2 py-1.5 rounded-lg border border-border bg-background text-center"
+                                className="w-16 px-2 py-1 text-sm rounded-md border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-center transition-all"
                               />
                             </div>
                           )
@@ -280,41 +309,55 @@ export default function ReaderCompetitionDetailPage({ params }: { params: Promis
                       </div>
                     </div>
                   ) : (
-                    <div>
-                      <label className="block text-sm font-medium mb-1">الدرجة (من 100)</label>
+                    <div className="space-y-2 max-w-xs">
+                      <label className="block text-sm font-semibold text-foreground">الدرجة النهائية (من 100)</label>
                       <input
                         type="number"
                         min={0}
                         max={100}
                         value={evalForm.score}
                         onChange={e => setEvalForm(prev => ({ ...prev, score: parseFloat(e.target.value) || 0 }))}
-                        className="w-full px-4 py-2.5 rounded-xl border border-border bg-background"
+                        className="w-full px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-lg font-medium"
                       />
                     </div>
                   )}
 
-                  <div>
-                    <label className="block text-sm font-medium mb-1">ملاحظات التقييم</label>
+                  <div className="space-y-2">
+                    <label className="block text-sm font-semibold text-foreground">الملاحظات التوجيهية للطالب</label>
                     <textarea
                       value={evalForm.feedback}
                       onChange={e => setEvalForm(prev => ({ ...prev, feedback: e.target.value }))}
-                      className="w-full px-4 py-2.5 rounded-xl border border-border bg-background min-h-[80px] resize-y"
-                      placeholder="أضف ملاحظاتك على التلاوة..."
+                      className="w-full px-4 py-3 rounded-lg border border-border bg-background min-h-[100px] resize-y focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                      placeholder="أضف ملاحظاتك البناءة للطالب هنا..."
                     />
                   </div>
 
-                  <div className="flex gap-2">
-                    <button
-                      type="submit"
-                      disabled={submitting}
-                      className="flex-1 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition-colors disabled:opacity-50"
-                    >
-                      {submitting ? <Loader2 className="w-4 h-4 animate-spin inline-block ml-1" /> : <Send className="w-4 h-4 inline-block ml-1" />}
-                      حفظ التقييم
-                    </button>
+                  <div className="flex items-center justify-end gap-3 pt-2">
                     <button
                       type="button"
                       onClick={() => setEvaluatingId(null)}
+                      className="px-5 py-2.5 rounded-lg text-sm font-semibold text-muted-foreground hover:bg-muted transition-colors"
+                    >
+                      إلغاء
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className="inline-flex items-center justify-center min-w-[120px] px-5 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4 ml-2" />}
+                      حفظ التقييم
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}=> setEvaluatingId(null)}
                       className="px-4 py-2.5 bg-muted text-foreground rounded-xl font-bold transition-colors"
                     >
                       إلغاء
