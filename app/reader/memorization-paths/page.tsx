@@ -4,8 +4,9 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import {
   BookOpen, Plus, Loader2, Users, CheckCircle2, Eye, EyeOff, Trash2,
-  ChevronRight,
+  ChevronRight, AlertTriangle, Layers, Sparkles, Mic, ArrowUpDown, Hash,
 } from "lucide-react"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -43,6 +44,28 @@ const TYPE_LABELS: Record<string, string> = {
   juz: "بالأجزاء", surah: "بالسور", hizb: "بالأحزاب", page: "بالصفحات", custom: "مخصص",
 }
 const RANGE_MAX: Record<string, number> = { juz: 30, surah: 114, hizb: 60, page: 604 }
+const UNIT_WORD: Record<string, string> = { juz: "جزء", surah: "سورة", hizb: "حزب", page: "صفحة" }
+const LEVEL_LABELS: Record<string, string> = {
+  beginner: "مبتدئ", intermediate: "متوسط", advanced: "متقدم",
+}
+
+// Quick presets to spare readers from manual range setup.
+type Preset = {
+  key: string
+  label: string
+  description: string
+  unit_type: string
+  range_from: number
+  range_to: number
+  direction: "asc" | "desc"
+  level: string
+}
+const PRESETS: Preset[] = [
+  { key: "juz30", label: "جزء عمّ", description: "السور القصيرة (النبأ → الناس)", unit_type: "surah", range_from: 78, range_to: 114, direction: "desc", level: "beginner" },
+  { key: "juz29", label: "جزء تبارك", description: "من سورة الملك", unit_type: "surah", range_from: 67, range_to: 77, direction: "desc", level: "beginner" },
+  { key: "full_surah", label: "المصحف كامل (بالسور)", description: "الفاتحة → الناس، 114 سورة", unit_type: "surah", range_from: 1, range_to: 114, direction: "desc", level: "advanced" },
+  { key: "full_juz", label: "المصحف كامل (بالأجزاء)", description: "30 جزءاً بالترتيب", unit_type: "juz", range_from: 1, range_to: 30, direction: "desc", level: "advanced" },
+]
 
 export default function ReaderMemorizationPathsPage() {
   const [paths, setPaths] = useState<Path[]>([])
@@ -66,6 +89,30 @@ export default function ReaderMemorizationPathsPage() {
     estimated_days: "",
     is_published: false,
   })
+
+  // ─── Derived preview + validation for the create form ───
+  const max = RANGE_MAX[form.unit_type] || 1
+  const from = parseInt(form.range_from, 10)
+  const to = parseInt(form.range_to, 10)
+  const rangeValid =
+    Number.isFinite(from) && Number.isFinite(to) &&
+    from >= 1 && to >= 1 && from <= max && to <= max
+  // Units are generated inclusively regardless of order (server clamps/sorts).
+  const unitCount = rangeValid ? Math.abs(to - from) + 1 : 0
+  const unitWord = UNIT_WORD[form.unit_type] || "وحدة"
+  const canSubmit = !!form.title.trim() && rangeValid && unitCount > 0
+
+  function applyPreset(p: Preset) {
+    setForm(f => ({
+      ...f,
+      unit_type: p.unit_type,
+      range_from: String(p.range_from),
+      range_to: String(p.range_to),
+      direction: p.direction,
+      level: p.level,
+      title: f.title.trim() ? f.title : p.label,
+    }))
+  }
 
   async function load() {
     setLoading(true)
@@ -91,7 +138,14 @@ export default function ReaderMemorizationPathsPage() {
   }, [])
 
   async function submit() {
-    if (!form.title.trim()) return
+    if (!form.title.trim()) {
+      toast.error("اكتب عنوان المسار أولاً")
+      return
+    }
+    if (!rangeValid || unitCount === 0) {
+      toast.error(`المدى غير صحيح — أدخل أرقاماً بين 1 و ${max}`)
+      return
+    }
     setCreating(true)
     try {
       const res = await fetch("/api/reader/memorization-paths", {
@@ -112,29 +166,43 @@ export default function ReaderMemorizationPathsPage() {
       })
       const data = await res.json()
       if (!res.ok) {
-        alert(data.error || "فشل الإنشاء")
+        toast.error(data.error || "فشل إنشاء المسار")
         return
       }
+      toast.success(
+        `تم إنشاء المسار${data.total_units ? ` بـ ${data.total_units} وحدة` : ""}` +
+        (form.is_published ? " ونُشر للطلاب" : " كمسودة"),
+      )
       setOpenCreate(false)
-      setForm({ ...form, title: "", description: "" })
+      setForm({
+        title: "", description: "", unit_type: "surah",
+        range_from: "1", range_to: "114", direction: "desc",
+        level: "beginner", require_audio: false, estimated_days: "", is_published: false,
+      })
       await load()
+    } catch {
+      toast.error("تعذّر الاتصال بالخادم")
     } finally {
       setCreating(false)
     }
   }
 
   async function togglePublish(p: Path) {
+    const next = !p.is_published
     await fetch(`/api/reader/memorization-paths/${p.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ is_published: !p.is_published }),
+      body: JSON.stringify({ is_published: next }),
     })
+    toast.success(next ? "تم نشر المسار للطلاب" : "تم إخفاء المسار")
     await load()
   }
 
   async function remove(p: Path) {
-    if (!confirm(`حذف المسار "${p.title}" نهائياً؟`)) return
-    await fetch(`/api/reader/memorization-paths/${p.id}`, { method: "DELETE" })
+    if (!confirm(`حذف المسار "${p.title}" نهائياً؟ سيُحذف معه تقدّم الطلاب المشتركين.`)) return
+    const res = await fetch(`/api/reader/memorization-paths/${p.id}`, { method: "DELETE" })
+    if (res.ok) toast.success("تم حذف المسار")
+    else toast.error("تعذّر حذف المسار")
     await load()
   }
 
