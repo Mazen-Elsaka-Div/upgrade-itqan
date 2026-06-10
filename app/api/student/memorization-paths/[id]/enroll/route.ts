@@ -19,11 +19,10 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
       return NextResponse.json({ error: "هذا المسار غير مسموح لهذا الحساب بواسطة ولي الأمر" }, { status: 403 })
     }
 
-    // 1. verify path is published & active
     let pathRows: any[]
     try {
       pathRows = (await query(
-        `SELECT id, total_units FROM memorization_paths
+        `SELECT id, total_units, enrollment_type FROM memorization_paths
           WHERE id = $1 AND is_active = TRUE AND is_published = TRUE LIMIT 1`,
         [id],
       )) as any[]
@@ -38,6 +37,8 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
       return NextResponse.json({ error: "المسار غير متاح" }, { status: 404 })
     }
 
+    const needsApproval = path.enrollment_type === "approval"
+
     // 2. fetch ordered units
     const units = (await query<{ id: string; position: number }>(
       `SELECT id, position FROM memorization_path_units WHERE path_id = $1 ORDER BY position ASC`,
@@ -45,6 +46,30 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
     )) as any[]
     if (units.length === 0) {
       return NextResponse.json({ error: "المسار فارغ — لا يحتوي على وحدات" }, { status: 400 })
+    }
+
+    // Approval-required paths: create/reuse a pending request without seeding progress
+    if (needsApproval) {
+      const existing = (await query<any>(
+        `SELECT id, status FROM memorization_path_enrollments
+          WHERE path_id = $1 AND student_id = $2 LIMIT 1`,
+        [id, session.sub],
+      )) as any[]
+      if (existing[0]) {
+        if (existing[0].status === "dropped" || existing[0].status === "rejected") {
+          await query(
+            `UPDATE memorization_path_enrollments SET status = 'pending', last_activity_at = NOW() WHERE id = $1`,
+            [existing[0].id],
+          )
+        }
+        return NextResponse.json({ enrollment_id: existing[0].id, status: "pending", reused: true })
+      }
+      const reqRows = (await query<any>(
+        `INSERT INTO memorization_path_enrollments (path_id, student_id, status, current_unit_id)
+           VALUES ($1, $2, 'pending', $3) RETURNING *`,
+        [id, session.sub, units[0].id],
+      )) as any[]
+      return NextResponse.json({ enrollment: reqRows[0], status: "pending" }, { status: 201 })
     }
 
     // 3. upsert enrollment

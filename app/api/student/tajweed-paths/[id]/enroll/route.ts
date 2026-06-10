@@ -33,6 +33,8 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
     const path = pathRows[0]
     if (!path) return NextResponse.json({ error: "غير موجود أو غير منشور" }, { status: 404 })
 
+    const needsApproval = path.enrollment_type === "approval"
+
     const stages = (await query<any>(
       `SELECT id FROM tajweed_path_stages WHERE path_id = $1 ORDER BY position ASC`,
       [id],
@@ -45,14 +47,30 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
       [id, session!.sub],
     )) as any[]
     if (existing[0]) {
-      // Reactivate if dropped
-      if (existing[0].status === "dropped") {
+      // Already requested/enrolled
+      if (existing[0].status === "pending") {
+        return NextResponse.json({ enrollment_id: existing[0].id, status: "pending", reused: true })
+      }
+      // Reactivate if dropped/rejected
+      if (existing[0].status === "dropped" || existing[0].status === "rejected") {
+        const newStatus = needsApproval ? "pending" : "active"
         await query(
-          `UPDATE tajweed_path_enrollments SET status = 'active', last_activity_at = NOW() WHERE id = $1`,
-          [existing[0].id],
+          `UPDATE tajweed_path_enrollments SET status = $2, last_activity_at = NOW() WHERE id = $1`,
+          [existing[0].id, newStatus],
         )
+        return NextResponse.json({ enrollment_id: existing[0].id, status: newStatus, reused: true })
       }
       return NextResponse.json({ enrollment_id: existing[0].id, reused: true })
+    }
+
+    // Approval-required paths: create a pending request, no progress seeding yet
+    if (needsApproval) {
+      const reqRows = (await query<any>(
+        `INSERT INTO tajweed_path_enrollments (path_id, student_id, status)
+         VALUES ($1, $2, 'pending') RETURNING *`,
+        [id, session!.sub],
+      )) as any[]
+      return NextResponse.json({ enrollment_id: reqRows[0].id, status: "pending" }, { status: 201 })
     }
 
     const firstStageId = stages[0].id
