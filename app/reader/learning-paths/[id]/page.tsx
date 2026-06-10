@@ -71,6 +71,8 @@ type Stage = {
   passage_text: string | null
   estimated_minutes: number
   stage_type?: string | null
+  halaqa_id?: string | null
+  halaqa_title?: string | null
   recitation_mode?: string | null
   surah_number?: number | null
   ayah_from?: number | null
@@ -85,6 +87,7 @@ const initialStageForm = {
   video_url: "", pdf_url: "", passage_text: "",
   estimated_minutes: 30,
   stage_type: "custom",
+  halaqa_id: "",
   recitation_mode: "surah",
   surah_number: 1,
   ayah_from: 1,
@@ -115,6 +118,15 @@ export default function ReaderTajweedPathDetailPage() {
   const [stageDialog, setStageDialog] = useState<{ open: boolean; stage?: Stage }>({ open: false })
   const [stageForm, setStageForm] = useState(initialStageForm)
   const [savingStage, setSavingStage] = useState(false)
+  const [halaqat, setHalaqat] = useState<{ id: string; name: string }[]>([])
+
+  // Load the reader's own maqraa halaqat so a stage can be linked to one.
+  useEffect(() => {
+    fetch(`/api/halaqat?platform=maqraa&scope=mine`)
+      .then(r => (r.ok ? r.json() : { data: [] }))
+      .then(j => setHalaqat((j.data || []).map((h: any) => ({ id: h.id, name: h.name }))))
+      .catch(() => {})
+  }, [])
 
   async function load() {
     setLoading(true)
@@ -195,6 +207,7 @@ export default function ReaderTajweedPathDetailPage() {
       passage_text: stage.passage_text || "",
       estimated_minutes: stage.estimated_minutes || 30,
       stage_type: stage.stage_type || "custom",
+      halaqa_id: stage.halaqa_id || "",
       recitation_mode: stage.recitation_mode || "surah",
       surah_number: stage.surah_number || 1,
       ayah_from: stage.ayah_from || 1,
@@ -208,7 +221,17 @@ export default function ReaderTajweedPathDetailPage() {
 
   async function saveStage() {
     const isRecitation = stageForm.stage_type === "recitation"
-    const autoTitle = isRecitation ? recitationLabel(stageForm) : stageForm.title
+    const isHalaqa = stageForm.stage_type === "halaqa"
+    const halaqaName = isHalaqa ? halaqat.find(h => h.id === stageForm.halaqa_id)?.name || "" : ""
+    const autoTitle = isRecitation
+      ? recitationLabel(stageForm)
+      : isHalaqa
+        ? stageForm.title.trim() || halaqaName
+        : stageForm.title
+    if (isHalaqa && !stageForm.halaqa_id) {
+      toast.error("اختر الحلقة المرتبطة بالمرحلة")
+      return
+    }
     if (!autoTitle.trim()) return
     setSavingStage(true)
     try {
@@ -233,6 +256,8 @@ export default function ReaderTajweedPathDetailPage() {
       } else {
         body.recitation_mode = null
       }
+      // Link to a halaqa when this is a halaqa stage; clear it otherwise.
+      body.halaqa_id = isHalaqa ? stageForm.halaqa_id : null
       // Reader uses /api/admin/tajweed-paths/[id]/stages — that route accepts
       // 'reader' role and enforces ownership server-side.
       if (stageDialog.stage) {
@@ -351,6 +376,7 @@ export default function ReaderTajweedPathDetailPage() {
                     <Badge variant="outline" className="text-[10px] font-semibold text-muted-foreground bg-muted/50 border-border/50">
                       {s.estimated_minutes} {tp.metadata.minutesShort}
                     </Badge>
+                    {s.stage_type === "halaqa" && <Badge variant="secondary" className="text-[10px] bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-500/20 inline-flex items-center gap-1"><Users className="h-3 w-3" /> حلقة مجدولة</Badge>}
                     {s.video_url && <Badge variant="secondary" className="text-[10px] bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-500/20">{tp.metadata.videoBadge}</Badge>}
                     {s.pdf_url && <Badge variant="secondary" className="text-[10px] bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20">{tp.metadata.pdfBadge}</Badge>}
                     {s.passage_text && <Badge variant="secondary" className="text-[10px] bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">نص للقراءة</Badge>}
@@ -569,11 +595,11 @@ export default function ReaderTajweedPathDetailPage() {
             {/* Stage type */}
             <div className="md:col-span-2 space-y-2">
               <Label className="font-semibold text-base">نوع المرحلة</Label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <button
                   type="button"
                   onClick={() => setStageForm({ ...stageForm, stage_type: "custom" })}
-                  className={`flex items-center justify-center gap-2 rounded-xl border-2 p-4 text-sm font-bold transition-all ${stageForm.stage_type !== "recitation" ? "border-primary bg-primary/5 text-primary shadow-sm" : "border-border/50 bg-muted/10 text-muted-foreground hover:bg-muted/30"}`}
+                  className={`flex items-center justify-center gap-2 rounded-xl border-2 p-4 text-sm font-bold transition-all ${stageForm.stage_type === "custom" ? "border-primary bg-primary/5 text-primary shadow-sm" : "border-border/50 bg-muted/10 text-muted-foreground hover:bg-muted/30"}`}
                 >
                   <BookOpen className="h-5 w-5" /> درس (شرح/فيديو/ملف)
                 </button>
@@ -584,10 +610,53 @@ export default function ReaderTajweedPathDetailPage() {
                 >
                   <Mic className="h-5 w-5" /> تلاوة / تسميع
                 </button>
+                <button
+                  type="button"
+                  onClick={() => setStageForm({ ...stageForm, stage_type: "halaqa" })}
+                  className={`flex items-center justify-center gap-2 rounded-xl border-2 p-4 text-sm font-bold transition-all ${stageForm.stage_type === "halaqa" ? "border-blue-500 bg-blue-500/5 text-blue-700 dark:text-blue-400 shadow-sm" : "border-border/50 bg-muted/10 text-muted-foreground hover:bg-muted/30"}`}
+                >
+                  <Users className="h-5 w-5" /> حلقة مجدولة
+                </button>
               </div>
             </div>
 
-            {stageForm.stage_type === "recitation" ? (
+            {stageForm.stage_type === "halaqa" ? (
+              <>
+                <div className="md:col-span-2 space-y-4 rounded-xl border border-blue-500/20 bg-blue-500/5 p-5">
+                  <Label className="flex items-center gap-2 font-bold text-blue-800 dark:text-blue-400">
+                    <Users className="h-5 w-5" /> الحلقة المرتبطة بهذه المرحلة
+                  </Label>
+                  <Select value={stageForm.halaqa_id} onValueChange={v => setStageForm({ ...stageForm, halaqa_id: v })}>
+                    <SelectTrigger className="h-11 rounded-lg bg-background border-blue-500/20 focus:ring-blue-500/20">
+                      <SelectValue placeholder="— اختر الحلقة —" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-72">
+                      {halaqat.length === 0 ? (
+                        <div className="px-3 py-2 text-sm text-muted-foreground">لا توجد حلقات بعد</div>
+                      ) : (
+                        halaqat.map(h => <SelectItem key={h.id} value={h.id}>{h.name}</SelectItem>)
+                      )}
+                    </SelectContent>
+                  </Select>
+                  <div className="text-left">
+                    <Link href="/reader/halaqat" target="_blank" className="text-xs font-bold text-blue-600 hover:text-blue-700 underline underline-offset-2">
+                      أو أنشئ حلقة جديدة مرتبطة بهذا المسار
+                    </Link>
+                  </div>
+                  <p className="text-xs text-blue-700/80 dark:text-blue-400/80">
+                    ستظهر هذه الحلقة كمرحلة داخل المسار، ويدخلها الطالب من خلاله ويحضر جلساتها المجدولة.
+                  </p>
+                </div>
+                <div className="md:col-span-2 space-y-1.5">
+                  <Label className="font-semibold">عنوان المرحلة (اختياري)</Label>
+                  <Input value={stageForm.title} onChange={e => setStageForm({ ...stageForm, title: e.target.value })} placeholder="يُستخدم اسم الحلقة تلقائياً إن تُرك فارغاً" className="h-11 rounded-lg focus-visible:ring-primary/20" />
+                </div>
+                <div className="md:col-span-2 space-y-1.5">
+                  <Label className="font-semibold">تعليمات للطالب</Label>
+                  <Textarea rows={3} value={stageForm.description} onChange={e => setStageForm({ ...stageForm, description: e.target.value })} placeholder="مثال: احضر الجلسة المجدولة وجهّز ورد الحفظ" className="resize-none rounded-lg focus-visible:ring-primary/20" />
+                </div>
+              </>
+            ) : stageForm.stage_type === "recitation" ? (
               <>
                 <div className="md:col-span-2 space-y-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-5">
                   <Label className="flex items-center gap-2 font-bold text-emerald-800 dark:text-emerald-400">
@@ -736,7 +805,7 @@ export default function ReaderTajweedPathDetailPage() {
           </div>
           <DialogFooter className="pt-4 border-t border-border/50 mt-4 gap-2 sm:gap-0">
             <Button variant="ghost" onClick={() => setStageDialog({ open: false })} className="rounded-lg font-semibold">{tp.actions.cancel}</Button>
-            <Button onClick={saveStage} disabled={savingStage || (stageForm.stage_type !== "recitation" && !stageForm.title.trim())} className="gap-2 rounded-lg font-bold min-w-[120px]">
+            <Button onClick={saveStage} disabled={savingStage || (stageForm.stage_type === "custom" && !stageForm.title.trim()) || (stageForm.stage_type === "halaqa" && !stageForm.halaqa_id)} className="gap-2 rounded-lg font-bold min-w-[120px]">
               {savingStage && <Loader2 className="h-4 w-4 animate-spin" />}
               {stageDialog.stage ? tp.actions.saveChanges : tp.actions.addStageVerb}
             </Button>

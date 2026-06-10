@@ -29,7 +29,10 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
     if (!path) return NextResponse.json({ error: "غير موجود" }, { status: 404 })
 
     const stages = (await query(
-      `SELECT * FROM tajweed_path_stages WHERE path_id = $1 ORDER BY position ASC`,
+      `SELECT s.*, h.name AS halaqa_title
+         FROM tajweed_path_stages s
+         LEFT JOIN halaqat h ON h.id = s.halaqa_id
+        WHERE s.path_id = $1 ORDER BY s.position ASC`,
       [id],
     )) as any[]
 
