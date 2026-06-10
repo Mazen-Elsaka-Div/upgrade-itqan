@@ -201,10 +201,10 @@ export default function ReaderSessionsPage() {
   ]
 
   const filterButtons = [
-    { key: "all" as const, label: t.admin.allSessions },
-    { key: "upcoming" as const, label: t.admin.upcoming },
-    { key: "completed" as const, label: t.admin.completed },
-    { key: "pending" as const, label: t.admin.pendingLinks },
+    { key: "all" as const, label: isAr ? "كل الجلسات" : "All Sessions" },
+    { key: "upcoming" as const, label: isAr ? "القادمة" : "Upcoming" },
+    { key: "completed" as const, label: isAr ? "المكتملة" : "Completed" },
+    { key: "pending" as const, label: isAr ? "بدون رابط" : "Pending Links" },
   ]
 
   const STATUS = {
@@ -248,19 +248,16 @@ export default function ReaderSessionsPage() {
       </div>
 
       {/* Elegant Filter Segment */}
-      <div className="flex flex-wrap items-center gap-2 p-1.5 bg-muted/50 rounded-2xl border border-border/50 max-w-fit shadow-sm">
+      <div className="flex flex-wrap items-center gap-2 p-1.5 bg-muted/50 rounded-2xl border border-border max-w-fit shadow-sm">
         {filterButtons.map((btn) => (
           <button
             key={btn.key}
             onClick={() => setFilter(btn.key)}
             className={`relative flex items-center justify-center gap-2 rounded-xl px-6 py-2.5 text-sm font-bold transition-all duration-300 ${filter === btn.key
-              ? "text-primary-foreground shadow-md shadow-primary/20"
-              : "text-muted-foreground hover:text-foreground hover:bg-muted"
+              ? "bg-[#0B3D2E] text-white shadow-md shadow-[#0B3D2E]/20"
+              : "text-muted-foreground hover:text-foreground hover:bg-card"
               }`}
           >
-            {filter === btn.key && (
-              <div className="absolute inset-0 bg-[#0B3D2E] rounded-xl -z-10" />
-            )}
             {btn.label}
           </button>
         ))}
