@@ -137,19 +137,6 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     ['duration_minutes', body.duration_minutes],
     ['scope', body.scope],
     ['is_active', body.is_active],
-    // Path linking. When scope is set to 'public', clear the link.
-    [
-      'path_type',
-      body.scope === 'public'
-        ? null
-        : body.path_type === 'tajweed' || body.path_type === 'memorization'
-          ? body.path_type
-          : body.path_type === null
-            ? null
-            : undefined,
-    ],
-    ['path_id', body.scope === 'public' ? null : body.path_id !== undefined ? body.path_id || null : undefined],
-    ['auto_enroll', body.scope === 'public' ? false : body.auto_enroll !== undefined ? Boolean(body.auto_enroll) : undefined],
   ]
   for (const [col, val] of fields) {
     if (val !== undefined) {
