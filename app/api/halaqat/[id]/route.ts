@@ -15,6 +15,11 @@ async function loadHalaqa(id: string) {
     `SELECT
        h.*,
        u.name AS teacher_name,
+       CASE
+         WHEN h.path_type = 'tajweed' THEN (SELECT title FROM tajweed_paths WHERE id = h.path_id)
+         WHEN h.path_type = 'memorization' THEN (SELECT title FROM memorization_paths WHERE id = h.path_id)
+         ELSE NULL
+       END AS path_title,
        COALESCE((
          SELECT COUNT(*) FROM halaqat_students hs
          WHERE hs.halaqah_id = h.id AND hs.is_active = TRUE
