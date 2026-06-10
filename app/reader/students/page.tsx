@@ -104,7 +104,8 @@ export default function ReaderStudentsPage() {
           {filtered.map((s) => (
             <Card
               key={s.student_id}
-              className="group border-border rounded-3xl overflow-hidden bg-card hover:shadow-xl hover:shadow-black/5 hover:border-emerald-500/30 transition-all duration-300"
+              onClick={() => router.push(`/reader/students/${s.student_id}`)}
+              className="group border-border rounded-3xl overflow-hidden bg-card hover:shadow-xl hover:shadow-black/5 hover:border-emerald-500/30 transition-all duration-300 cursor-pointer"
             >
               <CardContent className="p-5 space-y-4">
                 {/* Identity */}
@@ -169,7 +170,7 @@ export default function ReaderStudentsPage() {
                     size="sm"
                     variant="outline"
                     className="flex-1 rounded-xl font-bold"
-                    onClick={() => router.push(`/reader/recitations?studentId=${s.student_id}`)}
+                    onClick={(e) => { e.stopPropagation(); router.push(`/reader/recitations?studentId=${s.student_id}`) }}
                   >
                     <Mic className="w-4 h-4 ml-1.5" />
                     التلاوات
@@ -177,7 +178,7 @@ export default function ReaderStudentsPage() {
                   <Button
                     size="sm"
                     className="flex-1 rounded-xl font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20 shadow-none"
-                    onClick={() => router.push(`/reader/chat?studentId=${s.student_id}`)}
+                    onClick={(e) => { e.stopPropagation(); router.push(`/reader/chat?studentId=${s.student_id}`) }}
                   >
                     <Mail className="w-4 h-4 ml-1.5" />
                     مراسلة
