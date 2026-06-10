@@ -71,6 +71,7 @@ const getRoleConfig = (t: any): Record<'student' | 'reader' | 'admin' | 'student
           { href: '/reader/competitions', label: 'تحكيم المسابقات', icon: Trophy },
           { href: '/reader/sessions', label: t.reader.sessions || "الجلسات", icon: Calendar },
           { href: '/reader/halaqat', label: 'حلقاتي', icon: GraduationCap },
+          { href: '/reader/certificates', label: 'مركز الشهادات', icon: Award },
           { href: '/reader/schedule', label: t.reader.schedule, icon: Clock },
           { href: '/reader/chat', label: t.reader.chat, icon: MessageSquare },
           { href: '/community/maqraa/forum', label: 'منتدى المقرأة', icon: MessagesSquare },
