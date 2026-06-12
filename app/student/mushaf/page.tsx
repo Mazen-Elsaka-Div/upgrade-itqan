@@ -470,10 +470,10 @@ export default function MushafPage() {
         {/* Floating Side Toolbar */}
         <div 
           dir={isAr ? 'ltr' : 'rtl'}
-          className={`fixed top-1/2 -translate-y-1/2 z-50 flex flex-col items-start gap-3 p-2 sm:p-2.5 rounded-3xl bg-card/70 backdrop-blur-2xl border border-border/50 shadow-2xl transition-all duration-700 ease-out hover:shadow-emerald-500/20 ${isAr ? 'left-2 sm:left-6 animate-in slide-in-from-left-8' : 'right-2 sm:right-6 animate-in slide-in-from-right-8'}`}
+          className={`fixed top-1/2 -translate-y-1/2 z-50 flex flex-col items-start gap-3 transition-all duration-700 ease-out ${isAr ? 'left-2 sm:left-6 animate-in slide-in-from-left-8' : 'right-2 sm:right-6 animate-in slide-in-from-right-8'}`}
         >
           {/* Surah/Juz info */}
-          <div className="group/item flex items-center h-12 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg cursor-pointer transition-all duration-300 overflow-hidden hover:shadow-xl">
+          <div className="group/item flex items-center h-12 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-900/20 cursor-pointer transition-all duration-300 overflow-hidden hover:shadow-xl hover:scale-105 origin-left">
             <div className="w-12 h-12 shrink-0 flex items-center justify-center">
               <BookOpen className="w-5 h-5" />
             </div>
@@ -489,7 +489,7 @@ export default function MushafPage() {
 
           {/* Page indicator */}
           <div 
-            className="group/item flex items-center h-12 rounded-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400 shadow-inner cursor-pointer transition-all duration-300 overflow-hidden hover:bg-emerald-100 dark:hover:bg-emerald-500/20" 
+            className="group/item flex items-center h-12 rounded-full bg-card/95 backdrop-blur-md border border-border/50 text-emerald-700 dark:text-emerald-400 shadow-md shadow-black/5 cursor-pointer transition-all duration-300 overflow-hidden hover:bg-card hover:shadow-lg hover:scale-105 origin-left" 
           >
             <div className="w-12 h-12 shrink-0 flex items-center justify-center font-black text-sm">
               {toArabicDigits(pageNumber)}
@@ -506,7 +506,7 @@ export default function MushafPage() {
 
           {/* Reciter selector */}
           <Select value={reciterId} onValueChange={setReciterId}>
-            <SelectTrigger className="group/item flex items-center h-12 p-0 rounded-full bg-muted/50 border-border hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200 transition-all focus:ring-0 [&>svg:last-child]:hidden overflow-hidden w-auto">
+            <SelectTrigger className="group/item flex items-center h-12 p-0 rounded-full bg-card/95 backdrop-blur-md border border-border/50 hover:text-emerald-600 shadow-md shadow-black/5 transition-all focus:ring-0 [&>svg:last-child]:hidden overflow-hidden w-auto hover:bg-card hover:shadow-lg hover:scale-105 origin-left">
               <div className="w-12 h-12 shrink-0 flex items-center justify-center">
                 <Mic2 className="w-5 h-5 text-emerald-600" />
               </div>
@@ -531,7 +531,7 @@ export default function MushafPage() {
           {/* Progress Map */}
           <Link
             href="/student/mushaf-progress"
-            className="group/item flex items-center h-12 rounded-full bg-muted/50 border border-border hover:bg-emerald-50 hover:border-emerald-200 hover:text-emerald-600 dark:hover:bg-emerald-500/20 dark:hover:border-emerald-500/30 transition-all overflow-hidden shadow-sm"
+            className="group/item flex items-center h-12 rounded-full bg-card/95 backdrop-blur-md border border-border/50 hover:text-emerald-600 shadow-md shadow-black/5 transition-all overflow-hidden hover:bg-card hover:shadow-lg hover:scale-105 origin-left"
           >
             <div className="w-12 h-12 shrink-0 flex items-center justify-center">
               <Map className="w-5 h-5" />
@@ -549,7 +549,7 @@ export default function MushafPage() {
           {/* Surah Index */}
           <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
             <SheetTrigger asChild>
-              <button className="group/item flex items-center h-12 rounded-full bg-muted/50 border border-border hover:bg-emerald-50 hover:border-emerald-200 hover:text-emerald-600 dark:hover:bg-emerald-500/20 dark:hover:border-emerald-500/30 transition-all overflow-hidden shadow-sm">
+              <button className="group/item flex items-center h-12 rounded-full bg-card/95 backdrop-blur-md border border-border/50 hover:text-emerald-600 shadow-md shadow-black/5 transition-all overflow-hidden hover:bg-card hover:shadow-lg hover:scale-105 origin-left">
                 <div className="w-12 h-12 shrink-0 flex items-center justify-center">
                   <List className="w-5 h-5" />
                 </div>
