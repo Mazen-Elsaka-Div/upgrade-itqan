@@ -2,6 +2,7 @@
 
 import { useState, useEffect, use } from 'react'
 import Link from 'next/link'
+import { PageLoadingSkeleton } from '@/components/ui/page-loading-skeleton'
 import { ArrowRight, Loader2, Play, CheckCircle, Clock, Star, Send, Trophy, Award, Medal, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import MediaViewer from '@/components/media-viewer'
@@ -175,11 +176,7 @@ export default function ReaderCompetitionDetailPage({ params }: { params: Promis
   const evaluatedCount = entries.filter(e => e.status !== 'pending').length
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
-      </div>
-    )
+    return <PageLoadingSkeleton />
   }
 
   if (!competition) {

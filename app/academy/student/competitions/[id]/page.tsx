@@ -2,6 +2,7 @@
 
 import { useState, useEffect, use } from 'react'
 import Link from 'next/link'
+import { PageLoadingSkeleton } from '@/components/ui/page-loading-skeleton'
 import { Trophy, Calendar, Users, Star, Clock, ArrowRight, Loader2, Upload, Mic, CheckCircle, AlertCircle, Award } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import FileUploader from '@/components/academy/file-uploader'
@@ -136,11 +137,7 @@ export default function StudentCompetitionDetailPage({ params }: { params: Promi
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
-      </div>
-    )
+    return <PageLoadingSkeleton />
   }
 
   if (!competition) {

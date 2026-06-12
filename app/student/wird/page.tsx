@@ -11,6 +11,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { SURAHS } from "@/lib/data/surahs"
+import { PageLoadingSkeleton } from "@/components/ui/page-loading-skeleton"
+
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 type WirdItemType = "surah" | "pages" | "juz" | "ayahs" | "custom"
@@ -273,8 +275,8 @@ export default function WirdSettingsPage() {
 
   if (loading) {
     return (
-      <div className="flex-1 flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="max-w-3xl mx-auto p-4 md:p-8 space-y-6">
+        <PageLoadingSkeleton />
       </div>
     )
   }

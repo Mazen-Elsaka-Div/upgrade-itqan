@@ -338,11 +338,10 @@ export default function AcademyCalendarPage() {
               </div>
 
               {loading ? (
-                <div className="flex items-center justify-center py-32">
-                  <div className="relative">
-                    <div className="w-12 h-12 rounded-full border-4 border-blue-100 dark:border-blue-900/30" />
-                    <div className="w-12 h-12 rounded-full border-4 border-blue-600 border-t-transparent animate-spin absolute inset-0" />
-                  </div>
+                <div className="grid grid-cols-7 gap-2 sm:gap-4 animate-pulse">
+                  {Array.from({ length: 35 }).map((_, i) => (
+                    <div key={i} className="aspect-square rounded-2xl bg-muted" />
+                  ))}
                 </div>
               ) : (
                 <div className="grid grid-cols-7 gap-2 sm:gap-4">
@@ -377,7 +376,7 @@ export default function AcademyCalendarPage() {
                         </span>
                         
                         {dayEvs.length > 0 && (
-                          <div className="mt-auto mb-3 flex flex-wrap gap-1 justify-center px-1">
+                           <div className="mt-auto mb-3 flex flex-wrap gap-1 justify-center px-1">
                             {dayEvs.slice(0, 3).map(ev => (
                               <span 
                                 key={ev.id} 
@@ -434,13 +433,17 @@ export default function AcademyCalendarPage() {
             <CardContent className="p-0 overflow-y-auto flex-1">
               <AnimatePresence mode="wait">
                 {loading ? (
-                  <motion.div 
-                    key="loading"
-                    initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                    className="p-12 flex items-center justify-center"
-                  >
-                    <div className="w-8 h-8 rounded-full border-4 border-blue-100 border-t-blue-600 animate-spin" />
-                  </motion.div>
+                  <div className="p-6 space-y-4 animate-pulse">
+                    {[1, 2].map((i) => (
+                      <div key={i} className="flex gap-4 items-center">
+                        <div className="w-12 h-12 rounded-2xl bg-muted shrink-0" />
+                        <div className="flex-1 space-y-2">
+                          <div className="h-4 bg-muted rounded w-2/3" />
+                          <div className="h-3 bg-muted rounded w-1/2" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 ) : selectedEvents.length === 0 ? (
                   <motion.div 
                     key="empty"

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { useI18n } from "@/lib/i18n/context"
+import { PageLoadingSkeleton } from '@/components/ui/page-loading-skeleton'
 import { 
   Play, Pause, RotateCcw, CheckCircle, XCircle, 
   ChevronLeft, ChevronRight, MessageSquare, Award,
@@ -92,11 +93,7 @@ export default function RecitationReviewPage() {
   }
 
   if (loading) {
-    return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <Loader2 className="w-10 h-10 animate-spin text-primary" />
-      </div>
-    )
+    return <PageLoadingSkeleton />
   }
 
   if (!recitation) return null

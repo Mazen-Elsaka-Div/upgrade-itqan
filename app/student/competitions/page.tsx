@@ -7,6 +7,8 @@ import {
   Loader2, CheckCircle2, BookOpen, Mic, ChevronLeft
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { PageLoadingSkeleton } from "@/components/ui/page-loading-skeleton"
+
 
 interface Competition {
   id: string
@@ -90,9 +92,8 @@ export default function StudentLibraryCompetitionsPage() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] gap-3">
-        <Loader2 className="w-10 h-10 animate-spin text-primary" />
-        <p className="text-sm text-muted-foreground">جاري تحميل المسابقات...</p>
+      <div className="space-y-8 pb-8">
+        <PageLoadingSkeleton />
       </div>
     )
   }

@@ -232,8 +232,22 @@ export default function StudentFiqhPage() {
           </Card>
         )}
         {loading ? (
-          <div className="flex justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-card border border-border rounded-2xl p-5 animate-pulse space-y-4">
+                <div className="flex justify-between items-center gap-3">
+                  <div className="flex gap-2">
+                    <div className="h-5 w-16 bg-muted rounded-md" />
+                    <div className="h-5 w-20 bg-muted rounded-md" />
+                  </div>
+                  <div className="h-4 w-24 bg-muted rounded" />
+                </div>
+                <div className="space-y-2">
+                  <div className="h-4 bg-muted rounded w-1/4" />
+                  <div className="h-4 bg-muted rounded w-3/4" />
+                </div>
+              </div>
+            ))}
           </div>
         ) : filtered.length === 0 ? (
           <Card className="border-dashed bg-muted/30">

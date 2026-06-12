@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { PageLoadingSkeleton } from '@/components/ui/page-loading-skeleton'
 import { Trophy, Calendar, Users, Star, Clock, ChevronLeft, Loader2, Filter, Mic } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -88,11 +89,7 @@ export default function StudentCompetitionsPage() {
   const myJoinedCount = competitions.filter(c => c.has_joined).length
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
-      </div>
-    )
+    return <PageLoadingSkeleton />
   }
 
   return (

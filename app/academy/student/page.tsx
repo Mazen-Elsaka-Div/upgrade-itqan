@@ -10,6 +10,7 @@ import {
   CheckCircle2, GraduationCap, Activity as ActivityIcon,
   Video, Sparkles, ArrowUpRight, Medal,
 } from 'lucide-react'
+import { PageLoadingSkeleton } from '@/components/ui/page-loading-skeleton'
 import { AdhkarWidget } from '@/components/adhkar-widget'
 import { PrayerTimesDialog } from '@/components/prayer-times-dialog'
 
@@ -176,11 +177,7 @@ export default function AcademyStudentDashboard() {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    )
+    return <PageLoadingSkeleton />
   }
 
   const lp = stats?.level_progress

@@ -7,6 +7,8 @@ import {
   Loader2, Send, Play, Users, BookOpen, Star, AlertCircle
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { PageLoadingSkeleton } from "@/components/ui/page-loading-skeleton"
+
 import AudioRecorder from '@/components/academy/audio-recorder'
 
 interface Competition {
@@ -109,9 +111,8 @@ export default function StudentCompetitionDetailPage({ params }: { params: Promi
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] gap-3">
-        <Loader2 className="w-10 h-10 animate-spin text-primary" />
-        <p className="text-sm text-muted-foreground">جاري التحميل...</p>
+      <div className="max-w-3xl mx-auto space-y-6">
+        <PageLoadingSkeleton />
       </div>
     )
   }

@@ -41,7 +41,34 @@ type Message = {
 
 export default function StudentChatPage() {
     return (
-        <Suspense fallback={<div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-[#1B5E3B]" /></div>}>
+        <Suspense fallback={
+            <div className="space-y-6 h-[calc(100vh-140px)] flex flex-col max-w-6xl mx-auto animate-pulse">
+                <div className="flex justify-between items-center">
+                    <div className="space-y-2">
+                        <div className="h-8 w-48 bg-muted rounded" />
+                        <div className="h-4 w-72 bg-muted rounded" />
+                    </div>
+                    <div className="h-10 w-32 bg-muted rounded-xl" />
+                </div>
+                <div className="flex-1 min-h-0 flex flex-col lg:flex-row-reverse gap-6">
+                    <div className="border border-border w-full lg:w-1/3 rounded-2xl bg-card p-4 space-y-4">
+                        {[...Array(5)].map((_, i) => (
+                            <div key={i} className="flex gap-3">
+                                <div className="w-12 h-12 rounded-full bg-muted shrink-0" />
+                                <div className="flex-1 space-y-2 py-1">
+                                    <div className="h-4 bg-muted rounded w-1/3" />
+                                    <div className="h-3 bg-muted rounded w-2/3" />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    <div className="border border-border w-full lg:w-2/3 rounded-2xl bg-card p-6 flex flex-col justify-center items-center">
+                        <div className="w-16 h-16 rounded-full bg-muted mb-4" />
+                        <div className="h-4 w-48 bg-muted rounded" />
+                    </div>
+                </div>
+            </div>
+        }>
             <StudentChatInner />
         </Suspense>
     )
@@ -423,14 +450,22 @@ function StudentChatInner() {
                     {/* Conversations List */}
                     <Card className="border-border w-full lg:w-1/3 flex flex-col h-full overflow-hidden shadow-sm">
                         <CardHeader className="pb-3 border-b border-border bg-muted/30">
-                            <CardTitle className="text-base font-bold text-foreground/80">
+                        <CardTitle className="text-base font-bold text-foreground/80">
                                 {activeTab === "messages" ? t.student.conversationsHeader : (isAr ? "قائمة التذاكر" : "Tickets List")}
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="p-0 flex-1 overflow-y-auto">
-                            {loadingConvs ? (
-                                <div className="p-8 flex justify-center">
-                                    <Loader2 className="w-6 h-6 animate-spin text-[#1B5E3B]" />
+                             {loadingConvs ? (
+                                <div className="p-4 space-y-4 animate-pulse">
+                                    {[...Array(4)].map((_, i) => (
+                                        <div key={i} className="flex gap-3 items-center">
+                                            <div className="w-12 h-12 rounded-full bg-muted shrink-0" />
+                                            <div className="flex-1 space-y-2 py-1">
+                                                <div className="h-4 bg-muted rounded w-1/2" />
+                                                <div className="h-3 bg-muted rounded w-3/4" />
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                             ) : conversations.filter(c => activeTab === "tickets" ? c.is_ticket : !c.is_ticket).length === 0 ? (
                                 <div className="p-8 text-center text-muted-foreground flex flex-col items-center">
@@ -541,8 +576,12 @@ function StudentChatInner() {
                                 <CardContent className="flex-1 overflow-y-auto p-5 space-y-6">
                                     {/* Messages */}
                                     {loadingMsgs ? (
-                                        <div className="h-full flex items-center justify-center">
-                                            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                                        <div className="space-y-4 p-4 animate-pulse">
+                                            {[...Array(3)].map((_, i) => (
+                                                <div key={i} className={`flex ${i % 2 === 0 ? 'justify-start' : 'justify-end'}`}>
+                                                    <div className="h-12 w-48 bg-muted rounded-2xl" />
+                                                </div>
+                                            ))}
                                         </div>
                                     ) : messages.length === 0 ? (
                                         <div className="h-full flex flex-col items-center justify-center text-muted-foreground">

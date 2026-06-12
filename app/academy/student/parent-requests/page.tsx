@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { PageLoadingSkeleton } from '@/components/ui/page-loading-skeleton'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
@@ -86,11 +87,7 @@ export default function ParentRequestsPage() {
   const otherRequests = requests.filter(r => r.status?.toLowerCase() !== 'pending')
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    )
+    return <PageLoadingSkeleton />
   }
 
   return (

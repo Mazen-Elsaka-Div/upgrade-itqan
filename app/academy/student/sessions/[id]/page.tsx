@@ -14,6 +14,7 @@ import {
   Loader2, ArrowLeft, Info, AlertTriangle, LayoutDashboard
 } from 'lucide-react'
 import { useI18n } from '@/lib/i18n/context'
+import { PageLoadingSkeleton } from '@/components/ui/page-loading-skeleton'
 import { cn } from '@/lib/utils'
 import { VideoPlayerModal } from '@/components/video/video-player-modal'
 
@@ -124,18 +125,7 @@ export default function SessionDetailsPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] gap-6 relative">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-blue-500/10 blur-[80px] rounded-full -z-10" />
-        <div className="relative">
-          <div className="w-16 h-16 rounded-full border-4 border-blue-100 dark:border-blue-900/30" />
-          <div className="w-16 h-16 rounded-full border-4 border-blue-600 border-t-transparent animate-spin absolute inset-0" />
-        </div>
-        <p className="text-muted-foreground font-medium animate-pulse">
-          {isAr ? 'جارٍ تحميل تفاصيل الجلسة...' : 'Loading session details...'}
-        </p>
-      </div>
-    )
+    return <PageLoadingSkeleton />
   }
 
   if (error) {

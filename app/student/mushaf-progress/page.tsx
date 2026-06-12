@@ -8,6 +8,8 @@ import {
   Clock, Trophy, Crown, Sparkles, CheckCircle,
 } from 'lucide-react'
 import { SURAHS, JUZ_BOUNDS, juzName } from '@/lib/quran-data'
+import { PageLoadingSkeleton } from "@/components/ui/page-loading-skeleton"
+
 
 type PageStatus = 'mastered' | 'reviewing' | 'none'
 
@@ -122,11 +124,8 @@ export default function MushafProgressPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center space-y-4">
-          <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto" />
-          <p className="text-sm text-muted-foreground font-bold">جاري تحميل خريطة المصحف...</p>
-        </div>
+      <div className="space-y-6 max-w-6xl mx-auto">
+        <PageLoadingSkeleton />
       </div>
     )
   }

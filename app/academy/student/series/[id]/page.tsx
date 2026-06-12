@@ -2,6 +2,7 @@
 
 import { useState, useEffect, use } from 'react'
 import { Layers, BookOpen, Route, Loader2, ArrowRight } from 'lucide-react'
+import { PageLoadingSkeleton } from '@/components/ui/page-loading-skeleton'
 import Link from 'next/link'
 
 interface SeriesDetail {
@@ -47,11 +48,7 @@ export default function StudentSeriesDetailPage({ params }: { params: Promise<{ 
   }, [id])
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
-      </div>
-    )
+    return <PageLoadingSkeleton />
   }
 
   if (!series) {

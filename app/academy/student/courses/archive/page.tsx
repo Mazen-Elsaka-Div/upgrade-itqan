@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
+import { PageLoadingSkeleton } from '@/components/ui/page-loading-skeleton'
 import { useI18n } from '@/lib/i18n/context'
 import { cn } from '@/lib/utils'
 import {
@@ -229,9 +230,7 @@ export default function StudentCoursesArchivePage() {
           </button>
         </div>
       ) : loading ? (
-        <div className="flex justify-center py-20">
-          <Loader2 className="w-7 h-7 animate-spin text-indigo-600" />
-        </div>
+        <PageLoadingSkeleton />
       ) : visibleCount === 0 ? (
         <div className="text-center py-16 bg-card rounded-2xl border border-border">
           <Archive className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-40" />

@@ -11,6 +11,7 @@ import {
   Calendar, CheckCircle
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { PageLoadingSkeleton } from '@/components/ui/page-loading-skeleton'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
@@ -147,12 +148,7 @@ export default function StudentTasksPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[500px] gap-4">
-        <Loader2 className="w-8 h-8 text-muted-foreground animate-spin" />
-        <p className="text-muted-foreground font-medium">جاري تحميل المهام...</p>
-      </div>
-    )
+    return <PageLoadingSkeleton />
   }
 
   const pendingCount = tasks.filter(t => t.status === 'pending').length

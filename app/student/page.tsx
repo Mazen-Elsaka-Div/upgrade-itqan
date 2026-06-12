@@ -12,6 +12,8 @@ import {
 import { SURAHS } from "@/lib/quran-data"
 import { useI18n } from "@/lib/i18n/context"
 import { AdhkarWidget } from "@/components/adhkar-widget"
+import { PageLoadingSkeleton } from "@/components/ui/page-loading-skeleton"
+
 
 type Recitation = {
   id: string
@@ -306,7 +308,16 @@ export default function StudentDashboard() {
     return Math.max(1, ...chartData.map(d => d.newVerses + d.revisedVerses))
   }, [chartData])
 
+  if (loadingRecitations && loadingProgress) {
+    return (
+      <div className="max-w-6xl mx-auto pb-12">
+        <PageLoadingSkeleton />
+      </div>
+    )
+  }
+
   return (
+
     <div className="max-w-6xl mx-auto pb-12 space-y-6 md:space-y-8">
       {/* Header / Welcome */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -576,7 +587,11 @@ export default function StudentDashboard() {
           </div>
 
           {loadingProgress ? (
-            <div className="flex justify-center py-12"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>
+            <div className="flex items-end gap-[3px] h-40 animate-pulse" dir="ltr">
+              {[...Array(7)].map((_, i) => (
+                <div key={i} className="flex-1 bg-muted rounded-t-sm" style={{ height: `${20 + (i * 10) % 70}%` }} />
+              ))}
+            </div>
           ) : chartData.length === 0 ? (
             <div className="text-center py-12 text-sm text-muted-foreground">لا توجد بيانات بعد</div>
           ) : (
@@ -774,8 +789,16 @@ export default function StudentDashboard() {
           </div>
 
           {loadingPrayer ? (
-            <div className="flex items-center justify-center h-40">
-              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            <div className="space-y-2 animate-pulse">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="flex items-center justify-between rounded-xl px-3 md:px-4 py-2.5 bg-muted/30">
+                  <div className="flex items-center gap-3">
+                    <div className="w-4 h-4 rounded-full bg-muted" />
+                    <div className="h-4 w-12 bg-muted rounded" />
+                  </div>
+                  <div className="h-4 w-10 bg-muted rounded font-mono" />
+                </div>
+              ))}
             </div>
           ) : prayerTimes ? (
             <div className="space-y-2">
@@ -839,8 +862,16 @@ export default function StudentDashboard() {
           </div>
 
           {loadingWird ? (
-            <div className="flex justify-center py-6">
-              <Loader2 className="w-5 h-5 animate-spin text-emerald-500" />
+            <div className="space-y-2 animate-pulse">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="w-full flex items-center gap-3 rounded-xl px-3 md:px-4 py-3 bg-muted/30 border border-transparent">
+                  <div className="w-5 h-5 rounded-md bg-muted flex-shrink-0" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 bg-muted rounded w-2/3" />
+                    <div className="h-3 bg-muted rounded w-1/3" />
+                  </div>
+                </div>
+              ))}
             </div>
           ) : wirdItems.length === 0 ? (
             <div className="text-center py-6">
@@ -977,8 +1008,19 @@ export default function StudentDashboard() {
         </div>
 
         {loadingRecitations ? (
-          <div className="flex justify-center py-8">
-            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+          <div className="space-y-3 animate-pulse">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-muted/30">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-muted" />
+                  <div className="space-y-2">
+                    <div className="h-4 bg-muted rounded w-24" />
+                    <div className="h-3 bg-muted rounded w-16" />
+                  </div>
+                </div>
+                <div className="h-6 w-16 bg-muted rounded-full" />
+              </div>
+            ))}
           </div>
         ) : recitations.length === 0 ? (
           <div className="text-center py-8">

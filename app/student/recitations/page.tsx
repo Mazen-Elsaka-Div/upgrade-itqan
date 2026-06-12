@@ -110,9 +110,22 @@ export default function StudentRecitationsPage() {
       </div>
 
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-20 space-y-4">
-          <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-muted-foreground animate-pulse text-sm">جاري تحميل التسميعات...</p>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 animate-pulse">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="bg-card border border-border/60 rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+              <div className="flex items-center gap-5">
+                <div className="w-14 h-14 rounded-2xl bg-muted shrink-0" />
+                <div className="space-y-2">
+                  <div className="h-5 bg-muted rounded w-32" />
+                  <div className="h-4 bg-muted rounded w-24" />
+                </div>
+              </div>
+              <div className="flex sm:flex-col items-center sm:items-end gap-3">
+                <div className="h-8 w-24 bg-muted rounded-xl" />
+                <div className="h-10 w-28 bg-muted rounded-xl" />
+              </div>
+            </div>
+          ))}
         </div>
       ) : filtered.length === 0 ? (
         <div className="bg-card border border-border border-dashed rounded-3xl py-20 text-center shadow-sm">

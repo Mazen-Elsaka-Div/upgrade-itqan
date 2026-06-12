@@ -559,8 +559,28 @@ export default function ReaderDashboard() {
 
         <div className="bg-card/60 backdrop-blur-xl border border-border/50 rounded-[32px] shadow-sm overflow-hidden">
           {loadingStudentProgress ? (
-            <div className="p-10 flex items-center justify-center">
-              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            <div className="divide-y divide-border/60">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="p-5 md:p-6 space-y-4 animate-pulse">
+                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                    <div className="flex items-center gap-4 min-w-0">
+                      <div className="w-12 h-12 rounded-2xl bg-muted shrink-0" />
+                      <div className="space-y-2">
+                        <div className="h-4 bg-muted rounded w-28" />
+                        <div className="h-3 bg-muted rounded w-36" />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 lg:min-w-[620px]">
+                      {[1, 2, 3, 4].map((j) => (
+                        <div key={j} className="rounded-2xl bg-muted/40 border border-border/20 p-3 space-y-2">
+                          <div className="h-3 bg-muted rounded w-12" />
+                          <div className="h-5 bg-muted rounded w-20" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           ) : studentProgress.length === 0 ? (
             <div className="p-10 text-center text-muted-foreground font-medium">

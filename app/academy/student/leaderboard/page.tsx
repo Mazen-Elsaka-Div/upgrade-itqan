@@ -126,7 +126,35 @@ export default function LeaderboardPage() {
       </section>
 
       {loading ? (
-        <div className="flex min-h-80 items-center justify-center"><Loader2 className="h-9 w-9 animate-spin text-amber-500" /></div>
+        <div className="space-y-6">
+          {/* Podium Skeleton */}
+          <div className="grid gap-4 lg:grid-cols-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="rounded-3xl border border-border/50 bg-card p-5 text-center shadow-sm animate-pulse space-y-4">
+                <div className="mx-auto h-20 w-20 rounded-full bg-muted" />
+                <div className="h-4 bg-muted rounded w-2/3 mx-auto" />
+                <div className="h-3 bg-muted rounded w-1/3 mx-auto" />
+                <div className="h-8 bg-muted rounded w-1/2 mx-auto" />
+              </div>
+            ))}
+          </div>
+
+          {/* Table List Skeleton */}
+          <div className="rounded-3xl border border-border bg-card p-5 shadow-sm space-y-3">
+            <div className="h-6 w-32 bg-muted rounded mb-4 animate-pulse" />
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="flex items-center gap-4 rounded-2xl border border-border/40 bg-background p-4 animate-pulse">
+                <div className="h-11 w-11 rounded-2xl bg-muted shrink-0" />
+                <div className="h-12 w-12 rounded-full bg-muted shrink-0" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 bg-muted rounded w-1/4" />
+                  <div className="h-3 bg-muted rounded w-1/3" />
+                </div>
+                <div className="h-8 w-16 bg-muted rounded shrink-0" />
+              </div>
+            ))}
+          </div>
+        </div>
       ) : leaderboard.length === 0 ? (
         <div className="rounded-3xl border border-dashed border-border bg-card p-16 text-center">
           <Trophy className="mx-auto mb-4 h-14 w-14 text-muted-foreground/40" />

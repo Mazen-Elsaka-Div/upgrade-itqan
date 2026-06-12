@@ -122,9 +122,10 @@ function StageAyahText({ stage }: { stage: Stage }) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-6 gap-2 text-amber-700/70">
-        <Loader2 className="w-4 h-4 animate-spin" />
-        <span className="text-xs font-bold">جاري تحميل نص الآيات...</span>
+      <div className="space-y-2 py-4 animate-pulse">
+        <div className="h-4 bg-amber-700/10 rounded w-full" />
+        <div className="h-4 bg-amber-700/10 rounded w-5/6" />
+        <div className="h-4 bg-amber-700/10 rounded w-4/5" />
       </div>
     )
   }

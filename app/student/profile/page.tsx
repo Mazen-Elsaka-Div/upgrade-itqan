@@ -8,6 +8,8 @@ import { Label } from '@/components/ui/label'
 import { AvatarUpload } from '@/components/avatar-upload'
 import { Award, User, Lock, CheckCircle, Loader2, BookMarked, X, Plus, MapPin } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { PageLoadingSkeleton } from "@/components/ui/page-loading-skeleton"
+
 
 // Major Arab/Islamic cities for prayer times
 const PRAYER_CITIES = [
@@ -214,8 +216,17 @@ export default function ProfilePage() {
   const isAr = locale === 'ar'
   const roleLabel = profile?.role === 'student' ? t.profile.roles.student : profile?.role === 'reader' ? t.profile.roles.reader : t.profile.roles.admin
 
+  if (loading) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 pt-10">
+        <PageLoadingSkeleton />
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen relative pb-20">
+
       {/* Decorative background elements */}
       <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-primary/10 via-primary/5 to-transparent -z-10" />
       <div className="absolute top-20 right-[10%] w-64 h-64 bg-primary/20 rounded-full blur-[120px] -z-10 animate-pulse" />
@@ -440,8 +451,10 @@ export default function ProfilePage() {
               </CardHeader>
               <CardContent className="p-8 pt-0">
                 {specsLoading ? (
-                  <div className="flex justify-center py-6">
-                    <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                  <div className="flex flex-wrap gap-3 animate-pulse">
+                    {[...Array(6)].map((_, i) => (
+                      <div key={i} className="h-10 w-24 bg-muted rounded-2xl" />
+                    ))}
                   </div>
                 ) : (
                   <div className="flex flex-wrap gap-3">

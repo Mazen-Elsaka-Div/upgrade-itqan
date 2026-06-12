@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
+import { PageLoadingSkeleton } from '@/components/ui/page-loading-skeleton'
 import {
   BookOpen, Plus, Loader2, Users, CheckCircle2, Eye, EyeOff, Trash2,
   ChevronRight, AlertTriangle, Layers, Sparkles, Mic, ArrowUpDown, Hash,
@@ -250,9 +251,7 @@ export default function ReaderMemorizationPathsPage() {
       )}
 
       {loading ? (
-        <div className="flex justify-center py-10">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        </div>
+        <PageLoadingSkeleton />
       ) : paths.length === 0 ? (
         <Card className="p-12 text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-primary/10 text-primary mb-4">

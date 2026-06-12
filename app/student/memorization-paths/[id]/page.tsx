@@ -7,7 +7,9 @@ import {
   ArrowRight, BookOpen, CheckCircle2, ChevronDown, ChevronUp, Loader2,
   Lock, Mic, Play, Target, Trophy, Unlock,
 } from "lucide-react"
+import { PathDetailSkeleton } from "@/components/ui/skeletons"
 import { Card } from "@/components/ui/card"
+
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
@@ -181,8 +183,8 @@ export default function StudentMemorizationPathDetail() {
 
   if (loading) {
     return (
-      <div className="flex justify-center py-20">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      <div className="max-w-3xl mx-auto space-y-8 pb-12">
+        <PathDetailSkeleton />
       </div>
     )
   }

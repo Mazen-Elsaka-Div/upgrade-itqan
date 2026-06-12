@@ -188,9 +188,22 @@ export default function StudentTajweedPathsPage() {
 
 function Loading() {
   return (
-    <div className="flex flex-col items-center justify-center py-20 space-y-4">
-      <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-      <p className="text-muted-foreground animate-pulse text-sm font-bold">جاري التحميل...</p>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse w-full">
+      {[...Array(3)].map((_, i) => (
+        <div key={i} className="bg-card rounded-3xl border border-border/60 p-6 flex flex-col space-y-4">
+          <div className="w-12 h-12 rounded-2xl bg-muted shrink-0" />
+          <div className="h-6 bg-muted rounded w-3/4" />
+          <div className="flex gap-2">
+            <div className="h-6 w-16 bg-muted rounded" />
+            <div className="h-6 w-20 bg-muted rounded" />
+          </div>
+          <div className="space-y-2 mt-4">
+            <div className="h-3 bg-muted rounded w-full" />
+            <div className="h-3 bg-muted rounded w-5/6" />
+          </div>
+          <div className="h-10 bg-muted rounded-xl w-full mt-6" />
+        </div>
+      ))}
     </div>
   )
 }

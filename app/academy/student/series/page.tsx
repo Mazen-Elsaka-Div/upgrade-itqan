@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Layers, BookOpen, Route, Search, Loader2 } from 'lucide-react'
+import { PageLoadingSkeleton } from '@/components/ui/page-loading-skeleton'
 import Link from 'next/link'
 
 interface Series {
@@ -62,11 +63,7 @@ export default function StudentSeriesPage() {
   const getSubjectLabel = (val: string) => SUBJECTS.find(s => s.value === val)?.label || val || 'عام'
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
-      </div>
-    )
+    return <PageLoadingSkeleton />
   }
 
   return (

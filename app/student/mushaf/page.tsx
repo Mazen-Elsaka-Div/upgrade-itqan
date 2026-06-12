@@ -618,11 +618,26 @@ export default function MushafPage() {
             {/* Paper Texture Overlay */}
             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/rice-paper-2.png')] opacity-40 dark:opacity-10 mix-blend-multiply pointer-events-none" />
             {loading ? (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                <p className="text-sm font-bold text-muted-foreground">
-                  {t.student?.loadingMushaf || 'جاري تحميل المصحف...'}
-                </p>
+              <div className="absolute inset-0 flex flex-col items-center justify-center p-8 sm:p-12 animate-pulse space-y-6">
+                {/* Surah Header Skeleton */}
+                <div className="w-full max-w-xl h-16 rounded-2xl bg-amber-800/10 dark:bg-primary/10 border border-amber-800/20 dark:border-primary/20 flex items-center justify-between px-6">
+                  <div className="h-4 w-12 bg-amber-800/20 dark:bg-primary/20 rounded" />
+                  <div className="h-8 w-32 bg-amber-800/20 dark:bg-primary/20 rounded" />
+                  <div className="h-4 w-8 bg-amber-800/20 dark:bg-primary/20 rounded" />
+                </div>
+                {/* Bismillah Skeleton */}
+                <div className="h-6 w-48 bg-amber-800/10 dark:bg-primary/10 rounded" />
+                {/* Verses Lines Skeleton */}
+                <div className="w-full space-y-4 pt-4">
+                  <div className="h-5 bg-amber-800/10 dark:bg-primary/10 rounded w-full" />
+                  <div className="h-5 bg-amber-800/10 dark:bg-primary/10 rounded w-[95%] mx-auto" />
+                  <div className="h-5 bg-amber-800/10 dark:bg-primary/10 rounded w-[98%] mx-auto" />
+                  <div className="h-5 bg-amber-800/10 dark:bg-primary/10 rounded w-[92%] mx-auto" />
+                  <div className="h-5 bg-amber-800/10 dark:bg-primary/10 rounded w-[96%] mx-auto" />
+                  <div className="h-5 bg-amber-800/10 dark:bg-primary/10 rounded w-[90%] mx-auto" />
+                  <div className="h-5 bg-amber-800/10 dark:bg-primary/10 rounded w-[95%] mx-auto" />
+                  <div className="h-5 bg-amber-800/10 dark:bg-primary/10 rounded w-[85%] mx-auto" />
+                </div>
               </div>
             ) : error ? (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center px-6">
