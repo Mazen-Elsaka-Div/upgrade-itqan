@@ -167,6 +167,7 @@ const getRoleConfig = (t: any): Record<'student' | 'reader' | 'admin' | 'student
       {
         title: t.shell.account,
         items: [
+          { href: '/admin/activity-logs', label: 'سجل نشاطي', icon: ScrollText },
           { href: '/admin/profile', label: t.student.profile, icon: User },
         ]
       }
@@ -191,6 +192,7 @@ const getRoleConfig = (t: any): Record<'student' | 'reader' | 'admin' | 'student
       {
         title: t.shell.account,
         items: [
+          { href: '/admin/activity-logs', label: 'سجل نشاطي', icon: ScrollText },
           { href: '/admin/profile', label: t.student.profile, icon: User },
         ]
       }

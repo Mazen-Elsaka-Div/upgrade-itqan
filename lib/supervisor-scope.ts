@@ -73,3 +73,28 @@ export async function canSupervisorAccessUser(
   if (scope.kind === "ids") return scope.ids.includes(targetUserId)
   return false
 }
+
+/**
+ * Check whether a supervisor is allowed to act on a specific recitation.
+ * - student_supervisor is matched against the recitation's student_id
+ * - reciter_supervisor is matched against the recitation's assigned_reader_id
+ */
+export async function canSupervisorAccessRecitation(
+  session: JWTPayload,
+  recitationId: string
+): Promise<boolean> {
+  const scope = await resolveSupervisorScope(session)
+  if (scope.kind === "all") return true
+  if (scope.kind !== "ids") return false
+
+  const rows = await query<{ student_id: string; assigned_reader_id: string | null }>(
+    `SELECT student_id, assigned_reader_id FROM recitations WHERE id = $1`,
+    [recitationId]
+  )
+  const rec = rows[0]
+  if (!rec) return false
+
+  const targetId =
+    session.role === "student_supervisor" ? rec.student_id : rec.assigned_reader_id
+  return targetId ? scope.ids.includes(targetId) : false
+}

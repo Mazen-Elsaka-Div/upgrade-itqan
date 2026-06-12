@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSession, requireRole } from '@/lib/auth'
 import { query } from '@/lib/db'
 import { resolveSupervisorScope, canSupervisorAccessUser } from '@/lib/supervisor-scope'
+import { logAdminAction } from '@/lib/activity-log'
 
 export async function GET(req: NextRequest) {
     const session = await getSession()
@@ -122,6 +123,15 @@ export async function PATCH(req: NextRequest) {
     params.push(id)
 
     await query(`UPDATE users SET ${setters.join(', ')} WHERE id = $${idx} AND role = 'reader'`, params)
+
+    await logAdminAction({
+        userId: session!.sub,
+        action: 'reader.update',
+        entityType: 'user',
+        entityId: id,
+        description: 'تحديث بيانات المقرئ',
+        details: { fields: Object.keys(fields) },
+    })
 
     return NextResponse.json({ ok: true })
 }
