@@ -12,6 +12,7 @@ import {
   Save, Loader2, Plus, X, CheckCircle, Users, Lock,
 } from 'lucide-react'
 import { useI18n } from '@/lib/i18n/context'
+import { PageLoadingSkeleton } from '@/components/ui/page-loading-skeleton'
 
 interface TeacherProfile {
   id: string
@@ -187,11 +188,7 @@ export default function TeacherProfilePage() {
   const toggleSubject = (s: string) => setSubjects((prev) => prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s])
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    )
+    return <PageLoadingSkeleton />
   }
 
   return (

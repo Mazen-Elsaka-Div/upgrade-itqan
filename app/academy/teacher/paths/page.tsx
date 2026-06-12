@@ -11,6 +11,7 @@ import {
   UserPlus, Users, Mic, Eye, EyeOff, Search, CheckSquare, Square, Check,
   Layers, UploadCloud, ImageIcon
 } from 'lucide-react'
+import { PageLoadingSkeleton } from '@/components/ui/page-loading-skeleton'
 
 interface Path {
   id: string
@@ -279,14 +280,7 @@ export default function TeacherPathsPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-        <div className="p-4 rounded-2xl bg-emerald-100 dark:bg-emerald-900/30">
-          <Loader2 className="w-8 h-8 animate-spin text-emerald-600 dark:text-emerald-400" />
-        </div>
-        <p className="text-muted-foreground font-medium animate-pulse">جاري جلب المسارات...</p>
-      </div>
-    )
+    return <PageLoadingSkeleton />
   }
 
   return (

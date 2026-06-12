@@ -13,7 +13,9 @@ import {
   Pencil,
   ListChecks,
   Users,
+  Users,
 } from 'lucide-react'
+import { PageLoadingSkeleton } from '@/components/ui/page-loading-skeleton'
 
 type DisplayStatus = 'pending' | 'submitted' | 'graded'
 
@@ -65,7 +67,7 @@ export default function TeacherTasksPage() {
   }, [])
 
   if (loading) {
-    return <div className="text-center py-8">جاري التحميل...</div>
+    return <PageLoadingSkeleton />
   }
 
   const filteredTasks = tasks.filter(t =>

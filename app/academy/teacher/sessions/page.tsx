@@ -1,16 +1,10 @@
 import { Suspense } from 'react'
-import { Loader2 } from 'lucide-react'
+import { PageLoadingSkeleton } from '@/components/ui/page-loading-skeleton'
 import { TeacherSessionsHub } from '@/components/academy/teacher/sessions-hub'
 
 export default function TeacherSessionsPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="flex items-center justify-center min-h-[400px]">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        </div>
-      }
-    >
+    <Suspense fallback={<PageLoadingSkeleton />}>
       <TeacherSessionsHub />
     </Suspense>
   )

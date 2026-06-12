@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { PageLoadingSkeleton } from '@/components/ui/page-loading-skeleton'
 
 interface Student {
   id: string
@@ -72,12 +73,7 @@ export default function TeacherStudentsPage() {
   }, [students])
 
   if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-        <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-        <p className="text-muted-foreground font-medium animate-pulse">جاري تحميل الطلاب...</p>
-      </div>
-    )
+    return <PageLoadingSkeleton />
   }
 
   return (

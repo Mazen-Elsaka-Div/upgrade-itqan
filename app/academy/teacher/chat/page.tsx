@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Search, Send, User, Loader2, ArrowRight, UserPlus, X, Shield, Trash2 } from 'lucide-react'
 import { useI18n } from '@/lib/i18n/context'
+import { PageLoadingSkeleton } from '@/components/ui/page-loading-skeleton'
 
 interface Student {
   id: string
@@ -525,9 +526,8 @@ function ChatContent() {
 
 export default function TeacherChatPage() {
   return (
-    <Suspense fallback={<div className="flex items-center justify-center h-full"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>}>
+    <Suspense fallback={<PageLoadingSkeleton />}>
       <ChatContent />
     </Suspense>
   )
 }
-

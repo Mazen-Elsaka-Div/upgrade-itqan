@@ -5,6 +5,7 @@ import { useI18n } from '@/lib/i18n/context'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
 import { BookOpen, Plus, GraduationCap, PlayCircle, Users, Edit, FileText, Bell, Archive, Loader2, Trash2, Clock, XCircle, AlertTriangle, Send } from 'lucide-react'
+import { PageLoadingSkeleton } from '@/components/ui/page-loading-skeleton'
 
 type CourseStatus = 'draft' | 'pending_review' | 'published' | 'rejected' | 'archived'
 
@@ -157,11 +158,7 @@ export default function TeacherCoursesPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    )
+    return <PageLoadingSkeleton />
   }
 
   return (

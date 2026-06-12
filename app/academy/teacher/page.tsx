@@ -10,6 +10,7 @@ import {
   ChevronLeft, Star, Clock, TrendingUp, CheckCircle2,
   AlertCircle, PlayCircle, GraduationCap, LayoutDashboard, Plus, ArrowUpRight
 } from 'lucide-react'
+import { PageLoadingSkeleton } from '@/components/ui/page-loading-skeleton'
 
 interface TeacherStats {
   total_courses: number
@@ -111,11 +112,7 @@ export default function TeacherDashboard() {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    )
+    return <PageLoadingSkeleton />
   }
 
   const FADE_UP_ANIMATION_VARIANTS: Variants = {
