@@ -41,9 +41,9 @@ export async function PUT(req: NextRequest) {
             if (value === undefined) continue
             await query(
                 `INSERT INTO system_settings (setting_key, setting_value, setting_type, description, is_public)
-         VALUES ($1, $2::jsonb, 'homepage', $1, true)
+         VALUES ($1::text, $2::jsonb, 'homepage', $3::text, true)
          ON CONFLICT (setting_key) DO UPDATE SET setting_value = $2::jsonb, updated_at = NOW()`,
-                [key, JSON.stringify(value)]
+                [key, JSON.stringify(value), key]
             )
             count++
         }
