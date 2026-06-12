@@ -467,116 +467,120 @@ export default function MushafPage() {
 
       {/* Negative margins to counter the DashboardShell's p-6 lg:p-8 padding */}
       <div className="-m-6 lg:-m-8 min-h-[calc(100vh-4rem)] flex flex-col bg-background/50 relative font-sans">
-        {/* Top toolbar */}
-        <div className="sticky top-0 z-40 bg-card/80 backdrop-blur-xl border-b border-border shadow-sm">
-          <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-            {/* Left: Surah/Juz info */}
-            <div className="flex items-center gap-4 min-w-0">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center flex-shrink-0 shadow-lg shadow-emerald-500/20">
-                <BookOpen className="w-6 h-6" />
+        {/* Floating Side Toolbar */}
+        <div 
+          className={`fixed top-1/2 -translate-y-1/2 z-50 flex flex-col gap-3 p-2 sm:p-2.5 rounded-full bg-card/70 backdrop-blur-2xl border border-border/50 shadow-2xl transition-all duration-700 ease-out hover:shadow-emerald-500/20 hover:scale-[1.02] ${isAr ? 'right-2 sm:right-6 animate-in slide-in-from-right-8' : 'left-2 sm:left-6 animate-in slide-in-from-left-8'}`}
+        >
+          {/* Surah/Juz info */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" className="w-12 h-12 p-0 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
+                <BookOpen className="w-5 h-5" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent side={isAr ? 'left' : 'right'} align="center" className="w-64 p-4 rounded-2xl shadow-2xl border-emerald-500/20 bg-card/95 backdrop-blur-xl animate-in zoom-in-95 duration-200">
+              <div className="text-lg font-black text-foreground mb-1 flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-emerald-600" />
+                {t.student?.mushaf || 'مصحفي'}
               </div>
-              <div className="min-w-0">
-                <div className="text-lg font-black text-foreground truncate flex items-center gap-2">
-                  {t.student?.mushaf || 'مصحفي'}
+              {headerInfo && (
+                <div className="text-sm font-bold text-emerald-600 dark:text-emerald-400 mt-2 p-2 bg-emerald-50 dark:bg-emerald-500/10 rounded-xl flex items-center gap-2">
+                  {isAr ? stripSurahPrefix(headerInfo.surahName) : headerInfo.surahEnglish} 
+                  <span className="text-emerald-600/50">•</span>
+                  {isAr ? `الجزء ${toArabicDigits(headerInfo.juz)}` : `Juz ${headerInfo.juz}`}
                 </div>
-                {headerInfo && (
-                  <div className="text-xs sm:text-sm text-emerald-600 dark:text-emerald-400 font-bold truncate flex items-center gap-1.5">
-                    {isAr ? stripSurahPrefix(headerInfo.surahName) : headerInfo.surahEnglish}
-                    <span className="text-muted-foreground/50">•</span>
-                    {isAr ? `${t.student?.juz || 'الجزء'} ${toArabicDigits(headerInfo.juz)}` : `Juz ${headerInfo.juz}`}
-                  </div>
-                )}
-              </div>
-            </div>
+              )}
+            </PopoverContent>
+          </Popover>
 
-            {/* Right: Page indicator + Reciter + icon buttons */}
-            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-              <div className="flex items-center justify-center px-3 sm:px-4 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-xs sm:text-sm font-black tracking-wide whitespace-nowrap">
-                {isAr
-                  ? `${t.student?.pageNumber || 'صفحة'} ${toArabicDigits(pageNumber)} / ${toArabicDigits(TOTAL_PAGES)}`
-                  : `Page ${pageNumber} / ${TOTAL_PAGES}`}
-              </div>
-
-              {/* Reciter selector */}
-              <Select value={reciterId} onValueChange={setReciterId}>
-                <SelectTrigger className="h-10 rounded-xl text-xs sm:text-sm font-bold w-[150px] sm:w-[210px] bg-muted/50 border-border hover:bg-muted focus:ring-emerald-500">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <Mic2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                    <SelectValue placeholder={isAr ? 'اختر القارئ' : 'Select reciter'} />
-                  </div>
-                </SelectTrigger>
-                <SelectContent className="rounded-xl">
-                  {RECITERS.map(r => (
-                    <SelectItem key={r.id} value={r.id} className="font-bold cursor-pointer hover:bg-emerald-50 dark:hover:bg-emerald-500/10 focus:bg-emerald-50 dark:focus:bg-emerald-500/10 rounded-lg my-0.5">
-                      {isAr ? r.nameAr : r.nameEn}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Link
-                href="/student/mushaf-progress"
-                className="w-10 h-10 rounded-xl bg-muted/50 border border-border hover:bg-emerald-50 hover:border-emerald-200 hover:text-emerald-600 dark:hover:bg-emerald-500/20 dark:hover:border-emerald-500/30 flex items-center justify-center transition-all duration-300"
-                title="خريطة التقدم"
-              >
-                <Map className="w-5 h-5" />
-              </Link>
-
-              <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
-                <SheetTrigger asChild>
-                  <Button variant="outline" size="icon" className="w-10 h-10 rounded-xl bg-muted/50 border-border hover:bg-emerald-50 hover:border-emerald-200 hover:text-emerald-600 dark:hover:bg-emerald-500/20 dark:hover:border-emerald-500/30 transition-all duration-300">
-                    <List className="w-5 h-5" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side={isAr ? 'left' : 'right'} className="w-80 sm:w-96 p-0 flex flex-col border-emerald-500/20">
-                  <div className="p-5 border-b border-border/50 bg-card">
-                    <SheetTitle className="text-xl font-black mb-4 flex items-center gap-2">
-                      <BookOpen className="w-5 h-5 text-emerald-600" />
-                      {isAr ? 'فهرس السور' : 'Surah Index'}
-                    </SheetTitle>
-                    <div className="relative group">
-                      <Search className="absolute top-1/2 -translate-y-1/2 start-3 w-4 h-4 text-muted-foreground group-focus-within:text-emerald-600 transition-colors" />
-                      <Input
-                        value={search}
-                        onChange={e => setSearch(e.target.value)}
-                        placeholder={t.student?.searchSurah || 'ابحث عن سورة...'}
-                        className="ps-10 h-11 rounded-xl bg-muted/50 border-transparent focus:bg-background focus:border-emerald-500 focus:ring-emerald-500/20 transition-all"
-                      />
-                    </div>
-                  </div>
-                  <div className="flex-1 overflow-y-auto bg-muted/20">
-                    <div className="p-3 space-y-1">
-                      {filteredSurahs.map(s => (
-                        <button
-                          key={s.number}
-                          onClick={() => goToSurah(s.number)}
-                          className="w-full flex items-center gap-4 p-3.5 rounded-2xl hover:bg-white dark:hover:bg-card hover:shadow-sm border border-transparent hover:border-border/60 transition-all text-start group"
-                        >
-                          <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 flex items-center justify-center text-sm font-black flex-shrink-0 group-hover:scale-105 transition-transform">
-                            {isAr ? toArabicDigits(s.number) : s.number}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="font-black text-foreground text-lg mb-0.5 group-hover:text-emerald-600 transition-colors" style={{ fontFamily: "'Amiri Quran', serif" }}>
-                              {s.name}
-                            </div>
-                            <div className="text-xs text-muted-foreground font-bold flex items-center gap-1.5 opacity-80">
-                              <span className="truncate">{s.englishName}</span>
-                              <span>•</span>
-                              <span className="whitespace-nowrap">{isAr ? toArabicDigits(s.numberOfAyahs) : s.numberOfAyahs} {t.student?.versesCount || 'آية'}</span>
-                              <span>•</span>
-                              <span className="text-[10px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 px-1.5 py-0.5 rounded-md">
-                                {s.revelationType === 'Meccan' ? (t.student?.revelationMakkah || 'مكية') : (t.student?.revelationMadinah || 'مدنية')}
-                              </span>
-                            </div>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </SheetContent>
-              </Sheet>
-            </div>
+          {/* Page indicator */}
+          <div 
+            className="w-12 h-12 flex flex-col items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-sm font-black shadow-inner cursor-help transition-all hover:bg-emerald-100 dark:hover:bg-emerald-500/20" 
+            title={isAr ? `صفحة ${pageNumber} من ${TOTAL_PAGES}` : `Page ${pageNumber} of ${TOTAL_PAGES}`}
+          >
+            {toArabicDigits(pageNumber)}
           </div>
+
+          {/* Reciter selector */}
+          <Select value={reciterId} onValueChange={setReciterId}>
+            <SelectTrigger 
+              className="w-12 h-12 p-0 flex items-center justify-center rounded-full bg-muted/50 border-border hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200 transition-all focus:ring-0 [&>svg:last-child]:hidden"
+              title={isAr ? "اختر القارئ" : "Select Reciter"}
+            >
+              <div><Mic2 className="w-5 h-5 text-emerald-600" /></div>
+            </SelectTrigger>
+            <SelectContent side={isAr ? 'left' : 'right'} align="center" className="rounded-xl min-w-[200px]">
+              {RECITERS.map(r => (
+                <SelectItem key={r.id} value={r.id} className="font-bold cursor-pointer hover:bg-emerald-50 dark:hover:bg-emerald-500/10 focus:bg-emerald-50 dark:focus:bg-emerald-500/10 rounded-lg my-0.5">
+                  {isAr ? r.nameAr : r.nameEn}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Progress Map */}
+          <Link
+            href="/student/mushaf-progress"
+            className="w-12 h-12 rounded-full bg-muted/50 border border-border hover:bg-emerald-50 hover:border-emerald-200 hover:text-emerald-600 dark:hover:bg-emerald-500/20 dark:hover:border-emerald-500/30 flex items-center justify-center transition-all hover:-translate-y-1 shadow-sm"
+            title={isAr ? "خريطة التقدم" : "Progress Map"}
+          >
+            <Map className="w-5 h-5" />
+          </Link>
+
+          {/* Surah Index */}
+          <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
+            <SheetTrigger asChild>
+              <Button variant="outline" className="w-12 h-12 p-0 rounded-full bg-muted/50 border-border hover:bg-emerald-50 hover:border-emerald-200 hover:text-emerald-600 dark:hover:bg-emerald-500/20 dark:hover:border-emerald-500/30 transition-all hover:-translate-y-1 shadow-sm" title={isAr ? "فهرس السور" : "Surah Index"}>
+                <List className="w-5 h-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side={isAr ? 'left' : 'right'} className="w-80 sm:w-96 p-0 flex flex-col border-emerald-500/20">
+              <div className="p-5 border-b border-border/50 bg-card">
+                <SheetTitle className="text-xl font-black mb-4 flex items-center gap-2">
+                  <BookOpen className="w-5 h-5 text-emerald-600" />
+                  {isAr ? 'فهرس السور' : 'Surah Index'}
+                </SheetTitle>
+                <div className="relative group">
+                  <Search className="absolute top-1/2 -translate-y-1/2 start-3 w-4 h-4 text-muted-foreground group-focus-within:text-emerald-600 transition-colors" />
+                  <Input
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                    placeholder={t.student?.searchSurah || 'ابحث عن سورة...'}
+                    className="ps-10 h-11 rounded-xl bg-muted/50 border-transparent focus:bg-background focus:border-emerald-500 focus:ring-emerald-500/20 transition-all"
+                  />
+                </div>
+              </div>
+              <div className="flex-1 overflow-y-auto bg-muted/20">
+                <div className="p-3 space-y-1">
+                  {filteredSurahs.map(s => (
+                    <button
+                      key={s.number}
+                      onClick={() => goToSurah(s.number)}
+                      className="w-full flex items-center gap-4 p-3.5 rounded-2xl hover:bg-white dark:hover:bg-card hover:shadow-sm border border-transparent hover:border-border/60 transition-all text-start group"
+                    >
+                      <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 flex items-center justify-center text-sm font-black flex-shrink-0 group-hover:scale-105 transition-transform">
+                        {isAr ? toArabicDigits(s.number) : s.number}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-black text-foreground text-lg mb-0.5 group-hover:text-emerald-600 transition-colors" style={{ fontFamily: "'Amiri Quran', serif" }}>
+                          {s.name}
+                        </div>
+                        <div className="text-xs text-muted-foreground font-bold flex items-center gap-1.5 opacity-80">
+                          <span className="truncate">{s.englishName}</span>
+                          <span>•</span>
+                          <span className="whitespace-nowrap">{isAr ? toArabicDigits(s.numberOfAyahs) : s.numberOfAyahs} {t.student?.versesCount || 'آية'}</span>
+                          <span>•</span>
+                          <span className="text-[10px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 px-1.5 py-0.5 rounded-md">
+                            {s.revelationType === 'Meccan' ? (t.student?.revelationMakkah || 'مكية') : (t.student?.revelationMadinah || 'مدنية')}
+                          </span>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
 
         {/* Mushaf page */}
