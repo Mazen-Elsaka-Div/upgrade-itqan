@@ -133,8 +133,8 @@ export default function AdminMemorizationPathDetailPage() {
       {/* Premium Banner Header */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-900 via-[#0B3D2E] to-emerald-950 p-8 sm:p-10 shadow-xl">
         <div className="absolute inset-0 bg-[url('/noise.png')] opacity-10 mix-blend-overlay"></div>
-        <div className="absolute -top-24 -right-24 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-emerald-400/10 rounded-full blur-3xl"></div>
+        <div className="absolute -top-24 -end-24 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-24 -start-24 w-72 h-72 bg-emerald-400/10 rounded-full blur-3xl"></div>
         
         <div className="relative z-10">
           <Link 
@@ -256,9 +256,9 @@ export default function AdminMemorizationPathDetailPage() {
               <TableHeader className="bg-muted/50">
                 <TableRow className="hover:bg-transparent">
                   <TableHead className="w-16 text-center font-bold">التسلسل</TableHead>
-                  <TableHead className="font-bold">عنوان الوحدة</TableHead>
-                  <TableHead className="font-bold">النوع</TableHead>
-                  <TableHead className="hidden sm:table-cell font-bold">المدة المتوقعة</TableHead>
+                  <TableHead className="font-bold text-right">عنوان الوحدة</TableHead>
+                  <TableHead className="font-bold text-right">النوع</TableHead>
+                  <TableHead className="hidden sm:table-cell font-bold text-right">المدة المتوقعة</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -359,10 +359,10 @@ export default function AdminMemorizationPathDetailPage() {
             <Table>
               <TableHeader className="bg-muted/50">
                 <TableRow className="hover:bg-transparent">
-                  <TableHead className="font-bold">الطالب</TableHead>
+                  <TableHead className="font-bold text-right">الطالب</TableHead>
                   <TableHead className="text-center font-bold">الإنجاز</TableHead>
-                  <TableHead className="font-bold">الحالة</TableHead>
-                  <TableHead className="hidden sm:table-cell font-bold">آخر نشاط</TableHead>
+                  <TableHead className="font-bold text-right">الحالة</TableHead>
+                  <TableHead className="hidden sm:table-cell font-bold text-right">آخر نشاط</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
