@@ -5,7 +5,8 @@ import Link from "next/link"
 import { useParams } from "next/navigation"
 import {
   ArrowRight, BookOpen, CheckCircle2, Clock, Eye, EyeOff, Loader2,
-  Lock, Save, TrendingUp, Users,
+  Lock, Save, TrendingUp, Users, ChevronRight, Activity, CalendarDays,
+  ListTodo, Medal, Settings, UserCheck, ShieldAlert
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -21,6 +22,7 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
+import { PageLoadingSkeleton } from "@/components/ui/page-loading-skeleton"
 
 type Unit = {
   id: string
@@ -105,14 +107,21 @@ export default function AdminMemorizationPathDetailPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex justify-center py-20">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-      </div>
-    )
+    return <PageLoadingSkeleton />
   }
   if (!path) {
-    return <div className="p-6 text-center text-muted-foreground">المسار غير موجود.</div>
+    return (
+      <div className="flex flex-col items-center justify-center py-20 px-4">
+        <div className="w-20 h-20 rounded-full bg-red-50 text-red-500 flex items-center justify-center mb-6">
+          <ShieldAlert className="w-10 h-10" />
+        </div>
+        <h3 className="text-xl font-bold text-foreground mb-2">المسار غير موجود</h3>
+        <p className="text-muted-foreground text-center">يبدو أن المسار الذي تحاول الوصول إليه غير موجود أو تم حذفه.</p>
+        <Button asChild className="mt-6">
+          <Link href="/admin/memorization-paths">العودة للقائمة</Link>
+        </Button>
+      </div>
+    )
   }
 
   const overall = stats?.overall || {}
@@ -120,101 +129,169 @@ export default function AdminMemorizationPathDetailPage() {
   const topStudents: any[] = stats?.top_students || []
 
   return (
-    <div className="space-y-6 p-4 sm:p-6">
-      <div className="flex items-center justify-between">
-        <Button asChild variant="ghost" size="sm" className="gap-2">
-          <Link href="/admin/memorization-paths">
-            <ArrowRight className="h-4 w-4 rtl:rotate-180" /> رجوع للقائمة
+    <div className="space-y-8 max-w-7xl mx-auto pb-12">
+      {/* Premium Banner Header */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-900 via-[#0B3D2E] to-emerald-950 p-8 sm:p-10 shadow-xl">
+        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-10 mix-blend-overlay"></div>
+        <div className="absolute -top-24 -right-24 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-emerald-400/10 rounded-full blur-3xl"></div>
+        
+        <div className="relative z-10">
+          <Link 
+            href="/admin/memorization-paths" 
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-emerald-100 text-sm font-medium mb-6 backdrop-blur-md transition-colors"
+          >
+            <ArrowRight className="h-4 w-4 rtl:rotate-180" /> عودة للقائمة
           </Link>
-        </Button>
-      </div>
-
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <BookOpen className="h-6 w-6 text-emerald-600" />
-            {path.title}
-          </h1>
-          <div className="flex flex-wrap gap-2 mt-2">
-            <Badge variant="secondary">{path.total_units} وحدة</Badge>
-            <Badge variant="outline">{path.unit_type}</Badge>
-            {path.is_published ? (
-              <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100">
-                <Eye className="h-3 w-3 me-1" /> منشور
-              </Badge>
-            ) : (
-              <Badge variant="outline"><EyeOff className="h-3 w-3 me-1" /> مسودة</Badge>
+          
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-bold text-white mb-4 flex items-center gap-3">
+                <BookOpen className="h-8 w-8 text-emerald-400" />
+                {path.title}
+              </h1>
+              
+              <div className="flex flex-wrap items-center gap-3">
+                <Badge className="bg-emerald-500/20 text-emerald-100 border-emerald-500/30 px-3 py-1 text-sm rounded-xl">
+                  {path.unit_type === 'juz' ? 'بالأجزاء' : path.unit_type === 'surah' ? 'بالسور' : path.unit_type}
+                </Badge>
+                <Badge className="bg-white/10 text-white border-white/20 px-3 py-1 text-sm rounded-xl backdrop-blur-md">
+                  {path.total_units} وحدة
+                </Badge>
+                {path.is_published ? (
+                  <Badge className="bg-emerald-500 text-white border-0 px-3 py-1 text-sm rounded-xl shadow-lg shadow-emerald-500/20 gap-1.5">
+                    <Eye className="h-4 w-4" /> منشور
+                  </Badge>
+                ) : (
+                  <Badge className="bg-slate-800 text-slate-300 border-slate-700 px-3 py-1 text-sm rounded-xl gap-1.5">
+                    <EyeOff className="h-4 w-4" /> مسودة
+                  </Badge>
+                )}
+              </div>
+            </div>
+            
+            {path.description && (
+              <div className="md:max-w-md bg-black/20 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
+                <p className="text-emerald-100/90 text-sm leading-relaxed">
+                  {path.description}
+                </p>
+              </div>
             )}
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Card className="p-4">
-          <div className="text-xs text-muted-foreground flex items-center gap-1">
-            <Users className="h-3 w-3" /> مشتركين
+      {/* KPI Stats Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+        <Card className="p-6 rounded-3xl border-border/50 shadow-sm hover:shadow-md transition-shadow group">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <Users className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">الطلاب المشتركين</p>
+              <h4 className="text-2xl font-bold text-foreground">{overall.enrolled || "0"}</h4>
+            </div>
           </div>
-          <div className="text-2xl font-bold mt-1">{overall.enrolled || "0"}</div>
         </Card>
-        <Card className="p-4">
-          <div className="text-xs text-muted-foreground flex items-center gap-1">
-            <CheckCircle2 className="h-3 w-3" /> أتموا
+        
+        <Card className="p-6 rounded-3xl border-border/50 shadow-sm hover:shadow-md transition-shadow group">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <Medal className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">أتموا المسار</p>
+              <h4 className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{overall.completed || "0"}</h4>
+            </div>
           </div>
-          <div className="text-2xl font-bold mt-1 text-emerald-700">{overall.completed || "0"}</div>
         </Card>
-        <Card className="p-4">
-          <div className="text-xs text-muted-foreground flex items-center gap-1">
-            <Clock className="h-3 w-3" /> نشطون
+        
+        <Card className="p-6 rounded-3xl border-border/50 shadow-sm hover:shadow-md transition-shadow group">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <Activity className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">الطلاب النشطين</p>
+              <h4 className="text-2xl font-bold text-foreground">{overall.active || "0"}</h4>
+            </div>
           </div>
-          <div className="text-2xl font-bold mt-1">{overall.active || "0"}</div>
         </Card>
-        <Card className="p-4">
-          <div className="text-xs text-muted-foreground flex items-center gap-1">
-            <TrendingUp className="h-3 w-3" /> متوسط التقدم
+        
+        <Card className="p-6 rounded-3xl border-border/50 shadow-sm hover:shadow-md transition-shadow group">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <TrendingUp className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">متوسط الإنجاز</p>
+              <h4 className="text-2xl font-bold text-foreground">{overall.avg_progress_percent || "0"}%</h4>
+            </div>
           </div>
-          <div className="text-2xl font-bold mt-1">{overall.avg_progress_percent || "0"}%</div>
         </Card>
       </div>
 
-      <Tabs defaultValue="units" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="units">الوحدات ({units.length})</TabsTrigger>
-          <TabsTrigger value="funnel">معدلات الإكمال</TabsTrigger>
-          <TabsTrigger value="students">الطلاب</TabsTrigger>
-          <TabsTrigger value="settings">الإعدادات</TabsTrigger>
-        </TabsList>
+      <Tabs defaultValue="units" className="space-y-6">
+        <div className="bg-card border border-border/50 rounded-2xl p-1.5 shadow-sm overflow-x-auto">
+          <TabsList className="w-full flex justify-start sm:justify-center bg-transparent gap-2 h-auto">
+            <TabsTrigger value="units" className="rounded-xl px-6 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-medium">
+              <ListTodo className="w-4 h-4 me-2" /> وحدات المسار ({units.length})
+            </TabsTrigger>
+            <TabsTrigger value="funnel" className="rounded-xl px-6 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-medium">
+              <TrendingUp className="w-4 h-4 me-2" /> معدلات الإكمال
+            </TabsTrigger>
+            <TabsTrigger value="students" className="rounded-xl px-6 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-medium">
+              <Users className="w-4 h-4 me-2" /> الطلاب
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="rounded-xl px-6 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-medium">
+              <Settings className="w-4 h-4 me-2" /> الإعدادات
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
-        <TabsContent value="units">
-          <Card className="p-2">
+        <TabsContent value="units" className="mt-0">
+          <Card className="rounded-3xl border-border/50 shadow-sm overflow-hidden">
             <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-12 text-center">#</TableHead>
-                  <TableHead>العنوان</TableHead>
-                  <TableHead>النوع</TableHead>
-                  <TableHead className="hidden sm:table-cell">المدة المتوقعة</TableHead>
+              <TableHeader className="bg-muted/50">
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="w-16 text-center font-bold">التسلسل</TableHead>
+                  <TableHead className="font-bold">عنوان الوحدة</TableHead>
+                  <TableHead className="font-bold">النوع</TableHead>
+                  <TableHead className="hidden sm:table-cell font-bold">المدة المتوقعة</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {units.map(u => (
-                  <TableRow key={u.id}>
-                    <TableCell className="text-center font-mono">{u.position}</TableCell>
+                {units.map((u, index) => (
+                  <TableRow key={u.id} className="hover:bg-muted/30 transition-colors group">
+                    <TableCell className="text-center">
+                      <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold text-sm">
+                        {u.position}
+                      </span>
+                    </TableCell>
                     <TableCell>
-                      <div className="font-medium">{u.title}</div>
+                      <div className="font-bold text-foreground group-hover:text-emerald-600 transition-colors">{u.title}</div>
                       {u.description && (
-                        <div className="text-xs text-muted-foreground">{u.description}</div>
+                        <div className="text-xs text-muted-foreground mt-1 line-clamp-1">{u.description}</div>
                       )}
                     </TableCell>
-                    <TableCell><Badge variant="outline">{u.unit_type}</Badge></TableCell>
-                    <TableCell className="hidden sm:table-cell text-sm text-muted-foreground">
-                      {u.estimated_minutes} د
+                    <TableCell>
+                      <Badge variant="outline" className="bg-slate-50 dark:bg-slate-900/50">
+                        {u.unit_type}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="hidden sm:table-cell text-sm font-medium text-slate-600 dark:text-slate-400">
+                      <div className="flex items-center gap-1.5">
+                        <Clock className="w-4 h-4 text-slate-400" />
+                        {u.estimated_minutes} دقيقة
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
                 {units.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center text-muted-foreground py-6">
-                      لا توجد وحدات
+                    <TableCell colSpan={4} className="h-32 text-center text-muted-foreground">
+                      لا توجد وحدات في هذا المسار
                     </TableCell>
                   </TableRow>
                 )}
@@ -223,79 +300,113 @@ export default function AdminMemorizationPathDetailPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="funnel">
-          <Card className="p-4">
-            <div className="space-y-3">
+        <TabsContent value="funnel" className="mt-0">
+          <Card className="p-6 rounded-3xl border-border/50 shadow-sm">
+            <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
+              <Activity className="w-5 h-5 text-emerald-600" /> مسار إنجاز الطلاب عبر الوحدات
+            </h3>
+            <div className="space-y-4">
               {perUnit.map(u => {
                 const started = parseInt(u.started || "0", 10)
                 const completed = parseInt(u.completed || "0", 10)
                 const enrolled = parseInt(overall.enrolled || "0", 10)
                 const pct = enrolled > 0 ? Math.round((completed / enrolled) * 100) : 0
                 return (
-                  <div key={u.unit_id} className="border rounded-lg p-3">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="text-sm">
-                        <span className="font-mono text-muted-foreground">#{u.position}</span>{" "}
-                        <span className="font-medium">{u.title}</span>
+                  <div key={u.unit_id} className="relative overflow-hidden border border-border/50 rounded-2xl p-4 bg-card hover:border-emerald-200 transition-colors">
+                    {/* Background Progress Bar */}
+                    <div 
+                      className="absolute inset-0 bg-emerald-50 dark:bg-emerald-900/10 transition-all duration-1000 ease-out" 
+                      style={{ width: `${pct}%`, opacity: 0.5 }}
+                    />
+                    
+                    <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div className="flex items-center gap-3">
+                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-white dark:bg-slate-800 shadow-sm font-bold text-sm text-slate-500">
+                          {u.position}
+                        </span>
+                        <span className="font-bold text-foreground">{u.title}</span>
                       </div>
-                      <div className="text-xs text-muted-foreground flex gap-3 items-center">
-                        <span>بدأ: {started}</span>
-                        <span>أتم: <strong>{completed}</strong></span>
-                        <span>{pct}%</span>
+                      
+                      <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-sm">
+                        <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400">
+                          <Users className="w-4 h-4" /> 
+                          <span>بدأ: <strong>{started}</strong></span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400">
+                          <CheckCircle2 className="w-4 h-4" /> 
+                          <span>أتم: <strong>{completed}</strong></span>
+                        </div>
+                        <div className="px-3 py-1 bg-white dark:bg-slate-800 shadow-sm rounded-lg font-bold text-emerald-600 dark:text-emerald-400">
+                          {pct}%
+                        </div>
                       </div>
                     </div>
-                    <Progress value={pct} className="h-2 mt-2" />
                   </div>
                 )
               })}
               {perUnit.length === 0 && (
-                <div className="text-center text-muted-foreground py-8">
-                  لا توجد بيانات بعد
+                <div className="flex flex-col items-center justify-center py-12 text-muted-foreground bg-muted/30 rounded-2xl border border-dashed border-border">
+                  <TrendingUp className="w-10 h-10 text-slate-300 mb-3" />
+                  <p>لا توجد بيانات إحصائية متاحة بعد</p>
                 </div>
               )}
             </div>
           </Card>
         </TabsContent>
 
-        <TabsContent value="students">
-          <Card className="p-2">
+        <TabsContent value="students" className="mt-0">
+          <Card className="rounded-3xl border-border/50 shadow-sm overflow-hidden">
             <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>الاسم</TableHead>
-                  <TableHead>البريد</TableHead>
-                  <TableHead className="text-center">وحدات منجزة</TableHead>
-                  <TableHead>الحالة</TableHead>
-                  <TableHead className="hidden sm:table-cell">آخر نشاط</TableHead>
+              <TableHeader className="bg-muted/50">
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="font-bold">الطالب</TableHead>
+                  <TableHead className="text-center font-bold">الإنجاز</TableHead>
+                  <TableHead className="font-bold">الحالة</TableHead>
+                  <TableHead className="hidden sm:table-cell font-bold">آخر نشاط</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {topStudents.map(s => (
-                  <TableRow key={s.id}>
-                    <TableCell className="font-medium">{s.name || "—"}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{s.email || "—"}</TableCell>
+                  <TableRow key={s.id} className="hover:bg-muted/30">
+                    <TableCell>
+                      <div className="font-bold text-foreground">{s.name || "—"}</div>
+                      <div className="text-xs text-muted-foreground mt-0.5">{s.email || "—"}</div>
+                    </TableCell>
                     <TableCell className="text-center">
-                      {s.units_completed}/{path.total_units}
+                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 font-medium text-sm">
+                        <span className="text-emerald-600 dark:text-emerald-400 font-bold">{s.units_completed}</span>
+                        <span className="text-slate-400">/</span>
+                        <span className="text-slate-500">{path.total_units}</span>
+                      </div>
                     </TableCell>
                     <TableCell>
                       {s.status === "completed" ? (
-                        <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100">
-                          أتم
+                        <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 border-0">
+                          أتم المسار
                         </Badge>
                       ) : s.status === "active" ? (
-                        <Badge variant="secondary">نشط</Badge>
+                        <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 border-0">
+                          نشط
+                        </Badge>
                       ) : (
-                        <Badge variant="outline">{s.status}</Badge>
+                        <Badge variant="outline" className="text-slate-500 bg-slate-50 dark:bg-slate-900/50">
+                          {s.status}
+                        </Badge>
                       )}
                     </TableCell>
-                    <TableCell className="hidden sm:table-cell text-xs text-muted-foreground">
-                      {s.last_activity_at ? new Date(s.last_activity_at).toLocaleDateString("ar-EG") : "—"}
+                    <TableCell className="hidden sm:table-cell text-sm text-slate-500">
+                      {s.last_activity_at ? (
+                        <div className="flex items-center gap-1.5">
+                          <CalendarDays className="w-4 h-4 text-slate-400" />
+                          {new Date(s.last_activity_at).toLocaleDateString("ar-EG")}
+                        </div>
+                      ) : "—"}
                     </TableCell>
                   </TableRow>
                 ))}
                 {topStudents.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center text-muted-foreground py-6">
+                    <TableCell colSpan={4} className="h-32 text-center text-muted-foreground">
                       لا يوجد طلاب مشتركين بعد
                     </TableCell>
                   </TableRow>
@@ -305,65 +416,98 @@ export default function AdminMemorizationPathDetailPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="settings">
-          <Card className="p-6 max-w-xl space-y-4">
-            <div className="space-y-1">
-              <Label>العنوان</Label>
-              <Input value={edit.title} onChange={e => setEdit({ ...edit, title: e.target.value })} />
-            </div>
-            <div className="space-y-1">
-              <Label>الوصف</Label>
-              <Textarea
-                rows={3}
-                value={edit.description}
-                onChange={e => setEdit({ ...edit, description: e.target.value })}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <Label>المستوى</Label>
-                <Select value={edit.level} onValueChange={v => setEdit({ ...edit, level: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="beginner">مبتدئ</SelectItem>
-                    <SelectItem value="intermediate">متوسط</SelectItem>
-                    <SelectItem value="advanced">متقدم</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1">
-                <Label>المدة المتوقعة (أيام)</Label>
-                <Input
-                  type="number"
-                  value={edit.estimated_days}
-                  onChange={e => setEdit({ ...edit, estimated_days: e.target.value })}
+        <TabsContent value="settings" className="mt-0">
+          <Card className="p-6 sm:p-8 rounded-3xl border-border/50 shadow-sm max-w-2xl">
+            <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
+              <Settings className="w-5 h-5 text-emerald-600" /> إعدادات المسار
+            </h3>
+            
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <Label className="text-sm font-bold text-slate-700 dark:text-slate-300">عنوان المسار</Label>
+                <Input 
+                  value={edit.title} 
+                  onChange={e => setEdit({ ...edit, title: e.target.value })} 
+                  className="h-12 rounded-xl bg-slate-50 dark:bg-slate-900/50"
                 />
               </div>
+              
+              <div className="space-y-2">
+                <Label className="text-sm font-bold text-slate-700 dark:text-slate-300">الوصف</Label>
+                <Textarea
+                  rows={4}
+                  value={edit.description}
+                  onChange={e => setEdit({ ...edit, description: e.target.value })}
+                  className="rounded-xl bg-slate-50 dark:bg-slate-900/50 resize-none"
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label className="text-sm font-bold text-slate-700 dark:text-slate-300">المستوى</Label>
+                  <Select value={edit.level} onValueChange={v => setEdit({ ...edit, level: v })}>
+                    <SelectTrigger className="h-12 rounded-xl bg-slate-50 dark:bg-slate-900/50"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="beginner">مبتدئ</SelectItem>
+                      <SelectItem value="intermediate">متوسط</SelectItem>
+                      <SelectItem value="advanced">متقدم</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label className="text-sm font-bold text-slate-700 dark:text-slate-300">المدة المتوقعة (أيام)</Label>
+                  <Input
+                    type="number"
+                    value={edit.estimated_days}
+                    onChange={e => setEdit({ ...edit, estimated_days: e.target.value })}
+                    className="h-12 rounded-xl bg-slate-50 dark:bg-slate-900/50"
+                    placeholder="فارغ لعدم التحديد"
+                  />
+                </div>
+              </div>
+              
+              <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-5 space-y-4 border border-slate-100 dark:border-slate-800">
+                <div className="flex items-center gap-3">
+                  <div className="relative flex items-center justify-center w-5 h-5">
+                    <input
+                      id="require_audio_edit" type="checkbox" 
+                      className="peer w-5 h-5 rounded border-emerald-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                      checked={edit.require_audio}
+                      onChange={e => setEdit({ ...edit, require_audio: e.target.checked })}
+                    />
+                  </div>
+                  <Label htmlFor="require_audio_edit" className="cursor-pointer font-medium text-slate-700 dark:text-slate-300">
+                    يتطلب تسجيل صوتي للتسميع قبل إتمام كل وحدة
+                  </Label>
+                </div>
+                
+                <div className="flex items-center gap-3">
+                  <div className="relative flex items-center justify-center w-5 h-5">
+                    <input
+                      id="is_published_edit" type="checkbox" 
+                      className="peer w-5 h-5 rounded border-emerald-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                      checked={edit.is_published}
+                      onChange={e => setEdit({ ...edit, is_published: e.target.checked })}
+                    />
+                  </div>
+                  <Label htmlFor="is_published_edit" className="cursor-pointer font-medium text-slate-700 dark:text-slate-300">
+                    المسار منشور ومرئي للطلاب
+                  </Label>
+                </div>
+              </div>
+              
+              <div className="pt-4 flex justify-end">
+                <Button 
+                  onClick={save} 
+                  disabled={saving || !edit.title.trim()} 
+                  className="gap-2 rounded-xl h-12 px-8 bg-emerald-600 hover:bg-emerald-700 text-white shadow-md text-base"
+                >
+                  {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Save className="h-5 w-5" />}
+                  حفظ التعديلات
+                </Button>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <input
-                id="require_audio_edit" type="checkbox" className="h-4 w-4"
-                checked={edit.require_audio}
-                onChange={e => setEdit({ ...edit, require_audio: e.target.checked })}
-              />
-              <Label htmlFor="require_audio_edit" className="cursor-pointer">
-                يتطلب تسجيل صوتي قبل إتمام الوحدة
-              </Label>
-            </div>
-            <div className="flex items-center gap-2">
-              <input
-                id="is_published_edit" type="checkbox" className="h-4 w-4"
-                checked={edit.is_published}
-                onChange={e => setEdit({ ...edit, is_published: e.target.checked })}
-              />
-              <Label htmlFor="is_published_edit" className="cursor-pointer">
-                منشور للطلاب
-              </Label>
-            </div>
-            <Button onClick={save} disabled={saving} className="gap-2">
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-              حفظ التعديلات
-            </Button>
           </Card>
         </TabsContent>
       </Tabs>
