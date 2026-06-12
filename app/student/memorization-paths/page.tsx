@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { useI18n } from "@/lib/i18n/context"
 import { cn } from "@/lib/utils"
 
 type Path = {
@@ -39,6 +40,9 @@ const LEVEL_LABELS: Record<string, string> = {
 }
 
 export default function StudentMemorizationPathsPage() {
+  const { locale } = useI18n()
+  const isAr = locale === 'ar'
+  
   const [paths, setPaths] = useState<Path[]>([])
   const [enrolled, setEnrolled] = useState<Path[]>([])
   const [loading, setLoading] = useState(true)
@@ -104,7 +108,7 @@ export default function StudentMemorizationPathsPage() {
         </div>
       )}
 
-      <Tabs defaultValue="enrolled" className="space-y-6">
+      <Tabs defaultValue="enrolled" className="space-y-6" dir={isAr ? 'rtl' : 'ltr'}>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-card p-2 rounded-2xl border border-border shadow-sm">
           <TabsList className="bg-transparent border-none p-0 h-auto gap-2 flex-wrap">
             <TabsTrigger 

@@ -32,7 +32,8 @@ type Path = {
 }
 
 export default function StudentTajweedPathsPage() {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
+  const isAr = locale === 'ar'
   const tp = (t as any).tajweedPaths || {}
 
   const [paths, setPaths] = useState<Path[]>([])
@@ -104,7 +105,7 @@ export default function StudentTajweedPathsPage() {
         </div>
       )}
 
-      <Tabs defaultValue="enrolled" className="space-y-6">
+      <Tabs defaultValue="enrolled" className="space-y-6" dir={isAr ? 'rtl' : 'ltr'}>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-card p-2 rounded-2xl border border-border shadow-sm">
           <TabsList className="bg-transparent border-none p-0 h-auto gap-2 flex-wrap">
             <TabsTrigger 
