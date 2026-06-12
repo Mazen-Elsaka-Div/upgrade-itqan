@@ -16,7 +16,7 @@ import {
   Search, Plus, BookOpen, Award, UserCheck, CalendarCheck, CalendarDays,
   MessagesSquare, Megaphone, ScrollText, PieChart, Star, Medal, ShieldCheck,
   Globe, Home, Archive, Shield, Phone, BookMarked, FileEdit, Route, Target, GraduationCap, Mail,
-  Trophy, PanelLeftClose, PanelLeftOpen, Library, Video
+  Trophy, PanelLeftClose, PanelLeftOpen, Library, Video, ListChecks
 } from 'lucide-react'
 import { usePublicSettings } from '@/lib/hooks/use-public-settings'
 import { useSidebarCollapsed } from '@/hooks/use-sidebar-collapsed'
@@ -99,6 +99,7 @@ const getRoleConfig = (t: any): Record<'student' | 'reader' | 'admin' | 'student
       {
         title: 'المستخدمون والصلاحيات', items: [
           { href: '/admin/users', label: t.admin.users, icon: Users },
+          { href: '/admin/supervisors', label: 'إدارة المشرفين', icon: Shield },
           { href: '/admin/invitations', label: t.admin.invitations || 'الدعوات', icon: Mail },
           { href: '/admin/readers', label: t.admin.readers, icon: BookOpen },
           { href: '/admin/reader-applications', label: t.admin.readerApplications, icon: UserCheck },
@@ -155,6 +156,7 @@ const getRoleConfig = (t: any): Record<'student' | 'reader' | 'admin' | 'student
       {
         items: [
           { href: '/admin', label: t.admin.dashboard, icon: LayoutDashboard },
+          { href: '/admin/supervisor-tasks', label: 'مهامي والمعلّقات', icon: ListChecks },
           { href: '/admin/users', label: t.admin.users, icon: Users },
           { href: '/admin/recitations', label: t.admin.recitations, icon: FileText },
           { href: '/admin/conversations', label: t.admin.conversations, icon: MessagesSquare },
@@ -176,6 +178,7 @@ const getRoleConfig = (t: any): Record<'student' | 'reader' | 'admin' | 'student
       {
         items: [
           { href: '/admin', label: t.admin.dashboard, icon: LayoutDashboard },
+          { href: '/admin/supervisor-tasks', label: 'مهامي والمعلّقات', icon: ListChecks },
           { href: '/admin/readers', label: t.admin.readers, icon: BookOpen },
           { href: '/admin/reader-applications', label: t.admin.readerApplications, icon: UserCheck },
           { href: '/admin/recitations', label: t.admin.recitations, icon: FileText },
@@ -215,6 +218,7 @@ export function DashboardShell({ role, children, headerTitle }: { role: 'student
   const [unreadCount, setUnreadCount] = useState(0)
   const [unreadMessages, setUnreadMessages] = useState(0)
   const [pendingCerts, setPendingCerts] = useState(0)
+  const [supervisorTasks, setSupervisorTasks] = useState(0)
   const [avatarError, setAvatarError] = useState(false)
   const { branding } = usePublicSettings()
 
@@ -263,6 +267,14 @@ export function DashboardShell({ role, children, headerTitle }: { role: 'student
           setPendingCerts(d.count || 0)
         }
       } catch { }
+      // Pending action items for supervisors.
+      try {
+        const st = await fetch('/api/admin/supervisor-tasks')
+        if (st.ok) {
+          const d = await st.json()
+          setSupervisorTasks(d.total || 0)
+        }
+      } catch { }
     }
     fetchUser()
     fetchCounts()
@@ -284,6 +296,9 @@ export function DashboardShell({ role, children, headerTitle }: { role: 'student
       }
       if (item.href === '/student/certificates' && pendingCerts > 0) {
         return { ...item, badge: pendingCerts }
+      }
+      if (item.href === '/admin/supervisor-tasks' && supervisorTasks > 0) {
+        return { ...item, badge: supervisorTasks > 99 ? '99+' : supervisorTasks }
       }
       return item
     })
