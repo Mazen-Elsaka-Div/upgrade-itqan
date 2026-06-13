@@ -14,8 +14,10 @@ import { query, queryOne } from "@/lib/db"
 import { createNotification } from "@/lib/notifications"
 import { autoIssueRequest } from "@/lib/certificate/eligibility"
 
-const ADMIN_ROLES = ["admin", "academy_admin"]
-const ALLOWED_ROLES = ["reader", "admin", "academy_admin"]
+import type { AllRoles } from "@/lib/auth"
+
+const ADMIN_ROLES: AllRoles[] = ["admin", "academy_admin"]
+const ALLOWED_ROLES: AllRoles[] = ["reader", "admin", "academy_admin"]
 
 /**
  * Load a maqraa-scoped request and verify the caller may act on it.
@@ -55,7 +57,7 @@ async function loadOwnedRequest(
   )
   if (!req) return null
 
-  const isAdmin = ADMIN_ROLES.includes(session.role || "")
+  const isAdmin = session.role != null && ADMIN_ROLES.includes(session.role as AllRoles)
   if (isAdmin) return req
 
   // Tajweed path: must own or manage the path.
@@ -88,7 +90,7 @@ export function makeReaderRequestsListGet() {
     const { searchParams } = new URL(req.url)
     const status = searchParams.get("status")
 
-    const isAdmin = ADMIN_ROLES.includes(session.role || "")
+  const isAdmin = session.role ? ADMIN_ROLES.includes(session.role) : false
 
     const filters: string[] = [
       "r.scope = 'maqraa'",

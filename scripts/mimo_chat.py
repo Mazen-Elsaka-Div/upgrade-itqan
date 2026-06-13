@@ -451,21 +451,14 @@ class ChatUI:
                   bg="#e94560", fg="white", font=("Segoe UI", 10, "bold"),
                   relief=tk.FLAT, padx=14, cursor="hand2").pack(side=tk.RIGHT, padx=(6, 0))
 
-        # Gemini row
-        row2 = tk.Frame(bar, bg="#0f172a")
-        row2.pack(fill=tk.X)
-        tk.Label(row2, text="Gemini →", fg=self.COLORS["Gemini"], bg="#0f172a",
-                 font=("Segoe UI", 10, "bold"), width=9, anchor="w").pack(side=tk.LEFT)
-        self.gemini_entry = tk.Entry(
-            row2, font=("Segoe UI", 11), bg="#1e293b", fg="#c4b5fd",
-            insertbackground="#c4b5fd", relief=tk.FLAT,
-        )
-        self.gemini_entry.insert(0, FIRST_GEMINI_QUESTION)
-        self.gemini_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, ipady=6)
-        self.gemini_entry.bind("<Return>", lambda e: self._send_gemini())
-        tk.Button(row2, text="🤖 Ask mimo", command=self._send_gemini,
-                  bg="#7c3aed", fg="white", font=("Segoe UI", 10, "bold"),
-                  relief=tk.FLAT, padx=14, cursor="hand2").pack(side=tk.RIGHT, padx=(6, 0))
+        # Right-click context menu for pasting
+        self.context_menu = tk.Menu(self.root, tearoff=0, bg="#1e293b", fg="white")
+        self.context_menu.add_command(label="Paste", command=self._paste_text)
+        self.user_entry.bind("<Button-3>", self._show_context_menu)
+        
+        # Explicit bindings for Paste to fix tkinter issues with some keyboard layouts
+        self.user_entry.bind("<Control-v>", lambda e: self._paste_text())
+        self.user_entry.bind("<Control-V>", lambda e: self._paste_text())
 
         self.status = tk.StringVar(value="Booting MIMO backend …")
         tk.Label(self.root, textvariable=self.status, bg="#020617", fg="#64748b",
@@ -546,10 +539,19 @@ class ChatUI:
             self.user_entry.delete(0, tk.END)
             self._dispatch(msg, "You")
 
-    def _send_gemini(self):
-        msg = self.gemini_entry.get().strip()
-        if msg:
-            self._dispatch(msg, "Gemini")
+    def _paste_text(self):
+        try:
+            text = self.root.clipboard_get()
+            self.user_entry.insert(tk.INSERT, text)
+        except tk.TclError:
+            pass
+        return "break"
+
+    def _show_context_menu(self, event):
+        try:
+            self.context_menu.tk_popup(event.x_root, event.y_root)
+        finally:
+            self.context_menu.grab_release()
 
     # ── Gemini IPC file watcher ──────────────────────────────────────────────────
     def _watch_gemini_file(self):

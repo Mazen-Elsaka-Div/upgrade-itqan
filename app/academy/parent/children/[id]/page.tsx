@@ -3,57 +3,124 @@
 import { useEffect, useState, use } from 'react'
 import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
+import { Progress } from '@/components/ui/progress'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import {
   Loader2,
   BookOpen,
   Calendar,
-  Award,
+  Trophy,
   TrendingUp,
-  Mail,
-  ShieldAlert,
-  MessageSquare,
   ChevronLeft,
   ChevronRight,
-  Send,
+  Clock,
+  ArrowUpRight,
+  MessageSquare,
+  Shield,
+  BarChart3,
+  Sparkles,
 } from 'lucide-react'
 import { useI18n } from '@/lib/i18n/context'
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts'
 
-interface OverviewData {
-  child: { id: string; name: string; email: string; avatar_url: string | null } | null
-  link: { id: string; relation: string; confirmed_at: string | null }
-  recitations: { total: number; mastered: number; pending: number; last_at: string | null }
-  sessions: { total: number; attended: number; upcoming: number; last_at: string | null }
-  badges: { total: number; recent_at: string | null }
-  paths: {
-    memorization: { title: string; units_completed: number; total_units: number } | null
-    tajweed: { title: string; stages_completed: number; total_stages: number } | null
+interface ChildDetail {
+  link: {
+    id: string
+    relation: string
+    linked_at: string
+    confirmed_at: string | null
   }
-  enrollments: { active_count: number }
+  child: {
+    id: string
+    name: string
+    email: string
+    avatar_url: string | null
+    gender: string | null
+    created_at: string
+  }
+  progress: {
+    total_courses: number
+    active_courses: number
+    completed_courses: number
+    avg_progress: number
+    total_recitations_30d: number
+  }
+  enrollments: Array<{
+    id: string
+    course_id: string
+    course_title: string
+    status: string
+    progress: number
+    enrolled_at: string
+  }>
+  recent_recitations: Array<{
+    id: string
+    surah_name: string
+    surah_number: number
+    grade: number | null
+    notes: string | null
+    created_at: string
+  }>
+  upcoming_bookings: Array<{
+    id: string
+    reader_name: string
+    scheduled_at: string
+    status: string
+    meeting_link: string | null
+  }>
+  weekly_activity: Array<{
+    day_offset: number
+    count: number
+  }>
+  badges: Array<{
+    id: string
+    badge_name: string
+    badge_description: string | null
+    badge_icon: string | null
+    earned_at: string
+  }>
+}
+
+const relationLabels: Record<string, { ar: string; en: string }> = {
+  father: { ar: 'أب', en: 'Father' },
+  mother: { ar: 'أم', en: 'Mother' },
+  guardian: { ar: 'ولي أمر', en: 'Guardian' },
+  other: { ar: 'أخرى', en: 'Other' },
+}
+
+const dayLabels: Record<string, string[]> = {
+  ar: ['السبت', 'الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'],
+  en: ['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
 }
 
 function fmtDate(s: string | null, isAr: boolean) {
-  if (!s) return isAr ? '—' : '—'
+  if (!s) return '—'
   return new Date(s).toLocaleDateString(isAr ? 'ar-SA' : 'en-US', {
     year: 'numeric',
-    month: 'long',
+    month: 'short',
     day: 'numeric',
   })
 }
 
-function statusLabel(s: string, isAr: boolean) {
-  const map: Record<string, { ar: string; en: string }> = {
-    pending: { ar: 'قيد المراجعة', en: 'Pending' },
-    in_review: { ar: 'قيد المراجعة', en: 'In Review' },
-    mastered: { ar: 'متقن', en: 'Mastered' },
-    needs_session: { ar: 'بحاجة لجلسة', en: 'Needs Session' },
-    completed: { ar: 'مكتمل', en: 'Completed' },
-    confirmed: { ar: 'مؤكد', en: 'Confirmed' },
-    cancelled: { ar: 'ملغي', en: 'Cancelled' },
-  }
-  const l = map[s]
-  return l ? (isAr ? l.ar : l.en) : s
+function fmtDateTime(s: string | null, isAr: boolean) {
+  if (!s) return '—'
+  return new Date(s).toLocaleString(isAr ? 'ar-SA' : 'en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 }
 
 export default function ChildDetailPage({
@@ -65,338 +132,422 @@ export default function ChildDetailPage({
   const { locale } = useI18n()
   const isAr = locale === 'ar'
 
-  const [overview, setOverview] = useState<OverviewData | null>(null)
-  const [recitations, setRecitations] = useState<any[]>([])
-  const [bookings, setBookings] = useState<any[]>([])
-  const [courseSessions, setCourseSessions] = useState<any[]>([])
-  const [badges, setBadges] = useState<any[]>([])
+  const [detail, setDetail] = useState<ChildDetail | null>(null)
   const [loading, setLoading] = useState(true)
-  const [reportSending, setReportSending] = useState(false)
-  const [reportMessage, setReportMessage] = useState<string | null>(null)
-  const ChevronIcon = isAr ? ChevronLeft : ChevronRight
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        const [ov, rec, ses, bds] = await Promise.all([
-          fetch(`/api/academy/parent/children/${id}/overview`).then((r) => r.json()),
-          fetch(`/api/academy/parent/children/${id}/recitations`).then((r) => r.json()),
-          fetch(`/api/academy/parent/children/${id}/sessions`).then((r) => r.json()),
-          fetch(`/api/academy/parent/children/${id}/badges`).then((r) => r.json()),
-        ])
-        if (ov && !ov.error) setOverview(ov)
-        if (rec.recitations) setRecitations(rec.recitations)
-        if (ses.bookings) setBookings(ses.bookings)
-        if (ses.course_sessions) setCourseSessions(ses.course_sessions)
-        if (bds.badges) setBadges(bds.badges)
-      } finally {
-        setLoading(false)
-      }
-    }
-    load()
+    fetchDetail()
   }, [id])
 
-  const sendReport = async () => {
-    setReportSending(true)
-    setReportMessage(null)
+  const fetchDetail = async () => {
     try {
-      const res = await fetch(`/api/academy/parent/children/${id}/send-report`, {
-        method: 'POST',
-      })
-      const data = await res.json()
-      if (data.ok) {
-        setReportMessage(isAr ? 'تم إرسال التقرير الأسبوعي إلى بريدك.' : 'Weekly report sent to your email.')
-      } else {
-        setReportMessage(
-          (isAr ? 'تعذر الإرسال: ' : 'Could not send: ') + (data.error || 'unknown')
-        )
+      const res = await fetch(`/api/academy/parent/children/${id}/detail`)
+      if (res.ok) {
+        const data = await res.json()
+        setDetail(data)
       }
     } catch {
-      setReportMessage(isAr ? 'فشل الاتصال بالخادم' : 'Connection error')
+      // ignore
     } finally {
-      setReportSending(false)
+      setLoading(false)
     }
   }
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-10 h-10 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground font-medium">
+            {isAr ? 'جاري التحميل...' : 'Loading...'}
+          </p>
+        </div>
       </div>
     )
   }
 
-  if (!overview?.child) {
+  if (!detail?.child) {
     return (
       <div className="max-w-3xl mx-auto p-6">
-        <Card>
-          <CardContent className="p-12 text-center text-muted-foreground">
-            {isAr ? 'الطالب غير موجود أو غير مربوط بحسابك.' : 'Student not found or not linked.'}
+        <Card className="rounded-2xl">
+          <CardContent className="p-12 text-center">
+            <p className="text-muted-foreground">
+              {isAr ? 'الطالب غير موجود أو غير مربوط بحسابك.' : 'Student not found or not linked.'}
+            </p>
           </CardContent>
         </Card>
       </div>
     )
   }
 
-  const child = overview.child
-  const allSessions = [...bookings, ...courseSessions].sort(
-    (a, b) => +new Date(b.scheduled_at) - +new Date(a.scheduled_at)
-  )
+  const { child, link, progress, enrollments, recent_recitations, upcoming_bookings, weekly_activity, badges } = detail
+
+  const chartData = [...weekly_activity]
+    .sort((a, b) => a.day_offset - b.day_offset)
+    .map((d) => ({
+      name: dayLabels[locale][6 - d.day_offset],
+      count: d.count,
+    }))
+
+  const ChevronIcon = isAr ? ChevronLeft : ChevronRight
 
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-6" dir={isAr ? 'rtl' : 'ltr'}>
+      {/* Back Link */}
       <Link
         href="/academy/parent/children"
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors"
       >
         <ChevronIcon className="w-4 h-4" />
         {isAr ? 'العودة لقائمة الأبناء' : 'Back to children'}
       </Link>
 
-      {/* Header */}
-      <Card className="rounded-3xl border-border/50 overflow-hidden">
-        <CardContent className="p-6 flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary text-2xl font-bold">
-              {child.name?.[0] || '?'}
+      {/* Hero Profile */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary/5 via-primary/10 to-background border border-primary/10 p-8">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(120,119,198,0.06),transparent_50%)]" />
+        <div className="relative flex flex-col md:flex-row md:items-center gap-6">
+          <Avatar className="w-20 h-20 md:w-24 md:h-24 shrink-0 ring-4 ring-background shadow-lg">
+            <AvatarImage src={child.avatar_url || undefined} />
+            <AvatarFallback className="bg-primary/10 text-primary font-bold text-3xl">
+              {child.name?.charAt(0) || '?'}
+            </AvatarFallback>
+          </Avatar>
+
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-1">
+              <h1 className="text-2xl md:text-3xl font-black text-foreground">{child.name}</h1>
+              <Badge variant="secondary" className="text-xs">
+                {relationLabels[link.relation]?.[locale] || link.relation}
+              </Badge>
             </div>
-            <div>
-              <h1 className="text-2xl font-black">{child.name}</h1>
-              <div className="text-sm text-muted-foreground" dir="ltr">
-                <Mail className="w-3 h-3 inline" /> {child.email}
-              </div>
-            </div>
+            <p className="text-sm text-muted-foreground" dir="ltr">
+              {child.email}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {isAr ? 'ربط منذ' : 'Linked since'} {fmtDate(link.linked_at, isAr)}
+            </p>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <Button variant="outline" onClick={sendReport} disabled={reportSending}>
-              {reportSending ? <Loader2 className="w-4 h-4 animate-spin" /> : (
-                <>
-                  <Send className="w-4 h-4 me-2" />
-                  {isAr ? 'إرسال التقرير الأسبوعي' : 'Send weekly report'}
-                </>
-              )}
-            </Button>
-            <Link href={`/academy/parent/children/${id}/restrictions`}>
-              <Button variant="outline">
-                <ShieldAlert className="w-4 h-4 me-2" />
-                {isAr ? 'تقييد المحتوى' : 'Restrictions'}
-              </Button>
-            </Link>
+
+          <div className="flex flex-wrap gap-2 shrink-0">
             <Link href={`/academy/parent/messages?child_id=${id}`}>
-              <Button>
-                <MessageSquare className="w-4 h-4 me-2" />
-                {isAr ? 'مراسلة المعلم' : 'Message teacher'}
+              <Button variant="outline" size="sm" className="rounded-xl font-bold">
+                <MessageSquare className="w-4 h-4 me-1.5" />
+                {isAr ? 'مراسلة' : 'Message'}
+              </Button>
+            </Link>
+            <Link href={`/academy/parent/children/${id}/restrictions`}>
+              <Button variant="outline" size="sm" className="rounded-xl font-bold">
+                <Shield className="w-4 h-4 me-1.5" />
+                {isAr ? 'تقييد' : 'Restrict'}
               </Button>
             </Link>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      {reportMessage && (
-        <div className="p-3 rounded-xl border bg-muted/30 text-sm">{reportMessage}</div>
-      )}
-
-      {/* Stat cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="rounded-2xl">
+      {/* Stats Row */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="rounded-2xl border-border/50">
           <CardContent className="p-5">
-            <div className="flex items-center justify-between mb-2">
-              <BookOpen className="w-5 h-5 text-emerald-600" />
-              <span className="text-xs text-muted-foreground">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                <BookOpen className="w-5 h-5 text-emerald-500" />
+              </div>
+              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                {isAr ? 'المقررات' : 'Courses'}
+              </span>
+            </div>
+            <div className="text-3xl font-black text-foreground">{progress.active_courses}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {progress.completed_courses} {isAr ? 'مكتمل' : 'completed'}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-2xl border-border/50">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 text-blue-500" />
+              </div>
+              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                {isAr ? 'التقدم' : 'Progress'}
+              </span>
+            </div>
+            <div className="text-3xl font-black text-foreground">{progress.avg_progress}%</div>
+            <Progress value={progress.avg_progress} className="h-1.5 mt-2 bg-primary/10" />
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-2xl border-border/50">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center">
+                <BarChart3 className="w-5 h-5 text-violet-500" />
+              </div>
+              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
                 {isAr ? 'تلاوات' : 'Recitations'}
               </span>
             </div>
-            <div className="text-3xl font-black">{overview.recitations.total}</div>
-            <div className="text-xs text-muted-foreground mt-1">
-              {isAr
-                ? `${overview.recitations.mastered} متقنة • ${overview.recitations.pending} قيد المراجعة`
-                : `${overview.recitations.mastered} mastered • ${overview.recitations.pending} pending`}
-            </div>
+            <div className="text-3xl font-black text-foreground">{progress.total_recitations_30d}</div>
+            <p className="text-xs text-muted-foreground mt-1">{isAr ? 'آخر ٣٠ يوم' : 'Last 30 days'}</p>
           </CardContent>
         </Card>
-        <Card className="rounded-2xl">
+
+        <Card className="rounded-2xl border-border/50">
           <CardContent className="p-5">
-            <div className="flex items-center justify-between mb-2">
-              <Calendar className="w-5 h-5 text-blue-600" />
-              <span className="text-xs text-muted-foreground">
-                {isAr ? 'جلسات' : 'Sessions'}
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
+                <Trophy className="w-5 h-5 text-amber-500" />
+              </div>
+              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                {isAr ? 'الشارات' : 'Badges'}
               </span>
             </div>
-            <div className="text-3xl font-black">{overview.sessions.total}</div>
-            <div className="text-xs text-muted-foreground mt-1">
-              {isAr
-                ? `${overview.sessions.attended} حضر • ${overview.sessions.upcoming} قادم`
-                : `${overview.sessions.attended} attended • ${overview.sessions.upcoming} upcoming`}
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="rounded-2xl">
-          <CardContent className="p-5">
-            <div className="flex items-center justify-between mb-2">
-              <Award className="w-5 h-5 text-amber-600" />
-              <span className="text-xs text-muted-foreground">
-                {isAr ? 'شارات' : 'Badges'}
-              </span>
-            </div>
-            <div className="text-3xl font-black">{overview.badges.total}</div>
-            <div className="text-xs text-muted-foreground mt-1">
-              {fmtDate(overview.badges.recent_at, isAr)}
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="rounded-2xl">
-          <CardContent className="p-5">
-            <div className="flex items-center justify-between mb-2">
-              <TrendingUp className="w-5 h-5 text-violet-600" />
-              <span className="text-xs text-muted-foreground">
-                {isAr ? 'مسارات نشطة' : 'Active paths'}
-              </span>
-            </div>
-            <div className="text-3xl font-black">{overview.enrollments.active_count}</div>
+            <div className="text-3xl font-black text-foreground">{badges.length}</div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Current level */}
-      {(overview.paths.memorization || overview.paths.tajweed) && (
-        <div className="grid md:grid-cols-2 gap-4">
-          {overview.paths.memorization && (
-            <Card className="rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200">
-              <CardContent className="p-5">
-                <div className="text-xs uppercase tracking-wider text-emerald-700/80 mb-1">
-                  {isAr ? 'مسار الحفظ' : 'Memorization path'}
-                </div>
-                <div className="font-bold text-lg">{overview.paths.memorization.title}</div>
-                <div className="text-sm text-muted-foreground mt-1">
-                  {overview.paths.memorization.units_completed}/{overview.paths.memorization.total_units}{' '}
-                  {isAr ? 'وحدة' : 'units'}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-          {overview.paths.tajweed && (
-            <Card className="rounded-2xl bg-blue-50 dark:bg-blue-950/30 border-blue-200">
-              <CardContent className="p-5">
-                <div className="text-xs uppercase tracking-wider text-blue-700/80 mb-1">
-                  {isAr ? 'مسار التجويد' : 'Tajweed path'}
-                </div>
-                <div className="font-bold text-lg">{overview.paths.tajweed.title}</div>
-                <div className="text-sm text-muted-foreground mt-1">
-                  {overview.paths.tajweed.stages_completed}/{overview.paths.tajweed.total_stages}{' '}
-                  {isAr ? 'مرحلة' : 'stages'}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      )}
-
       {/* Tabs */}
-      <Tabs defaultValue="recitations" className="w-full">
-        <TabsList className="grid grid-cols-3 w-full max-w-xl">
+      <Tabs defaultValue="overview" className="w-full">
+        <TabsList className="grid grid-cols-4 w-full max-w-2xl">
+          <TabsTrigger value="overview">
+            {isAr ? 'نظرة' : 'Overview'}
+          </TabsTrigger>
           <TabsTrigger value="recitations">
             {isAr ? 'التلاوات' : 'Recitations'}
           </TabsTrigger>
-          <TabsTrigger value="sessions">
-            {isAr ? 'الجلسات' : 'Sessions'}
+          <TabsTrigger value="schedule">
+            {isAr ? 'المواعيد' : 'Schedule'}
           </TabsTrigger>
           <TabsTrigger value="badges">
             {isAr ? 'الشارات' : 'Badges'}
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="recitations" className="mt-4">
-          {recitations.length === 0 ? (
-            <Card>
-              <CardContent className="p-10 text-center text-muted-foreground">
-                {isAr ? 'لا توجد تلاوات بعد.' : 'No recitations yet.'}
+        {/* Overview Tab */}
+        <TabsContent value="overview" className="mt-6 space-y-6">
+          {/* Weekly Activity Chart */}
+          <Card className="rounded-2xl border-border/50">
+            <CardContent className="p-6">
+              <h3 className="text-lg font-bold text-foreground mb-4">
+                {isAr ? 'نشاط الأسبوع' : 'Weekly Activity'}
+              </h3>
+              {weekly_activity.some((d) => d.count > 0) ? (
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={chartData} barSize={32}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis
+                        dataKey="name"
+                        tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                        axisLine={false}
+                        tickLine={false}
+                      />
+                      <YAxis
+                        allowDecimals={false}
+                        tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                        axisLine={false}
+                        tickLine={false}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: 'hsl(var(--card))',
+                          border: '1px solid hsl(var(--border))',
+                          borderRadius: '12px',
+                          fontSize: '13px',
+                        }}
+                      />
+                      <Bar
+                        dataKey="count"
+                        fill="hsl(var(--primary))"
+                        radius={[6, 6, 0, 0]}
+                        name={isAr ? 'النشاط' : 'Activity'}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <div className="h-64 flex items-center justify-center text-muted-foreground text-sm">
+                  {isAr ? 'لا يوجد نشاط هذا الأسبوع' : 'No activity this week'}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Enrollments */}
+          {enrollments.length > 0 && (
+            <Card className="rounded-2xl border-border/50">
+              <CardContent className="p-6">
+                <h3 className="text-lg font-bold text-foreground mb-4">
+                  {isAr ? 'المقررات' : 'Enrolled Courses'}
+                </h3>
+                <div className="space-y-3">
+                  {enrollments.map((e) => (
+                    <div key={e.id} className="flex items-center gap-4 p-3 rounded-xl hover:bg-muted/30 transition-colors">
+                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                        <BookOpen className="w-5 h-5 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-bold text-sm text-foreground truncate">{e.course_title}</h4>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Progress value={e.progress} className="h-1.5 flex-1 bg-primary/10" />
+                          <span className="text-xs font-bold text-muted-foreground shrink-0">{e.progress}%</span>
+                        </div>
+                      </div>
+                      <Badge
+                        variant={e.status === 'completed' ? 'default' : 'secondary'}
+                        className="text-[10px] shrink-0"
+                      >
+                        {e.status === 'completed'
+                          ? isAr ? 'مكتمل' : 'Done'
+                          : isAr ? 'نشط' : 'Active'}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
               </CardContent>
             </Card>
-          ) : (
-            <div className="space-y-2">
-              {recitations.map((r) => (
-                <Card key={r.id} className="rounded-xl">
-                  <CardContent className="p-4 flex items-center justify-between gap-4">
-                    <div>
-                      <div className="font-bold">{r.surah_name}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {isAr ? 'من آية' : 'From'} {r.ayah_from} {isAr ? 'إلى' : 'to'} {r.ayah_to}{' '}
-                        {r.reader_name ? `• ${r.reader_name}` : ''}
-                      </div>
-                    </div>
-                    <div className="flex flex-col items-end gap-1 shrink-0">
-                      <span className="text-xs px-2 py-1 rounded-full bg-muted">
-                        {statusLabel(r.status, isAr)}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {fmtDate(r.created_at, isAr)}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
           )}
         </TabsContent>
 
-        <TabsContent value="sessions" className="mt-4">
-          {allSessions.length === 0 ? (
-            <Card>
-              <CardContent className="p-10 text-center text-muted-foreground">
-                {isAr ? 'لا توجد جلسات.' : 'No sessions.'}
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-2">
-              {allSessions.map((s, idx) => (
-                <Card key={`${s.id}-${idx}`} className="rounded-xl">
-                  <CardContent className="p-4 flex items-center justify-between gap-4">
-                    <div>
-                      <div className="font-bold">{s.title}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {fmtDate(s.scheduled_at, isAr)}
-                        {s.counterpart_name ? ` • ${s.counterpart_name}` : ''}
+        {/* Recitations Tab */}
+        <TabsContent value="recitations" className="mt-6">
+          <Card className="rounded-2xl border-border/50">
+            <CardContent className="p-6">
+              <h3 className="text-lg font-bold text-foreground mb-4">
+                {isAr ? 'التلاوات الأخيرة' : 'Recent Recitations'}
+              </h3>
+              {recent_recitations.length === 0 ? (
+                <div className="py-12 text-center text-muted-foreground">
+                  {isAr ? 'لا توجد تلاوات بعد.' : 'No recitations yet.'}
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {recent_recitations.map((r) => (
+                    <div
+                      key={r.id}
+                      className="flex items-center justify-between p-3 rounded-xl hover:bg-muted/30 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+                          <Sparkles className="w-5 h-5 text-emerald-500" />
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-sm text-foreground">{r.surah_name}</h4>
+                          {r.notes && (
+                            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{r.notes}</p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0">
+                        {r.grade != null && (
+                          <span className="text-xs font-bold px-2 py-1 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                            {r.grade}/100
+                          </span>
+                        )}
+                        <span className="text-xs text-muted-foreground">{fmtDate(r.created_at, isAr)}</span>
                       </div>
                     </div>
-                    <span className="text-xs px-2 py-1 rounded-full bg-muted">
-                      {statusLabel(s.status, isAr)}
-                    </span>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
-        <TabsContent value="badges" className="mt-4">
-          {badges.length === 0 ? (
-            <Card>
-              <CardContent className="p-10 text-center text-muted-foreground">
-                {isAr ? 'لم يحصل على شارات بعد.' : 'No badges yet.'}
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid md:grid-cols-2 gap-3">
-              {badges.map((b) => (
-                <Card key={b.id} className="rounded-xl">
-                  <CardContent className="p-4 flex items-start gap-3">
-                    <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0">
-                      <Award className="w-6 h-6 text-amber-600" />
-                    </div>
-                    <div>
-                      <div className="font-bold">{b.badge_name}</div>
-                      {b.badge_description && (
-                        <div className="text-sm text-muted-foreground">{b.badge_description}</div>
-                      )}
-                      <div className="text-xs text-muted-foreground mt-1">
-                        {fmtDate(b.awarded_at, isAr)}
+        {/* Schedule Tab */}
+        <TabsContent value="schedule" className="mt-6">
+          <Card className="rounded-2xl border-border/50">
+            <CardContent className="p-6">
+              <h3 className="text-lg font-bold text-foreground mb-4">
+                {isAr ? 'المواعيد القادمة' : 'Upcoming Schedule'}
+              </h3>
+              {upcoming_bookings.length === 0 ? (
+                <div className="py-12 text-center text-muted-foreground">
+                  {isAr ? 'لا توجد مواعيد قادمة.' : 'No upcoming bookings.'}
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {upcoming_bookings.map((b) => (
+                    <div
+                      key={b.id}
+                      className="flex items-center justify-between p-3 rounded-xl hover:bg-muted/30 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center shrink-0">
+                          <Calendar className="w-5 h-5 text-blue-500" />
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-sm text-foreground">
+                            {isAr ? 'حجز تلاوة' : 'Recitation'} — {b.reader_name}
+                          </h4>
+                          <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            {fmtDateTime(b.scheduled_at, isAr)}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        {b.meeting_link && (
+                          <Button variant="outline" size="sm" className="rounded-xl h-8 text-xs" asChild>
+                            <a href={b.meeting_link} target="_blank" rel="noopener noreferrer">
+                              <ArrowUpRight className="w-3 h-3 me-1" />
+                              {isAr ? 'انضمام' : 'Join'}
+                            </a>
+                          </Button>
+                        )}
+                        <Badge variant="secondary" className="text-[10px]">
+                          {isAr ? 'قادم' : 'Upcoming'}
+                        </Badge>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Badges Tab */}
+        <TabsContent value="badges" className="mt-6">
+          <Card className="rounded-2xl border-border/50">
+            <CardContent className="p-6">
+              <h3 className="text-lg font-bold text-foreground mb-4">
+                {isAr ? 'الشارات المكتسبة' : 'Earned Badges'}
+              </h3>
+              {badges.length === 0 ? (
+                <div className="py-12 text-center text-muted-foreground">
+                  {isAr ? 'لم يحصل على شارات بعد.' : 'No badges earned yet.'}
+                </div>
+              ) : (
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {badges.map((b) => (
+                    <div
+                      key={b.id}
+                      className="flex items-start gap-3 p-4 rounded-xl border border-border/50 hover:border-amber-300/50 dark:hover:border-amber-700/50 transition-colors"
+                    >
+                      <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
+                        <Trophy className="w-6 h-6 text-amber-500" />
+                      </div>
+                      <div className="min-w-0">
+                        <h4 className="font-bold text-sm text-foreground">{b.badge_name}</h4>
+                        {b.badge_description && (
+                          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                            {b.badge_description}
+                          </p>
+                        )}
+                        <p className="text-[10px] text-muted-foreground/60 mt-1">
+                          {fmtDate(b.earned_at, isAr)}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>

@@ -12,6 +12,8 @@ interface CalendarEvent {
   type: 'live_session' | 'assignment_deadline' | 'booking'
   course: string
   course_id: string
+  child_id: string
+  child_name: string
   link?: string
   status?: string
   scheduled_at?: string
@@ -40,6 +42,7 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
     const month = searchParams.get('month')
+    const childFilter = searchParams.get('child')
     const year = month ? parseInt(month.split('-')[0]) : new Date().getFullYear()
     const mon = month ? parseInt(month.split('-')[1]) : new Date().getMonth() + 1
 
@@ -48,20 +51,28 @@ export async function GET(req: NextRequest) {
     const endDate = new Date(Date.UTC(year, mon, 0, 23, 59, 59))
     endDate.setUTCDate(endDate.getUTCDate() + 1)
 
-    // Get linked children for this parent
-    const children = await query<{ student_id: string; name: string }>(`
-      SELECT psl.student_id, u.name
-      FROM parent_student_links psl
-      JOIN users u ON u.id = psl.student_id
-      WHERE psl.parent_id = $1 AND psl.is_active = TRUE
-    `, [session.sub])
+    // Get linked children from parent_children table
+    let childrenQuery = `
+      SELECT pc.child_id, u.name
+      FROM parent_children pc
+      JOIN users u ON u.id = pc.child_id
+      WHERE pc.parent_id = $1 AND pc.status = 'active'
+    `
+    const childrenParams: any[] = [session.sub]
 
-    if (children.length === 0) {
-      return NextResponse.json({ events: [] })
+    if (childFilter) {
+      childrenQuery += ` AND pc.child_id = $2`
+      childrenParams.push(childFilter)
     }
 
-    const childIds = children.map((c) => c.student_id)
-    const childNames = new Map(children.map((c) => [c.student_id, c.name]))
+    const children = await query<{ child_id: string; name: string }>(childrenQuery, childrenParams)
+
+    if (children.length === 0) {
+      return NextResponse.json({ events: [], children: [] })
+    }
+
+    const childIds = children.map((c) => c.child_id)
+    const childNames = new Map(children.map((c) => [c.child_id, c.name]))
 
     const events: CalendarEvent[] = []
 
@@ -91,6 +102,8 @@ export async function GET(req: NextRequest) {
         type: 'live_session',
         course: s.course_title || '',
         course_id: s.course_id,
+        child_id: s.student_id,
+        child_name: childName,
         link: s.meeting_link,
         status: s.status,
         scheduled_at: s.scheduled_at,
@@ -120,6 +133,8 @@ export async function GET(req: NextRequest) {
         type: 'assignment_deadline',
         course: t.course_title || '',
         course_id: t.course_id,
+        child_id: t.student_id,
+        child_name: childName,
         scheduled_at: t.due_date,
       })
     }
@@ -146,13 +161,18 @@ export async function GET(req: NextRequest) {
         type: 'booking',
         course: b.reader_name ? `مع ${b.reader_name}` : 'تلاوة',
         course_id: '',
+        child_id: b.student_id,
+        child_name: childName,
         link: b.meeting_link,
         status: b.status,
         scheduled_at: b.scheduled_at,
       })
     }
 
-    return NextResponse.json({ events })
+    return NextResponse.json({
+      events,
+      children: children.map((c) => ({ id: c.child_id, name: c.name })),
+    })
   } catch (error) {
     console.error('[API] /academy/parent/calendar/events error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

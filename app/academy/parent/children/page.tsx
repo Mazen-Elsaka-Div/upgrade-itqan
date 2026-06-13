@@ -3,9 +3,25 @@
 import { useState, useEffect } from 'react'
 import { useI18n } from '@/lib/i18n/context'
 import { Card, CardContent } from '@/components/ui/card'
-import { Users, BookOpen, Target, UserMinus, Plus, Loader2, AlertTriangle, Mic, Calendar, Award } from 'lucide-react'
-import Link from 'next/link'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
+import { Progress } from '@/components/ui/progress'
 import { Button } from '@/components/ui/button'
+import Link from 'next/link'
+import {
+  Users,
+  LinkIcon,
+  Loader2,
+  ChevronRight,
+  Clock,
+  BookOpen,
+  Trophy,
+  Calendar,
+  AlertCircle,
+  UserMinus,
+  ArrowUpRight,
+  Shield,
+} from 'lucide-react'
 import { toast } from 'sonner'
 import {
   AlertDialog,
@@ -18,72 +34,74 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 
-interface LinkedChild {
-  id: string
-  child_id: string
-  child_name: string
-  child_email: string
-  child_avatar: string | null
-  relation: string
-  status: string
-  linked_at: string
+interface DashboardOverview {
+  parent: {
+    id: string
+    name: string
+    email: string
+    avatar_url: string | null
+  }
+  summary: {
+    total_children: number
+    pending_requests: number
+    rejected_links: number
+    active_count: number
+  }
+  children: Array<{
+    link_id: string
+    child_id: string
+    child_name: string
+    child_avatar: string | null
+    relation: string
+    linked_at: string
+    enrollments: {
+      total: number
+      active: number
+      completed: number
+      avg_progress: number
+    }
+    recitations: {
+      total_30d: number
+      last_at: string | null
+    }
+    bookings: {
+      upcoming: number
+    }
+    weekly_activity: {
+      recitations: number
+      bookings: number
+    }
+    badges: {
+      total: number
+    }
+  }>
 }
 
-interface ChildActivity {
-  recitations: Array<{
-    id: string
-    surah_name: string
-    status: string
-    created_at: string
-    reader_name: string | null
-    overall_score: string | number | null
-  }>
-  sessions: Array<{
-    id: string
-    status: string
-    scheduled_at: string | null
-    slot_start: string | null
-    teacher_name: string | null
-  }>
-  badges: Array<{
-    id: string
-    badge_name: string | null
-    badge_type: string
-    earned_at: string | null
-  }>
+const relationLabels: Record<string, { ar: string; en: string }> = {
+  father: { ar: 'أب', en: 'Father' },
+  mother: { ar: 'أم', en: 'Mother' },
+  guardian: { ar: 'ولي أمر', en: 'Guardian' },
+  other: { ar: 'أخرى', en: 'Other' },
 }
 
 export default function ParentChildrenPage() {
-  const { t, locale } = useI18n()
+  const { locale } = useI18n()
   const isAr = locale === 'ar'
-  const [children, setChildren] = useState<LinkedChild[]>([])
+  const [overview, setOverview] = useState<DashboardOverview | null>(null)
   const [loading, setLoading] = useState(true)
-  const [activities, setActivities] = useState<Record<string, ChildActivity>>({})
-  const [unlinkingChild, setUnlinkingChild] = useState<LinkedChild | null>(null)
+  const [unlinkingChild, setUnlinkingChild] = useState<DashboardOverview['children'][0] | null>(null)
   const [unlinkLoading, setUnlinkLoading] = useState(false)
 
   useEffect(() => {
-    fetchChildren()
+    fetchOverview()
   }, [])
 
-  const fetchChildren = async () => {
+  const fetchOverview = async () => {
     try {
-      const res = await fetch('/api/academy/parent/children')
-      const data = await res.json()
+      const res = await fetch('/api/academy/parent/overview')
       if (res.ok) {
-        const linkedChildren: LinkedChild[] = data.children || []
-        setChildren(linkedChildren)
-        const entries = await Promise.all(linkedChildren.map(async (child) => {
-          try {
-            const activityRes = await fetch(`/api/academy/parent/children/${child.child_id}/activity`)
-            if (!activityRes.ok) return [child.child_id, { recitations: [], sessions: [], badges: [] }] as const
-            const activityData = await activityRes.json()
-            return [child.child_id, activityData as ChildActivity] as const
-          } catch {
-            return [child.child_id, { recitations: [], sessions: [], badges: [] }] as const
-          }
-        }))
-        setActivities(Object.fromEntries(entries))
+        const data = await res.json()
+        setOverview(data)
       }
     } catch {
       // ignore
@@ -92,15 +110,9 @@ export default function ParentChildrenPage() {
     }
   }
 
-  const getRelationLabel = (rel: string) => {
-    if (rel === 'father') return isAr ? 'أب' : 'Father'
-    if (rel === 'mother') return isAr ? 'أم' : 'Mother'
-    return isAr ? 'ولي أمر' : 'Guardian'
-  }
-
   const handleUnlink = async () => {
     if (!unlinkingChild) return
-    
+
     setUnlinkLoading(true)
     try {
       const res = await fetch('/api/academy/parent/children', {
@@ -108,16 +120,26 @@ export default function ParentChildrenPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ child_id: unlinkingChild.child_id }),
       })
-      
+
       const data = await res.json()
-      
+
       if (res.ok) {
         toast.success(data.message || (isAr ? 'تم إلغاء الربط بنجاح' : 'Successfully unlinked'))
-        setChildren(prev => prev.filter(c => c.child_id !== unlinkingChild.child_id))
+        setOverview((prev) => {
+          if (!prev) return prev
+          return {
+            ...prev,
+            summary: {
+              ...prev.summary,
+              active_count: prev.summary.active_count - 1,
+            },
+            children: prev.children.filter((c) => c.child_id !== unlinkingChild.child_id),
+          }
+        })
       } else {
         toast.error(data.error || (isAr ? 'حدث خطأ' : 'Error occurred'))
       }
-    } catch (error) {
+    } catch {
       toast.error(isAr ? 'حدث خطأ في الاتصال' : 'Connection error')
     } finally {
       setUnlinkLoading(false)
@@ -127,147 +149,260 @@ export default function ParentChildrenPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-10 h-10 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground font-medium">
+            {isAr ? 'جاري التحميل...' : 'Loading...'}
+          </p>
+        </div>
       </div>
     )
   }
 
+  const children = overview?.children || []
+  const summary = overview?.summary
+  const hasChildren = children.length > 0
+  const hasPending = (summary?.pending_requests || 0) > 0
+
   return (
-    <div className="max-w-6xl mx-auto space-y-8 pb-12" dir={isAr ? "rtl" : "ltr"}>
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-4 border-b border-border/50">
+    <div className="max-w-6xl mx-auto space-y-8 pb-12" dir={isAr ? 'rtl' : 'ltr'}>
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider mb-2">
-             <Users className="w-4 h-4" />
-             {isAr ? "إدارة الأبناء" : "Manage Children"}
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider">
+            <Users className="w-4 h-4" />
+            {isAr ? 'إدارة الأبناء' : 'Manage Children'}
           </div>
           <h1 className="text-3xl lg:text-4xl font-black tracking-tight text-foreground">
-            {isAr ? "قائمة الأبناء" : "My Children"}
+            {isAr ? 'قائمة الأبناء' : 'My Children'}
           </h1>
           <p className="text-muted-foreground font-medium max-w-2xl">
-            {isAr 
-              ? "استعرض قائمة أبنائك المربوطين بحسابك وتحكم في تفضيلات المتابعة." 
-              : "View a list of your linked children and manage tracking preferences."}
+            {isAr
+              ? 'استعرض أبنائك المربوطين وتابع تقدمهم الأكاديمي.'
+              : 'View your linked children and track their academic progress.'}
           </p>
         </div>
-        <Button asChild className="h-12 px-6 rounded-2xl bg-primary text-primary-foreground font-bold shadow-md hover:shadow-lg transition-all">
+        <Button
+          asChild
+          className="h-12 px-6 rounded-2xl bg-primary text-primary-foreground font-bold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all active:scale-95 shrink-0"
+        >
           <Link href="/academy/parent/link-child">
-            <Plus className={`w-5 h-5 ${isAr ? "ml-2" : "mr-2"}`} />
-            {isAr ? "ربط ابن جديد" : "Link New Child"}
+            <LinkIcon className="w-4 h-4 me-2" />
+            {isAr ? 'ربط ابن جديد' : 'Link New Child'}
           </Link>
         </Button>
       </div>
 
-      {children.length === 0 ? (
-        <Card className="border-border/50 shadow-sm rounded-3xl bg-card">
+      {/* Pending Requests Alert */}
+      {hasPending && (
+        <Card className="rounded-2xl border-amber-200/50 dark:border-amber-800/50 bg-amber-50/50 dark:bg-amber-950/20">
+          <CardContent className="p-6">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
+                <Clock className="w-6 h-6 text-amber-500" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-foreground mb-1">
+                  {isAr ? 'طلبات ربط معلقة' : 'Pending Link Requests'}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {isAr
+                    ? `لديك ${summary?.pending_requests} طلب ربط في انتظار موافقة الأبناء. سيتم تفعيل الحسابات تلقائياً بعد الموافقة.`
+                    : `You have ${summary?.pending_requests} link requests awaiting student approval. Accounts will be activated automatically upon approval.`}
+                </p>
+              </div>
+              <AlertCircle className="w-5 h-5 text-amber-500 shrink-0 mt-1" />
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Empty State */}
+      {!hasChildren && !hasPending && (
+        <Card className="rounded-2xl border-border/50">
           <CardContent className="p-16 text-center">
-            <Users className="w-16 h-16 text-muted-foreground/20 mx-auto mb-4" />
-            <h4 className="text-xl font-bold text-foreground mb-2">{isAr ? "لا يوجد أبناء مربوطين حالياً" : "No linked children yet"}</h4>
-            <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto">{isAr ? "ابدأ بربط حساب ابنك عن طريق البريد الإلكتروني المسجل في المنصة." : "Start by linking your child's account using their registered email."}</p>
-            <Button asChild className="rounded-2xl font-bold h-12 px-8">
-              <Link href="/academy/parent/link-child">{isAr ? "ربط ابن جديد" : "Link New Child"}</Link>
+            <div className="w-20 h-20 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-5">
+              <Users className="w-9 h-9 text-muted-foreground/30" />
+            </div>
+            <h4 className="text-xl font-bold text-foreground mb-2">
+              {isAr ? 'لا يوجد أبناء مربوطين' : 'No linked children'}
+            </h4>
+            <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto">
+              {isAr
+                ? 'ابدأ بربط حساب ابنك لتتبع تقدمه الأكاديمي من مكان واحد.'
+                : "Start by linking your child's account to track their academic progress from one place."}
+            </p>
+            <Button asChild className="rounded-xl font-bold h-12 px-8">
+              <Link href="/academy/parent/link-child">
+                {isAr ? 'ربط ابن جديد' : 'Link New Child'}
+              </Link>
             </Button>
           </CardContent>
         </Card>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {children.map(child => (
-            <Card key={child.id} className="border-border/50 shadow-sm rounded-3xl bg-card overflow-hidden">
-              <CardContent className="p-0">
-                <div className="p-8 pb-6 border-b border-border/50 flex flex-col sm:flex-row sm:items-center gap-6">
-                  <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-primary/20 to-accent/20 flex items-center justify-center shrink-0">
-                    <span className="text-3xl font-black text-primary">{child.child_name.charAt(0)}</span>
-                  </div>
-                  <div className="space-y-1">
-                    <h3 className="text-2xl font-bold text-foreground leading-tight">{child.child_name}</h3>
-                    <p className="text-sm font-medium text-muted-foreground" dir="ltr">{child.child_email}</p>
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-muted/60 mt-2">
-                      <span className="text-xs font-bold text-muted-foreground uppercase">{isAr ? "صلة القرابة:" : "Relation:"}</span>
-                      <span className="text-xs font-black text-foreground">{getRelationLabel(child.relation)}</span>
-                    </div>
-                  </div>
-                </div>
+      )}
 
-                <div className="px-6 pb-6 grid grid-cols-1 gap-4">
-                  <div className="rounded-2xl border border-border bg-muted/10 p-4">
-                    <div className="flex items-center gap-2 font-bold mb-3">
-                      <Mic className="w-4 h-4 text-primary" />
-                      {isAr ? 'آخر التلاوات' : 'Recent Recitations'}
-                    </div>
-                    {(activities[child.child_id]?.recitations || []).slice(0, 3).length === 0 ? (
-                      <p className="text-sm text-muted-foreground">{isAr ? 'لا توجد تلاوات بعد.' : 'No recitations yet.'}</p>
-                    ) : (
-                      <div className="space-y-2">
-                        {(activities[child.child_id]?.recitations || []).slice(0, 3).map(recitation => (
-                          <div key={recitation.id} className="flex items-center justify-between gap-3 text-sm">
-                            <span className="font-semibold text-foreground">{recitation.surah_name}</span>
-                            <span className="text-muted-foreground">{recitation.status}</span>
-                          </div>
-                        ))}
+      {/* Children Grid */}
+      {hasChildren && (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-bold text-foreground">
+              {isAr ? 'الأبناء المربوطين' : 'Linked Children'}
+              <span className="text-muted-foreground font-normal ms-2">({children.length})</span>
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {children.map((child) => (
+              <Card
+                key={child.link_id}
+                className="rounded-2xl border-border/50 overflow-hidden hover:shadow-md hover:border-primary/20 transition-all group"
+              >
+                <CardContent className="p-0">
+                  {/* Child Header */}
+                  <div className="p-6 pb-4">
+                    <div className="flex items-start gap-4">
+                      <Link href={`/academy/parent/children/${child.child_id}`}>
+                        <Avatar className="w-14 h-14 shrink-0 ring-2 ring-background shadow-sm cursor-pointer hover:ring-primary/30 transition-all">
+                          <AvatarImage src={child.child_avatar || undefined} />
+                          <AvatarFallback className="bg-primary/10 text-primary font-bold text-lg">
+                            {child.child_name.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                      </Link>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Link
+                            href={`/academy/parent/children/${child.child_id}`}
+                            className="font-bold text-foreground hover:text-primary transition-colors truncate"
+                          >
+                            {child.child_name}
+                          </Link>
+                          <Badge variant="secondary" className="text-[10px] px-1.5 py-0 shrink-0">
+                            {relationLabels[child.relation]?.[locale] || child.relation}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {isAr ? 'ربط منذ' : 'Linked'} {fmtDate(child.linked_at, isAr)}
+                        </p>
                       </div>
-                    )}
+                      <Link
+                        href={`/academy/parent/children/${child.child_id}`}
+                        className="shrink-0"
+                      >
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <ChevronRight
+                            className={`w-4 h-4 text-muted-foreground ${isAr ? 'rotate-180' : ''}`}
+                          />
+                        </Button>
+                      </Link>
+                    </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="rounded-2xl border border-border bg-muted/10 p-4">
-                      <div className="flex items-center gap-2 font-bold mb-3">
-                        <Calendar className="w-4 h-4 text-primary" />
-                        {isAr ? 'الجلسات' : 'Sessions'}
-                      </div>
-                      <p className="text-2xl font-black text-foreground">{activities[child.child_id]?.sessions?.length || 0}</p>
-                      <p className="text-xs text-muted-foreground">{isAr ? 'جلسة مرتبطة' : 'linked sessions'}</p>
+                  {/* Progress */}
+                  <div className="px-6 pb-4">
+                    <div className="flex items-center justify-between text-xs mb-1.5">
+                      <span className="text-muted-foreground font-medium">
+                        {isAr ? 'التقدم' : 'Progress'}
+                      </span>
+                      <span className="font-bold text-foreground">
+                        {child.enrollments.avg_progress}%
+                      </span>
                     </div>
-                    <div className="rounded-2xl border border-border bg-muted/10 p-4">
-                      <div className="flex items-center gap-2 font-bold mb-3">
-                        <Award className="w-4 h-4 text-primary" />
-                        {isAr ? 'الشارات' : 'Badges'}
-                      </div>
-                      <p className="text-2xl font-black text-foreground">{activities[child.child_id]?.badges?.length || 0}</p>
-                      <p className="text-xs text-muted-foreground">{isAr ? 'شارة مكتسبة' : 'earned badges'}</p>
-                    </div>
+                    <Progress
+                      value={child.enrollments.avg_progress}
+                      className="h-1.5 bg-primary/10"
+                    />
                   </div>
-                </div>
-                
-                <div className="bg-muted/10 p-6 flex items-center justify-around">
-                  <div className="text-center space-y-1">
-                    <div className="flex items-center justify-center gap-2 text-muted-foreground mb-2">
-                      <span className="text-xs font-bold uppercase">{isAr ? "الحالة" : "Status"}</span>
-                    </div>
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-                      <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">{isAr ? "مربوط ✓" : "Linked ✓"}</span>
-                    </div>
-                  </div>
-                  
-                  <div className="w-px h-12 bg-border/50" />
-                  
-                  <div className="text-center space-y-1">
-                    <div className="flex items-center justify-center gap-2 text-muted-foreground mb-2">
-                      <span className="text-xs font-bold uppercase">{isAr ? "تاريخ الربط" : "Linked On"}</span>
-                    </div>
-                    <p className="text-sm font-bold text-foreground" dir="ltr">{new Date(child.linked_at).toLocaleDateString('ar-EG')}</p>
-                  </div>
-                </div>
 
-                <div className="p-6 bg-muted/20 border-t border-border/50 flex items-center gap-4">
-                  <Button variant="default" asChild className="flex-1 bg-card border border-border text-foreground hover:bg-muted font-bold rounded-xl h-12 shadow-sm">
-                    <Link href={`/academy/parent/reports?child=${child.child_id}`}>
-                      {isAr ? "عرض التقارير الكاملة" : "View Full Reports"}
-                    </Link>
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="icon"
-                    className="h-12 w-12 rounded-xl text-destructive hover:bg-destructive/10 hover:text-destructive"
-                    onClick={() => setUnlinkingChild(child)}
-                    title={isAr ? "إلغاء الربط" : "Unlink"}
-                  >
-                    <UserMinus className="w-5 h-5" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                  {/* Stats Grid */}
+                  <div className="px-6 pb-4 grid grid-cols-4 gap-3">
+                    <div className="text-center p-2 rounded-xl bg-muted/30">
+                      <BookOpen className="w-4 h-4 text-blue-500 mx-auto mb-1" />
+                      <p className="text-sm font-bold text-foreground">{child.enrollments.active}</p>
+                      <p className="text-[10px] text-muted-foreground">
+                        {isAr ? 'مقرر' : 'Courses'}
+                      </p>
+                    </div>
+                    <div className="text-center p-2 rounded-xl bg-muted/30">
+                      <Calendar className="w-4 h-4 text-emerald-500 mx-auto mb-1" />
+                      <p className="text-sm font-bold text-foreground">{child.bookings.upcoming}</p>
+                      <p className="text-[10px] text-muted-foreground">
+                        {isAr ? 'حجز' : 'Bookings'}
+                      </p>
+                    </div>
+                    <div className="text-center p-2 rounded-xl bg-muted/30">
+                      <Clock className="w-4 h-4 text-violet-500 mx-auto mb-1" />
+                      <p className="text-sm font-bold text-foreground">{child.recitations.total_30d}</p>
+                      <p className="text-[10px] text-muted-foreground">
+                        {isAr ? 'تلاوة' : 'Recitations'}
+                      </p>
+                    </div>
+                    <div className="text-center p-2 rounded-xl bg-muted/30">
+                      <Trophy className="w-4 h-4 text-amber-500 mx-auto mb-1" />
+                      <p className="text-sm font-bold text-foreground">{child.badges.total}</p>
+                      <p className="text-[10px] text-muted-foreground">
+                        {isAr ? 'شارة' : 'Badges'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="px-6 pb-6 flex items-center gap-2">
+                    <Button
+                      asChild
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 rounded-xl h-9 font-bold text-xs"
+                    >
+                      <Link href={`/academy/parent/children/${child.child_id}`}>
+                        <ArrowUpRight className="w-3.5 h-3.5 me-1" />
+                        {isAr ? 'التفاصيل' : 'Details'}
+                      </Link>
+                    </Button>
+                    <Button
+                      asChild
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 rounded-xl h-9 font-bold text-xs"
+                    >
+                      <Link href={`/academy/parent/children/${child.child_id}/restrictions`}>
+                        <Shield className="w-3.5 h-3.5 me-1" />
+                        {isAr ? 'تقييد' : 'Restrict'}
+                      </Link>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-9 w-9 p-0 rounded-xl text-destructive hover:bg-destructive/10 hover:text-destructive shrink-0"
+                      onClick={() => setUnlinkingChild(child)}
+                      title={isAr ? 'إلغاء الربط' : 'Unlink'}
+                    >
+                      <UserMinus className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
+      )}
+
+      {/* Rejected Links Info */}
+      {(summary?.rejected_links || 0) > 0 && (
+        <Card className="rounded-2xl border-border/50 bg-muted/20">
+          <CardContent className="p-5">
+            <p className="text-sm text-muted-foreground">
+              {isAr
+                ? `لديك ${summary?.rejected_links} طلب ربط مرفوض.`
+                : `You have ${summary?.rejected_links} rejected link requests.`}
+            </p>
+          </CardContent>
+        </Card>
       )}
 
       {/* Unlink Confirmation Dialog */}
@@ -275,11 +410,11 @@ export default function ParentChildrenPage() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5 text-destructive" />
+              <UserMinus className="w-5 h-5 text-destructive" />
               {isAr ? 'تأكيد إلغاء الربط' : 'Confirm Unlink'}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {isAr 
+              {isAr
                 ? `هل أنت متأكد من إلغاء ربط ${unlinkingChild?.child_name}؟ لن تتمكن من متابعة تقدمه الدراسي بعد ذلك.`
                 : `Are you sure you want to unlink ${unlinkingChild?.child_name}? You will no longer be able to track their progress.`}
             </AlertDialogDescription>
@@ -295,8 +430,10 @@ export default function ParentChildrenPage() {
             >
               {unlinkLoading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
+              ) : isAr ? (
+                'إلغاء الربط'
               ) : (
-                isAr ? 'إلغاء الربط' : 'Unlink'
+                'Unlink'
               )}
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -304,4 +441,13 @@ export default function ParentChildrenPage() {
       </AlertDialog>
     </div>
   )
+}
+
+function fmtDate(s: string | null, isAr: boolean) {
+  if (!s) return '—'
+  return new Date(s).toLocaleDateString(isAr ? 'ar-SA' : 'en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
 }

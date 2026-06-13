@@ -6,8 +6,19 @@ import { ChatDateDivider } from '@/components/chat/date-divider'
 import { shouldShowDateDivider, formatChatTime } from '@/lib/chat-date'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
 import { useI18n } from '@/lib/i18n/context'
-import { Loader2, MessageSquare, Send, UserRound, Shield } from 'lucide-react'
+import {
+  Loader2,
+  MessageSquare,
+  Send,
+  UserRound,
+  Shield,
+  Search,
+  ArrowUpRight,
+  Inbox,
+} from 'lucide-react'
 import { ConversationsSkeleton } from '@/components/ui/skeletons'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 
@@ -25,6 +36,7 @@ interface Conversation {
   other_user_name: string
   other_user_avatar: string | null
   other_user_role?: string
+  student_id?: string
   last_message: string | null
   last_message_at: string | null
   unread_count: number
@@ -54,10 +66,11 @@ export default function ParentMessagesPage() {
   const [sending, setSending] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const [showTicketDialog, setShowTicketDialog] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
 
   const selectedTeacher = useMemo(
-    () => teachers.find(t => t.id === teacherId && t.child_id === childId),
-    [teachers, teacherId, childId],
+    () => teachers.find((t) => t.id === teacherId && t.child_id === childId),
+    [teachers, teacherId, childId]
   )
 
   async function fetchConversations() {
@@ -96,7 +109,11 @@ export default function ParentMessagesPage() {
     async function fetchMessages() {
       setLoadingMessages(true)
       try {
-        const res = await fetch(platform === 'maqraa' ? `/api/conversations/${conversationId}/messages` : `/api/academy/conversations/${conversationId}/messages`)
+        const url =
+          platform === 'maqraa'
+            ? `/api/conversations/${conversationId}/messages`
+            : `/api/academy/conversations/${conversationId}/messages`
+        const res = await fetch(url)
         const data = await res.json()
         if (res.ok) setMessages(data.messages || [])
       } finally {
@@ -130,6 +147,7 @@ export default function ParentMessagesPage() {
           other_user_id: teacherId,
           other_user_name: selectedTeacher?.name || '',
           other_user_avatar: null,
+          student_id: childId,
           last_message: null,
           last_message_at: null,
           unread_count: 0,
@@ -148,14 +166,18 @@ export default function ParentMessagesPage() {
     setReply('')
     setSending(true)
     try {
-      const res = await fetch(activeConv.platform === 'maqraa' ? `/api/conversations/${activeConv.id}/messages` : `/api/academy/conversations/${activeConv.id}/messages`, {
+      const url =
+        activeConv.platform === 'maqraa'
+          ? `/api/conversations/${activeConv.id}/messages`
+          : `/api/academy/conversations/${activeConv.id}/messages`
+      const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content }),
       })
       const data = await res.json()
       if (res.ok) {
-        setMessages(prev => [...prev, data.message])
+        setMessages((prev) => [...prev, data.message])
         await fetchConversations()
       }
     } finally {
@@ -179,7 +201,14 @@ export default function ParentMessagesPage() {
         setActiveConv({
           id: data.conversationId,
           other_user_id: 'admin',
-          other_user_name: platform === 'maqraa' ? (isAr ? 'إدارة المقرأة' : 'Maqraa Support') : (isAr ? 'إدارة الأكاديمية' : 'Academy Support'),
+          other_user_name:
+            platform === 'maqraa'
+              ? isAr
+                ? 'إدارة المقرأة'
+                : 'Maqraa Support'
+              : isAr
+              ? 'إدارة الأكاديمية'
+              : 'Academy Support',
           other_user_avatar: null,
           last_message: null,
           last_message_at: null,
@@ -193,131 +222,272 @@ export default function ParentMessagesPage() {
     }
   }
 
+  const filteredConversations = conversations.filter((conv) => {
+    if (!searchQuery) return true
+    const q = searchQuery.toLowerCase()
+    return conv.other_user_name?.toLowerCase().includes(q)
+  })
+
   if (loading) {
     return <ConversationsSkeleton />
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 pb-12" dir={isAr ? 'rtl' : 'ltr'}>
-      <div className="space-y-2 pb-4 border-b border-border/50">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider mb-2">
-          <MessageSquare className="w-4 h-4" />
-          {isAr ? 'مراسلة الشيخ' : 'Teacher Messaging'}
+    <div className="h-[calc(100vh-4rem)] flex flex-col" dir={isAr ? 'rtl' : 'ltr'}>
+      {/* Header */}
+      <div className="px-6 py-4 border-b border-border/50 bg-background/80 backdrop-blur-sm shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+            <MessageSquare className="w-5 h-5 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-lg font-black text-foreground">
+              {isAr ? 'الرسائل' : 'Messages'}
+            </h1>
+            <p className="text-xs text-muted-foreground">
+              {isAr ? 'تواصل مع معلمي أبنائك' : "Message your children's teachers"}
+            </p>
+          </div>
         </div>
-        <h1 className="text-3xl lg:text-4xl font-black tracking-tight text-foreground">
-          {isAr ? 'رسائل ولي الأمر' : 'Parent Messages'}
-        </h1>
-        <p className="text-muted-foreground font-medium max-w-2xl">
-          {isAr ? 'تواصل مباشرة مع الشيخ المرتبط بتلاوات أو دورات أو جلسات ابنك.' : "Message your child's teacher directly from the platform."}
-        </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="rounded-3xl border-border/50">
-          <CardContent className="p-6 space-y-4">
-            <h2 className="font-black text-lg">{isAr ? 'بدء محادثة' : 'Start conversation'}</h2>
-            {teachers.length === 0 ? (
-              <p className="text-sm text-muted-foreground">{isAr ? 'لا يوجد شيوخ مرتبطون بأبنائك بعد.' : 'No linked teachers yet.'}</p>
-            ) : (
-              <>
-                <select
-                  value={`${teacherId}:${childId}`}
-                  onChange={e => {
-                    const [nextTeacherId, nextChildId] = e.target.value.split(':')
-                    setTeacherId(nextTeacherId)
-                    setChildId(nextChildId)
-                  }}
-                  className="w-full h-12 rounded-2xl border border-border bg-card px-4 font-bold"
-                >
-                  {teachers.map(teacher => (
-                    <option key={`${teacher.id}:${teacher.child_id}`} value={`${teacher.id}:${teacher.child_id}`}>
-                      {teacher.name} — {teacher.child_name}
-                    </option>
-                  ))}
-                </select>
-                <Button onClick={startConversation} disabled={sending} className="w-full rounded-2xl font-bold">
-                  {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : (isAr ? 'فتح المحادثة' : 'Open conversation')}
-                </Button>
-              </>
-            )}
-
-            <div className="pt-4 border-t border-border/50 space-y-2">
-              
-              <div className="flex items-center justify-between pb-2 border-b border-border/50">
-                <h3 className="font-bold text-sm text-muted-foreground">{isAr ? 'المحادثات السابقة' : 'Conversations'}</h3>
-                <Button variant="outline" size="sm" onClick={() => setShowTicketDialog(true)} className="h-8 gap-1 rounded-xl text-blue-600 border-blue-200 hover:bg-blue-50">
-                  <Shield className="w-3.5 h-3.5" />
-                  {isAr ? 'تذكرة دعم' : 'Support Ticket'}
-                </Button>
-              </div>
-              {conversations.length === 0 ? (
-                <p className="text-sm text-muted-foreground">{isAr ? 'لا توجد محادثات.' : 'No conversations.'}</p>
-              ) : conversations.map(conv => (
-                <button
-                  key={conv.id}
-                  onClick={() => setActiveConv(conv)}
-                  className="w-full flex items-center gap-3 rounded-2xl border border-border p-3 text-start hover:bg-muted/40"
-                >
-                  <UserRound className="w-5 h-5 text-primary" />
-                  <div className="min-w-0">
-                    <p className="font-bold text-sm truncate">{conv.other_user_name || (isAr ? 'الشيخ' : 'Teacher')}</p>
-                    <p className="text-xs text-muted-foreground truncate">{conv.last_message || (isAr ? 'لا توجد رسائل بعد' : 'No messages yet')}</p>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="lg:col-span-2 rounded-3xl border-border/50 overflow-hidden">
-          <CardContent className="p-0 min-h-[560px] flex flex-col">
-            <div className="p-5 border-b border-border/50 bg-muted/20">
-              <h2 className="font-black">{activeConv?.other_user_name || (isAr ? 'اختر محادثة' : 'Select a conversation')}</h2>
-            </div>
-            <div className="flex-1 p-5 space-y-3 overflow-y-auto">
-              {!activeConv ? (
-                <div className="h-full flex items-center justify-center text-muted-foreground font-medium">
-                  {isAr ? 'اختر أو افتح محادثة للبدء.' : 'Select or open a conversation to begin.'}
-                </div>
-              ) : loadingMessages ? (
-                <div className="flex justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
-              ) : (
-                messages.map((message, idx) => (
-                  <Fragment key={message.id}>
-                    {shouldShowDateDivider(messages[idx - 1]?.created_at, message.created_at) && (
-                      <ChatDateDivider date={message.created_at} isAr={isAr} />
-                    )}
-                    <div className="rounded-2xl border border-border bg-card p-3">
-                      <p className="text-sm font-medium whitespace-pre-wrap">{message.content}</p>
-                      <p className="text-[11px] text-muted-foreground mt-2">{formatChatTime(message.created_at, isAr)}</p>
-                    </div>
-                  </Fragment>
-                ))
-              )}
-              <div ref={messagesEndRef} />
-            </div>
-            <form onSubmit={sendMessage} className="p-4 border-t border-border/50 flex gap-3">
-              <Input
-                value={reply}
-                onChange={e => setReply(e.target.value)}
-                disabled={!activeConv || sending}
-                placeholder={isAr ? 'اكتب رسالتك...' : 'Write a message...'}
-                className="rounded-2xl"
+      {/* Main Split Layout */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Sidebar — Conversations List */}
+        <div
+          className={`w-full md:w-80 lg:w-96 border-e border-border/50 flex flex-col bg-background ${
+            activeConv ? 'hidden md:flex' : 'flex'
+          }`}
+        >
+          {/* Search + New */}
+          <div className="p-3 border-b border-border/50 space-y-3">
+            <div className="relative">
+              <Search
+                className={`absolute ${isAr ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground`}
               />
-              <Button disabled={!activeConv || !reply.trim() || sending} className="rounded-2xl">
-                {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+              <Input
+                placeholder={isAr ? 'بحث...' : 'Search...'}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className={`h-9 rounded-xl text-sm ${isAr ? 'pr-9' : 'pl-9'}`}
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => setShowTicketDialog(true)}
+                variant="outline"
+                size="sm"
+                className="flex-1 h-9 rounded-xl text-xs font-bold"
+              >
+                <Shield className="w-3.5 h-3.5 me-1" />
+                {isAr ? 'تذكرة دعم' : 'Support'}
               </Button>
-            </form>
-          </CardContent>
-        </Card>
+              <Button
+                onClick={startConversation}
+                disabled={sending || !teacherId}
+                size="sm"
+                className="flex-1 h-9 rounded-xl text-xs font-bold"
+              >
+                {sending ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <>
+                    <MessageSquare className="w-3.5 h-3.5 me-1" />
+                    {isAr ? 'جديد' : 'New'}
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+
+          {/* Conversation Items */}
+          <div className="flex-1 overflow-y-auto">
+            {filteredConversations.length === 0 ? (
+              <div className="p-8 text-center">
+                <Inbox className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
+                <p className="text-sm text-muted-foreground">
+                  {isAr ? 'لا توجد محادثات' : 'No conversations'}
+                </p>
+              </div>
+            ) : (
+              <div className="divide-y divide-border/50">
+                {filteredConversations.map((conv) => {
+                  const isActive = activeConv?.id === conv.id
+                  return (
+                    <button
+                      key={conv.id}
+                      onClick={() => setActiveConv(conv)}
+                      className={`w-full flex items-center gap-3 p-4 text-start transition-colors ${
+                        isActive
+                          ? 'bg-primary/5 border-s-2 border-s-primary'
+                          : 'hover:bg-muted/30'
+                      }`}
+                    >
+                      <Avatar className="w-11 h-11 shrink-0">
+                        <AvatarImage src={conv.other_user_avatar || undefined} />
+                        <AvatarFallback className="bg-muted text-muted-foreground font-bold text-sm">
+                          {conv.other_user_name?.charAt(0) || '?'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-bold text-sm text-foreground truncate">
+                            {conv.other_user_name || (isAr ? 'الشيخ' : 'Teacher')}
+                          </h4>
+                          {conv.is_ticket && (
+                            <Badge variant="secondary" className="text-[9px] px-1 py-0 shrink-0">
+                              {isAr ? 'دعم' : 'Support'}
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground truncate mt-0.5">
+                          {conv.last_message || (isAr ? 'لا توجد رسائل' : 'No messages')}
+                        </p>
+                      </div>
+                      <div className="flex flex-col items-end gap-1 shrink-0">
+                        {conv.unread_count > 0 && (
+                          <span className="w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
+                            {conv.unread_count}
+                          </span>
+                        )}
+                        {conv.last_message_at && (
+                          <span className="text-[10px] text-muted-foreground">
+                            {formatChatTime(conv.last_message_at, isAr)}
+                          </span>
+                        )}
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Main — Chat View */}
+        <div
+          className={`flex-1 flex flex-col bg-muted/10 ${
+            activeConv ? 'flex' : 'hidden md:flex'
+          }`}
+        >
+          {!activeConv ? (
+            <div className="flex-1 flex items-center justify-center">
+              <div className="text-center">
+                <MessageSquare className="w-12 h-12 text-muted-foreground/20 mx-auto mb-4" />
+                <h3 className="font-bold text-foreground mb-1">
+                  {isAr ? 'اختر محادثة' : 'Select a conversation'}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {isAr
+                    ? 'اختر محادثة من القائمة للبدء'
+                    : 'Choose a conversation from the list to begin'}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Chat Header */}
+              <div className="px-5 py-3 border-b border-border/50 bg-background/80 backdrop-blur-sm flex items-center gap-3">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="md:hidden h-8 w-8 p-0 rounded-lg me-1"
+                  onClick={() => setActiveConv(null)}
+                >
+                  <ArrowUpRight
+                    className={`w-4 h-4 ${isAr ? 'rotate-[270deg]' : 'rotate-[90deg]'}`}
+                  />
+                </Button>
+                <Avatar className="w-9 h-9">
+                  <AvatarImage src={activeConv.other_user_avatar || undefined} />
+                  <AvatarFallback className="bg-muted text-muted-foreground font-bold text-xs">
+                    {activeConv.other_user_name?.charAt(0) || '?'}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-bold text-sm text-foreground truncate">
+                    {activeConv.other_user_name}
+                  </h3>
+                  <p className="text-[11px] text-muted-foreground">
+                    {activeConv.is_ticket
+                      ? isAr
+                        ? 'تذكرة دعم'
+                        : 'Support Ticket'
+                      : isAr
+                      ? 'محادثة'
+                      : 'Conversation'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Messages */}
+              <div className="flex-1 overflow-y-auto p-5 space-y-3">
+                {loadingMessages ? (
+                  <div className="flex justify-center py-20">
+                    <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                  </div>
+                ) : messages.length === 0 ? (
+                  <div className="flex items-center justify-center h-full">
+                    <p className="text-sm text-muted-foreground">
+                      {isAr ? 'لا توجد رسائل بعد.' : 'No messages yet.'}
+                    </p>
+                  </div>
+                ) : (
+                  messages.map((message, idx) => (
+                    <Fragment key={message.id}>
+                      {shouldShowDateDivider(
+                        messages[idx - 1]?.created_at,
+                        message.created_at
+                      ) && <ChatDateDivider date={message.created_at} isAr={isAr} />}
+                      <div className="rounded-2xl border border-border bg-card p-3 max-w-2xl">
+                        <p className="text-sm font-medium whitespace-pre-wrap">
+                          {message.content}
+                        </p>
+                        <p className="text-[11px] text-muted-foreground mt-2">
+                          {formatChatTime(message.created_at, isAr)}
+                        </p>
+                      </div>
+                    </Fragment>
+                  ))
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+
+              {/* Reply Input */}
+              <form
+                onSubmit={sendMessage}
+                className="p-4 border-t border-border/50 bg-background/80 backdrop-blur-sm flex gap-3"
+              >
+                <Input
+                  value={reply}
+                  onChange={(e) => setReply(e.target.value)}
+                  disabled={!activeConv || sending}
+                  placeholder={isAr ? 'اكتب رسالتك...' : 'Write a message...'}
+                  className="rounded-xl"
+                />
+                <Button
+                  disabled={!activeConv || !reply.trim() || sending}
+                  className="rounded-xl px-4"
+                >
+                  {sending ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Send className="w-4 h-4" />
+                  )}
+                </Button>
+              </form>
+            </>
+          )}
+        </div>
       </div>
 
+      {/* Support Ticket Dialog */}
       <Dialog open={showTicketDialog} onOpenChange={setShowTicketDialog}>
-        <DialogContent className="rounded-3xl">
+        <DialogContent className="rounded-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Shield className="w-5 h-5 text-blue-600" />
-              {isAr ? 'فتح تذكرة دعم فني' : 'Open a Support Ticket'}
+              {isAr ? 'فتح تذكرة دعم' : 'Open Support Ticket'}
             </DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground">
@@ -327,7 +497,7 @@ export default function ParentMessagesPage() {
             <Button
               onClick={() => handleCreateTicket('academy')}
               disabled={sending}
-              className="rounded-2xl h-auto py-4 flex-col gap-1 font-bold"
+              className="rounded-xl h-auto py-4 flex-col gap-1 font-bold"
             >
               <Shield className="w-5 h-5" />
               {isAr ? 'دعم الأكاديمية' : 'Academy Support'}
@@ -336,7 +506,7 @@ export default function ParentMessagesPage() {
               onClick={() => handleCreateTicket('maqraa')}
               disabled={sending}
               variant="outline"
-              className="rounded-2xl h-auto py-4 flex-col gap-1 font-bold"
+              className="rounded-xl h-auto py-4 flex-col gap-1 font-bold"
             >
               <Shield className="w-5 h-5" />
               {isAr ? 'دعم المقرأة' : 'Maqraa Support'}
