@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getSession, requireRole } from "@/lib/auth"
 import * as db from "@/lib/db"
+import { logAdminAction } from "@/lib/activity-log"
+import { canSupervisorAccessRecitation } from "@/lib/supervisor-scope"
 
 export async function GET(
     req: NextRequest,
@@ -14,6 +16,14 @@ export async function GET(
         }
 
         const { id } = await params
+
+        // Scoped permissions: supervisors can only view recitations within their scope.
+        if (session!.role === 'student_supervisor' || session!.role === 'reciter_supervisor') {
+            const allowed = await canSupervisorAccessRecitation(session!, id)
+            if (!allowed) {
+                return NextResponse.json({ error: "هذا التسميع خارج نطاق إشرافك" }, { status: 403 })
+            }
+        }
 
         const recitation = await db.queryOne<any>(
             `SELECT 
@@ -93,6 +103,14 @@ export async function PATCH(
         const body = await req.json()
         const { status, internal_notes } = body
 
+        // Scoped permissions: supervisors can only modify recitations within their scope.
+        if (session!.role === 'student_supervisor' || session!.role === 'reciter_supervisor') {
+            const allowed = await canSupervisorAccessRecitation(session!, id)
+            if (!allowed) {
+                return NextResponse.json({ error: "هذا التسميع خارج نطاق إشرافك" }, { status: 403 })
+            }
+        }
+
         // بناء SET clause ديناميكي
         const updates: string[] = []
         const vals: any[] = []
@@ -130,6 +148,15 @@ export async function PATCH(
         if ((result as any[]).length === 0) {
             return NextResponse.json({ error: "التسميع غير موجود" }, { status: 404 })
         }
+
+        await logAdminAction({
+            userId: session!.sub,
+            action: 'recitation.update',
+            entityType: 'recitation',
+            entityId: id,
+            description: status ? `تحديث حالة التسميع إلى ${status}` : 'تحديث ملاحظات التسميع',
+            details: { status, hasNotes: internal_notes !== undefined },
+        })
 
         return NextResponse.json({ success: true, data: (result as any[])[0] })
     } catch (error) {

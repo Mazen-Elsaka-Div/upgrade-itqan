@@ -27,6 +27,7 @@ export default function ContentSupervisorDashboard() {
   const [counts, setCounts] = useState<Counts>({ pending: 0, approved: 0, rejected: 0, all: 0 })
   const [recent, setRecent] = useState<RecentLesson[]>([])
   const [loading, setLoading] = useState(true)
+  const [name, setName] = useState('')
 
   useEffect(() => {
     fetch('/api/academy/supervisor/content?status=pending')
@@ -38,6 +39,10 @@ export default function ContentSupervisorDashboard() {
         }
       })
       .finally(() => setLoading(false))
+    fetch('/api/auth/me')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d?.user?.name) setName(d.user.name) })
+      .catch(() => {})
   }, [])
 
   const reviewedTotal = counts.approved + counts.rejected
@@ -55,9 +60,9 @@ export default function ContentSupervisorDashboard() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-black text-foreground">لوحة التحكم</h1>
+        <h1 className="text-2xl font-black text-foreground">{name ? `مرحباً، ${name}` : 'لوحة التحكم'}</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          مراجعة دروس المعلمين واعتمادها قبل النشر
+          مشرف المحتوى — مراجعة دروس المعلمين واعتمادها قبل النشر
         </p>
       </div>
 

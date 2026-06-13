@@ -3,6 +3,7 @@ import { getSession, requireRole } from "@/lib/auth"
 import { query } from "@/lib/db"
 import bcrypt from "bcryptjs"
 import { logAdminAction } from "@/lib/activity-log"
+import { resolveSupervisorScope, canSupervisorAccessUser } from "@/lib/supervisor-scope"
 
 // GET /api/admin/users - list all users (admin only)
 export async function GET(req: NextRequest) {
@@ -44,6 +45,15 @@ export async function GET(req: NextRequest) {
       } else {
         params.push(role)
         whereClause += ` AND u.role = $${params.length}`
+      }
+    }
+
+    // Scoped permissions: restrict supervisors to their assigned users (if any).
+    if (session!.role === 'student_supervisor' || session!.role === 'reciter_supervisor') {
+      const scope = await resolveSupervisorScope(session!)
+      if (scope.kind === 'ids') {
+        params.push(scope.ids)
+        whereClause += ` AND u.id = ANY($${params.length}::uuid[])`
       }
     }
 
@@ -127,6 +137,14 @@ export async function PATCH(req: NextRequest) {
     } else if (session!.role === 'reciter_supervisor') {
       if (currentUser.role !== 'reader' || (role && role !== 'reader')) {
         return NextResponse.json({ error: "غير مصرح لك بتعديل هذا المستخدم" }, { status: 403 })
+      }
+    }
+
+    // Scoped permissions: supervisors with assignments can only edit their assigned users.
+    if (session!.role === 'student_supervisor' || session!.role === 'reciter_supervisor') {
+      const allowed = await canSupervisorAccessUser(session!, userId)
+      if (!allowed) {
+        return NextResponse.json({ error: "هذا المستخدم خارج نطاق إشرافك" }, { status: 403 })
       }
     }
 

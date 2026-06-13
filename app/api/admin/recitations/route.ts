@@ -3,6 +3,7 @@ import { getSession, requireRole } from "@/lib/auth"
 import { query } from "@/lib/db"
 import { logAdminAction } from "@/lib/activity-log"
 import { createNotification } from "@/lib/notifications"
+import { resolveSupervisorScope } from "@/lib/supervisor-scope"
 
 // GET /api/admin/recitations - list all recitations with filters
 export async function GET(req: NextRequest) {
@@ -39,6 +40,21 @@ export async function GET(req: NextRequest) {
         if (status) {
             params.push(status)
             whereClause += ` AND r.status = $${params.length}`
+        }
+
+        // Scoped permissions: restrict supervisors to their assigned users.
+        // student_supervisor -> recitations of assigned students (r.student_id)
+        // reciter_supervisor -> recitations assigned to their readers (r.assigned_reader_id)
+        if (session!.role === 'student_supervisor' || session!.role === 'reciter_supervisor') {
+            const scope = await resolveSupervisorScope(session!)
+            if (scope.kind === 'ids') {
+                params.push(scope.ids)
+                if (session!.role === 'student_supervisor') {
+                    whereClause += ` AND r.student_id = ANY($${params.length}::uuid[])`
+                } else {
+                    whereClause += ` AND r.assigned_reader_id = ANY($${params.length}::uuid[])`
+                }
+            }
         }
 
         const recitations = await query(

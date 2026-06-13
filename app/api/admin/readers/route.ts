@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSession, requireRole } from '@/lib/auth'
 import { query } from '@/lib/db'
+import { resolveSupervisorScope, canSupervisorAccessUser } from '@/lib/supervisor-scope'
+import { logAdminAction } from '@/lib/activity-log'
 
 export async function GET(req: NextRequest) {
     const session = await getSession()
@@ -28,6 +30,15 @@ export async function GET(req: NextRequest) {
     }
     if (status) { conditions.push(`u.approval_status = $${idx++}`); params.push(status) }
     if (gender) { conditions.push(`u.gender = $${idx++}`); params.push(gender) }
+
+    // Scoped permissions: reciter_supervisor with assignments sees only assigned readers.
+    if (session!.role === 'reciter_supervisor') {
+        const scope = await resolveSupervisorScope(session!)
+        if (scope.kind === 'ids') {
+            conditions.push(`u.id = ANY($${idx++}::uuid[])`)
+            params.push(scope.ids)
+        }
+    }
 
     const where = 'WHERE ' + conditions.join(' AND ')
 
@@ -78,6 +89,14 @@ export async function PATCH(req: NextRequest) {
     const { id, ...fields } = body
     if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 })
 
+    // Scoped permissions: reciter_supervisor can only edit assigned readers.
+    if (session!.role === 'reciter_supervisor') {
+        const allowedTarget = await canSupervisorAccessUser(session!, id)
+        if (!allowedTarget) {
+            return NextResponse.json({ error: 'هذا المقرئ خارج نطاق إشرافك' }, { status: 403 })
+        }
+    }
+
     const allowed = [
       'name', 'phone', 'city', 'gender', 'qualification', 'memorized_parts', 
       'years_of_experience', 'is_active', 'is_accepting_recitations',
@@ -104,6 +123,15 @@ export async function PATCH(req: NextRequest) {
     params.push(id)
 
     await query(`UPDATE users SET ${setters.join(', ')} WHERE id = $${idx} AND role = 'reader'`, params)
+
+    await logAdminAction({
+        userId: session!.sub,
+        action: 'reader.update',
+        entityType: 'user',
+        entityId: id,
+        description: 'تحديث بيانات المقرئ',
+        details: { fields: Object.keys(fields) },
+    })
 
     return NextResponse.json({ ok: true })
 }

@@ -29,7 +29,7 @@ function getRedirectPath(u: LoginUser): string {
 
   if (role === 'admin') return '/admin'
   if (role === 'academy_admin') return '/academy/admin'
-  if (role === 'student_supervisor' || role === 'reciter_supervisor') return `/${role}`
+  if (role === 'student_supervisor' || role === 'reciter_supervisor') return '/admin'
   if (role === 'fiqh_supervisor') return '/academy/fiqh-supervisor'
   if (role === 'content_supervisor') return '/academy/content-supervisor'
   if (role === 'supervisor') return '/academy/supervisor'

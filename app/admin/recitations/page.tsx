@@ -16,6 +16,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import { TableSkeleton } from "@/components/admin/skeletons"
+import { downloadCsv } from "@/lib/csv-export"
 
 export default function AdminRecitationsPage() {
   const { t, locale } = useI18n()
@@ -104,6 +105,24 @@ export default function AdminRecitationsPage() {
     setReassignDialog(true)
   }
 
+  const handleExport = () => {
+    const headers = [
+      "ID", t.auth.student, isAr ? "البريد" : "Email", t.admin.surahAyahs,
+      t.admin.assignedReader, t.admin.sessionReader, t.reader.status, t.admin.submissionDate,
+    ]
+    const rows = recitations.map((rec) => [
+      rec.id,
+      rec.studentName || "",
+      rec.studentEmail || "",
+      `${rec.surah} (${rec.fromAyah}-${rec.toAyah})`,
+      rec.assignedReaderName || "",
+      rec.sessionReaderName || "",
+      rec.status || "",
+      new Date(rec.createdAt).toISOString(),
+    ])
+    downloadCsv(`recitations-${new Date().toISOString().slice(0, 10)}`, headers, rows)
+  }
+
   const avatarColors = [
     "bg-primary/10 text-primary border-primary/20",
     "bg-blue-500/10 text-blue-500 border-blue-500/20",
@@ -126,7 +145,9 @@ export default function AdminRecitationsPage() {
         </div>
         <Button 
           variant="outline" 
-          className="w-full md:w-auto rounded-2xl font-black border-border hover:bg-muted h-11 px-6 gap-2 shrink-0"
+          onClick={handleExport}
+          disabled={recitations.length === 0}
+          className="w-full md:w-auto rounded-2xl font-black border-border hover:bg-muted h-11 px-6 gap-2 shrink-0 disabled:opacity-50"
         >
           <Download className="w-4 h-4 ml-1" />
           {t.admin.exportReport}

@@ -13,6 +13,8 @@ import { VisitorStats } from "@/components/admin/analytics/visitors-stats"
 import { SuspendedStudents } from "@/components/admin/SuspendedStudents"
 
 import { StatsGridSkeleton, StatsMiniGridSkeleton, ChartSkeleton, TableSkeleton } from "@/components/admin/skeletons"
+import { StudentSupervisorDashboard } from "@/components/admin/student-supervisor-dashboard"
+import { ReciterSupervisorDashboard } from "@/components/admin/reciter-supervisor-dashboard"
 
 export default function AdminDashboard() {
   const { t } = useI18n()
@@ -21,8 +23,21 @@ export default function AdminDashboard() {
   const [data, setData] = useState<{ stats: any, latestRecitations: any[] } | null>(null)
   const [loading, setLoading] = useState(true)
   const [analytics, setAnalytics] = useState<any>(null)
+  const [me, setMe] = useState<{ role: string; name?: string } | null>(null)
 
   useEffect(() => {
+    fetch('/api/auth/me').then(r => r.ok ? r.json() : null).then(d => {
+      if (d?.user) setMe({ role: d.user.role, name: d.user.name })
+    }).catch(() => { })
+  }, [])
+
+  useEffect(() => {
+    // Supervisors get their own focused dashboards — skip the heavy admin stats/analytics fetch.
+    if (me && (me.role === 'student_supervisor' || me.role === 'reciter_supervisor')) {
+      setLoading(false)
+      return
+    }
+    if (me === null) return
     async function loadStats() {
       try {
         const res = await fetch("/api/admin/stats")
@@ -45,7 +60,16 @@ export default function AdminDashboard() {
     fetch('/api/admin/analytics?days=30').then(r => r.ok ? r.json() : null).then(d => {
       if (d) setAnalytics(d)
     }).catch(() => { })
-  }, [])
+  }, [me])
+
+  // Supervisors get focused, role-specific dashboards.
+  if (me?.role === 'student_supervisor') {
+    return <StudentSupervisorDashboard name={me.name} />
+  }
+  if (me?.role === 'reciter_supervisor') {
+    return <ReciterSupervisorDashboard name={me.name} />
+  }
+
 
   if (loading) {
     return (
