@@ -7,7 +7,10 @@
     "build": "next build",
     "start": "next start",
     "hostinger": "NODE_ENV=production node server.js",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1053.0",
@@ -98,6 +101,10 @@
     "@eslint/js": "^9.39.4",
     "@next/eslint-plugin-next": "^16.2.6",
     "@tailwindcss/postcss": "^4.2.0",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/bcryptjs": "^2.4.6",
     "@types/fluent-ffmpeg": "^2.1.28",
     "@types/node": "^22",
@@ -106,15 +113,19 @@
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "@types/text-to-svg": "^3.1.4",
+    "@vitejs/plugin-react": "^6.0.2",
     "eslint": "^9.39.4",
     "eslint-config-next": "^16.2.6",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
+    "jsdom": "^29.1.1",
+    "msw": "^2.14.6",
     "postcss": "^8.5",
     "puppeteer": "^22.6.0",
     "tailwindcss": "^4.2.0",
     "tw-animate-css": "1.3.3",
     "typescript": "5.7.3",
-    "typescript-eslint": "^8.59.3"
+    "typescript-eslint": "^8.59.3",
+    "vitest": "^4.1.8"
   }
 }

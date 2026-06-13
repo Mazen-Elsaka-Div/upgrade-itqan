@@ -121,7 +121,7 @@ CONTINUE_FOOTER = (
 
 # Use a dedicated headless server instead of fighting the TUI on 4096.
 USE_DEDICATED_SERVER = True
-RUN_TIMEOUT = 240            # seconds to wait for one MIMO answer
+RUN_TIMEOUT = 1800            # seconds to wait for one MIMO answer
 SERVER_BOOT_TIMEOUT = 40     # seconds to wait for `mimo serve` to come up
 
 FIRST_GEMINI_QUESTION = (
