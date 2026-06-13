@@ -184,8 +184,6 @@ const getAcademyRoleConfig = (t: any, role: AcademyRole): { sections: NavSection
             { href: '/academy/parent/children', label: t.academy?.myChildren || 'أبنائي', icon: Users },
             { href: '/academy/parent/messages', label: t.academy?.chat || 'الرسائل', icon: MessageSquare },
             { href: '/community/academy/forum', label: t.academy?.forum || 'المنتدى', icon: MessageSquare },
-            { href: '/academy/fiqh', label: t.academy?.fiqhLibrary || 'المكتبة الفقهية', icon: Library },
-            { href: '/academy/library', label: t.academy?.booksLibrary || 'مكتبة الكتب', icon: BookOpen },
           ]
         },
         {

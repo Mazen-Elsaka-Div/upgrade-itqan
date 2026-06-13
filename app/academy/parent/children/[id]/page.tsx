@@ -48,6 +48,8 @@ interface ChildDetail {
     avatar_url: string | null
     gender: string | null
     created_at: string
+    has_academy_access: boolean
+    has_quran_access: boolean
   }
   progress: {
     total_courses: number
@@ -191,6 +193,20 @@ export default function ChildDetailPage({
 
   const { child, link, progress, enrollments, recent_recitations, upcoming_bookings, weekly_activity, badges } = detail
 
+  // Account-type aware views: academy (courses), maqraa (recitations), or mixed
+  const hasAcademy = child.has_academy_access
+  const hasQuran = child.has_quran_access
+  const isMixed = hasAcademy && hasQuran
+  // Default to academy if neither flag is set (legacy accounts)
+  const showAcademy = hasAcademy || (!hasAcademy && !hasQuran)
+  const showQuran = hasQuran
+
+  const accountTypeLabel = isMixed
+    ? isAr ? 'أكاديمية ومقرأة' : 'Academy & Maqraa'
+    : showQuran && !hasAcademy
+      ? isAr ? 'مقرأة' : 'Maqraa'
+      : isAr ? 'أكاديمية' : 'Academy'
+
   const chartData = [...weekly_activity]
     .sort((a, b) => a.day_offset - b.day_offset)
     .map((d) => ({
@@ -228,6 +244,18 @@ export default function ChildDetailPage({
               <Badge variant="secondary" className="text-xs">
                 {relationLabels[link.relation]?.[locale] || link.relation}
               </Badge>
+              <Badge
+                variant="outline"
+                className={`text-xs ${
+                  isMixed
+                    ? 'border-violet-500/30 text-violet-600 dark:text-violet-400'
+                    : showQuran && !hasAcademy
+                      ? 'border-emerald-500/30 text-emerald-600 dark:text-emerald-400'
+                      : 'border-blue-500/30 text-blue-600 dark:text-blue-400'
+                }`}
+              >
+                {accountTypeLabel}
+              </Badge>
             </div>
             <p className="text-sm text-muted-foreground" dir="ltr">
               {child.email}
@@ -256,6 +284,7 @@ export default function ChildDetailPage({
 
       {/* Stats Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {showAcademy && (
         <Card className="rounded-2xl border-border/50">
           <CardContent className="p-5">
             <div className="flex items-center gap-3 mb-3">
@@ -273,7 +302,9 @@ export default function ChildDetailPage({
             </p>
           </CardContent>
         </Card>
+        )}
 
+        {showAcademy && (
         <Card className="rounded-2xl border-border/50">
           <CardContent className="p-5">
             <div className="flex items-center gap-3 mb-3">
@@ -288,7 +319,9 @@ export default function ChildDetailPage({
             <Progress value={progress.avg_progress} className="h-1.5 mt-2 bg-primary/10" />
           </CardContent>
         </Card>
+        )}
 
+        {showQuran && (
         <Card className="rounded-2xl border-border/50">
           <CardContent className="p-5">
             <div className="flex items-center gap-3 mb-3">
@@ -303,6 +336,7 @@ export default function ChildDetailPage({
             <p className="text-xs text-muted-foreground mt-1">{isAr ? 'آخر ٣٠ يوم' : 'Last 30 days'}</p>
           </CardContent>
         </Card>
+        )}
 
         <Card className="rounded-2xl border-border/50">
           <CardContent className="p-5">
@@ -321,16 +355,23 @@ export default function ChildDetailPage({
 
       {/* Tabs */}
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid grid-cols-4 w-full max-w-2xl">
+        <TabsList
+          className="grid w-full max-w-2xl"
+          style={{ gridTemplateColumns: `repeat(${2 + (showQuran ? 2 : 0)}, minmax(0, 1fr))` }}
+        >
           <TabsTrigger value="overview">
             {isAr ? 'نظرة' : 'Overview'}
           </TabsTrigger>
-          <TabsTrigger value="recitations">
-            {isAr ? 'التلاوات' : 'Recitations'}
-          </TabsTrigger>
-          <TabsTrigger value="schedule">
-            {isAr ? 'المواعيد' : 'Schedule'}
-          </TabsTrigger>
+          {showQuran && (
+            <TabsTrigger value="recitations">
+              {isAr ? 'التلاوات' : 'Recitations'}
+            </TabsTrigger>
+          )}
+          {showQuran && (
+            <TabsTrigger value="schedule">
+              {isAr ? 'المواعيد' : 'Schedule'}
+            </TabsTrigger>
+          )}
           <TabsTrigger value="badges">
             {isAr ? 'الشارات' : 'Badges'}
           </TabsTrigger>
@@ -425,6 +466,7 @@ export default function ChildDetailPage({
         </TabsContent>
 
         {/* Recitations Tab */}
+        {showQuran && (
         <TabsContent value="recitations" className="mt-6">
           <Card className="rounded-2xl border-border/50">
             <CardContent className="p-6">
@@ -478,8 +520,10 @@ export default function ChildDetailPage({
             </CardContent>
           </Card>
         </TabsContent>
+        )}
 
         {/* Schedule Tab */}
+        {showQuran && (
         <TabsContent value="schedule" className="mt-6">
           <Card className="rounded-2xl border-border/50">
             <CardContent className="p-6">
@@ -531,6 +575,7 @@ export default function ChildDetailPage({
             </CardContent>
           </Card>
         </TabsContent>
+        )}
 
         {/* Badges Tab */}
         <TabsContent value="badges" className="mt-6">
