@@ -68,7 +68,7 @@ interface ChildDetail {
     id: string
     surah_name: string
     surah_number: number
-    grade: number | null
+    verdict: string | null
     notes: string | null
     created_at: string
   }>
@@ -102,6 +102,15 @@ const relationLabels: Record<string, { ar: string; en: string }> = {
 const dayLabels: Record<string, string[]> = {
   ar: ['السبت', 'الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'],
   en: ['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+}
+
+const verdictLabels: Record<string, { ar: string; en: string; tone: 'good' | 'warn' | 'bad' }> = {
+  approved: { ar: 'مقبولة', en: 'Approved', tone: 'good' },
+  accepted: { ar: 'مقبولة', en: 'Accepted', tone: 'good' },
+  passed: { ar: 'ناجحة', en: 'Passed', tone: 'good' },
+  needs_improvement: { ar: 'تحتاج تحسين', en: 'Needs work', tone: 'warn' },
+  rejected: { ar: 'مرفوضة', en: 'Rejected', tone: 'bad' },
+  failed: { ar: 'غير مقبولة', en: 'Failed', tone: 'bad' },
 }
 
 function fmtDate(s: string | null, isAr: boolean) {
@@ -257,9 +266,10 @@ export default function ChildDetailPage({
                 {isAr ? 'المقررات' : 'Courses'}
               </span>
             </div>
-            <div className="text-3xl font-black text-foreground">{progress.active_courses}</div>
+            <div className="text-3xl font-black text-foreground">{progress.total_courses}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              {progress.completed_courses} {isAr ? 'مكتمل' : 'completed'}
+              {progress.active_courses} {isAr ? 'نشط' : 'active'} · {progress.completed_courses}{' '}
+              {isAr ? 'مكتمل' : 'completed'}
             </p>
           </CardContent>
         </Card>
@@ -402,7 +412,9 @@ export default function ChildDetailPage({
                       >
                         {e.status === 'completed'
                           ? isAr ? 'مكتمل' : 'Done'
-                          : isAr ? 'نشط' : 'Active'}
+                          : e.status === 'pending'
+                            ? isAr ? 'قيد الانتظار' : 'Pending'
+                            : isAr ? 'نشط' : 'Active'}
                       </Badge>
                     </div>
                   ))}
@@ -442,11 +454,21 @@ export default function ChildDetailPage({
                         </div>
                       </div>
                       <div className="flex items-center gap-3 shrink-0">
-                        {r.grade != null && (
-                          <span className="text-xs font-bold px-2 py-1 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                            {r.grade}/100
-                          </span>
-                        )}
+                        {r.verdict && (() => {
+                          const v = verdictLabels[r.verdict.toLowerCase()]
+                          const tone = v?.tone ?? 'warn'
+                          const cls =
+                            tone === 'good'
+                              ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                              : tone === 'bad'
+                                ? 'bg-red-500/10 text-red-600 dark:text-red-400'
+                                : 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
+                          return (
+                            <span className={`text-xs font-bold px-2 py-1 rounded-lg ${cls}`}>
+                              {v ? v[locale] : r.verdict}
+                            </span>
+                          )
+                        })()}
                         <span className="text-xs text-muted-foreground">{fmtDate(r.created_at, isAr)}</span>
                       </div>
                     </div>
