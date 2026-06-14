@@ -61,6 +61,7 @@ export default function ParentMessagesPage() {
   const [activeConv, setActiveConv] = useState<Conversation | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
   const [reply, setReply] = useState('')
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [loadingMessages, setLoadingMessages] = useState(false)
   const [sending, setSending] = useState(false)
@@ -82,10 +83,13 @@ export default function ParentMessagesPage() {
   useEffect(() => {
     async function load() {
       try {
-        const [teachersRes] = await Promise.all([
+        const [teachersRes, meRes] = await Promise.all([
           fetch('/api/academy/parent/teachers'),
+          fetch('/api/auth/me'),
           fetchConversations(),
         ])
+        const meData = await meRes.json().catch(() => null)
+        if (meRes.ok && meData?.user) setCurrentUserId(meData.user.id)
         const teachersData = await teachersRes.json()
         if (teachersRes.ok) {
           const list: TeacherOption[] = teachersData.teachers || []
@@ -416,57 +420,115 @@ export default function ParentMessagesPage() {
                     className={`w-4 h-4 ${isAr ? 'rotate-[270deg]' : 'rotate-[90deg]'}`}
                   />
                 </Button>
-                <Avatar className="w-9 h-9">
-                  <AvatarImage src={activeConv.other_user_avatar || undefined} />
-                  <AvatarFallback className="bg-muted text-muted-foreground font-bold text-xs">
-                    {activeConv.other_user_name?.charAt(0) || '?'}
-                  </AvatarFallback>
-                </Avatar>
+                <div className="relative shrink-0">
+                  <Avatar className="w-10 h-10">
+                    <AvatarImage src={activeConv.other_user_avatar || undefined} />
+                    <AvatarFallback
+                      className={`font-bold text-xs ${
+                        activeConv.is_ticket
+                          ? 'bg-blue-500/10 text-blue-600'
+                          : 'bg-primary/10 text-primary'
+                      }`}
+                    >
+                      {activeConv.is_ticket ? (
+                        <Shield className="w-4 h-4" />
+                      ) : (
+                        activeConv.other_user_name?.charAt(0) || '?'
+                      )}
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-bold text-sm text-foreground truncate">
                     {activeConv.other_user_name}
                   </h3>
-                  <p className="text-[11px] text-muted-foreground">
-                    {activeConv.is_ticket
-                      ? isAr
-                        ? 'تذكرة دعم'
-                        : 'Support Ticket'
-                      : isAr
-                      ? 'محادثة'
-                      : 'Conversation'}
-                  </p>
+                  <div className="flex items-center gap-1.5">
+                    {activeConv.is_ticket ? (
+                      <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-4">
+                        {isAr ? 'تذكرة دعم' : 'Support'}
+                      </Badge>
+                    ) : (
+                      <p className="text-[11px] text-muted-foreground flex items-center gap-1">
+                        <UserRound className="w-3 h-3" />
+                        {isAr ? 'معلم' : 'Teacher'}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
 
               {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-5 space-y-3">
+              <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-1">
                 {loadingMessages ? (
                   <div className="flex justify-center py-20">
                     <Loader2 className="w-6 h-6 animate-spin text-primary" />
                   </div>
                 ) : messages.length === 0 ? (
-                  <div className="flex items-center justify-center h-full">
-                    <p className="text-sm text-muted-foreground">
-                      {isAr ? 'لا توجد رسائل بعد.' : 'No messages yet.'}
+                  <div className="flex flex-col items-center justify-center h-full text-center gap-3">
+                    <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
+                      <MessageSquare className="w-7 h-7 text-primary/60" />
+                    </div>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      {isAr ? 'لا توجد رسائل بعد' : 'No messages yet'}
+                    </p>
+                    <p className="text-xs text-muted-foreground/70 max-w-xs">
+                      {isAr
+                        ? 'ابدأ المحادثة بكتابة رسالتك في الأسفل'
+                        : 'Start the conversation by writing a message below'}
                     </p>
                   </div>
                 ) : (
-                  messages.map((message, idx) => (
-                    <Fragment key={message.id}>
-                      {shouldShowDateDivider(
-                        messages[idx - 1]?.created_at,
-                        message.created_at
-                      ) && <ChatDateDivider date={message.created_at} isAr={isAr} />}
-                      <div className="rounded-2xl border border-border bg-card p-3 max-w-2xl">
-                        <p className="text-sm font-medium whitespace-pre-wrap">
-                          {message.content}
-                        </p>
-                        <p className="text-[11px] text-muted-foreground mt-2">
-                          {formatChatTime(message.created_at, isAr)}
-                        </p>
-                      </div>
-                    </Fragment>
-                  ))
+                  messages.map((message, idx) => {
+                    const isOwn = currentUserId != null && message.sender_id === currentUserId
+                    const prev = messages[idx - 1]
+                    const grouped =
+                      prev != null &&
+                      prev.sender_id === message.sender_id &&
+                      !shouldShowDateDivider(prev.created_at, message.created_at)
+                    return (
+                      <Fragment key={message.id}>
+                        {shouldShowDateDivider(prev?.created_at, message.created_at) && (
+                          <ChatDateDivider date={message.created_at} isAr={isAr} />
+                        )}
+                        <div
+                          className={`flex items-end gap-2 ${grouped ? 'mt-0.5' : 'mt-3'} ${
+                            isOwn ? 'flex-row-reverse' : 'flex-row'
+                          }`}
+                        >
+                          {!isOwn ? (
+                            <Avatar className={`w-7 h-7 shrink-0 ${grouped ? 'invisible' : ''}`}>
+                              <AvatarImage src={activeConv.other_user_avatar || undefined} />
+                              <AvatarFallback className="bg-muted text-muted-foreground font-bold text-[10px]">
+                                {activeConv.other_user_name?.charAt(0) || '?'}
+                              </AvatarFallback>
+                            </Avatar>
+                          ) : (
+                            <span className="w-7 shrink-0" />
+                          )}
+                          <div
+                            className={`group max-w-[78%] sm:max-w-md rounded-2xl px-3.5 py-2 shadow-sm ${
+                              isOwn
+                                ? 'bg-primary text-primary-foreground rounded-ee-md'
+                                : 'bg-card border border-border/60 text-foreground rounded-es-md'
+                            }`}
+                          >
+                            <p className="text-sm font-medium whitespace-pre-wrap leading-relaxed break-words">
+                              {message.content}
+                            </p>
+                            <p
+                              className={`text-[10px] mt-1 ${
+                                isOwn
+                                  ? 'text-primary-foreground/70 text-end'
+                                  : 'text-muted-foreground text-end'
+                              }`}
+                            >
+                              {formatChatTime(message.created_at, isAr)}
+                            </p>
+                          </div>
+                        </div>
+                      </Fragment>
+                    )
+                  })
                 )}
                 <div ref={messagesEndRef} />
               </div>
@@ -474,25 +536,29 @@ export default function ParentMessagesPage() {
               {/* Reply Input */}
               <form
                 onSubmit={sendMessage}
-                className="p-4 border-t border-border/50 bg-background/80 backdrop-blur-sm flex gap-3"
+                className="p-3 sm:p-4 border-t border-border/50 bg-background/80 backdrop-blur-sm"
               >
-                <Input
-                  value={reply}
-                  onChange={(e) => setReply(e.target.value)}
-                  disabled={!activeConv || sending}
-                  placeholder={isAr ? 'اكتب رسالتك...' : 'Write a message...'}
-                  className="rounded-xl"
-                />
-                <Button
-                  disabled={!activeConv || !reply.trim() || sending}
-                  className="rounded-xl px-4"
-                >
-                  {sending ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Send className="w-4 h-4" />
-                  )}
-                </Button>
+                <div className="flex items-center gap-2 rounded-2xl border border-border/60 bg-muted/30 p-1.5 focus-within:border-primary/40 focus-within:bg-background transition-colors">
+                  <Input
+                    value={reply}
+                    onChange={(e) => setReply(e.target.value)}
+                    disabled={!activeConv || sending}
+                    placeholder={isAr ? 'اكتب رسالتك...' : 'Write a message...'}
+                    className="border-0 bg-transparent shadow-none focus-visible:ring-0 h-9"
+                  />
+                  <Button
+                    type="submit"
+                    disabled={!activeConv || !reply.trim() || sending}
+                    size="icon"
+                    className="rounded-xl h-9 w-9 shrink-0"
+                  >
+                    {sending ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Send className={`w-4 h-4 ${isAr ? 'rotate-180' : ''}`} />
+                    )}
+                  </Button>
+                </div>
               </form>
             </>
           )}
