@@ -63,12 +63,18 @@ export default function ParentProfilePage() {
 
   const fetchSession = async () => {
     try {
-      const res = await fetch('/api/auth/session')
+      const res = await fetch('/api/auth/me')
       if (res.ok) {
         const data = await res.json()
         if (data.user) {
           setUser(data.user)
-          setLanguage(data.user.preferred_language || 'ar')
+          setLanguage(data.user.preferred_language === 'en' ? 'en' : 'ar')
+          const np = data.user.notification_preferences
+          if (np) {
+            setEmailNotifications(np.email ?? true)
+            setPushNotifications(np.push ?? true)
+            setWeeklyReport(np.weeklyReport ?? true)
+          }
         }
       }
     } catch {
@@ -115,18 +121,25 @@ export default function ParentProfilePage() {
   const handleSavePreferences = async () => {
     setSaving(true)
     try {
-      const res = await fetch('/api/auth/preferences', {
-        method: 'POST',
+      const res = await fetch('/api/auth/me', {
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          language,
-          notifications: { email: emailNotifications, push: pushNotifications, weeklyReport },
+          preferred_language: language,
+          notification_preferences: {
+            email: emailNotifications,
+            push: pushNotifications,
+            weeklyReport,
+          },
         }),
       })
       if (res.ok) {
         setSaved(true)
         setTimeout(() => setSaved(false), 2000)
         toast.success(isAr ? 'تم الحفظ' : 'Saved')
+      } else {
+        const data = await res.json().catch(() => null)
+        toast.error(data?.error || (isAr ? 'حدث خطأ' : 'Error'))
       }
     } catch {
       toast.error(isAr ? 'حدث خطأ' : 'Error')
