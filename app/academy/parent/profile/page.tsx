@@ -63,12 +63,12 @@ export default function ParentProfilePage() {
 
   const fetchSession = async () => {
     try {
-      const res = await fetch('/api/auth/session')
+      const res = await fetch('/api/auth/me')
       if (res.ok) {
         const data = await res.json()
         if (data.user) {
           setUser(data.user)
-          setLanguage(data.user.preferred_language || 'ar')
+          setLanguage(data.user.platform_preference === 'en' ? 'en' : 'ar')
         }
       }
     } catch {
