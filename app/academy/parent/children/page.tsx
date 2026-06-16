@@ -5,9 +5,9 @@ import { useI18n } from '@/lib/i18n/context'
 import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { Progress } from '@/components/ui/progress'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   Users,
   LinkIcon,
@@ -19,8 +19,10 @@ import {
   Calendar,
   AlertCircle,
   UserMinus,
-  ArrowUpRight,
   Shield,
+  GraduationCap,
+  Sparkles,
+  Activity
 } from 'lucide-react'
 import { toast } from 'sonner'
 import {
@@ -93,6 +95,19 @@ const relationLabels: Record<string, { ar: string; en: string }> = {
   mother: { ar: 'أم', en: 'Mother' },
   guardian: { ar: 'ولي أمر', en: 'Guardian' },
   other: { ar: 'أخرى', en: 'Other' },
+}
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 },
+  },
+}
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } },
 }
 
 export default function ParentChildrenPage() {
@@ -201,10 +216,15 @@ export default function ParentChildrenPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-10 h-10 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground font-medium">
-            {isAr ? 'جاري التحميل...' : 'Loading...'}
+        <div className="flex flex-col items-center gap-6">
+          <div className="relative">
+            <div className="absolute inset-0 rounded-full blur-xl bg-primary/20 animate-pulse" />
+            <div className="w-16 h-16 rounded-full bg-background border-2 border-primary/20 flex items-center justify-center relative z-10">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          </div>
+          <p className="text-sm text-muted-foreground font-medium animate-pulse">
+            {isAr ? 'جاري تحميل بيانات الأبناء...' : 'Loading children data...'}
           </p>
         </div>
       </div>
@@ -217,318 +237,402 @@ export default function ParentChildrenPage() {
   const hasPending = pendingRequests.length > 0
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 pb-12" dir={isAr ? 'rtl' : 'ltr'}>
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div className="space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider">
-            <Users className="w-4 h-4" />
-            {isAr ? 'إدارة الأبناء' : 'Manage Children'}
-          </div>
-          <h1 className="text-3xl lg:text-4xl font-black tracking-tight text-foreground">
-            {isAr ? 'قائمة الأبناء' : 'My Children'}
-          </h1>
-          <p className="text-muted-foreground font-medium max-w-2xl">
-            {isAr
-              ? 'استعرض أبنائك المربوطين وتابع تقدمهم الأكاديمي.'
-              : 'View your linked children and track their academic progress.'}
-          </p>
+    <div className="max-w-6xl mx-auto space-y-10 pb-16" dir={isAr ? 'rtl' : 'ltr'}>
+      {/* Premium Header */}
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-primary/5 via-primary/10 to-transparent border border-primary/10"
+      >
+        <div className="absolute top-0 right-0 p-8 opacity-20 pointer-events-none">
+          <div className="w-64 h-64 bg-primary rounded-full blur-3xl" />
         </div>
-        <Button
-          asChild
-          className="h-12 px-6 rounded-2xl bg-primary text-primary-foreground font-bold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all active:scale-95 shrink-0"
-        >
-          <Link href="/academy/parent/link-child">
-            <LinkIcon className="w-4 h-4 me-2" />
-            {isAr ? 'ربط ابن جديد' : 'Link New Child'}
-          </Link>
-        </Button>
-      </div>
+        <div className="absolute bottom-0 left-0 p-8 opacity-20 pointer-events-none">
+          <div className="w-64 h-64 bg-blue-500 rounded-full blur-3xl" />
+        </div>
+
+        <div className="relative z-10 px-8 py-12 md:px-12 md:py-16 flex flex-col md:flex-row md:items-center justify-between gap-8">
+          <div className="space-y-4 max-w-2xl">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-md shadow-sm border border-border/50 text-primary text-sm font-bold">
+              <Users className="w-4 h-4" />
+              {isAr ? 'إدارة الأبناء' : 'Manage Children'}
+            </div>
+            <h1 className="text-4xl lg:text-5xl font-black tracking-tight text-foreground flex items-center gap-3">
+              {isAr ? 'قائمة الأبناء' : 'My Children'}
+              <Sparkles className="w-8 h-8 text-amber-500 animate-pulse hidden md:block" />
+            </h1>
+            <p className="text-lg text-muted-foreground font-medium leading-relaxed">
+              {isAr
+                ? 'استعرض أبنائك المربوطين وتابع تقدمهم الأكاديمي، سجلات الحضور، والإنجازات من مكان واحد.'
+                : 'View your linked children and track their academic progress, attendance records, and achievements from one place.'}
+            </p>
+          </div>
+          <Button
+            asChild
+            className="h-14 px-8 rounded-2xl bg-primary text-primary-foreground font-bold shadow-xl shadow-primary/25 hover:shadow-2xl hover:shadow-primary/40 hover:-translate-y-1 transition-all active:scale-95 shrink-0 text-lg group"
+          >
+            <Link href="/academy/parent/link-child">
+              <LinkIcon className="w-5 h-5 me-2 group-hover:rotate-12 transition-transform" />
+              {isAr ? 'ربط ابن جديد' : 'Link New Child'}
+            </Link>
+          </Button>
+        </div>
+      </motion.div>
 
       {/* Pending Requests Section */}
-      {pendingRequests.length > 0 && (
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4 text-amber-500" />
-            <h2 className="text-base font-bold text-foreground">
-              {isAr ? 'طلبات الربط المعلقة' : 'Pending Link Requests'}
-            </h2>
-            <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/20 text-xs font-bold">
-              {pendingRequests.length}
-            </Badge>
-          </div>
-          <Card className="rounded-2xl border-amber-200/40 dark:border-amber-800/40 bg-amber-50/30 dark:bg-amber-950/10">
-            <CardContent className="p-4 space-y-3">
-              <p className="text-xs text-amber-700/70 dark:text-amber-400/70 mb-4">
-                {isAr
-                  ? 'هذه الطلبات في انتظار موافقة الطلاب من لوحة تحكمهم.'
-                  : 'These requests are awaiting student approval from their dashboard.'}
-              </p>
+      <AnimatePresence>
+        {pendingRequests.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="space-y-4"
+          >
+            <div className="flex items-center gap-2 px-2">
+              <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center">
+                <Clock className="w-4 h-4 text-amber-500" />
+              </div>
+              <h2 className="text-lg font-bold text-foreground">
+                {isAr ? 'طلبات الربط المعلقة' : 'Pending Link Requests'}
+              </h2>
+              <Badge className="bg-amber-500 text-white border-0 text-xs font-bold shadow-sm ms-2">
+                {pendingRequests.length}
+              </Badge>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {pendingRequests.map((req) => (
-                <div
+                <motion.div
                   key={req.id}
-                  className="flex items-center gap-3 p-3 rounded-xl bg-background/60 border border-border/40"
+                  layout
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
                 >
-                  <Avatar className="w-10 h-10 shrink-0">
-                    <AvatarImage src={req.child_avatar || undefined} />
-                    <AvatarFallback className="bg-amber-500/10 text-amber-600 font-bold text-sm">
-                      {req.child_name?.charAt(0) || '?'}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-bold text-sm text-foreground truncate">{req.child_name}</p>
-                    <p className="text-xs text-muted-foreground" dir="ltr">{req.child_email}</p>
-                  </div>
-                  <Badge variant="secondary" className="text-[10px] shrink-0">
-                    {relationLabels[req.relation]?.[locale] || req.relation}
-                  </Badge>
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/20 text-[10px] gap-1">
-                      <Clock className="w-3 h-3" />
-                      {isAr ? 'معلق' : 'Pending'}
-                    </Badge>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 px-2 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive rounded-lg"
-                      disabled={cancellingPending === req.child_id}
-                      onClick={() => handleCancelPending(req.child_id)}
-                    >
-                      {cancellingPending === req.child_id ? (
-                        <Loader2 className="w-3 h-3 animate-spin" />
-                      ) : isAr ? (
-                        'إلغاء'
-                      ) : (
-                        'Cancel'
-                      )}
-                    </Button>
-                  </div>
-                </div>
+                  <Card className="rounded-2xl border-amber-200/50 dark:border-amber-900/50 bg-gradient-to-br from-amber-50/50 to-amber-100/30 dark:from-amber-950/20 dark:to-amber-900/10 shadow-sm overflow-hidden relative">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-amber-400/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none" />
+                    <CardContent className="p-5 flex items-center gap-4 relative z-10">
+                      <Avatar className="w-12 h-12 shrink-0 ring-2 ring-amber-500/20">
+                        <AvatarImage src={req.child_avatar || undefined} />
+                        <AvatarFallback className="bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-400 font-bold text-lg">
+                          {req.child_name?.charAt(0) || '?'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="font-bold text-base text-foreground truncate">{req.child_name}</p>
+                          <Badge variant="outline" className="text-[10px] bg-background/50 border-amber-200 dark:border-amber-800">
+                            {relationLabels[req.relation]?.[locale] || req.relation}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-0.5 truncate" dir="ltr">{req.child_email}</p>
+                      </div>
+                      
+                      <div className="flex flex-col items-end gap-2 shrink-0">
+                        <Badge className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-0 text-[10px] gap-1 shadow-none">
+                          <Clock className="w-3 h-3" />
+                          {isAr ? 'في الانتظار' : 'Waiting'}
+                        </Badge>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-3 text-xs font-bold text-destructive hover:bg-destructive/10 hover:text-destructive rounded-lg"
+                          disabled={cancellingPending === req.child_id}
+                          onClick={() => handleCancelPending(req.child_id)}
+                        >
+                          {cancellingPending === req.child_id ? (
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                          ) : isAr ? (
+                            'إلغاء الطلب'
+                          ) : (
+                            'Cancel'
+                          )}
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
               ))}
-            </CardContent>
-          </Card>
-        </div>
-      )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Empty State */}
       {!hasChildren && !hasPending && (
-        <Card className="rounded-2xl border-border/50">
-          <CardContent className="p-16 text-center">
-            <div className="w-20 h-20 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-5">
-              <Users className="w-9 h-9 text-muted-foreground/30" />
-            </div>
-            <h4 className="text-xl font-bold text-foreground mb-2">
-              {isAr ? 'لا يوجد أبناء مربوطين' : 'No linked children'}
-            </h4>
-            <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto">
-              {isAr
-                ? 'ابدأ بربط حساب ابنك لتتبع تقدمه الأكاديمي من مكان واحد.'
-                : "Start by linking your child's account to track their academic progress from one place."}
-            </p>
-            <Button asChild className="rounded-xl font-bold h-12 px-8">
-              <Link href="/academy/parent/link-child">
-                {isAr ? 'ربط ابن جديد' : 'Link New Child'}
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <Card className="rounded-[2.5rem] border-dashed border-2 border-border/60 bg-muted/10 shadow-sm overflow-hidden relative">
+            <div className="absolute inset-0 bg-grid-black/[0.02] dark:bg-grid-white/[0.02]" />
+            <CardContent className="p-20 text-center relative z-10 flex flex-col items-center">
+              <div className="relative mb-8 group">
+                <div className="absolute inset-0 rounded-full bg-primary/20 blur-xl group-hover:bg-primary/30 transition-colors duration-500" />
+                <div className="w-24 h-24 rounded-full bg-background border border-border shadow-xl flex items-center justify-center relative z-10">
+                  <GraduationCap className="w-12 h-12 text-primary" />
+                </div>
+              </div>
+              <h4 className="text-2xl font-black text-foreground mb-3">
+                {isAr ? 'لم تقم بربط أي أبناء بعد' : 'No children linked yet'}
+              </h4>
+              <p className="text-base text-muted-foreground mb-8 max-w-md mx-auto leading-relaxed">
+                {isAr
+                  ? 'ابدأ بربط حساب ابنك لتتمكن من متابعة تقدمه الأكاديمي، جدول الحصص، والمزيد بكل سهولة.'
+                  : "Start by linking your child's account to easily track their academic progress, schedule, and more."}
+              </p>
+              <Button asChild className="rounded-2xl font-bold h-14 px-10 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all">
+                <Link href="/academy/parent/link-child">
+                  <LinkIcon className="w-5 h-5 me-2" />
+                  {isAr ? 'ربط حساب ابنك الآن' : 'Link Child Account Now'}
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </motion.div>
       )}
 
       {/* Children Grid */}
       {hasChildren && (
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-foreground">
-              {isAr ? 'الأبناء المربوطين' : 'Linked Children'}
-              <span className="text-muted-foreground font-normal ms-2">({children.length})</span>
-            </h2>
+        <motion.div 
+          className="space-y-6"
+          variants={containerVariants}
+          initial="hidden"
+          animate="show"
+        >
+          <div className="flex items-center justify-between px-2">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Users className="w-5 h-5 text-primary" />
+              </div>
+              <h2 className="text-2xl font-bold text-foreground">
+                {isAr ? 'الأبناء المربوطين' : 'Linked Children'}
+              </h2>
+              <Badge variant="secondary" className="rounded-full px-2.5 py-0.5 text-sm font-bold bg-muted/50">
+                {children.length}
+              </Badge>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-6">
             {children.map((child) => (
-              <Card
-                key={child.link_id}
-                className="rounded-2xl border-border/50 overflow-hidden hover:shadow-md hover:border-primary/20 transition-all group"
-              >
-                <CardContent className="p-0">
-                  {/* Child Header */}
-                  <div className="p-6 pb-4">
-                    <div className="flex items-start gap-4">
-                      <Link href={`/academy/parent/children/${child.child_id}`}>
-                        <Avatar className="w-14 h-14 shrink-0 ring-2 ring-background shadow-sm cursor-pointer hover:ring-primary/30 transition-all">
-                          <AvatarImage src={child.child_avatar || undefined} />
-                          <AvatarFallback className="bg-primary/10 text-primary font-bold text-lg">
+              <motion.div key={child.link_id} variants={itemVariants} className="h-full">
+                <Card className="rounded-[2rem] border-border/40 overflow-hidden shadow-sm hover:shadow-xl hover:shadow-primary/5 hover:border-primary/20 transition-all duration-300 group bg-card relative h-full flex flex-col">
+                  <div className="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
+                  
+                  <CardContent className="p-0 flex flex-col flex-1 relative z-10">
+                    {/* Child Profile Header */}
+                    <div className="p-6 sm:p-8 pb-5 flex items-start gap-5">
+                      <Link href={`/academy/parent/children/${child.child_id}`} className="relative group/avatar shrink-0">
+                        <div className="absolute inset-0 rounded-full bg-primary/20 blur-md group-hover/avatar:bg-primary/40 transition-colors duration-300" />
+                        <Avatar className="w-20 h-20 ring-4 ring-background shadow-lg relative z-10">
+                          <AvatarImage src={child.child_avatar || undefined} className="object-cover" />
+                          <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10 text-primary font-black text-2xl">
                             {child.child_name.charAt(0)}
                           </AvatarFallback>
                         </Avatar>
                       </Link>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
+                      <div className="flex-1 min-w-0 pt-1">
+                        <div className="flex items-center flex-wrap gap-2 mb-2">
                           <Link
                             href={`/academy/parent/children/${child.child_id}`}
-                            className="font-bold text-foreground hover:text-primary transition-colors truncate"
+                            className="text-2xl font-black text-foreground hover:text-primary transition-colors truncate"
                           >
                             {child.child_name}
                           </Link>
-                          <Badge variant="secondary" className="text-[10px] px-1.5 py-0 shrink-0">
+                          <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-0 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider shrink-0">
                             {relationLabels[child.relation]?.[locale] || child.relation}
                           </Badge>
                         </div>
-                        <p className="text-xs text-muted-foreground">
-                          {isAr ? 'ربط منذ' : 'Linked'} {fmtDate(child.linked_at, isAr)}
-                        </p>
+                        <div className="flex items-center text-sm text-muted-foreground gap-1.5 font-medium">
+                          <LinkIcon className="w-3.5 h-3.5 shrink-0" />
+                          <span className="truncate">{isAr ? 'مربوط منذ' : 'Linked since'} {fmtDate(child.linked_at, isAr)}</span>
+                        </div>
                       </div>
-                      <Link
-                        href={`/academy/parent/children/${child.child_id}`}
-                        className="shrink-0"
-                      >
+                      
+                      <div className="shrink-0 flex gap-2">
                         <Button
                           variant="ghost"
-                          size="sm"
-                          className="h-8 w-8 p-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                          size="icon"
+                          className="w-10 h-10 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                          onClick={() => setUnlinkingChild(child)}
+                          title={isAr ? 'إلغاء الربط' : 'Unlink'}
                         >
-                          <ChevronRight
-                            className={`w-4 h-4 text-muted-foreground ${isAr ? 'rotate-180' : ''}`}
-                          />
+                          <UserMinus className="w-4 h-4" />
                         </Button>
-                      </Link>
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Progress */}
-                  <div className="px-6 pb-4">
-                    <div className="flex items-center justify-between text-xs mb-1.5">
-                      <span className="text-muted-foreground font-medium">
-                        {isAr ? 'التقدم' : 'Progress'}
-                      </span>
-                      <span className="font-bold text-foreground">
-                        {child.enrollments.avg_progress}%
-                      </span>
+                    {/* Main Progress Indicator */}
+                    <div className="px-6 sm:px-8 pb-6">
+                      <div className="p-5 rounded-2xl bg-muted/30 border border-border/40">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <Activity className="w-4 h-4 text-primary" />
+                            <span className="text-sm font-bold text-foreground">
+                              {isAr ? 'التقدم الأكاديمي' : 'Academic Progress'}
+                            </span>
+                          </div>
+                          <span className="text-xl font-black text-primary">
+                            {child.enrollments.avg_progress}%
+                          </span>
+                        </div>
+                        <div className="relative h-2.5 bg-secondary rounded-full overflow-hidden">
+                          <motion.div 
+                            initial={{ width: 0 }}
+                            whileInView={{ width: `${child.enrollments.avg_progress}%` }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
+                            className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary to-primary/80 rounded-full"
+                          />
+                        </div>
+                      </div>
                     </div>
-                    <Progress
-                      value={child.enrollments.avg_progress}
-                      className="h-1.5 bg-primary/10"
-                    />
-                  </div>
 
-                  {/* Stats Grid */}
-                  <div className="px-6 pb-4 grid grid-cols-4 gap-3">
-                    <div className="text-center p-2 rounded-xl bg-muted/30">
-                      <BookOpen className="w-4 h-4 text-blue-500 mx-auto mb-1" />
-                      <p className="text-sm font-bold text-foreground">{child.enrollments.total}</p>
-                      <p className="text-[10px] text-muted-foreground">
-                        {isAr ? 'مقرر' : 'Courses'}
-                      </p>
+                    {/* Bento Stats Grid */}
+                    <div className="px-6 sm:px-8 pb-8 grid grid-cols-2 gap-3 flex-1 content-start">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 p-4 rounded-2xl bg-blue-500/5 dark:bg-blue-500/10 border border-blue-500/10 group-hover:bg-blue-500/10 transition-colors">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-500/10 flex items-center justify-center shrink-0">
+                          <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 text-blue-500" />
+                        </div>
+                        <div>
+                          <p className="text-xl sm:text-2xl font-black text-foreground leading-none mb-1">{child.enrollments.total}</p>
+                          <p className="text-[11px] sm:text-xs font-medium text-muted-foreground">{isAr ? 'مقررات مسجلة' : 'Enrolled Courses'}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 p-4 rounded-2xl bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/10 group-hover:bg-emerald-500/10 transition-colors">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+                          <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-500" />
+                        </div>
+                        <div>
+                          <p className="text-xl sm:text-2xl font-black text-foreground leading-none mb-1">{child.bookings.upcoming}</p>
+                          <p className="text-[11px] sm:text-xs font-medium text-muted-foreground">{isAr ? 'حجوزات قادمة' : 'Upcoming Bookings'}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 p-4 rounded-2xl bg-violet-500/5 dark:bg-violet-500/10 border border-violet-500/10 group-hover:bg-violet-500/10 transition-colors">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-violet-500/10 flex items-center justify-center shrink-0">
+                          <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-violet-500" />
+                        </div>
+                        <div>
+                          <p className="text-xl sm:text-2xl font-black text-foreground leading-none mb-1">{child.recitations.total_30d}</p>
+                          <p className="text-[11px] sm:text-xs font-medium text-muted-foreground">{isAr ? 'تلاوات (30 يوم)' : 'Recitations (30d)'}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 p-4 rounded-2xl bg-amber-500/5 dark:bg-amber-500/10 border border-amber-500/10 group-hover:bg-amber-500/10 transition-colors">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
+                          <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-amber-500" />
+                        </div>
+                        <div>
+                          <p className="text-xl sm:text-2xl font-black text-foreground leading-none mb-1">{child.badges.total}</p>
+                          <p className="text-[11px] sm:text-xs font-medium text-muted-foreground">{isAr ? 'شارات محصلة' : 'Earned Badges'}</p>
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-center p-2 rounded-xl bg-muted/30">
-                      <Calendar className="w-4 h-4 text-emerald-500 mx-auto mb-1" />
-                      <p className="text-sm font-bold text-foreground">{child.bookings.upcoming}</p>
-                      <p className="text-[10px] text-muted-foreground">
-                        {isAr ? 'حجز' : 'Bookings'}
-                      </p>
-                    </div>
-                    <div className="text-center p-2 rounded-xl bg-muted/30">
-                      <Clock className="w-4 h-4 text-violet-500 mx-auto mb-1" />
-                      <p className="text-sm font-bold text-foreground">{child.recitations.total_30d}</p>
-                      <p className="text-[10px] text-muted-foreground">
-                        {isAr ? 'تلاوة' : 'Recitations'}
-                      </p>
-                    </div>
-                    <div className="text-center p-2 rounded-xl bg-muted/30">
-                      <Trophy className="w-4 h-4 text-amber-500 mx-auto mb-1" />
-                      <p className="text-sm font-bold text-foreground">{child.badges.total}</p>
-                      <p className="text-[10px] text-muted-foreground">
-                        {isAr ? 'شارة' : 'Badges'}
-                      </p>
-                    </div>
-                  </div>
 
-                  {/* Actions */}
-                  <div className="px-6 pb-6 flex items-center gap-2">
-                    <Button
-                      asChild
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 rounded-xl h-9 font-bold text-xs"
-                    >
-                      <Link href={`/academy/parent/children/${child.child_id}`}>
-                        <ArrowUpRight className="w-3.5 h-3.5 me-1" />
-                        {isAr ? 'التفاصيل' : 'Details'}
-                      </Link>
-                    </Button>
-                    <Button
-                      asChild
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 rounded-xl h-9 font-bold text-xs"
-                    >
-                      <Link href={`/academy/parent/children/${child.child_id}/restrictions`}>
-                        <Shield className="w-3.5 h-3.5 me-1" />
-                        {isAr ? 'تقييد' : 'Restrict'}
-                      </Link>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-9 w-9 p-0 rounded-xl text-destructive hover:bg-destructive/10 hover:text-destructive shrink-0"
-                      onClick={() => setUnlinkingChild(child)}
-                      title={isAr ? 'إلغاء الربط' : 'Unlink'}
-                    >
-                      <UserMinus className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                    {/* Bottom Actions Bar */}
+                    <div className="px-6 sm:px-8 py-4 bg-muted/20 border-t border-border/40 flex items-center gap-3 mt-auto">
+                      <Button
+                        asChild
+                        className="flex-1 rounded-xl h-12 font-bold shadow-sm"
+                      >
+                        <Link href={`/academy/parent/children/${child.child_id}`}>
+                          {isAr ? 'عرض التفاصيل' : 'View Details'}
+                          <ChevronRight className={`w-4 h-4 ms-2 ${isAr ? 'rotate-180' : ''}`} />
+                        </Link>
+                      </Button>
+                      <Button
+                        asChild
+                        variant="secondary"
+                        className="rounded-xl h-12 px-6 font-bold bg-background shadow-sm border border-border"
+                      >
+                        <Link href={`/academy/parent/children/${child.child_id}/restrictions`}>
+                          <Shield className="w-4 h-4 sm:me-2 text-primary" />
+                          <span className="hidden sm:inline">{isAr ? 'القيود' : 'Restrictions'}</span>
+                        </Link>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
             ))}
           </div>
-        </div>
+        </motion.div>
       )}
 
       {/* Rejected Links Info */}
       {(summary?.rejected_links || 0) > 0 && (
-        <Card className="rounded-2xl border-border/50 bg-muted/20">
-          <CardContent className="p-5">
-            <p className="text-sm text-muted-foreground">
-              {isAr
-                ? `لديك ${summary?.rejected_links} طلب ربط مرفوض.`
-                : `You have ${summary?.rejected_links} rejected link requests.`}
-            </p>
-          </CardContent>
-        </Card>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
+          <Card className="rounded-[2rem] border-red-200/40 dark:border-red-900/40 bg-red-50/50 dark:bg-red-950/20">
+            <CardContent className="p-6 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/50 flex items-center justify-center shrink-0">
+                <AlertCircle className="w-6 h-6 text-red-600 dark:text-red-400" />
+              </div>
+              <div>
+                <h4 className="text-base font-bold text-red-900 dark:text-red-300 mb-1">
+                  {isAr ? 'طلبات مرفوضة' : 'Rejected Requests'}
+                </h4>
+                <p className="text-sm text-red-700 dark:text-red-400">
+                  {isAr
+                    ? `لديك ${summary?.rejected_links} طلب ربط تم رفضه من قبل الأبناء.`
+                    : `You have ${summary?.rejected_links} link requests that were rejected.`}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       )}
 
       {/* Unlink Confirmation Dialog */}
       <AlertDialog open={!!unlinkingChild} onOpenChange={() => setUnlinkingChild(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              <UserMinus className="w-5 h-5 text-destructive" />
-              {isAr ? 'تأكيد إلغاء الربط' : 'Confirm Unlink'}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {isAr
-                ? `هل أنت متأكد من إلغاء ربط ${unlinkingChild?.child_name}؟ لن تتمكن من متابعة تقدمه الدراسي بعد ذلك.`
-                : `Are you sure you want to unlink ${unlinkingChild?.child_name}? You will no longer be able to track their progress.`}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={unlinkLoading}>
-              {isAr ? 'إلغاء' : 'Cancel'}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleUnlink}
-              disabled={unlinkLoading}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {unlinkLoading ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : isAr ? (
-                'إلغاء الربط'
-              ) : (
-                'Unlink'
-              )}
-            </AlertDialogAction>
-          </AlertDialogFooter>
+        <AlertDialogContent className="rounded-[2rem] overflow-hidden p-0 border-0">
+          <div className="h-2 bg-destructive w-full" />
+          <div className="p-6 sm:p-8 space-y-6">
+            <AlertDialogHeader className="space-y-4">
+              <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-2">
+                <UserMinus className="w-8 h-8 text-destructive" />
+              </div>
+              <AlertDialogTitle className="text-2xl font-black text-center">
+                {isAr ? 'تأكيد إلغاء الربط' : 'Confirm Unlink'}
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-center text-base">
+                {isAr
+                  ? (
+                    <>
+                      هل أنت متأكد من إلغاء ربط حساب <strong className="text-foreground">{unlinkingChild?.child_name}</strong>؟<br/><br/>
+                      لن تتمكن من متابعة تقدمه الدراسي أو استعراض جدوله بعد ذلك. هذا الإجراء لا يمكن التراجع عنه.
+                    </>
+                  )
+                  : (
+                    <>
+                      Are you sure you want to unlink <strong className="text-foreground">{unlinkingChild?.child_name}</strong>?<br/><br/>
+                      You will no longer be able to track their progress or view their schedule. This action cannot be undone.
+                    </>
+                  )}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="gap-3 sm:gap-0">
+              <AlertDialogCancel disabled={unlinkLoading} className="rounded-xl h-12 font-bold w-full sm:w-auto mt-0">
+                {isAr ? 'تراجع' : 'Cancel'}
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleUnlink}
+                disabled={unlinkLoading}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl h-12 font-bold w-full sm:w-auto"
+              >
+                {unlinkLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : isAr ? (
+                  'نعم، قم بإلغاء الربط'
+                ) : (
+                  'Yes, Unlink'
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </div>
         </AlertDialogContent>
       </AlertDialog>
     </div>
@@ -538,7 +642,7 @@ export default function ParentChildrenPage() {
 function fmtDate(s: string | null, isAr: boolean) {
   if (!s) return '—'
   return new Date(s).toLocaleDateString(isAr ? 'ar-SA' : 'en-US', {
-    month: 'short',
+    month: 'long',
     day: 'numeric',
     year: 'numeric',
   })
