@@ -250,6 +250,9 @@ const getAcademyRoleConfig = (t: any, role: AcademyRole): { sections: NavSection
           items: [
             { href: '/academy/content-supervisor', label: 'لوحة التحكم', icon: LayoutDashboard },
             { href: '/academy/content-supervisor/lessons', label: 'الدروس', icon: BookOpen },
+            { href: '/academy/content-supervisor/courses', label: 'الدورات', icon: GraduationCap },
+            { href: '/academy/content-supervisor/series', label: 'السلاسل', icon: Library },
+            { href: '/academy/content-supervisor/paths', label: 'مسارات المقرئ', icon: Route },
             { href: '/academy/content-supervisor/archive', label: 'أرشيف الدورات', icon: Archive },
             { href: '/academy/content-supervisor/messages', label: 'الرسائل', icon: MessageSquare },
           ]
