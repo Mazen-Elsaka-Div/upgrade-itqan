@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { toast } from "sonner"
 import { AcademySettings } from "../hooks/use-academy-settings"
+import { useI18n } from "@/lib/i18n/context"
 
 interface MaintenanceSettingsProps {
   settings: AcademySettings
@@ -28,6 +29,8 @@ interface MaintenanceSettingsProps {
 }
 
 export function MaintenanceSettings({ settings, onUpdate }: MaintenanceSettingsProps) {
+  const { t } = useI18n()
+  const a = t.academyAdmin
   const [clearingCache, setClearingCache] = useState(false)
   const [backingUp, setBackingUp] = useState(false)
 
@@ -47,9 +50,9 @@ export function MaintenanceSettings({ settings, onUpdate }: MaintenanceSettingsP
       const res = await fetch("/api/academy/admin/settings/clear-cache", { method: "POST" })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || "فشل")
-      toast.success(data.message || "تم مسح الـ Cache بنجاح")
+      toast.success(data.message || a.mtCacheClearedSuccess)
     } catch (err: any) {
-      toast.error(err.message || "فشل في مسح الـ Cache")
+      toast.error(err.message || a.mtCacheClearedFailed)
     } finally {
       setClearingCache(false)
     }
@@ -61,20 +64,20 @@ export function MaintenanceSettings({ settings, onUpdate }: MaintenanceSettingsP
       const res = await fetch("/api/academy/admin/settings/backup")
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
-        throw new Error(err.error || "فشل في إنشاء النسخة الاحتياطية")
+        throw new Error(err.error || a.mtBackupFailed)
       }
       const blob = await res.blob()
       const url = URL.createObjectURL(blob)
-      const a = document.createElement("a")
-      a.href = url
-      a.download = `itqan-settings-backup-${new Date().toISOString().split("T")[0]}.json`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
+      const link = document.createElement("a")
+      link.href = url
+      link.download = `itqan-settings-backup-${new Date().toISOString().split("T")[0]}.json`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
       URL.revokeObjectURL(url)
-      toast.success("تم تحميل النسخة الاحتياطية")
+      toast.success(a.mtBackupSuccess)
     } catch (err: any) {
-      toast.error(err.message || "فشل في إنشاء النسخة الاحتياطية")
+      toast.error(err.message || a.mtBackupFailed)
     } finally {
       setBackingUp(false)
     }
@@ -90,16 +93,16 @@ export function MaintenanceSettings({ settings, onUpdate }: MaintenanceSettingsP
               <Wrench className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-lg">وضع الصيانة</CardTitle>
-              <CardDescription className="text-xs mt-0.5">إيقاف المنصة مؤقتاً للصيانة</CardDescription>
+              <CardTitle className="text-lg">{a.mtTitle}</CardTitle>
+              <CardDescription className="text-xs mt-0.5">{a.mtDesc}</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent className="pt-6 space-y-6">
           <div className="flex items-center justify-between p-4 bg-destructive/10 border border-destructive/30 rounded-xl">
             <div className="space-y-0.5">
-              <Label className="font-medium text-destructive">تفعيل وضع الصيانة</Label>
-              <p className="text-xs text-destructive/80">سيتم حجب المنصة عن جميع المستخدمين</p>
+              <Label className="font-medium text-destructive">{a.mtEnable}</Label>
+              <p className="text-xs text-destructive/80">{a.mtEnableDesc}</p>
             </div>
             <Switch
               checked={settings.academy_maintenance_enabled ?? false}
@@ -111,24 +114,24 @@ export function MaintenanceSettings({ settings, onUpdate }: MaintenanceSettingsP
             <Alert className="bg-destructive/10 border-destructive/30">
               <AlertTriangle className="w-4 h-4 text-destructive" />
               <AlertDescription className="text-sm text-destructive">
-                وضع الصيانة مُفعّل! المنصة محجوبة عن المستخدمين العاديين.
+                {a.mtActiveWarning}
               </AlertDescription>
             </Alert>
           )}
 
           <div className="space-y-3">
-            <Label className="font-medium text-sm">رسالة الصيانة</Label>
+            <Label className="font-medium text-sm">{a.mtMessage}</Label>
             <Textarea
               value={settings.academy_maintenance_message || ""}
               onChange={(e) => onUpdate({ academy_maintenance_message: e.target.value })}
               placeholder="المنصة تحت الصيانة، سنعود قريباً..."
               className="min-h-[100px] resize-none"
             />
-            <p className="text-[11px] text-muted-foreground">تظهر للمستخدمين عند محاولة الدخول</p>
+            <p className="text-[11px] text-muted-foreground">{a.mtMessageHint}</p>
           </div>
 
           <div className="space-y-3">
-            <Label className="font-medium text-sm">IPs مستثناة من الصيانة</Label>
+            <Label className="font-medium text-sm">{a.mtExcludedIps}</Label>
             <Textarea
               value={allowedIps.join("\n")}
               onChange={(e) => updateAllowedIps(e.target.value)}
@@ -137,7 +140,7 @@ export function MaintenanceSettings({ settings, onUpdate }: MaintenanceSettingsP
               dir="ltr"
             />
             <p className="text-[11px] text-muted-foreground">
-              IP واحد في كل سطر. هذه الـ IPs تستطيع الوصول حتى أثناء الصيانة.
+              {a.mtExcludedIpsHint}
             </p>
           </div>
         </CardContent>
@@ -151,8 +154,8 @@ export function MaintenanceSettings({ settings, onUpdate }: MaintenanceSettingsP
               <RefreshCw className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-lg">إجراءات النظام</CardTitle>
-              <CardDescription className="text-xs mt-0.5">عمليات الصيانة والنسخ الاحتياطي</CardDescription>
+              <CardTitle className="text-lg">{a.mtSystemActions}</CardTitle>
+              <CardDescription className="text-xs mt-0.5">{a.mtSystemActionsDesc}</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -162,9 +165,9 @@ export function MaintenanceSettings({ settings, onUpdate }: MaintenanceSettingsP
             <div className="space-y-0.5">
               <Label className="font-medium flex items-center gap-2">
                 <Trash2 className="w-4 h-4" />
-                مسح الـ Cache
+                {a.mtClearCache}
               </Label>
-              <p className="text-xs text-muted-foreground">إزالة البيانات المؤقتة المخزنة</p>
+              <p className="text-xs text-muted-foreground">{a.mtClearCacheDesc}</p>
             </div>
             <AlertDialog>
               <AlertDialogTrigger asChild>
@@ -174,19 +177,19 @@ export function MaintenanceSettings({ settings, onUpdate }: MaintenanceSettingsP
                   ) : (
                     <Trash2 className="w-4 h-4 ml-2" />
                   )}
-                  مسح
+                  {a.mtClear}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>تأكيد مسح الـ Cache</AlertDialogTitle>
+                  <AlertDialogTitle>{a.mtConfirmClearCache}</AlertDialogTitle>
                   <AlertDialogDescription>
-                    سيتم حذف جميع البيانات المؤقتة. قد يؤدي ذلك إلى بطء مؤقت في تحميل الصفحات.
+                    {a.mtConfirmClearCacheDesc}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>إلغاء</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleClearCache}>تأكيد المسح</AlertDialogAction>
+                  <AlertDialogAction onClick={handleClearCache}>{a.mtConfirmClear}</AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
@@ -197,9 +200,9 @@ export function MaintenanceSettings({ settings, onUpdate }: MaintenanceSettingsP
             <div className="space-y-0.5">
               <Label className="font-medium flex items-center gap-2">
                 <Download className="w-4 h-4" />
-                نسخة احتياطية فورية
+                {a.mtBackup}
               </Label>
-              <p className="text-xs text-muted-foreground">تصدير الإعدادات والبيانات (JSON)</p>
+              <p className="text-xs text-muted-foreground">{a.mtBackupDesc}</p>
             </div>
             <AlertDialog>
               <AlertDialogTrigger asChild>
@@ -209,19 +212,19 @@ export function MaintenanceSettings({ settings, onUpdate }: MaintenanceSettingsP
                   ) : (
                     <Download className="w-4 h-4 ml-2" />
                   )}
-                  تصدير
+                  {a.mtExport}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>تأكيد النسخ الاحتياطي</AlertDialogTitle>
+                  <AlertDialogTitle>{a.mtConfirmBackup}</AlertDialogTitle>
                   <AlertDialogDescription>
-                    سيتم تحميل ملف JSON يحتوي على جميع الإعدادات. هل تريد المتابعة؟
+                    {a.mtConfirmBackupDesc}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>إلغاء</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleBackup}>تأكيد التصدير</AlertDialogAction>
+                  <AlertDialogAction onClick={handleBackup}>{a.mtConfirmExport}</AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { CheckCircle2, XCircle, Clock, Loader2, ExternalLink, Calendar, Video } from 'lucide-react'
+import { useI18n } from '@/lib/i18n/context'
 
 interface PublicLesson {
   id: string
@@ -26,11 +27,22 @@ interface PublicLesson {
 type Tab = 'pending_review' | 'approved' | 'rejected'
 
 export default function AdminPublicLessonsReviewPage() {
+  const { t, locale } = useI18n()
+  const a = t.academyAdmin
+
   const [lessons, setLessons] = useState<PublicLesson[]>([])
   const [loading, setLoading] = useState(true)
   const [tab, setTab] = useState<Tab>('pending_review')
   const [actingId, setActingId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+
+  const dateLocale = locale === 'ar' ? 'ar-EG' : 'en-US'
+
+  const TABS = [
+    { id: 'pending_review' as const, label: a.tabs.pendingReview, icon: Clock, color: 'text-amber-600' },
+    { id: 'approved' as const, label: a.tabs.approved, icon: CheckCircle2, color: 'text-green-600' },
+    { id: 'rejected' as const, label: a.tabs.rejected, icon: XCircle, color: 'text-red-600' },
+  ]
 
   const load = async () => {
     setLoading(true)
@@ -38,24 +50,23 @@ export default function AdminPublicLessonsReviewPage() {
     try {
       const res = await fetch(`/api/academy/admin/public-lessons?review_status=${tab}`)
       const json = await res.json()
-      if (!res.ok) throw new Error(json?.error || 'فشل التحميل')
+      if (!res.ok) throw new Error(json?.error || a.lessonsUpdateFailed)
       setLessons(json.data || [])
     } catch (e: any) {
-      setError(e.message || 'تعذر التحميل')
+      setError(e.message || a.lessonsUpdateFailed)
     } finally {
       setLoading(false)
     }
   }
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
   useEffect(() => { load() }, [tab])
 
   const review = async (id: string, action: 'approve' | 'reject') => {
     let notes: string | null = null
     if (action === 'reject') {
-      notes = prompt('سبب الرفض (اختياري)')
+      notes = prompt(a.rejectReasonPrompt)
     }
-    if (!confirm(action === 'approve' ? 'الموافقة على نشر الحلقة؟' : 'رفض الحلقة؟')) return
+    if (!confirm(action === 'approve' ? a.confirmApprove : a.confirmReject)) return
     setActingId(id)
     try {
       const res = await fetch(`/api/academy/admin/public-lessons/${id}/review`, {
@@ -65,7 +76,7 @@ export default function AdminPublicLessonsReviewPage() {
       })
       if (!res.ok) {
         const json = await res.json().catch(() => ({}))
-        alert(json?.error || 'فشل التحديث')
+        alert(json?.error || a.lessonsUpdateFailed)
         return
       }
       setLessons(prev => prev.filter(l => l.id !== id))
@@ -77,16 +88,12 @@ export default function AdminPublicLessonsReviewPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">مراجعة الحلقات العامة</h1>
-        <p className="text-muted-foreground mt-1">راجع الحلقات التي يقدّمها المدرسون قبل ظهورها للجمهور.</p>
+        <h1 className="text-2xl font-bold">{a.publicLessonsTitle}</h1>
+        <p className="text-muted-foreground mt-1">{a.publicLessonsDesc}</p>
       </div>
 
       <div className="flex items-center gap-2 border-b border-border">
-        {[
-          { id: 'pending_review' as const, label: 'بانتظار المراجعة', icon: Clock, color: 'text-amber-600' },
-          { id: 'approved' as const, label: 'مقبولة', icon: CheckCircle2, color: 'text-green-600' },
-          { id: 'rejected' as const, label: 'مرفوضة', icon: XCircle, color: 'text-red-600' },
-        ].map(t => (
+        {TABS.map(t => (
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
@@ -106,9 +113,9 @@ export default function AdminPublicLessonsReviewPage() {
         <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl p-4">{error}</div>
       ) : lessons.length === 0 ? (
         <div className="bg-card border border-border rounded-xl p-12 text-center text-muted-foreground">
-          {tab === 'pending_review' && 'لا توجد حلقات تنتظر المراجعة الآن.'}
-          {tab === 'approved' && 'لم تتم الموافقة على أي حلقات بعد.'}
-          {tab === 'rejected' && 'لا توجد حلقات مرفوضة.'}
+          {tab === 'pending_review' && a.noPendingLessons}
+          {tab === 'approved' && a.noApprovedLessons}
+          {tab === 'rejected' && a.noRejectedLessons}
         </div>
       ) : (
         <div className="grid gap-4">
@@ -116,7 +123,7 @@ export default function AdminPublicLessonsReviewPage() {
             <div key={l.id} className="bg-card border border-border rounded-xl p-5 flex flex-col gap-4 md:flex-row md:items-start">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1 text-xs text-muted-foreground">
-                  <span>المدرس: <strong className="text-foreground">{l.teacher_name}</strong></span>
+                  <span>{a.teacherLabel} <strong className="text-foreground">{l.teacher_name}</strong></span>
                   {l.category_name && <span>• {l.category_name}</span>}
                 </div>
                 <h3 className="font-bold text-lg mb-1 truncate">{l.title}</h3>
@@ -124,12 +131,12 @@ export default function AdminPublicLessonsReviewPage() {
                   <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{l.description}</p>
                 )}
                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                  <span className="inline-flex items-center gap-1"><Calendar className="w-3.5 h-3.5" /> {new Date(l.scheduled_at).toLocaleString('ar-EG', { dateStyle: 'medium', timeStyle: 'short' })}</span>
-                  <span className="inline-flex items-center gap-1"><Video className="w-3.5 h-3.5" /> {l.duration_minutes} د</span>
+                  <span className="inline-flex items-center gap-1"><Calendar className="w-3.5 h-3.5" /> {new Date(l.scheduled_at).toLocaleString(dateLocale, { dateStyle: 'medium', timeStyle: 'short' })}</span>
+                  <span className="inline-flex items-center gap-1"><Video className="w-3.5 h-3.5" /> {l.duration_minutes} {a.minutes}</span>
                 </div>
                 {l.review_notes && (
                   <div className="mt-3 text-xs bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 p-2 rounded">
-                    ملاحظات المراجعة السابقة: {l.review_notes}
+                    {a.previousReviewNotes} {l.review_notes}
                   </div>
                 )}
               </div>
@@ -141,7 +148,7 @@ export default function AdminPublicLessonsReviewPage() {
                   className="inline-flex items-center gap-1 px-3 py-2 text-sm border border-border rounded-lg hover:bg-muted"
                 >
                   <ExternalLink className="w-4 h-4" />
-                  معاينة
+                  {a.preview}
                 </Link>
                 {tab === 'pending_review' && (
                   <>
@@ -151,7 +158,7 @@ export default function AdminPublicLessonsReviewPage() {
                       className="inline-flex items-center gap-1 px-3 py-2 text-sm border border-red-200 text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
                     >
                       {actingId === l.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
-                      رفض
+                      {a.reject}
                     </button>
                     <button
                       onClick={() => review(l.id, 'approve')}
@@ -159,7 +166,7 @@ export default function AdminPublicLessonsReviewPage() {
                       className="inline-flex items-center gap-1 px-3 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700"
                     >
                       {actingId === l.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                      موافقة
+                      {a.approve}
                     </button>
                   </>
                 )}
@@ -170,7 +177,7 @@ export default function AdminPublicLessonsReviewPage() {
                     className="inline-flex items-center gap-1 px-3 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700"
                   >
                     {actingId === l.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                    إعادة الموافقة
+                    {a.approveAgain}
                   </button>
                 )}
                 {tab === 'approved' && (
@@ -180,7 +187,7 @@ export default function AdminPublicLessonsReviewPage() {
                     className="inline-flex items-center gap-1 px-3 py-2 text-sm border border-red-200 text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
                   >
                     {actingId === l.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
-                    سحب النشر
+                    {a.unpublish}
                   </button>
                 )}
               </div>

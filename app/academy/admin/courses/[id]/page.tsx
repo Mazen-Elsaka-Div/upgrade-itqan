@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
+import { useI18n } from '@/lib/i18n/context'
 
 type CourseStatus = 'draft' | 'pending_review' | 'published' | 'archived' | 'rejected'
 type Level = 'beginner' | 'intermediate' | 'advanced'
@@ -55,43 +56,6 @@ interface CourseDetail {
   updated_at: string
 }
 
-const STATUS_LABELS: Record<CourseStatus, string> = {
-  draft: 'مسودة',
-  pending_review: 'بانتظار المراجعة',
-  published: 'منشورة',
-  rejected: 'مرفوضة',
-  archived: 'مؤرشفة',
-}
-
-const STATUS_BADGE_CLS: Record<CourseStatus, string> = {
-  draft: 'bg-slate-100 text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-600',
-  pending_review: 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-700',
-  published: 'bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-700',
-  rejected: 'bg-red-100 text-red-800 border-red-300 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700',
-  archived: 'bg-gray-200 text-gray-700 border-gray-400 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600',
-}
-
-const LEVEL_LABELS: Record<Level, string> = {
-  beginner: 'مبتدئ',
-  intermediate: 'متوسط',
-  advanced: 'متقدم',
-}
-
-function formatDate(iso: string | null | undefined): string {
-  if (!iso) return '—'
-  try {
-    return new Date(iso).toLocaleDateString('ar-EG', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-  } catch {
-    return iso
-  }
-}
-
 function youtubeEmbed(url: string): string | null {
   if (!url) return null
   if (url.includes('youtu.be/')) {
@@ -109,6 +73,46 @@ export default function AdminCourseDetailPage() {
   const params = useParams()
   const router = useRouter()
   const courseId = params.id as string
+  const { t, locale } = useI18n()
+  const a = t.academyAdmin
+  const dateLocale = locale === 'ar' ? 'ar-EG' : 'en-US'
+
+  const STATUS_LABELS: Record<CourseStatus, string> = {
+    draft: a.courseStatus.draft,
+    pending_review: a.courseStatus.pendingReview,
+    published: a.courseStatus.published,
+    rejected: a.courseStatus.rejected,
+    archived: a.courseStatus.archived,
+  }
+
+  const STATUS_BADGE_CLS: Record<CourseStatus, string> = {
+    draft: 'bg-slate-100 text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-600',
+    pending_review: 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-700',
+    published: 'bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-700',
+    rejected: 'bg-red-100 text-red-800 border-red-300 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700',
+    archived: 'bg-gray-200 text-gray-700 border-gray-400 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600',
+  }
+
+  const LEVEL_LABELS: Record<Level, string> = {
+    beginner: a.courseLevel.beginner,
+    intermediate: a.courseLevel.intermediate,
+    advanced: a.courseLevel.advanced,
+  }
+
+  function formatDate(iso: string | null | undefined): string {
+    if (!iso) return '—'
+    try {
+      return new Date(iso).toLocaleDateString(dateLocale, {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    } catch {
+      return iso
+    }
+  }
 
   const [loading, setLoading] = useState(true)
   const [course, setCourse] = useState<CourseDetail | null>(null)
@@ -117,7 +121,6 @@ export default function AdminCourseDetailPage() {
   const [pendingRequests, setPendingRequests] = useState(0)
   const [expandedLessons, setExpandedLessons] = useState<Record<string, boolean>>({})
 
-  // Review modal
   const [reviewMode, setReviewMode] = useState<'approve' | 'reject' | null>(null)
   const [rejectionReason, setRejectionReason] = useState('')
   const [submittingReview, setSubmittingReview] = useState(false)
@@ -127,7 +130,7 @@ export default function AdminCourseDetailPage() {
       const res = await fetch(`/api/academy/admin/courses/${courseId}`)
       const json = await res.json().catch(() => ({}))
       if (!res.ok) {
-        toast.error(json.error || 'تعذر تحميل بيانات الدورة')
+        toast.error(json.error || a.failedToLoadCourses)
         return
       }
       setCourse(json.course)
@@ -136,13 +139,12 @@ export default function AdminCourseDetailPage() {
       setPendingRequests(json.pending_requests || 0)
     } catch (err) {
       console.error(err)
-      toast.error('فشل الاتصال بالخادم')
+      toast.error(a.courseServerFailed)
     } finally {
       setLoading(false)
     }
   }
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
   useEffect(() => { fetchCourse() }, [courseId])
 
   const toggleLesson = (id: string) => {
@@ -152,7 +154,7 @@ export default function AdminCourseDetailPage() {
   const handleSubmitReview = async () => {
     if (!reviewMode) return
     if (reviewMode === 'reject' && rejectionReason.trim().length < 3) {
-      toast.error('يجب كتابة سبب الرفض')
+      toast.error(a.rejectionReasonRequired)
       return
     }
     setSubmittingReview(true)
@@ -167,16 +169,16 @@ export default function AdminCourseDetailPage() {
       })
       const json = await res.json().catch(() => ({}))
       if (!res.ok) {
-        toast.error(json.error || 'حدث خطأ أثناء الحفظ')
+        toast.error(json.error || a.courseErrorOccurred)
         return
       }
-      toast.success(reviewMode === 'approve' ? 'تم قبول الدورة ونشرها للطلاب' : 'تم رفض الدورة وإبلاغ المدرس')
+      toast.success(reviewMode === 'approve' ? a.courseApproved : a.courseRejected)
       setReviewMode(null)
       setRejectionReason('')
       fetchCourse()
     } catch (err) {
       console.error(err)
-      toast.error('حدث خطأ أثناء الحفظ')
+      toast.error(a.courseErrorOccurred)
     } finally {
       setSubmittingReview(false)
     }
@@ -194,13 +196,13 @@ export default function AdminCourseDetailPage() {
     return (
       <div className="text-center p-8 bg-card rounded-xl border border-border">
         <AlertTriangle className="w-12 h-12 mx-auto mb-3 text-amber-500" />
-        <p className="font-bold mb-2">الدورة غير موجودة</p>
+        <p className="font-bold mb-2">{a.courseNotFound}</p>
         <Link
           href="/academy/admin/courses"
           className="inline-flex items-center gap-2 px-4 py-2 mt-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-bold"
         >
           <ArrowRight className="w-4 h-4 rtl:rotate-180" />
-          العودة لقائمة الدورات
+          {a.backToCourses}
         </Link>
       </div>
     )
@@ -219,7 +221,7 @@ export default function AdminCourseDetailPage() {
           className="text-sm font-bold text-muted-foreground hover:text-foreground inline-flex items-center gap-1 self-start"
         >
           <ArrowRight className="w-4 h-4 rtl:rotate-180" />
-          العودة لإدارة الدورات
+          {a.backToCourseManagement}
         </Link>
 
         <div className="relative bg-card rounded-2xl border border-border overflow-hidden shadow-sm">
@@ -256,10 +258,10 @@ export default function AdminCourseDetailPage() {
             </div>
 
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-              <InfoChip icon={<GraduationCap className="w-4 h-4" />} label="المدرس" value={course.teacher_name || '—'} subValue={course.teacher_email || undefined} />
-              <InfoChip icon={<PlayCircle className="w-4 h-4" />} label="عدد الدروس" value={`${lessons.length} درس`} />
-              <InfoChip icon={<Users className="w-4 h-4" />} label="الطلاب المسجلون" value={`${totalEnrolled}${pendingRequests ? ` (${pendingRequests} قيد المراجعة)` : ''}`} />
-              <InfoChip icon={<Calendar className="w-4 h-4" />} label="تاريخ الإنشاء" value={formatDate(course.created_at)} />
+              <InfoChip icon={<GraduationCap className="w-4 h-4" />} label={a.teacher} value={course.teacher_name || '—'} subValue={course.teacher_email || undefined} />
+              <InfoChip icon={<PlayCircle className="w-4 h-4" />} label={`${lessons.length} ${a.lessons}`} value={`${lessons.length} ${a.lessons}`} />
+              <InfoChip icon={<Users className="w-4 h-4" />} label={a.enrolledStudents} value={`${totalEnrolled}${pendingRequests ? ` ${a.coursePendingReviewCount.replace('{count}', String(pendingRequests))}` : ''}`} />
+              <InfoChip icon={<Calendar className="w-4 h-4" />} label={a.createdAt} value={formatDate(course.created_at)} />
             </div>
           </div>
         </div>
@@ -273,13 +275,13 @@ export default function AdminCourseDetailPage() {
               <ShieldCheck className="w-5 h-5 text-amber-700 dark:text-amber-300" />
             </div>
             <div>
-              <h2 className="font-bold text-base text-amber-900 dark:text-amber-100">هذه الدورة بانتظار مراجعتك</h2>
+              <h2 className="font-bold text-base text-amber-900 dark:text-amber-100">{a.pendingReviewBannerTitle}</h2>
               <p className="text-sm text-amber-800/80 dark:text-amber-200/80 mt-1">
-                راجع وصف الدورة والدروس والمحتوى أدناه، ثم اتخذ القرار. إذا قبلت تُنشر للطلاب، وإذا رفضت يصل للمدرس سبب الرفض ليُعدِّل ويعيد الإرسال.
+                {a.pendingReviewBannerDesc}
               </p>
               {course.submitted_for_review_at && (
                 <p className="text-xs text-amber-700/70 dark:text-amber-300/70 mt-1">
-                  أُرسلت للمراجعة: {formatDate(course.submitted_for_review_at)}
+                  {a.submittedForReview} {formatDate(course.submitted_for_review_at)}
                 </p>
               )}
             </div>
@@ -289,30 +291,30 @@ export default function AdminCourseDetailPage() {
               onClick={() => setReviewMode('approve')}
               className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-colors shadow-sm"
             >
-              <CheckCircle2 className="w-4 h-4" /> قبول ونشر الدورة
+              <CheckCircle2 className="w-4 h-4" /> {a.approveAndPublish}
             </button>
             <button
               onClick={() => setReviewMode('reject')}
               className="inline-flex items-center gap-2 px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-colors shadow-sm"
             >
-              <XCircle className="w-4 h-4" /> رفض مع كتابة السبب
+              <XCircle className="w-4 h-4" /> {a.rejectWithReason}
             </button>
           </div>
         </div>
       )}
 
-      {/* Previous rejection banner (informational) */}
+      {/* Previous rejection banner */}
       {wasRejected && course.rejection_reason && (
         <div className="bg-red-50 dark:bg-red-900/15 border border-red-300 dark:border-red-800/60 rounded-2xl p-5 shadow-sm">
           <div className="flex items-start gap-3">
             <XCircle className="w-5 h-5 text-red-700 dark:text-red-300 mt-0.5 shrink-0" />
             <div className="flex-1">
-              <h3 className="font-bold text-red-900 dark:text-red-200 mb-1">آخر سبب رفض</h3>
+              <h3 className="font-bold text-red-900 dark:text-red-200 mb-1">{a.lastRejectionReason}</h3>
               <p className="text-sm text-red-800 dark:text-red-200/90 whitespace-pre-wrap">{course.rejection_reason}</p>
               <p className="text-xs text-red-700/70 dark:text-red-300/70 mt-2">
-                {course.reviewed_at && <>تم الرفض بواسطة {course.reviewed_by_name || 'الأدمن'} • {formatDate(course.reviewed_at)}</>}
+                {course.reviewed_at && <>{a.reviewedBy} {course.reviewed_by_name || 'Admin'} • {formatDate(course.reviewed_at)}</>}
               </p>
-              <p className="text-xs text-red-700/70 dark:text-red-300/70 mt-1">المدرس يستطيع تعديل الدورة وإعادة إرسالها للمراجعة.</p>
+              <p className="text-xs text-red-700/70 dark:text-red-300/70 mt-1">{a.teacherCanEdit}</p>
             </div>
           </div>
         </div>
@@ -322,12 +324,12 @@ export default function AdminCourseDetailPage() {
       <div className="bg-card rounded-2xl border border-border p-5 shadow-sm">
         <h2 className="font-bold text-base mb-2 flex items-center gap-2">
           <FileText className="w-4 h-4 text-blue-600" />
-          وصف الدورة
+          {a.courseDescriptionLabel}
         </h2>
         {course.description ? (
           <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{course.description}</p>
         ) : (
-          <p className="text-sm text-muted-foreground italic">— لم يكتب المدرس وصفاً للدورة —</p>
+          <p className="text-sm text-muted-foreground italic">— {a.noDescriptionFromTeacher} —</p>
         )}
       </div>
 
@@ -336,17 +338,17 @@ export default function AdminCourseDetailPage() {
         <div className="p-5 border-b border-border flex items-center justify-between bg-muted/10">
           <h2 className="font-bold text-base flex items-center gap-2">
             <PlayCircle className="w-5 h-5 text-blue-600" />
-            دروس الدورة ({lessons.length})
+            {a.courseLessonsTitle.replace('{count}', String(lessons.length))}
           </h2>
         </div>
 
         {lessons.length === 0 ? (
           <div className="p-10 text-center">
             <PlayCircle className="w-12 h-12 mx-auto mb-3 text-muted-foreground opacity-30" />
-            <p className="font-medium text-muted-foreground">لم يُضِف المدرس أي دروس لهذه الدورة بعد.</p>
+            <p className="font-medium text-muted-foreground">{a.noLessonsYet}</p>
             {isPendingReview && (
               <p className="text-xs text-amber-700 dark:text-amber-400 mt-2">
-                يُفضّل رفض الدورة وطلب رفع المحتوى قبل إعادة الإرسال.
+                {a.preferRejectThenRequest}
               </p>
             )}
           </div>
@@ -371,19 +373,19 @@ export default function AdminCourseDetailPage() {
                         <div className="text-xs text-muted-foreground flex items-center gap-3 mt-0.5">
                           {lesson.duration_minutes ? (
                             <span className="flex items-center gap-1">
-                              <Clock className="w-3 h-3" /> {lesson.duration_minutes} د
+                              <Clock className="w-3 h-3" /> {lesson.duration_minutes} {a.courseDuration}
                             </span>
                           ) : null}
                           {lesson.video_url ? (
                             <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
-                              <Video className="w-3 h-3" /> فيديو
+                              <Video className="w-3 h-3" /> {a.courseVideo}
                             </span>
                           ) : (
-                            <span className="flex items-center gap-1 text-muted-foreground">بدون فيديو</span>
+                            <span className="flex items-center gap-1 text-muted-foreground">{a.noVideo}</span>
                           )}
                           {lesson.attachments && lesson.attachments.length > 0 && (
                             <span className="flex items-center gap-1 text-blue-600 dark:text-blue-400">
-                              <FileText className="w-3 h-3" /> {lesson.attachments.length} مرفق
+                              <FileText className="w-3 h-3" /> {lesson.attachments.length} {a.courseAttachments}
                             </span>
                           )}
                         </div>
@@ -414,7 +416,7 @@ export default function AdminCourseDetailPage() {
 
                       {lesson.attachments && lesson.attachments.length > 0 && (
                         <div className="space-y-1.5">
-                          <div className="text-xs font-bold text-muted-foreground">المرفقات</div>
+                          <div className="text-xs font-bold text-muted-foreground">{a.courseAttachments}</div>
                           <div className="grid sm:grid-cols-2 gap-2">
                             {lesson.attachments.map(att => (
                               <a
@@ -455,8 +457,8 @@ export default function AdminCourseDetailPage() {
                     <CheckCircle2 className="w-5 h-5 text-emerald-700 dark:text-emerald-300" />
                   </div>
                   <div>
-                    <h3 className="font-bold">قبول الدورة</h3>
-                    <p className="text-xs text-muted-foreground">ستُنشر الدورة للطلاب فوراً</p>
+                    <h3 className="font-bold">{a.approveAndPublish}</h3>
+                    <p className="text-xs text-muted-foreground">{a.courseApproved}</p>
                   </div>
                 </>
               ) : (
@@ -465,8 +467,8 @@ export default function AdminCourseDetailPage() {
                     <XCircle className="w-5 h-5 text-red-700 dark:text-red-300" />
                   </div>
                   <div>
-                    <h3 className="font-bold">رفض الدورة</h3>
-                    <p className="text-xs text-muted-foreground">يصل سبب الرفض للمدرس لتعديل الدورة وإعادة إرسالها</p>
+                    <h3 className="font-bold">{a.confirmRejectTitle}</h3>
+                    <p className="text-xs text-muted-foreground">{a.confirmRejectDesc}</p>
                   </div>
                 </>
               )}
@@ -474,20 +476,20 @@ export default function AdminCourseDetailPage() {
             <div className="p-5 space-y-4">
               {reviewMode === 'reject' ? (
                 <div>
-                  <label className="text-sm font-bold block mb-2">سبب الرفض <span className="text-red-500">*</span></label>
+                  <label className="text-sm font-bold block mb-2">{a.rejectReasonLabel} <span className="text-red-500">*</span></label>
                   <textarea
                     rows={5}
                     autoFocus
                     value={rejectionReason}
                     onChange={e => setRejectionReason(e.target.value)}
-                    placeholder="مثال: المحتوى ناقص في الدرس الثاني، ولا يوجد وصف كافٍ للدورة. الرجاء إضافة..."
+                    placeholder={a.rejectReasonPlaceholder}
                     className="w-full p-3 rounded-xl border border-border bg-background focus:ring-2 focus:ring-red-500 outline-none text-sm"
                   />
-                  <p className="text-xs text-muted-foreground mt-1">سيرى المدرس النص أعلاه بالكامل.</p>
+                  <p className="text-xs text-muted-foreground mt-1">{a.teacherWillSeeReason}</p>
                 </div>
               ) : (
                 <p className="text-sm">
-                  هل أنت متأكد من قبول الدورة <span className="font-bold">{course.title}</span> ونشرها للطلاب؟
+                  {a.confirmApproval.replace('{title}', course.title)}
                 </p>
               )}
             </div>
@@ -497,7 +499,7 @@ export default function AdminCourseDetailPage() {
                 onClick={() => setReviewMode(null)}
                 className="px-4 py-2 border border-border bg-card hover:bg-muted rounded-lg font-bold text-sm transition-colors disabled:opacity-60"
               >
-                إلغاء
+                {t.cancel}
               </button>
               <button
                 disabled={submittingReview || (reviewMode === 'reject' && rejectionReason.trim().length < 3)}
@@ -508,7 +510,7 @@ export default function AdminCourseDetailPage() {
                 )}
               >
                 {submittingReview && <Loader2 className="w-4 h-4 animate-spin" />}
-                {reviewMode === 'approve' ? 'تأكيد القبول' : 'تأكيد الرفض'}
+                {reviewMode === 'approve' ? a.approveAndPublishNow : a.confirmRejectButton}
               </button>
             </div>
           </div>

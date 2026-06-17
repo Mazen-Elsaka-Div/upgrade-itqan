@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Award, Crown, Flame, Loader2, Medal, Search, Star, Trophy, Users } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useI18n } from '@/lib/i18n/context'
 
 type Entry = {
   id: string
@@ -18,19 +19,24 @@ type Entry = {
   halaqa_name?: string | null
 }
 
-const PERIODS = [
-  { value: 'all_time', label: 'كل الوقت' },
-  { value: 'monthly', label: 'شهري' },
-  { value: 'weekly', label: 'أسبوعي' },
-] as const
-
 export default function AdminLeaderboardPage() {
+  const { t, locale } = useI18n()
+  const a = t.academyAdmin
+
+  const PERIODS = [
+    { value: 'all_time', label: a.periods.allTime },
+    { value: 'monthly', label: a.periods.monthly },
+    { value: 'weekly', label: a.periods.weekly },
+  ] as const
+
   const [leaderboard, setLeaderboard] = useState<Entry[]>([])
   const [summary, setSummary] = useState({ users_count: 0, points_total: 0, badges_total: 0, tasks_total: 0 })
   const [loading, setLoading] = useState(true)
   const [period, setPeriod] = useState<'all_time' | 'monthly' | 'weekly'>('all_time')
   const [scope, setScope] = useState<'platform' | 'halaqa'>('platform')
   const [search, setSearch] = useState('')
+
+  const numberLocale = locale === 'ar' ? 'ar-EG' : 'en-US'
 
   useEffect(() => {
     const fetchLeaderboard = async () => {
@@ -66,31 +72,31 @@ export default function AdminLeaderboardPage() {
         <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-3">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm font-bold backdrop-blur">
-              <Trophy className="h-4 w-4" /> ترتيب الطلاب حسب النقاط
+              <Trophy className="h-4 w-4" /> {a.leaderboardSubtitle}
             </div>
-            <h1 className="text-3xl font-black lg:text-4xl">لوحة المتصدرين</h1>
-            <p className="max-w-2xl text-sm leading-7 text-white/80">عرض إداري واضح لترتيب الطلاب على مستوى المنصة أو الحلقات، مع النقاط والمهام والشارات.</p>
+            <h1 className="text-3xl font-black lg:text-4xl">{a.leaderboardTitle}</h1>
+            <p className="max-w-2xl text-sm leading-7 text-white/80">{a.leaderboardDesc}</p>
           </div>
         </div>
       </section>
 
       <section className="grid gap-4 md:grid-cols-4">
-        <SummaryCard label="المستخدمون" value={summary.users_count} icon={Users} />
-        <SummaryCard label="إجمالي النقاط" value={summary.points_total} icon={Star} />
-        <SummaryCard label="الشارات" value={summary.badges_total} icon={Award} />
-        <SummaryCard label="المهام المكتملة" value={summary.tasks_total} icon={Flame} />
+        <SummaryCard label={a.summaryUsers} value={summary.users_count} icon={Users} numberLocale={numberLocale} />
+        <SummaryCard label={a.summaryTotalPoints} value={summary.points_total} icon={Star} numberLocale={numberLocale} />
+        <SummaryCard label={a.summaryBadges} value={summary.badges_total} icon={Award} numberLocale={numberLocale} />
+        <SummaryCard label={a.summaryCompletedTasks} value={summary.tasks_total} icon={Flame} numberLocale={numberLocale} />
       </section>
 
       <section className="rounded-3xl border border-border bg-card p-4 shadow-sm">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-wrap gap-2">
-            <button onClick={() => setScope('platform')} className={cn('rounded-2xl px-4 py-2.5 text-sm font-bold transition', scope === 'platform' ? 'bg-blue-600 text-white' : 'bg-muted text-muted-foreground hover:text-foreground')}>المنصة كاملة</button>
-            <button onClick={() => setScope('halaqa')} className={cn('rounded-2xl px-4 py-2.5 text-sm font-bold transition', scope === 'halaqa' ? 'bg-blue-600 text-white' : 'bg-muted text-muted-foreground hover:text-foreground')}>الحلقات</button>
+            <button onClick={() => setScope('platform')} className={cn('rounded-2xl px-4 py-2.5 text-sm font-bold transition', scope === 'platform' ? 'bg-blue-600 text-white' : 'bg-muted text-muted-foreground hover:text-foreground')}>{a.scopes.platform}</button>
+            <button onClick={() => setScope('halaqa')} className={cn('rounded-2xl px-4 py-2.5 text-sm font-bold transition', scope === 'halaqa' ? 'bg-blue-600 text-white' : 'bg-muted text-muted-foreground hover:text-foreground')}>{a.scopes.halaqa}</button>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row">
             <div className="relative">
               <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="بحث باسم أو بريد..." className="w-full rounded-2xl border border-border bg-background py-2.5 pe-9 ps-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 sm:w-72" />
+              <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder={a.searchLeaderboardPlaceholder} className="w-full rounded-2xl border border-border bg-background py-2.5 pe-9 ps-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 sm:w-72" />
             </div>
             <div className="flex gap-2">
               {PERIODS.map((item) => (
@@ -106,13 +112,13 @@ export default function AdminLeaderboardPage() {
       ) : filtered.length === 0 ? (
         <div className="rounded-3xl border border-dashed border-border bg-card p-16 text-center">
           <Trophy className="mx-auto mb-4 h-14 w-14 text-muted-foreground/40" />
-          <p className="font-black">لا توجد بيانات</p>
-          <p className="mt-1 text-sm text-muted-foreground">لا توجد نتائج مطابقة للفلاتر الحالية.</p>
+          <p className="font-black">{a.noData}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{a.noMatchingResults}</p>
         </div>
       ) : (
         <section className="rounded-3xl border border-border bg-card p-4 shadow-sm">
           <div className="space-y-3">
-            {filtered.map((entry) => <LeaderboardCard key={entry.id} entry={entry} />)}
+            {filtered.map((entry) => <LeaderboardCard key={entry.id} entry={entry} a={a} numberLocale={numberLocale} />)}
           </div>
         </section>
       )}
@@ -120,13 +126,13 @@ export default function AdminLeaderboardPage() {
   )
 }
 
-function SummaryCard({ label, value, icon: Icon }: { label: string; value: number; icon: typeof Trophy }) {
+function SummaryCard({ label, value, icon: Icon, numberLocale }: { label: string; value: number; icon: typeof Trophy; numberLocale: string }) {
   return (
     <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm text-muted-foreground">{label}</p>
-          <p className="mt-2 text-3xl font-black">{Number(value || 0).toLocaleString('ar-EG')}</p>
+          <p className="mt-2 text-3xl font-black">{Number(value || 0).toLocaleString(numberLocale)}</p>
         </div>
         <div className="rounded-2xl bg-blue-50 p-3 text-blue-700"><Icon className="h-6 w-6" /></div>
       </div>
@@ -134,7 +140,7 @@ function SummaryCard({ label, value, icon: Icon }: { label: string; value: numbe
   )
 }
 
-function LeaderboardCard({ entry }: { entry: Entry }) {
+function LeaderboardCard({ entry, a, numberLocale }: { entry: Entry; a: any; numberLocale: string }) {
   return (
     <article className="flex flex-col gap-4 rounded-2xl border border-border bg-background p-4 transition hover:shadow-sm lg:flex-row lg:items-center">
       <div className="flex items-center gap-4 lg:w-2/5">
@@ -151,20 +157,20 @@ function LeaderboardCard({ entry }: { entry: Entry }) {
         </div>
       </div>
       <div className="grid flex-1 grid-cols-2 gap-3 sm:grid-cols-4">
-        <Metric icon={Star} label="النقاط" value={entry.total_points} tone="text-amber-600" />
-        <Metric icon={Crown} label="المستوى" value={entry.current_level} tone="text-blue-600" />
-        <Metric icon={Medal} label="الشارات" value={entry.badges_count} tone="text-purple-600" />
-        <Metric icon={Flame} label="المهام" value={entry.tasks_completed} tone="text-emerald-600" />
+        <Metric icon={Star} label={a.metricPoints} value={entry.total_points} tone="text-amber-600" numberLocale={numberLocale} />
+        <Metric icon={Crown} label={a.metricLevel} value={entry.current_level} tone="text-blue-600" numberLocale={numberLocale} />
+        <Metric icon={Medal} label={a.metricBadges} value={entry.badges_count} tone="text-purple-600" numberLocale={numberLocale} />
+        <Metric icon={Flame} label={a.metricTasks} value={entry.tasks_completed} tone="text-emerald-600" numberLocale={numberLocale} />
       </div>
     </article>
   )
 }
 
-function Metric({ icon: Icon, label, value, tone }: { icon: typeof Trophy; label: string; value: number; tone: string }) {
+function Metric({ icon: Icon, label, value, tone, numberLocale }: { icon: typeof Trophy; label: string; value: number; tone: string; numberLocale: string }) {
   return (
     <div className="rounded-2xl bg-muted/60 p-3 text-center">
       <p className="mb-1 flex items-center justify-center gap-1 text-xs text-muted-foreground"><Icon className="h-3.5 w-3.5" /> {label}</p>
-      <p className={cn('text-xl font-black', tone)}>{Number(value || 0).toLocaleString('ar-EG')}</p>
+      <p className={cn('text-xl font-black', tone)}>{Number(value || 0).toLocaleString(numberLocale)}</p>
     </div>
   )
 }

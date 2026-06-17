@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { AcademySettings } from "../hooks/use-academy-settings"
+import { useI18n } from "@/lib/i18n/context"
 
 interface LiveSessionsSettingsProps {
   settings: AcademySettings
@@ -22,6 +23,15 @@ const videoProviders = [
 ]
 
 export function LiveSessionsSettings({ settings, onUpdate, onReset }: LiveSessionsSettingsProps) {
+  const { t } = useI18n()
+  const a = t.academyAdmin
+
+  const providers = [
+    { id: "livekit", name: "LiveKit", description: a.lsIntegrated },
+    { id: "zoom", name: "Zoom", description: a.lsExternal },
+    { id: "google_meet", name: "Google Meet", description: a.lsExternal },
+  ]
+
   return (
     <div className="space-y-6">
       {/* Video Provider */}
@@ -33,19 +43,19 @@ export function LiveSessionsSettings({ settings, onUpdate, onReset }: LiveSessio
                 <Video className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <CardTitle className="text-lg">مزود الفيديو</CardTitle>
-                <CardDescription className="text-xs mt-0.5">خدمة الجلسات الحية</CardDescription>
+                <CardTitle className="text-lg">{a.lsVideoProvider}</CardTitle>
+                <CardDescription className="text-xs mt-0.5">{a.lsVideoProviderDesc}</CardDescription>
               </div>
             </div>
             <Button variant="ghost" size="sm" onClick={onReset} className="text-muted-foreground">
               <RotateCcw className="w-4 h-4 ml-1" />
-              استعادة
+              {a.gsRestore}
             </Button>
           </div>
         </CardHeader>
         <CardContent className="pt-6">
           <div className="grid gap-3">
-            {videoProviders.map((provider) => (
+            {providers.map((provider) => (
               <div
                 key={provider.id}
                 className={`flex items-center justify-between p-4 rounded-xl border-2 cursor-pointer transition-all ${
@@ -69,7 +79,7 @@ export function LiveSessionsSettings({ settings, onUpdate, onReset }: LiveSessio
                   </div>
                 </div>
                 {provider.id === "livekit" && (
-                  <Badge variant="secondary">مُوصى به</Badge>
+                  <Badge variant="secondary">{a.lsRecommended}</Badge>
                 )}
               </div>
             ))}
@@ -85,15 +95,15 @@ export function LiveSessionsSettings({ settings, onUpdate, onReset }: LiveSessio
               <Clock className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-lg">المدة والتذكيرات</CardTitle>
-              <CardDescription className="text-xs mt-0.5">إعدادات وقت الجلسة والتنبيهات</CardDescription>
+              <CardTitle className="text-lg">{a.lsDurationReminders}</CardTitle>
+              <CardDescription className="text-xs mt-0.5">{a.lsDurationRemindersDesc}</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent className="pt-6 space-y-6">
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
-              <Label className="font-medium text-sm">المدة الافتراضية (دقيقة)</Label>
+              <Label className="font-medium text-sm">{a.lsDefaultDurationLabel}</Label>
               <Input
                 type="number"
                 value={settings.academy_sessions_default_duration || 60}
@@ -104,7 +114,7 @@ export function LiveSessionsSettings({ settings, onUpdate, onReset }: LiveSessio
               />
             </div>
             <div className="space-y-2">
-              <Label className="font-medium text-sm">التذكير الأول (دقيقة قبل)</Label>
+              <Label className="font-medium text-sm">{a.lsReminderFirstLabel}</Label>
               <Input
                 type="number"
                 value={settings.academy_sessions_reminder_first || 60}
@@ -115,7 +125,7 @@ export function LiveSessionsSettings({ settings, onUpdate, onReset }: LiveSessio
               />
             </div>
             <div className="space-y-2">
-              <Label className="font-medium text-sm">التذكير الثاني (دقيقة قبل)</Label>
+              <Label className="font-medium text-sm">{a.lsReminderSecondLabel}</Label>
               <Input
                 type="number"
                 value={settings.academy_sessions_reminder_second || 10}
@@ -129,7 +139,7 @@ export function LiveSessionsSettings({ settings, onUpdate, onReset }: LiveSessio
 
           {/* Visual Timeline */}
           <div className="p-4 bg-muted/30 rounded-xl">
-            <Label className="text-sm text-muted-foreground mb-3 block">مخطط التذكيرات</Label>
+            <Label className="text-sm text-muted-foreground mb-3 block">{a.lsReminderTimeline}</Label>
             <div className="relative h-2 bg-muted rounded-full">
               <div className="absolute left-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-primary rounded-full" />
               <div
@@ -143,10 +153,10 @@ export function LiveSessionsSettings({ settings, onUpdate, onReset }: LiveSessio
               <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-success rounded-full" />
             </div>
             <div className="flex justify-between mt-2 text-[10px] text-muted-foreground">
-              <span>الآن</span>
-              <span>تذكير 1 (قبل {settings.academy_sessions_reminder_first || 60} د)</span>
-              <span>تذكير 2 (قبل {settings.academy_sessions_reminder_second || 10} د)</span>
-              <span>بداية الجلسة</span>
+              <span>{a.lsNow}</span>
+              <span>{a.lsReminderFirstLabel} ({settings.academy_sessions_reminder_first || 60})</span>
+              <span>{a.lsReminderSecondLabel} ({settings.academy_sessions_reminder_second || 10})</span>
+              <span>{a.lsSessionStart}</span>
             </div>
           </div>
         </CardContent>
@@ -160,16 +170,16 @@ export function LiveSessionsSettings({ settings, onUpdate, onReset }: LiveSessio
               <Users className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-lg">التحكم في الجلسات</CardTitle>
-              <CardDescription className="text-xs mt-0.5">خيارات التسجيل والدخول</CardDescription>
+              <CardTitle className="text-lg">{a.lsSessionControls}</CardTitle>
+              <CardDescription className="text-xs mt-0.5">{a.lsSessionControlsDesc}</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent className="pt-6 space-y-6">
           <div className="flex items-center justify-between p-4 bg-muted/50 rounded-xl">
             <div className="space-y-0.5">
-              <Label className="font-medium">التسجيل التلقائي للجلسات</Label>
-              <p className="text-xs text-muted-foreground">حفظ تسجيل الجلسة تلقائياً</p>
+              <Label className="font-medium">{a.lsAutoRecord}</Label>
+              <p className="text-xs text-muted-foreground">{a.lsAutoRecordDesc}</p>
             </div>
             <Switch
               checked={settings.academy_sessions_auto_record ?? false}
@@ -179,11 +189,11 @@ export function LiveSessionsSettings({ settings, onUpdate, onReset }: LiveSessio
 
           <div className="flex items-center justify-between p-4 bg-muted/50 rounded-xl">
             <div className="space-y-0.5">
-              <Label className="font-medium">دخول الطلاب بدون موافقة</Label>
+              <Label className="font-medium">{a.lsAutoAdmit}</Label>
               <p className="text-xs text-muted-foreground">
                 {settings.academy_sessions_auto_admit
-                  ? "الطالب يدخل مباشرة"
-                  : "الأستاذ يوافق على كل طالب"}
+                  ? a.lsAutoAdmitYes
+                  : a.lsAutoAdmitNo}
               </p>
             </div>
             <Switch
@@ -193,7 +203,7 @@ export function LiveSessionsSettings({ settings, onUpdate, onReset }: LiveSessio
           </div>
 
           <div className="space-y-2">
-            <Label className="font-medium text-sm">مدة صلاحية الرابط بعد الانتهاء (ساعات)</Label>
+            <Label className="font-medium text-sm">{a.lsLinkExpiry}</Label>
             <Input
               type="number"
               value={settings.academy_sessions_link_expiry || 0}
@@ -202,7 +212,7 @@ export function LiveSessionsSettings({ settings, onUpdate, onReset }: LiveSessio
               max={168}
               className="h-11 max-w-xs"
             />
-            <p className="text-[11px] text-muted-foreground">0 = ينتهي فور انتهاء الجلسة</p>
+            <p className="text-[11px] text-muted-foreground">{a.lsLinkExpiryHint}</p>
           </div>
         </CardContent>
       </Card>

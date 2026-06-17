@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Button } from "@/components/ui/button"
 import { AcademySettings } from "../hooks/use-academy-settings"
+import { useI18n } from "@/lib/i18n/context"
 
 interface GamificationSettingsProps {
   settings: AcademySettings
@@ -14,23 +15,26 @@ interface GamificationSettingsProps {
   onReset: () => void
 }
 
-const pointsConfig = [
-  { key: "academy_gamification_points_recitation", label: "تسجيل تلاوة", default: 10 },
-  { key: "academy_gamification_points_mastery", label: "تلاوة مقبولة بإتقان", default: 30 },
-  { key: "academy_gamification_points_task", label: "إنهاء مهمة", default: 15 },
-  { key: "academy_gamification_points_attendance", label: "حضور درس", default: 20 },
-  { key: "academy_gamification_points_streak", label: "يوم Streak جديد", default: 5 },
-  { key: "academy_gamification_points_juz", label: "إنهاء جزء كامل", default: 100 },
-]
-
-const levelsConfig = [
-  { key: "academy_gamification_level_beginner", label: "مبتدئ", color: "bg-blue-500" },
-  { key: "academy_gamification_level_intermediate", label: "متوسط", color: "bg-green-500" },
-  { key: "academy_gamification_level_advanced", label: "متقدم", color: "bg-purple-500" },
-  { key: "academy_gamification_level_hafiz", label: "حافظ", color: "bg-yellow-500" },
-]
-
 export function GamificationSettings({ settings, onUpdate, onReset }: GamificationSettingsProps) {
+  const { t } = useI18n()
+  const a = t.academyAdmin
+
+  const pointsConfig = [
+    { key: "academy_gamification_points_recitation", label: a.gmActivity, default: 10 },
+    { key: "academy_gamification_points_mastery", label: a.gmActivity, default: 30 },
+    { key: "academy_gamification_points_task", label: a.gmActivity, default: 15 },
+    { key: "academy_gamification_points_attendance", label: a.gmActivity, default: 20 },
+    { key: "academy_gamification_points_streak", label: a.gmActivity, default: 5 },
+    { key: "academy_gamification_points_juz", label: a.gmActivity, default: 100 },
+  ]
+
+  const levelsConfig = [
+    { key: "academy_gamification_level_beginner", label: a.gmLevelBeginner, color: "bg-blue-500" },
+    { key: "academy_gamification_level_intermediate", label: a.gmLevelIntermediate, color: "bg-green-500" },
+    { key: "academy_gamification_level_advanced", label: a.gmLevelAdvanced, color: "bg-purple-500" },
+    { key: "academy_gamification_level_hafiz", label: a.gmLevelHafiz, color: "bg-yellow-500" },
+  ]
+
   return (
     <div className="space-y-6">
       {/* Feature Toggles */}
@@ -42,13 +46,13 @@ export function GamificationSettings({ settings, onUpdate, onReset }: Gamificati
                 <Trophy className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <CardTitle className="text-lg">ميزات التحفيز</CardTitle>
-                <CardDescription className="text-xs mt-0.5">تفعيل/تعطيل أنظمة التحفيز</CardDescription>
+                <CardTitle className="text-lg">{a.gmFeatures}</CardTitle>
+                <CardDescription className="text-xs mt-0.5">{a.gmFeaturesDesc}</CardDescription>
               </div>
             </div>
             <Button variant="ghost" size="sm" onClick={onReset} className="text-muted-foreground">
               <RotateCcw className="w-4 h-4 ml-1" />
-              استعادة
+              {a.gsRestore}
             </Button>
           </div>
         </CardHeader>
@@ -57,8 +61,8 @@ export function GamificationSettings({ settings, onUpdate, onReset }: Gamificati
             <div className="flex items-center gap-3">
               <Star className="w-5 h-5 text-yellow-500" />
               <div className="space-y-0.5">
-                <Label className="font-medium">نظام النقاط</Label>
-                <p className="text-xs text-muted-foreground">اكتساب نقاط للأنشطة</p>
+                <Label className="font-medium">{a.gmPointsSystem}</Label>
+                <p className="text-xs text-muted-foreground">{a.gmPointsSystemDesc}</p>
               </div>
             </div>
             <Switch
@@ -71,8 +75,8 @@ export function GamificationSettings({ settings, onUpdate, onReset }: Gamificati
             <div className="flex items-center gap-3">
               <Award className="w-5 h-5 text-purple-500" />
               <div className="space-y-0.5">
-                <Label className="font-medium">الشارات</Label>
-                <p className="text-xs text-muted-foreground">منح شارات للإنجازات</p>
+                <Label className="font-medium">{a.gmBadges}</Label>
+                <p className="text-xs text-muted-foreground">{a.gmBadgesDesc}</p>
               </div>
             </div>
             <Switch
@@ -85,8 +89,8 @@ export function GamificationSettings({ settings, onUpdate, onReset }: Gamificati
             <div className="flex items-center gap-3">
               <TrendingUp className="w-5 h-5 text-green-500" />
               <div className="space-y-0.5">
-                <Label className="font-medium">لوحة المتصدرين</Label>
-                <p className="text-xs text-muted-foreground">ترتيب الطلاب بالنقاط</p>
+                <Label className="font-medium">{a.gmLeaderboard}</Label>
+                <p className="text-xs text-muted-foreground">{a.gmLeaderboardDesc}</p>
               </div>
             </div>
             <Switch
@@ -99,8 +103,8 @@ export function GamificationSettings({ settings, onUpdate, onReset }: Gamificati
             <div className="flex items-center gap-3">
               <Flame className="w-5 h-5 text-orange-500" />
               <div className="space-y-0.5">
-                <Label className="font-medium">عداد الـ Streak</Label>
-                <p className="text-xs text-muted-foreground">تتبع الأيام المتتالية</p>
+                <Label className="font-medium">{a.gmStreak}</Label>
+                <p className="text-xs text-muted-foreground">{a.gmStreakDesc}</p>
               </div>
             </div>
             <Switch
@@ -119,8 +123,8 @@ export function GamificationSettings({ settings, onUpdate, onReset }: Gamificati
               <Star className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-lg">قيم النقاط</CardTitle>
-              <CardDescription className="text-xs mt-0.5">تحديد النقاط لكل نشاط</CardDescription>
+              <CardTitle className="text-lg">{a.gmPointsValues}</CardTitle>
+              <CardDescription className="text-xs mt-0.5">{a.gmPointsValuesDesc}</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -129,8 +133,8 @@ export function GamificationSettings({ settings, onUpdate, onReset }: Gamificati
             <table className="w-full">
               <thead>
                 <tr className="text-right text-sm text-muted-foreground border-b">
-                  <th className="pb-3 font-medium">النشاط</th>
-                  <th className="pb-3 font-medium w-32">النقاط</th>
+                  <th className="pb-3 font-medium">{a.gmActivity}</th>
+                  <th className="pb-3 font-medium w-32">{a.gmPoints}</th>
                 </tr>
               </thead>
               <tbody>
@@ -152,7 +156,7 @@ export function GamificationSettings({ settings, onUpdate, onReset }: Gamificati
                   </tr>
                 ))}
                 <tr className="bg-muted/30">
-                  <td className="py-3 font-medium">مضاعف Streak (7+ أيام)</td>
+                  <td className="py-3 font-medium">{a.gmStreakMultiplier}</td>
                   <td className="py-3">
                     <div className="flex items-center gap-1">
                       <span className="text-muted-foreground">×</span>
@@ -196,8 +200,8 @@ export function GamificationSettings({ settings, onUpdate, onReset }: Gamificati
               <TrendingUp className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-lg">حدود المستويات</CardTitle>
-              <CardDescription className="text-xs mt-0.5">النقاط المطلوبة لكل مستوى</CardDescription>
+              <CardTitle className="text-lg">{a.gmLevelThresholds}</CardTitle>
+              <CardDescription className="text-xs mt-0.5">{a.gmLevelThresholdsDesc}</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -228,7 +232,7 @@ export function GamificationSettings({ settings, onUpdate, onReset }: Gamificati
 
           {/* Visual Progress */}
           <div className="mt-6 p-4 bg-muted/30 rounded-xl">
-            <Label className="text-sm text-muted-foreground mb-3 block">مخطط المستويات</Label>
+            <Label className="text-sm text-muted-foreground mb-3 block">{a.gmLevelDiagram}</Label>
             <div className="relative h-3 bg-muted rounded-full overflow-hidden">
               <div className="absolute inset-y-0 right-0 w-[20%] bg-blue-500" />
               <div className="absolute inset-y-0 right-[20%] w-[30%] bg-green-500" />

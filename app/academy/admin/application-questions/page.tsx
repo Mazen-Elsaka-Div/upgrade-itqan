@@ -5,6 +5,7 @@ import {
     Plus, Trash2, Loader2, Save, ListChecks, Mic, FileText,
     AlignLeft, Type, ChevronDown, GripVertical, EyeOff, Eye
 } from "lucide-react"
+import { useI18n } from '@/lib/i18n/context'
 
 type Question = {
     id: string
@@ -18,15 +19,18 @@ type Question = {
     is_active: boolean
 }
 
-const TYPE_LABELS: Record<Question["type"], { label: string; icon: any }> = {
-    text: { label: "نص قصير", icon: Type },
-    textarea: { label: "نص طويل", icon: AlignLeft },
-    select: { label: "قائمة اختيار", icon: ChevronDown },
-    audio: { label: "تسجيل صوتي", icon: Mic },
-    file: { label: "ملف PDF", icon: FileText },
-}
-
 export default function ApplicationQuestionsPage() {
+    const { t } = useI18n()
+    const a = t.academyAdmin
+
+    const TYPE_LABELS: Record<Question["type"], { label: string; icon: any }> = {
+        text: { label: a.types.shortText, icon: Type },
+        textarea: { label: a.types.longText, icon: AlignLeft },
+        select: { label: a.types.selectList, icon: ChevronDown },
+        audio: { label: a.types.audioRecording, icon: Mic },
+        file: { label: a.types.pdfFile, icon: FileText },
+    }
+
     const [tab, setTab] = useState<"teacher" | "reader">("teacher")
     const [questions, setQuestions] = useState<Question[]>([])
     const [loading, setLoading] = useState(true)
@@ -73,7 +77,7 @@ export default function ApplicationQuestionsPage() {
     }
 
     const removeQ = async (id: string) => {
-        if (!confirm("حذف هذا السؤال نهائياً؟")) return
+        if (!confirm(a.confirmDeleteQuestion)) return
         setSaving(id)
         try {
             await fetch(`/api/admin/application-questions/${id}`, { method: "DELETE" })
@@ -85,7 +89,7 @@ export default function ApplicationQuestionsPage() {
 
     const create = async () => {
         if (!newQ.label || !newQ.label.trim()) {
-            alert("العنوان مطلوب")
+            alert(a.titleRequired)
             return
         }
         setAdding(true)
@@ -112,7 +116,7 @@ export default function ApplicationQuestionsPage() {
                 setNewQ({ type: "text", is_required: false, is_active: true, sort_order: 0 })
                 setNewOptionsRaw("")
             } else {
-                alert("فشل الإضافة")
+                alert(a.addFailed)
             }
         } finally {
             setAdding(false)
@@ -120,15 +124,15 @@ export default function ApplicationQuestionsPage() {
     }
 
     return (
-        <div className="space-y-6" dir="rtl">
+        <div className="space-y-6">
             <div className="flex items-center justify-between flex-wrap gap-3">
                 <div>
                     <h1 className="text-2xl font-bold flex items-center gap-2">
                         <ListChecks className="w-6 h-6 text-primary" />
-                        أسئلة طلب الانضمام
+                        {a.applicationQuestions}
                     </h1>
                     <p className="text-sm text-muted-foreground mt-1">
-                        تحكم في الأسئلة التي يراها المتقدم لطلب انضمامه (مدرس / مقرئ).
+                        {a.applicationQuestionsDesc}
                     </p>
                 </div>
                 <div className="bg-card border border-border rounded-xl p-1 flex">
@@ -137,14 +141,14 @@ export default function ApplicationQuestionsPage() {
                         className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors ${tab === "teacher" ? "bg-primary text-primary-foreground" : "text-muted-foreground"
                             }`}
                     >
-                        المدرسين
+                        {a.teachers}
                     </button>
                     <button
                         onClick={() => setTab("reader")}
                         className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors ${tab === "reader" ? "bg-primary text-primary-foreground" : "text-muted-foreground"
                             }`}
                     >
-                        المقرئين
+                        {a.readers}
                     </button>
                 </div>
             </div>
@@ -158,7 +162,7 @@ export default function ApplicationQuestionsPage() {
                 )}
                 {!loading && questions.length === 0 && (
                     <div className="bg-card border border-border rounded-xl p-8 text-center text-muted-foreground">
-                        لا توجد أسئلة بعد. أضف أول سؤال أدناه.
+                        {a.noQuestionsYet}
                     </div>
                 )}
                 {!loading && questions.map((q, idx) => {
@@ -186,7 +190,7 @@ export default function ApplicationQuestionsPage() {
                                     <textarea
                                         defaultValue={q.description || ""}
                                         rows={1}
-                                        placeholder="وصف اختياري للسؤال"
+                                        placeholder={a.optionalDescription}
                                         onBlur={e => {
                                             const v = e.target.value || null
                                             if ((v || "") !== (q.description || "")) updateQ(q.id, { description: v })
@@ -205,22 +209,22 @@ export default function ApplicationQuestionsPage() {
                                                 onChange={e => updateQ(q.id, { is_required: e.target.checked })}
                                                 className="rounded"
                                             />
-                                            <span>مطلوب</span>
+                                            <span>{a.required}</span>
                                         </label>
                                         <button
                                             onClick={() => updateQ(q.id, { is_active: !q.is_active })}
                                             className="flex items-center gap-1.5 px-2.5 py-1 hover:bg-muted rounded-md font-bold"
-                                            title={q.is_active ? "إخفاء" : "إظهار"}
+                                            title={q.is_active ? a.hide : a.show}
                                         >
                                             {q.is_active ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-                                            {q.is_active ? "ظاهر" : "مخفي"}
+                                            {q.is_active ? a.visible : a.hidden}
                                         </button>
                                     </div>
                                     {q.type === "select" && (
                                         <textarea
                                             defaultValue={(q.options || []).join("\n")}
                                             rows={3}
-                                            placeholder="خيار في كل سطر"
+                                            placeholder={a.optionPerLine}
                                             onBlur={e => {
                                                 const opts = e.target.value.split("\n").map(s => s.trim()).filter(Boolean)
                                                 updateQ(q.id, { options: opts })
@@ -234,7 +238,7 @@ export default function ApplicationQuestionsPage() {
                                     <button
                                         onClick={() => removeQ(q.id)}
                                         className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
-                                        title="حذف"
+                                        title={a.delete}
                                     >
                                         <Trash2 className="w-4 h-4" />
                                     </button>
@@ -248,19 +252,19 @@ export default function ApplicationQuestionsPage() {
             {/* New question */}
             <div className="bg-card border border-dashed border-primary/30 rounded-xl p-5 space-y-3">
                 <h2 className="font-bold flex items-center gap-2">
-                    <Plus className="w-4 h-4 text-primary" /> إضافة سؤال جديد
+                    <Plus className="w-4 h-4 text-primary" /> {a.addNewQuestion}
                 </h2>
                 <input
                     type="text"
                     value={newQ.label || ""}
                     onChange={e => setNewQ({ ...newQ, label: e.target.value })}
-                    placeholder="عنوان السؤال (مثال: لماذا تريد الانضمام؟)"
+                    placeholder={a.questionTitlePlaceholder}
                     className="w-full px-3 py-2 bg-muted/30 border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 outline-none"
                 />
                 <textarea
                     value={newQ.description || ""}
                     onChange={e => setNewQ({ ...newQ, description: e.target.value })}
-                    placeholder="وصف اختياري"
+                    placeholder={a.optionalDescription}
                     rows={2}
                     className="w-full px-3 py-2 bg-muted/30 border border-border rounded-lg text-xs focus:ring-2 focus:ring-primary/20 outline-none resize-y"
                 />
@@ -281,14 +285,14 @@ export default function ApplicationQuestionsPage() {
                             onChange={e => setNewQ({ ...newQ, is_required: e.target.checked })}
                             className="rounded"
                         />
-                        مطلوب
+                        {a.required}
                     </label>
                 </div>
                 {newQ.type === "select" && (
                     <textarea
                         value={newOptionsRaw}
                         onChange={e => setNewOptionsRaw(e.target.value)}
-                        placeholder="خيارات القائمة (خيار في كل سطر)"
+                        placeholder={a.selectOptionsPlaceholder}
                         rows={3}
                         className="w-full px-3 py-2 bg-muted/30 border border-border rounded-lg text-xs focus:ring-2 focus:ring-primary/20 outline-none resize-y"
                     />
@@ -299,7 +303,7 @@ export default function ApplicationQuestionsPage() {
                     className="w-full px-4 py-2.5 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 rounded-lg font-bold flex items-center justify-center gap-2"
                 >
                     {adding ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                    إضافة السؤال
+                    {a.addQuestion}
                 </button>
             </div>
         </div>

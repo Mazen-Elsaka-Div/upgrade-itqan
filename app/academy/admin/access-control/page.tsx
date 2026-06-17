@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Shield, Search, Save, AlertTriangle, BookOpen, GraduationCap, Loader2 } from 'lucide-react'
+import { useI18n } from '@/lib/i18n/context'
 
 interface UserAccess {
     id: string
@@ -14,6 +15,8 @@ interface UserAccess {
 }
 
 export default function AccessControlPage() {
+    const { t } = useI18n()
+    const a = t.academyAdmin
     const [users, setUsers] = useState<UserAccess[]>([])
     const [loading, setLoading] = useState(true)
     const [search, setSearch] = useState('')
@@ -46,15 +49,15 @@ export default function AccessControlPage() {
                 setUsers(prev => prev.map(u =>
                     u.id === userId ? { ...u, [field]: !currentValue } : u
                 ))
-                setToast('تم تحديث الصلاحيات بنجاح')
+                setToast(a.permissionsUpdated)
                 setTimeout(() => setToast(''), 3000)
             } else {
-                setToast('فشل التحديث')
+                setToast(a.updateFailed)
                 setTimeout(() => setToast(''), 3000)
             }
         } catch (err) {
             console.error(err)
-            setToast('فشل التحديث')
+            setToast(a.updateFailed)
             setTimeout(() => setToast(''), 3000)
         }
         finally { setSaving(null) }
@@ -69,9 +72,9 @@ export default function AccessControlPage() {
             <div>
                 <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
                     <Shield className="w-6 h-6 text-blue-500" />
-                    التحكم بالوصول
+                    {a.accessControl}
                 </h1>
-                <p className="text-sm text-muted-foreground mt-1">إدارة صلاحيات وصول المستخدمين للمنصات</p>
+                <p className="text-sm text-muted-foreground mt-1">{a.accessControlDesc}</p>
             </div>
 
             {/* Search */}
@@ -81,15 +84,15 @@ export default function AccessControlPage() {
                     type="text"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    placeholder="بحث بالاسم أو البريد..."
+                    placeholder={a.searchByNameOrEmail}
                     className="w-full pr-10 pl-4 py-2 bg-secondary/20 border border-border rounded-lg text-sm text-foreground focus:ring-2 focus:ring-blue-500"
                 />
             </div>
 
             {/* Legend */}
             <div className="flex items-center gap-6 text-xs text-muted-foreground">
-                <span className="flex items-center gap-1"><BookOpen className="w-4 h-4 text-emerald-500" />المقرأة</span>
-                <span className="flex items-center gap-1"><GraduationCap className="w-4 h-4 text-blue-500" />الأكاديمية</span>
+                <span className="flex items-center gap-1"><BookOpen className="w-4 h-4 text-emerald-500" />{a.recitation}</span>
+                <span className="flex items-center gap-1"><GraduationCap className="w-4 h-4 text-blue-500" />{a.academy}</span>
             </div>
 
             {/* Users Table */}
@@ -103,15 +106,15 @@ export default function AccessControlPage() {
                         <table className="w-full text-sm">
                             <thead className="bg-muted/50">
                                 <tr>
-                                    <th className="text-right p-3 font-medium text-muted-foreground">المستخدم</th>
-                                    <th className="text-center p-3 font-medium text-muted-foreground">الدور</th>
+                                    <th className="text-right p-3 font-medium text-muted-foreground">{a.user}</th>
+                                    <th className="text-center p-3 font-medium text-muted-foreground">{a.role}</th>
                                     <th className="text-center p-3 font-medium text-muted-foreground">
-                                        <BookOpen className="w-4 h-4 inline text-emerald-500 ml-1" />المقرأة
+                                        <BookOpen className="w-4 h-4 inline text-emerald-500 ml-1" />{a.recitation}
                                     </th>
                                     <th className="text-center p-3 font-medium text-muted-foreground">
-                                        <GraduationCap className="w-4 h-4 inline text-blue-500 ml-1" />الأكاديمية
+                                        <GraduationCap className="w-4 h-4 inline text-blue-500 ml-1" />{a.academy}
                                     </th>
-                                    <th className="text-center p-3 font-medium text-muted-foreground">التفضيل</th>
+                                    <th className="text-center p-3 font-medium text-muted-foreground">{a.preference}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -149,7 +152,7 @@ export default function AccessControlPage() {
                         </table>
                     </div>
                     {filtered.length === 0 && (
-                        <div className="p-8 text-center text-muted-foreground">لا توجد نتائج</div>
+                        <div className="p-8 text-center text-muted-foreground">{t.noResults}</div>
                     )}
                 </div>
             )}
@@ -158,8 +161,8 @@ export default function AccessControlPage() {
             <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-4 flex items-start gap-3">
                 <AlertTriangle className="w-5 h-5 text-yellow-500 shrink-0 mt-0.5" />
                 <div>
-                    <p className="text-sm font-medium text-yellow-700 dark:text-yellow-400">تنبيه</p>
-                    <p className="text-xs text-yellow-600 dark:text-yellow-300 mt-1">تغيير صلاحيات الوصول سيؤثر فوراً على ما يراه المستخدم في لوحة التحكم عند تسجيل دخوله التالي.</p>
+                    <p className="text-sm font-medium text-yellow-700 dark:text-yellow-400">{a.warning}</p>
+                    <p className="text-xs text-yellow-600 dark:text-yellow-300 mt-1">{a.accessWarningDesc}</p>
                 </div>
             </div>
 

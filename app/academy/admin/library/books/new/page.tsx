@@ -7,6 +7,7 @@ import { ArrowRight, BookOpen, Loader2, Save } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { BookForm, emptyBookForm, type BookFormValue } from "@/components/library/book-form"
+import { useI18n } from "@/lib/i18n/context"
 
 function buildPayload(v: BookFormValue) {
   return {
@@ -25,57 +26,36 @@ function buildPayload(v: BookFormValue) {
 
 export default function NewBookPage() {
   const router = useRouter()
+  const { t } = useI18n()
+  const a = t.academyAdmin
+
   const [form, setForm] = useState<BookFormValue>({ ...emptyBookForm })
   const [saving, setSaving] = useState(false)
 
   const handleSave = async () => {
-    if (!form.title.trim()) {
-      toast.error("العنوان مطلوب")
-      return
-    }
+    if (!form.title.trim()) { toast.error(a.libTitleRequired); return }
     setSaving(true)
     try {
-      const res = await fetch("/api/academy/admin/library/books", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(buildPayload(form)),
-      })
+      const res = await fetch("/api/academy/admin/library/books", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(buildPayload(form)) })
       const data = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(data.error || "تعذر حفظ الكتاب")
-      toast.success("تم إنشاء الكتاب — ارفع الآن ملفات اللغات")
+      if (!res.ok) throw new Error(data.error || a.libCreateFailed)
+      toast.success(a.libCreateSuccess)
       router.push(`/academy/admin/library/books/${data.id}/edit`)
-    } catch (e: any) {
-      toast.error(e?.message || "تعذر حفظ الكتاب")
-    } finally {
-      setSaving(false)
-    }
+    } catch (e: any) { toast.error(e?.message || a.libCreateFailed) } finally { setSaving(false) }
   }
 
   return (
-    <div className="container mx-auto px-4 py-6 space-y-5" dir="rtl">
+    <div className="container mx-auto px-4 py-6 space-y-5">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-2">
-          <Link href="/academy/admin/library/books">
-            <Button variant="ghost" size="sm" className="gap-1">
-              <ArrowRight className="w-4 h-4 rotate-180" />
-              رجوع
-            </Button>
-          </Link>
-          <h1 className="text-xl font-black flex items-center gap-2">
-            <BookOpen className="w-5 h-5 text-primary" />
-            كتاب جديد
-          </h1>
+          <Link href="/academy/admin/library/books"><Button variant="ghost" size="sm" className="gap-1"><ArrowRight className="w-4 h-4 rotate-180" />{a.libBack}</Button></Link>
+          <h1 className="text-xl font-black flex items-center gap-2"><BookOpen className="w-5 h-5 text-primary" />{a.libNewBook}</h1>
         </div>
         <Button onClick={handleSave} disabled={saving} className="gap-2 font-bold">
-          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-          حفظ ومتابعة
+          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}{a.libSaveAndContinue}
         </Button>
       </div>
-
-      <p className="text-sm text-muted-foreground">
-        أضف بيانات الكتاب أولاً، وبعد الحفظ ستفتح صفحة التعديل لإضافة ملفات اللغات.
-      </p>
-
+      <p className="text-sm text-muted-foreground">{a.libSaveDesc}</p>
       <BookForm value={form} onChange={setForm} />
     </div>
   )

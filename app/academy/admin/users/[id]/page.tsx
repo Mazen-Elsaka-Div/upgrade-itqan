@@ -99,9 +99,11 @@ const SPECIALIZATIONS = [
 ]
 
 export default function UserProfilePage({ params }: { params: Promise<{ id: string }> }) {
-    const { t } = useI18n()
+    const { t, locale } = useI18n()
     const router = useRouter()
-    const isAr = t.locale === "ar"
+    const isAr = locale === "ar"
+    const a = t.academyAdmin
+    const dateLocale = locale === 'ar' ? 'ar-SA' : 'en-US'
     const [data, setData] = useState<AcademyUserData | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -162,7 +164,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
     }
 
     const handleDeleteUser = async () => {
-        if (!window.confirm(isAr ? "هل أنت متأكد من حذف هذا المستخدم نهائياً؟ لا يمكن التراجع عن هذا الإجراء." : "Are you sure you want to permanently delete this user? This action cannot be undone.")) {
+        if (!window.confirm(a.uprDeleteConfirm)) {
             return
         }
         setIsDeleting(true)
@@ -224,7 +226,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
             case 'student_supervisor': return (t.auth.studentSupervisor || 'Student Supervisor')
             case 'reciter_supervisor': return (t.auth.reciterSupervisor || 'Reciter Supervisor')
             case 'admin':              return t.auth.admin
-            case 'academy_admin':      return isAr ? 'أدمن الأكاديمية' : 'Academy Admin'
+            case 'academy_admin':      return a.uprAcademyAdmin
             default:                   return role
         }
     }
@@ -232,10 +234,10 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
     const approvalBadge = () => {
         if (user.role !== 'teacher' || !user.approval_status) return null
         const map: Record<string, { label: string; cls: string }> = {
-            approved:         { label: isAr ? 'مدرّس موافق عليه'   : 'Approved',         cls: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30' },
-            pending_approval: { label: isAr ? 'قيد المراجعة'        : 'Pending Approval', cls: 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30' },
-            rejected:         { label: isAr ? 'مرفوض'              : 'Rejected',         cls: 'bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/30' },
-            auto_approved:    { label: isAr ? 'موافق تلقائي'        : 'Auto-Approved',    cls: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30' },
+            approved:         { label: a.uprApprovedTeacher,  cls: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30' },
+            pending_approval: { label: a.uprPendingApproval,  cls: 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30' },
+            rejected:         { label: a.uprRejected,         cls: 'bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/30' },
+            auto_approved:    { label: a.uprAutoApproved,     cls: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30' },
         }
         const e = map[user.approval_status]
         if (!e) return null
@@ -245,35 +247,35 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
     }
 
     const formatDate = (d: string | null | undefined) =>
-        d ? new Date(d).toLocaleDateString(isAr ? 'ar-SA' : 'en-US') : '---'
+        d ? new Date(d).toLocaleDateString(dateLocale) : '---'
 
     const statCards: { label: string; value: number | string; icon: any; color: string; bg: string }[] = []
     if (user.role === 'student') {
         statCards.push(
-            { label: isAr ? 'الدورات المسجَّلة' : 'Enrolled Courses', value: roleMetrics?.enrollments?.total ?? 0,         icon: BookOpen,    color: 'text-blue-500',    bg: 'bg-blue-500/10' },
-            { label: isAr ? 'دورات مكتملة'      : 'Completed Courses', value: roleMetrics?.enrollments?.completed ?? 0,    icon: CheckCircle2, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-            { label: isAr ? 'دروس مكتملة'       : 'Lessons Completed', value: roleMetrics?.lessons?.completed ?? 0,        icon: BookMarked,   color: 'text-violet-500',  bg: 'bg-violet-500/10' },
-            { label: isAr ? 'مهام مُنجزة'        : 'Tasks Completed',   value: roleMetrics?.tasks?.completed ?? 0,          icon: ClipboardList, color: 'text-amber-500',  bg: 'bg-amber-500/10' },
-            { label: isAr ? 'مهام معلَّقة'        : 'Tasks Pending',     value: roleMetrics?.tasks?.pending ?? 0,            icon: AlertCircle,  color: 'text-orange-500',  bg: 'bg-orange-500/10' },
-            { label: isAr ? 'حضور الجلسات'      : 'Sessions Attended', value: roleMetrics?.attendance?.present ?? 0,       icon: UserCheck,    color: 'text-cyan-500',    bg: 'bg-cyan-500/10' },
-            { label: isAr ? 'مجموع النقاط'      : 'Total Points',      value: points.total,                                 icon: Trophy,       color: 'text-yellow-500',  bg: 'bg-yellow-500/10' },
-            { label: isAr ? 'سلسلة أيام'        : 'Streak (days)',     value: points.streak_days,                           icon: Flame,        color: 'text-red-500',     bg: 'bg-red-500/10' },
-            { label: isAr ? 'الشارات'           : 'Badges',            value: points.badges_count,                          icon: Award,        color: 'text-pink-500',    bg: 'bg-pink-500/10' },
+            { label: a.uprEnrolledCourses, value: roleMetrics?.enrollments?.total ?? 0,         icon: BookOpen,    color: 'text-blue-500',    bg: 'bg-blue-500/10' },
+            { label: a.uprCompletedCourses, value: roleMetrics?.enrollments?.completed ?? 0,    icon: CheckCircle2, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+            { label: a.uprLessonsCompleted, value: roleMetrics?.lessons?.completed ?? 0,        icon: BookMarked,   color: 'text-violet-500',  bg: 'bg-violet-500/10' },
+            { label: a.uprTasksCompleted,   value: roleMetrics?.tasks?.completed ?? 0,          icon: ClipboardList, color: 'text-amber-500',  bg: 'bg-amber-500/10' },
+            { label: a.uprTasksPending,     value: roleMetrics?.tasks?.pending ?? 0,            icon: AlertCircle,  color: 'text-orange-500',  bg: 'bg-orange-500/10' },
+            { label: a.uprSessionsAttended, value: roleMetrics?.attendance?.present ?? 0,       icon: UserCheck,    color: 'text-cyan-500',    bg: 'bg-cyan-500/10' },
+            { label: a.uprTotalPoints,      value: points.total,                                 icon: Trophy,       color: 'text-yellow-500',  bg: 'bg-yellow-500/10' },
+            { label: a.uprStreak,           value: points.streak_days,                           icon: Flame,        color: 'text-red-500',     bg: 'bg-red-500/10' },
+            { label: a.uprBadges,           value: points.badges_count,                          icon: Award,        color: 'text-pink-500',    bg: 'bg-pink-500/10' },
         )
     } else if (user.role === 'teacher') {
         statCards.push(
-            { label: isAr ? 'دورات يملكها'    : 'Courses Owned',   value: roleMetrics?.courses?.total ?? 0,      icon: BookOpen,       color: 'text-blue-500',    bg: 'bg-blue-500/10' },
-            { label: isAr ? 'حلقات يديرها'    : 'Halaqat Managed', value: roleMetrics?.halaqat?.total ?? 0,      icon: UsersIcon,      color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-            { label: isAr ? 'طلاب يدرّسهم'    : 'Students Taught', value: roleMetrics?.students_taught ?? 0,     icon: UserCheck,      color: 'text-violet-500',  bg: 'bg-violet-500/10' },
-            { label: isAr ? 'جلسات مجدولة'    : 'Sessions',        value: roleMetrics?.sessions?.total ?? 0,     icon: Calendar,       color: 'text-amber-500',   bg: 'bg-amber-500/10' },
-            { label: isAr ? 'جلسات مكتملة'    : 'Sessions Done',   value: roleMetrics?.sessions?.completed ?? 0, icon: CheckCircle2,   color: 'text-cyan-500',    bg: 'bg-cyan-500/10' },
-            { label: isAr ? 'مهام أنشأها'     : 'Tasks Assigned',  value: roleMetrics?.tasks_assigned ?? 0,      icon: ClipboardList,  color: 'text-orange-500',  bg: 'bg-orange-500/10' },
+            { label: a.uprCoursesOwned,    value: roleMetrics?.courses?.total ?? 0,      icon: BookOpen,       color: 'text-blue-500',    bg: 'bg-blue-500/10' },
+            { label: a.uprHalaqatManaged,  value: roleMetrics?.halaqat?.total ?? 0,      icon: UsersIcon,      color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+            { label: a.uprStudentsTaught,  value: roleMetrics?.students_taught ?? 0,     icon: UserCheck,      color: 'text-violet-500',  bg: 'bg-violet-500/10' },
+            { label: a.uprSessions,        value: roleMetrics?.sessions?.total ?? 0,     icon: Calendar,       color: 'text-amber-500',   bg: 'bg-amber-500/10' },
+            { label: a.uprSessionsDone,    value: roleMetrics?.sessions?.completed ?? 0, icon: CheckCircle2,   color: 'text-cyan-500',    bg: 'bg-cyan-500/10' },
+            { label: a.uprTasksAssigned,   value: roleMetrics?.tasks_assigned ?? 0,      icon: ClipboardList,  color: 'text-orange-500',  bg: 'bg-orange-500/10' },
         )
     } else if (user.role === 'parent') {
         statCards.push(
-            { label: isAr ? 'أبناء مرتبطون'    : 'Linked Children',   value: roleMetrics?.children?.active ?? 0,   icon: UsersIcon,      color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-            { label: isAr ? 'طلبات معلَّقة'    : 'Pending Requests',  value: roleMetrics?.children?.pending ?? 0,  icon: UserPlus,       color: 'text-amber-500',   bg: 'bg-amber-500/10' },
-            { label: isAr ? 'طلبات مرفوضة'    : 'Rejected Requests', value: roleMetrics?.children?.rejected ?? 0, icon: XCircle,        color: 'text-red-500',     bg: 'bg-red-500/10' },
+            { label: a.uprLinkedChildren,   value: roleMetrics?.children?.active ?? 0,   icon: UsersIcon,      color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+            { label: a.uprPendingRequests,  value: roleMetrics?.children?.pending ?? 0,  icon: UserPlus,       color: 'text-amber-500',   bg: 'bg-amber-500/10' },
+            { label: a.uprRejectedRequests, value: roleMetrics?.children?.rejected ?? 0, icon: XCircle,        color: 'text-red-500',     bg: 'bg-red-500/10' },
         )
     }
 
@@ -310,7 +312,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
                         disabled={isDeleting}
                     >
                         {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                        {t.admin.deleteUser || "Delete"}
+                        {a.uprDeleteUser}
                     </Button>
                 </div>
             </div>
@@ -349,7 +351,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
                                     </span>
                                     {user.halaqah_name && (
                                         <span className="flex items-center gap-2 bg-emerald-500/10 px-3 py-1.5 rounded-xl border border-emerald-500/30 backdrop-blur-sm text-emerald-700 dark:text-emerald-400">
-                                            <UsersIcon className="w-4 h-4" /> {isAr ? 'الحلقة' : 'Halaqah'}: {user.halaqah_name}{user.halaqah_teacher_name ? ` — ${user.halaqah_teacher_name}` : ''}
+                                            <UsersIcon className="w-4 h-4" /> {a.uprHalaqah}: {user.halaqah_name}{user.halaqah_teacher_name ? ` — ${user.halaqah_teacher_name}` : ''}
                                         </span>
                                     )}
                                 </div>
@@ -368,14 +370,14 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
                     </TabsTrigger>
                     <TabsTrigger value="stats" className="whitespace-nowrap shrink-0 rounded-xl data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-lg text-muted-foreground hover:text-foreground font-black gap-2 px-6 py-3 transition-all">
                         <BarChart3 className="w-4 h-4" />
-                        {isAr ? 'إحصائيات الأكاديمية' : 'Academy Stats'}
+                        {a.uprAcademyStats}
                     </TabsTrigger>
                     <TabsTrigger value="history" className="whitespace-nowrap shrink-0 rounded-xl data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-lg text-muted-foreground hover:text-foreground font-black gap-2 px-6 py-3 transition-all">
                         <ClipboardList className="w-4 h-4" />
-                        {user.role === 'student' ? (isAr ? 'الدورات المسجَّلة' : 'Enrollments')
-                            : user.role === 'teacher' ? (isAr ? 'الدورات' : 'Courses')
-                            : user.role === 'parent'  ? (isAr ? 'الأبناء المرتبطون' : 'Linked Children')
-                            : (isAr ? 'السجل' : 'Activity')}
+                        {user.role === 'student' ? a.uprEnrolledCourses
+                            : user.role === 'teacher' ? a.uprCoursesOwned
+                            : user.role === 'parent'  ? a.uprLinkedChildren
+                            : a.uprHistoryTab}
                     </TabsTrigger>
                 </TabsList>
 
@@ -404,13 +406,13 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
                                 </div>
                                 <div className="flex justify-between items-center py-2 border-b border-border/30">
                                     <span className="text-muted-foreground font-bold">{t.admin.lastLogin}</span>
-                                    <span className="text-foreground font-black">{user.last_login_at ? new Date(user.last_login_at).toLocaleString(isAr ? 'ar-SA' : 'en-US') : "---"}</span>
+                                    <span className="text-foreground font-black">{user.last_login_at ? new Date(user.last_login_at).toLocaleString(dateLocale) : "---"}</span>
                                 </div>
                                 {user.user_city && (
                                     <div className="flex justify-between items-center py-2">
                                         <span className="text-muted-foreground font-bold flex items-center gap-2">
                                             <Globe className="w-4 h-4" />
-                                            {isAr ? "مدينة مواقيت الصلاة" : "Prayer City"}
+                                            {a.uprPrayerCity}
                                         </span>
                                         <span className="text-foreground font-black">{user.user_city}</span>
                                     </div>
@@ -442,7 +444,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
                                 </div>
                                 <div className="flex justify-between items-center py-2 border-b border-border/30">
                                     <span className="text-muted-foreground font-bold flex items-center gap-2.5">
-                                        <Laptop className="w-4 h-4 text-muted-foreground/50" /> {isAr ? 'الجهاز والمتصفح' : 'Device & Browser'}
+                                        <Laptop className="w-4 h-4 text-muted-foreground/50" /> {a.uprDeviceAndBrowser}
                                     </span>
                                     <span className="text-foreground font-black text-xs max-w-[200px] truncate bg-muted/30 px-3 py-1 rounded-xl border border-border/20 flex-shrink-0" title={data.lastSession?.user_agent || undefined}>
                                         {data.lastSession?.user_agent || "N/A"}
@@ -459,43 +461,43 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
                                 <div className="p-2 rounded-xl bg-primary/10 text-primary">
                                     <Shield className="w-5 h-5" />
                                 </div>
-                                {isAr ? 'التحكم بالصلاحيات' : 'Access Control'}
+                                {a.uprAccessControl}
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-2 border-b border-border/30">
-                                <span className="text-muted-foreground font-bold">{isAr ? 'وصول القرآن الكريم' : 'Quran Access'}</span>
+                                <span className="text-muted-foreground font-bold">{a.uprQuranAccess}</span>
                                 <select
                                     className="h-9 rounded-xl border border-border/50 bg-muted/30 px-3 text-sm font-bold disabled:opacity-50"
                                     value={String(!!user.has_quran_access)}
                                     onChange={(e) => handleAccessUpdate('has_quran_access', e.target.value === 'true')}
                                     disabled={isUpdatingAccess}
                                 >
-                                    <option value="true">{isAr ? 'مسموح' : 'Allowed'}</option>
-                                    <option value="false">{isAr ? 'محظور' : 'Blocked'}</option>
+                                    <option value="true">{a.uprAllowed}</option>
+                                    <option value="false">{a.uprBlocked}</option>
                                 </select>
                             </div>
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-2 border-b border-border/30">
-                                <span className="text-muted-foreground font-bold">{isAr ? 'وصول الأكاديمية' : 'Academy Access'}</span>
+                                <span className="text-muted-foreground font-bold">{a.uprAcademyAccess}</span>
                                 <select
                                     className="h-9 rounded-xl border border-border/50 bg-muted/30 px-3 text-sm font-bold disabled:opacity-50"
                                     value={String(!!user.has_academy_access)}
                                     onChange={(e) => handleAccessUpdate('has_academy_access', e.target.value === 'true')}
                                     disabled={isUpdatingAccess}
                                 >
-                                    <option value="true">{isAr ? 'مسموح' : 'Allowed'}</option>
-                                    <option value="false">{isAr ? 'محظور' : 'Blocked'}</option>
+                                    <option value="true">{a.uprAllowed}</option>
+                                    <option value="false">{a.uprBlocked}</option>
                                 </select>
                             </div>
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-2">
-                                <span className="text-muted-foreground font-bold">{isAr ? 'تفضيل المنصة' : 'Platform Preference'}</span>
+                                <span className="text-muted-foreground font-bold">{a.uprPlatformPreference}</span>
                                 <select
                                     className="h-9 rounded-xl border border-border/50 bg-muted/30 px-3 text-sm font-bold disabled:opacity-50"
                                     value={user.platform_preference || ''}
                                     onChange={(e) => handleAccessUpdate('platform_preference', e.target.value)}
                                     disabled={isUpdatingAccess}
                                 >
-                                    <option value="both">{isAr ? 'بدون تحديد ( اختيار المنصة عند الدخول )' : 'None (Choose on login)'}</option>
+                                    <option value="both">{a.uprPlatformNone}</option>
                                     <option value="quran">{isAr ? 'القرآن الكريم' : 'Quran Platform'}</option>
                                     <option value="academy">{isAr ? 'الأكاديمية' : 'Academy'}</option>
                                 </select>
@@ -510,10 +512,10 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
                                 <div className="p-2 rounded-xl bg-primary/10 text-primary">
                                     <BookMarked className="w-5 h-5" />
                                 </div>
-                                التخصصات الدراسية
+                                {a.uprSpecializations}
                             </CardTitle>
                             <p className="text-xs text-muted-foreground mt-1 font-medium">
-                                التخصصات التي يحددها الأدمن ملزمة للمستخدم ولا يمكنه حذفها. التخصصات التي يضيفها المستخدم بنفسه تظهر بشكل مختلف.
+                                {a.uprSpecializationsDesc}
                             </p>
                         </CardHeader>
                         <CardContent>
@@ -544,14 +546,14 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
                                             )}
                                             {label}
                                             {active && active.set_by !== 'admin' && (
-                                                <span className="text-[10px] opacity-60">(المستخدم)</span>
+                                                <span className="text-[10px] opacity-60">{a.uprUserLabel}</span>
                                             )}
                                         </button>
                                     )
                                 })}
                             </div>
                             {userSpecs.length === 0 && (
-                                <p className="text-xs text-muted-foreground mt-3">لا توجد تخصصات — المستخدم يرى جميع الدورات.</p>
+                                <p className="text-xs text-muted-foreground mt-3">{a.uprNoSpecializations}</p>
                             )}
                         </CardContent>
                     </Card>
@@ -564,20 +566,20 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
                                     <div className="p-2 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
                                         <ClipboardList className="w-5 h-5" />
                                     </div>
-                                    {isAr ? 'حالة التقديم كمدرس' : 'Teacher Application Status'}
+                                    {a.uprTeacherApplication}
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div className="space-y-1">
-                                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">{isAr ? 'الحالة' : 'Status'}</p>
+                                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">{a.uprStatus}</p>
                                     <p className="font-black">{roleMetrics.application.status || '---'}</p>
                                 </div>
                                 <div className="space-y-1">
-                                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">{isAr ? 'تاريخ المراجعة' : 'Reviewed At'}</p>
+                                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">{a.uprReviewedAt}</p>
                                     <p className="font-black">{formatDate(roleMetrics.application.reviewed_at)}</p>
                                 </div>
                                 <div className="space-y-1">
-                                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">{isAr ? 'بواسطة' : 'Reviewer'}</p>
+                                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">{a.uprReviewer}</p>
                                     <p className="font-black">{roleMetrics.application.reviewer_name || '---'}</p>
                                 </div>
                             </CardContent>
@@ -591,7 +593,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
                         <Card className="border-border/50 shadow-2xl shadow-black/5 rounded-3xl bg-card/60 backdrop-blur-xl border">
                             <CardContent className="p-12 text-center text-muted-foreground">
                                 <Sparkles className="w-12 h-12 mx-auto mb-4 opacity-30" />
-                                <p className="font-bold">{isAr ? 'لا توجد إحصائيات أكاديمية لهذا الدور.' : 'No academy stats for this role.'}</p>
+                                <p className="font-bold">{a.uprNoStatsForRole}</p>
                             </CardContent>
                         </Card>
                     ) : (
@@ -622,24 +624,24 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
                                     <div className="p-2 rounded-xl bg-yellow-500/10 text-yellow-600">
                                         <Star className="w-5 h-5" />
                                     </div>
-                                    {isAr ? 'مستوى المستخدم والإنجازات' : 'Level & Achievements'}
+                                    {a.uprLevelAchievements}
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-4 p-6">
                                 <div>
-                                    <p className="text-xs font-bold text-muted-foreground uppercase">{isAr ? 'المستوى' : 'Level'}</p>
+                                    <p className="text-xs font-bold text-muted-foreground uppercase">{a.uprLevel}</p>
                                     <p className="text-2xl font-black capitalize">{points.level || 'beginner'}</p>
                                 </div>
                                 <div>
-                                    <p className="text-xs font-bold text-muted-foreground uppercase">{isAr ? 'أطول سلسلة' : 'Longest Streak'}</p>
+                                    <p className="text-xs font-bold text-muted-foreground uppercase">{a.uprLongestStreak}</p>
                                     <p className="text-2xl font-black">{points.longest_streak}</p>
                                 </div>
                                 <div>
-                                    <p className="text-xs font-bold text-muted-foreground uppercase">{isAr ? 'آخر نشاط' : 'Last Activity'}</p>
+                                    <p className="text-xs font-bold text-muted-foreground uppercase">{a.uprLastActivity}</p>
                                     <p className="text-sm font-black">{formatDate(points.last_activity)}</p>
                                 </div>
                                 <div>
-                                    <p className="text-xs font-bold text-muted-foreground uppercase">{isAr ? 'الشارات' : 'Badges'}</p>
+                                    <p className="text-xs font-bold text-muted-foreground uppercase">{a.uprBadges}</p>
                                     <p className="text-2xl font-black">{points.badges_count}</p>
                                 </div>
                             </CardContent>
@@ -653,10 +655,10 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
                                 <div className="p-2 rounded-xl bg-primary/10 text-primary">
                                     <Activity className="w-5 h-5" />
                                 </div>
-                                {isAr ? 'نشاط الأكاديمية خلال 14 يوماً' : 'Academy Activity (14 days)'}
+                                {a.uprAcademyActivity14Days}
                             </CardTitle>
                             <p className="text-xs text-muted-foreground mt-1 font-medium">
-                                {isAr ? 'يشمل: تقدم الدروس + تسليم المهام + حضور الجلسات.' : 'Includes: lesson progress + task submissions + session attendance.'}
+                                {a.uprActivityDesc}
                             </p>
                         </CardHeader>
                         <CardContent className="p-6">
@@ -671,7 +673,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
                                             tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 900 }}
                                             tickFormatter={(val) => {
                                                 const d = new Date(val);
-                                                return d.toLocaleDateString(isAr ? 'ar-SA' : 'en-US', { day: 'numeric', month: 'short' });
+                                                return d.toLocaleDateString(dateLocale, { day: 'numeric', month: 'short' });
                                             }}
                                         />
                                         <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 900 }} />
@@ -687,7 +689,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
                                             }}
                                             labelFormatter={(val) => {
                                                 const d = new Date(val);
-                                                return d.toLocaleDateString(isAr ? 'ar-SA' : 'en-US', { weekday: 'long', day: 'numeric', month: 'long' });
+                                                return d.toLocaleDateString(dateLocale, { weekday: 'long', day: 'numeric', month: 'long' });
                                             }}
                                         />
                                         <Bar dataKey="count" fill="#10b981" radius={[6, 6, 0, 0]} barSize={32} />
@@ -741,10 +743,10 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
                                                     <Calendar className="w-4 h-4" /> {formatDate(c.created_at)}
                                                 </span>
                                                 <span className="flex items-center gap-1.5">
-                                                    <UsersIcon className="w-4 h-4" /> {c.students_count} {isAr ? 'طالب' : 'students'}
+                                                    <UsersIcon className="w-4 h-4" /> {c.students_count} {a.uprStudents}
                                                 </span>
                                                 <Badge variant={c.is_active ? 'default' : 'destructive'} className="font-bold">
-                                                    {c.is_active ? (isAr ? 'نشط' : 'Active') : (isAr ? 'مؤرشف' : 'Archived')}
+                                                    {c.is_active ? a.uprActive : a.uprArchived}
                                                 </Badge>
                                             </div>
                                         </div>
@@ -783,10 +785,10 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
                             <div className="p-12 text-center text-muted-foreground/40">
                                 <ClipboardList className="w-12 h-12 mx-auto mb-4 opacity-20" />
                                 <p>
-                                    {user.role === 'student' ? (isAr ? 'لا توجد دورات مسجَّلة' : 'No enrollments')
-                                        : user.role === 'teacher' ? (isAr ? 'لم ينشئ هذا المدرّس أي دورة' : 'This teacher has no courses')
-                                        : user.role === 'parent'  ? (isAr ? 'لا يوجد أبناء مرتبطون' : 'No linked children')
-                                        : (isAr ? 'لا توجد بيانات' : 'No data')}
+                                    {user.role === 'student' ? a.uprNoEnrollments
+                                        : user.role === 'teacher' ? a.uprNoCourses
+                                        : user.role === 'parent'  ? a.uprNoLinkedChildren
+                                        : a.uprNoData}
                                 </p>
                             </div>
                         </Card>

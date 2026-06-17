@@ -114,28 +114,28 @@ const getAcademyRoleConfig = (t: any, role: AcademyRole): { sections: NavSection
           ]
         },
         {
-          title: 'العملية التعليمية',
+          title: t.academyAdmin?.sidebarEducationalProcess,
           items: [
             { href: '/academy/admin/courses', label: t.academy?.courses || 'الدورات', icon: BookOpen },
-            { href: '/academy/admin/archive', label: 'الأرشيف الشامل', icon: Archive },
+            { href: '/academy/admin/archive', label: t.academyAdmin?.archiveTitle, icon: Archive },
             { href: '/academy/admin/categories', label: t.academy?.categories || 'التصنيفات', icon: Grid },
             { href: '/academy/admin/learning-paths', label: t.academy?.learningPaths || 'المسارات التعليمية', icon: Route },
           ]
         },
         {
-          title: 'المستخدمون والصلاحيات',
+          title: t.academyAdmin?.sidebarUsersPermissions,
           items: [
             { href: '/academy/admin/teachers', label: t.academy?.teachers || 'المدرسين', icon: GraduationCap },
             { href: '/academy/admin/teacher-applications', label: t.academy?.teacherApplications || 'طلبات التدريس', icon: UserCheck },
             { href: '/academy/admin/application-questions', label: t.academy?.applicationQuestions || 'أسئلة طلبات الانضمام', icon: ClipboardList },
             { href: '/academy/admin/students', label: t.academy?.students || 'الطلاب', icon: Users },
-            { href: '/academy/admin/supervisors', label: 'مشرفو الفقه', icon: Shield },
+            { href: '/academy/admin/supervisors', label: t.academyAdmin?.fiqhOfficers, icon: Shield },
             { href: '/academy/admin/users', label: t.admin?.users || 'المستخدمين', icon: Users },
             { href: '/academy/admin/invitations', label: t.academy?.invitations || 'الدعوات', icon: UserPlus },
           ]
         },
         {
-          title: t.academy?.engagement || 'التفاعل',
+          title: t.academyAdmin?.sidebarEngagement,
           items: [
             { href: '/academy/admin/competitions', label: t.academy?.competitions || 'المسابقات', icon: Trophy },
             { href: '/academy/admin/leaderboard', label: t.academy?.leaderboard || 'لوحة المتصدرين', icon: Star },
@@ -143,23 +143,23 @@ const getAcademyRoleConfig = (t: any, role: AcademyRole): { sections: NavSection
           ]
         },
         {
-          title: t.academy?.community || 'المجتمع',
+          title: t.academyAdmin?.sidebarCommunity,
           items: [
             { href: '/community/academy/admin', label: t.academy?.forum || 'المنتدى', icon: MessageSquare },
-            { href: '/community/academy/admin/manage', label: 'إدارة المنتدى', icon: Shield },
+            { href: '/community/academy/admin/manage', label: t.academyAdmin?.sidebarManageForum, icon: Shield },
             { href: '/academy/admin/fiqh', label: t.academy?.fiqhQuestions || 'صندوق الأسئلة الفقهية', icon: HelpCircle },
             { href: '/academy/fiqh', label: t.academy?.fiqhLibrary || 'المكتبة الفقهية', icon: Library },
             { href: '/academy/library', label: t.academy?.booksLibrary || 'مكتبة الكتب (تصفح)', icon: BookOpen },
-            { href: '/academy/admin/library/books', label: 'إدارة المكتبة', icon: BookOpen },
+            { href: '/academy/admin/library/books', label: t.academyAdmin?.sidebarManageLibrary, icon: BookOpen },
             { href: '/academy/admin/announcements', label: t.admin?.announcements || 'الإعلانات', icon: Megaphone },
             { href: '/academy/admin/conversations', label: t.admin?.conversations || 'مركز المحادثات', icon: MessageSquare },
           ]
         },
         {
-          title: 'الحلقات والبث',
+          title: t.academyAdmin?.sidebarHalaqatBroadcast,
           items: [
             { href: '/academy/admin/halaqat', label: t.academy?.halaqat || 'الحلقات', icon: GraduationCap },
-            { href: '/academy/admin/video-settings', label: 'إعدادات البث والفيديو', icon: Video },
+            { href: '/academy/admin/video-settings', label: t.academyAdmin?.sidebarVideoSettings, icon: Video },
           ]
         },
         {
@@ -227,43 +227,43 @@ const getAcademyRoleConfig = (t: any, role: AcademyRole): { sections: NavSection
       sections: [
         {
           items: [
-            { href: '/academy/fiqh-supervisor', label: 'لوحة التحكم', icon: LayoutDashboard },
-            { href: '/academy/fiqh-supervisor/questions', label: 'صندوق الأسئلة', icon: HelpCircle },
-            { href: '/academy/fiqh', label: 'المكتبة الفقهية', icon: Library },
-            { href: '/academy/fiqh-supervisor/messages', label: 'الرسائل', icon: MessageSquare },
+            { href: '/academy/fiqh-supervisor', label: t.academyAdmin?.sidebarDashboard, icon: LayoutDashboard },
+            { href: '/academy/fiqh-supervisor/questions', label: t.academyAdmin?.sidebarFiqhQuestions, icon: HelpCircle },
+            { href: '/academy/fiqh', label: t.academyAdmin?.fiqhLibrary, icon: Library },
+            { href: '/academy/fiqh-supervisor/messages', label: t.academyAdmin?.sidebarFiqhMessages, icon: MessageSquare },
           ]
         },
         {
-          title: 'الحساب',
+          title: t.shell?.account || 'الحساب',
           items: [
-            { href: '/academy/fiqh-supervisor/profile', label: 'الملف الشخصي', icon: User },
+            { href: '/academy/fiqh-supervisor/profile', label: t.academyAdmin?.sidebarProfile, icon: User },
           ]
         }
       ],
-      label: 'لوحة مشرف أسئلة الفقه',
-      name: 'مشرف أسئلة الفقه',
-      sublabel: 'مشرف أسئلة الفقه'
+      label: t.academyAdmin?.sidebarFiqhSupervisorTitle,
+      name: t.academyAdmin?.sidebarFiqhSupervisorName,
+      sublabel: t.academyAdmin?.sidebarFiqhSupervisorName
     },
     content_supervisor: {
       sections: [
         {
           items: [
-            { href: '/academy/content-supervisor', label: 'لوحة التحكم', icon: LayoutDashboard },
-            { href: '/academy/content-supervisor/lessons', label: 'الدروس', icon: BookOpen },
-            { href: '/academy/content-supervisor/archive', label: 'أرشيف الدورات', icon: Archive },
-            { href: '/academy/content-supervisor/messages', label: 'الرسائل', icon: MessageSquare },
+            { href: '/academy/content-supervisor', label: t.academyAdmin?.sidebarDashboard, icon: LayoutDashboard },
+            { href: '/academy/content-supervisor/lessons', label: t.academyAdmin?.sidebarContentLessons, icon: BookOpen },
+            { href: '/academy/content-supervisor/archive', label: t.academyAdmin?.sidebarContentArchive, icon: Archive },
+            { href: '/academy/content-supervisor/messages', label: t.academyAdmin?.sidebarContentMessages, icon: MessageSquare },
           ]
         },
         {
-          title: 'الحساب',
+          title: t.shell?.account || 'الحساب',
           items: [
-            { href: '/academy/content-supervisor/profile', label: 'الملف الشخصي', icon: User },
+            { href: '/academy/content-supervisor/profile', label: t.academyAdmin?.sidebarProfile, icon: User },
           ]
         }
       ],
-      label: 'لوحة مشرف المحتوى',
-      name: 'مشرف المحتوى',
-      sublabel: 'مشرف المحتوى'
+      label: t.academyAdmin?.sidebarContentSupervisorTitle,
+      name: t.academyAdmin?.sidebarContentSupervisorName,
+      sublabel: t.academyAdmin?.sidebarContentSupervisorName
     }
   }
 

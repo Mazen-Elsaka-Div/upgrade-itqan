@@ -23,6 +23,8 @@ export default function AdminUsersPage() {
   const { t, locale } = useI18n()
   const router = useRouter()
   const isAr = locale === "ar"
+  const a = t.academyAdmin
+  const dateLocale = locale === 'ar' ? 'ar-SA' : 'en-US'
 
   const [searchQuery, setSearchQuery] = useState("")
   const [activeTab, setActiveTab] = useState<"students" | "teachers" | "parents" | "admins" | "supervisors">("students")
@@ -31,12 +33,10 @@ export default function AdminUsersPage() {
   const [pagination, setPagination] = useState<any>(null)
   const [currentPage, setCurrentPage] = useState(1)
 
-  // Modals state
   const [isAddUserOpen, setIsAddUserOpen] = useState(false)
   const [isEditUserOpen, setIsEditUserOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<any>(null)
 
-  // Form state
   const [formData, setFormData] = useState({ 
     name: "", 
     email: "", 
@@ -49,7 +49,6 @@ export default function AdminUsersPage() {
   const [submitting, setSubmitting] = useState(false)
   const [currentUserRole, setCurrentUserRole] = useState<string>("")
 
-  // Fetch current user to check role
   useEffect(() => {
     async function fetchMe() {
       try {
@@ -65,9 +64,8 @@ export default function AdminUsersPage() {
     fetchMe()
   }, [])
 
-  // Fetch users based on activeTab
   useEffect(() => {
-    setCurrentPage(1) // Reset to first page when changing tabs
+    setCurrentPage(1)
     fetchUsers(1)
   }, [activeTab])
 
@@ -99,8 +97,8 @@ export default function AdminUsersPage() {
 
   const handleSearch = (query: string) => {
     setSearchQuery(query)
-    setCurrentPage(1) // Reset to first page when searching
-    fetchUsers(1, query) // Fetch with search
+    setCurrentPage(1)
+    fetchUsers(1, query)
   }
 
 
@@ -216,7 +214,7 @@ export default function AdminUsersPage() {
             {t.admin.usersManagementTitle}
           </h1>
           <p className="text-muted-foreground font-bold tracking-wide">
-            {t.admin.academyUsersDesc || (isAr ? "عرض وإدارة جميع حسابات الطلاب والمعلمين وأولياء الأمور" : "View and manage all student, teacher, and parent accounts")}
+            {t.admin.academyUsersDesc}
           </p>
         </div>
         <Button
@@ -239,13 +237,12 @@ export default function AdminUsersPage() {
         </Button>
       </div>
 
-      {/* Tabs and Search Row */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <div className="flex p-1 bg-muted/50 border border-border rounded-2xl w-full lg:w-auto flex-1 overflow-x-auto overflow-y-hidden hide-scrollbar gap-1">
           {[
-            { id: "students", label: t.admin.students },
-            { id: "teachers", label: t.admin.teachers || (isAr ? "المعلمين" : "Teachers") },
-            { id: "parents", label: t.admin.parents || (isAr ? "أولياء الأمور" : "Parents") },
+            { id: "students", label: a.analyticsStudents },
+            { id: "teachers", label: a.analyticsTeachers },
+            { id: "parents", label: a.analyticsParents },
             { id: "admins", label: t.admin.admins },
             { id: "supervisors", label: t.admin.supervisors }
           ].map((tab) => (
@@ -272,7 +269,6 @@ export default function AdminUsersPage() {
         </div>
       </div>
 
-      {/* Table Card */}
       <div className="bg-card rounded-3xl shadow-sm border border-border overflow-hidden">
         <div className="overflow-x-auto min-h-[400px]">
           {loading ? (
@@ -295,7 +291,7 @@ export default function AdminUsersPage() {
                     <td colSpan={7} className="px-6 py-20 text-center">
                       <div className="flex flex-col items-center justify-center text-muted-foreground">
                         <Users className="w-12 h-12 opacity-20 mb-4" />
-                        <p className="font-bold">{isAr ? "لا توجد نتائج" : "No results found"}</p>
+                        <p className="font-bold">{a.usersNoResults}</p>
                       </div>
                     </td>
                   </tr>
@@ -321,14 +317,14 @@ export default function AdminUsersPage() {
                           <div className="min-w-0 flex-1">
                             <p className="font-black text-foreground text-sm group-hover:text-primary transition-colors flex items-center gap-1.5">
                               {user.name}
-                              {user.gender === 'female' && <span className="w-1.5 h-1.5 rounded-full bg-pink-400 opacity-60 inline-block" title="طالبة / معلمة" />}
+                              {user.gender === 'female' && <span className="w-1.5 h-1.5 rounded-full bg-pink-400 opacity-60 inline-block" />}
                             </p>
                             <div className="flex items-center gap-2 mt-0.5">
                               <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-tighter">ID: #{user.id.substring(0, 8)}</span>
                               {user.is_online && (
                                 <span className="flex items-center gap-1">
                                   <span className="w-1.5 h-1.5 bg-success rounded-full animate-pulse" />
-                                  <span className="text-[9px] font-black text-success uppercase tracking-widest">{t.admin.onlineNow}</span>
+                                  <span className="text-[9px] font-black text-success uppercase tracking-widest">{a.usersOnlineNow}</span>
                                 </span>
                               )}
                             </div>
@@ -339,36 +335,36 @@ export default function AdminUsersPage() {
                         {user.email}
                       </td>
                       <td className="px-6 py-4 text-xs font-bold text-muted-foreground">
-                        {new Date(user.created_at).toLocaleDateString(isAr ? "ar-SA" : "en-US")}
+                        {new Date(user.created_at).toLocaleDateString(dateLocale)}
                       </td>
                       <td className="px-6 py-4">
                         {user.role === 'student' ? (
                           <Badge className="bg-blue-500/10 text-blue-400 border-blue-500/20 font-black text-[10px] uppercase tracking-widest rounded-lg pointer-events-none">
-                            {t.auth.student}
+                            {a.usersStudent}
                           </Badge>
                         ) : user.role === 'teacher' ? (
                           <Badge className="bg-cyan-500/10 text-cyan-400 border-cyan-500/20 font-black text-[10px] uppercase tracking-widest rounded-lg pointer-events-none">
-                            {t.auth.teacher}
+                            {a.usersTeacher}
                           </Badge>
                         ) : user.role === 'parent' ? (
                           <Badge className="bg-amber-500/10 text-amber-400 border-amber-500/20 font-black text-[10px] uppercase tracking-widest rounded-lg pointer-events-none">
-                            {t.auth.parent}
+                            {a.usersParent}
                           </Badge>
                         ) : user.role === 'admin' ? (
                           <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 font-black text-[10px] uppercase tracking-widest rounded-lg pointer-events-none">
-                            {t.auth.admin}
+                            {a.usersAdmin}
                           </Badge>
                         ) : user.role === 'reader' ? (
                           <Badge className="bg-purple-500/10 text-purple-400 border-purple-500/20 font-black text-[10px] uppercase tracking-widest rounded-lg pointer-events-none">
-                            {t.auth.reader}
+                            {a.usersReader}
                           </Badge>
                         ) : user.role === 'student_supervisor' ? (
                           <Badge className="bg-orange-500/10 text-orange-400 border-orange-500/20 font-black text-[10px] uppercase tracking-widest rounded-lg pointer-events-none">
-                            {t.auth.studentSupervisor}
+                            {a.usersStudentSupervisor}
                           </Badge>
                         ) : user.role === 'reciter_supervisor' ? (
                           <Badge className="bg-rose-500/10 text-rose-400 border-rose-500/20 font-black text-[10px] uppercase tracking-widest rounded-lg pointer-events-none">
-                            {t.auth.reciterSupervisor}
+                            {a.usersReciterSupervisor}
                           </Badge>
                         ) : (
                           <Badge className="bg-muted text-muted-foreground border-border font-black text-[10px] uppercase tracking-widest rounded-lg pointer-events-none">
@@ -378,12 +374,12 @@ export default function AdminUsersPage() {
                         <div className="flex gap-1 mt-1">
                           {user.has_quran_access !== false && (
                             <Badge variant="outline" className="text-[8px] px-1 py-0 border-emerald-500/30 text-emerald-500 bg-emerald-500/5">
-                              {isAr ? "قرآن" : "Quran"}
+                              {a.usersQuranPlatform}
                             </Badge>
                           )}
                           {user.has_academy_access !== false && (
                             <Badge variant="outline" className="text-[8px] px-1 py-0 border-blue-500/30 text-blue-500 bg-blue-500/5">
-                              {isAr ? "أكاديمية" : "Academy"}
+                              {a.usersAcademyPlatform}
                             </Badge>
                           )}
                         </div>
@@ -444,13 +440,12 @@ export default function AdminUsersPage() {
           )}
         </div>
 
-        {/* Footer info and pagination */}
         <div className="bg-muted/30 px-6 py-5 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">
-            {isAr ? "إجمالي المستخدمين" : "Total users"}: <span className="text-foreground">{pagination?.totalUsers || 0}</span>
+            {a.usersTotal}: <span className="text-foreground">{pagination?.totalUsers || 0}</span>
             {pagination && (
               <span className="mr-4">
-                {isAr ? "صفحة" : "Page"} {pagination.currentPage} {isAr ? "من" : "of"} {pagination.totalPages}
+                {a.usersPage.replace('{page}', String(pagination.currentPage)).replace('{total}', String(pagination.totalPages))}
               </span>
             )}
           </div>
@@ -465,7 +460,7 @@ export default function AdminUsersPage() {
                 className="rounded-xl font-black text-xs h-8 px-3"
               >
                 <ChevronRight className={`w-4 h-4 ${isAr ? "ml-1" : "mr-1"}`} />
-                {isAr ? "السابق" : "Previous"}
+                {a.usersPrevious}
               </Button>
 
               <div className="flex items-center gap-1">
@@ -503,7 +498,7 @@ export default function AdminUsersPage() {
                 disabled={!pagination.hasNextPage || loading}
                 className="rounded-xl font-black text-xs h-8 px-3"
               >
-                {isAr ? "التالي" : "Next"}
+                {a.usersNext}
                 <ChevronLeft className={`w-4 h-4 ${isAr ? "mr-1" : "ml-1"}`} />
               </Button>
             </div>
@@ -511,11 +506,10 @@ export default function AdminUsersPage() {
         </div>
       </div>
 
-      {/* Add User Modal */}
       <Dialog open={isAddUserOpen} onOpenChange={setIsAddUserOpen}>
         <DialogContent className="rounded-3xl border-none shadow-2xl bg-card max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-xl font-black text-foreground">{t.admin.newUserModalTitle}</DialogTitle>
+            <DialogTitle className="text-xl font-black text-foreground">{a.usersNewUserTitle}</DialogTitle>
           </DialogHeader>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
             <div className="space-y-2">
@@ -537,7 +531,7 @@ export default function AdminUsersPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground">{isAr ? "كلمة المرور" : t.auth.password}</Label>
+              <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground">{a.usersPasswordLabel}</Label>
               <Input
                 className="rounded-2xl h-11 bg-muted/30 border-border focus:bg-card font-bold"
                 type="password"
@@ -555,15 +549,15 @@ export default function AdminUsersPage() {
               >
                 {(currentUserRole === 'admin' || currentUserRole === 'student_supervisor') && (
                   <>
-                    <option value="student">{t.auth.student}</option>
-                    <option value="parent">{t.auth.parent}</option>
-                    <option value="teacher">{t.auth.teacher}</option>
+                    <option value="student">{a.usersStudent}</option>
+                    <option value="parent">{a.usersParent}</option>
+                    <option value="teacher">{a.usersTeacher}</option>
                   </>
                 )}
                 {currentUserRole === 'admin' && (
                   <>
-                    <option value="admin">{t.auth.admin}</option>
-                    <option value="student_supervisor">{t.auth.studentSupervisor}</option>
+                    <option value="admin">{a.usersAdmin}</option>
+                    <option value="student_supervisor">{a.usersStudentSupervisor}</option>
                   </>
                 )}
               </select>
@@ -583,7 +577,7 @@ export default function AdminUsersPage() {
             
             <div className="md:col-span-2 p-4 bg-muted/20 rounded-2xl border border-border/50 space-y-3">
               <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground">
-                {isAr ? "صلاحيات الوصول للمنصات" : "Platform Access Permissions"}
+                {a.usersPlatformAccess}
               </Label>
               <div className="flex flex-wrap gap-6">
                 <label className="flex items-center gap-2 cursor-pointer group">
@@ -594,7 +588,7 @@ export default function AdminUsersPage() {
                     className="w-4 h-4 rounded border-border text-primary focus:ring-primary/20"
                   />
                   <span className="text-sm font-bold group-hover:text-primary transition-colors">
-                    {isAr ? "منصة القرآن" : "Quran Platform"}
+                    {a.usersQuranPlatform}
                   </span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer group">
@@ -605,7 +599,7 @@ export default function AdminUsersPage() {
                     className="w-4 h-4 rounded border-border text-primary focus:ring-primary/20"
                   />
                   <span className="text-sm font-bold group-hover:text-primary transition-colors">
-                    {isAr ? "الأكاديمية" : "Academy"}
+                    {a.usersAcademyPlatform}
                   </span>
                 </label>
               </div>
@@ -621,11 +615,10 @@ export default function AdminUsersPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Edit User Modal */}
       <Dialog open={isEditUserOpen} onOpenChange={setIsEditUserOpen}>
         <DialogContent className="rounded-3xl border-none shadow-2xl bg-card max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-xl font-black text-foreground">{t.admin.editUserModalTitle}</DialogTitle>
+            <DialogTitle className="text-xl font-black text-foreground">{a.usersEditUserTitle}</DialogTitle>
           </DialogHeader>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
             <div className="space-y-2">
@@ -647,7 +640,7 @@ export default function AdminUsersPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground">{t.admin.passwordLeaveBlank}</Label>
+              <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground">{a.usersPasswordOptional}</Label>
               <Input
                 className="rounded-2xl h-11 bg-muted/30 border-border focus:bg-card font-bold"
                 type="password"
@@ -665,15 +658,15 @@ export default function AdminUsersPage() {
               >
                 {(currentUserRole === 'admin' || currentUserRole === 'student_supervisor') && (
                   <>
-                    <option value="student">{t.auth.student}</option>
-                    <option value="parent">{t.auth.parent}</option>
-                    <option value="teacher">{t.auth.teacher}</option>
+                    <option value="student">{a.usersStudent}</option>
+                    <option value="parent">{a.usersParent}</option>
+                    <option value="teacher">{a.usersTeacher}</option>
                   </>
                 )}
                 {currentUserRole === 'admin' && (
                   <>
-                    <option value="admin">{t.auth.admin}</option>
-                    <option value="student_supervisor">{t.auth.studentSupervisor}</option>
+                    <option value="admin">{a.usersAdmin}</option>
+                    <option value="student_supervisor">{a.usersStudentSupervisor}</option>
                   </>
                 )}
               </select>
@@ -693,7 +686,7 @@ export default function AdminUsersPage() {
 
             <div className="md:col-span-2 p-4 bg-muted/20 rounded-2xl border border-border/50 space-y-3">
               <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground">
-                {isAr ? "صلاحيات الوصول للمنصات" : "Platform Access Permissions"}
+                {a.usersPlatformAccess}
               </Label>
               <div className="flex flex-wrap gap-6">
                 <label className="flex items-center gap-2 cursor-pointer group">
@@ -704,7 +697,7 @@ export default function AdminUsersPage() {
                     className="w-4 h-4 rounded border-border text-primary focus:ring-primary/20"
                   />
                   <span className="text-sm font-bold group-hover:text-primary transition-colors">
-                    {isAr ? "منصة القرآن" : "Quran Platform"}
+                    {a.usersQuranPlatform}
                   </span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer group">
@@ -715,7 +708,7 @@ export default function AdminUsersPage() {
                     className="w-4 h-4 rounded border-border text-primary focus:ring-primary/20"
                   />
                   <span className="text-sm font-bold group-hover:text-primary transition-colors">
-                    {isAr ? "الأكاديمية" : "Academy"}
+                    {a.usersAcademyPlatform}
                   </span>
                 </label>
               </div>

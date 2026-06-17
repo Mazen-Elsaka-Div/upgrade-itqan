@@ -8,37 +8,21 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import {
-  Loader2,
-  UserPlus,
-  Shield,
-  Mail,
-  Trash2,
-  ChevronLeft,
-  CheckCircle2,
-  XCircle,
+  Loader2, UserPlus, Shield, Mail, Trash2, ChevronLeft, CheckCircle2, XCircle,
 } from 'lucide-react'
+import { useI18n } from '@/lib/i18n/context'
 
 interface Officer {
-  id: string
-  user_id: string
-  bio: string | null
-  is_active: boolean
-  name: string
-  email: string
-  avatar_url: string | null
-  role: string
-  category_ids: string[]
-  category_names: string[]
-  open_count: number
+  id: string; user_id: string; bio: string | null; is_active: boolean; name: string; email: string;
+  avatar_url: string | null; role: string; category_ids: string[]; category_names: string[]; open_count: number;
 }
 
-interface Category {
-  id: string
-  slug: string
-  name_ar: string
-}
+interface Category { id: string; slug: string; name_ar: string }
 
 export default function AdminFiqhOfficersPage() {
+  const { t } = useI18n()
+  const a = t.academyAdmin
+
   const [officers, setOfficers] = useState<Officer[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
@@ -59,120 +43,49 @@ export default function AdminFiqhOfficersPage() {
       ])
       setOfficers(oRes.officers || [])
       setCategories(cRes.categories || [])
-    } finally {
-      setLoading(false)
-    }
+    } finally { setLoading(false) }
   }
 
-  useEffect(() => {
-    load()
-  }, [])
+  useEffect(() => { load() }, [])
 
-  const openAdd = () => {
-    setEditing(null)
-    setEmail('')
-    setBio('')
-    setSelectedCats([])
-    setIsAddOpen(true)
-  }
-  const openEdit = (o: Officer) => {
-    setEditing(o)
-    setEmail(o.email)
-    setBio(o.bio || '')
-    setSelectedCats(o.category_ids)
-    setIsAddOpen(true)
-  }
+  const openAdd = () => { setEditing(null); setEmail(''); setBio(''); setSelectedCats([]); setIsAddOpen(true) }
+  const openEdit = (o: Officer) => { setEditing(o); setEmail(o.email); setBio(o.bio || ''); setSelectedCats(o.category_ids); setIsAddOpen(true) }
 
   const submit = async () => {
     if (!editing && !email.trim()) return
-    setSubmitting(true)
-    setFeedback(null)
+    setSubmitting(true); setFeedback(null)
     try {
-      const res = await fetch('/api/academy/admin/fiqh/officers', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_id: editing?.user_id,
-          email: editing ? undefined : email.trim().toLowerCase(),
-          bio: bio.trim() || null,
-          category_ids: selectedCats,
-        }),
-      })
+      const res = await fetch('/api/academy/admin/fiqh/officers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user_id: editing?.user_id, email: editing ? undefined : email.trim().toLowerCase(), bio: bio.trim() || null, category_ids: selectedCats }) })
       const data = await res.json()
-      if (!res.ok) {
-        setFeedback({ kind: 'err', text: data.error || 'فشل الحفظ' })
-      } else {
-        setFeedback({ kind: 'ok', text: editing ? 'تم تحديث المسؤول' : 'تم إضافة المسؤول' })
-        setIsAddOpen(false)
-        await load()
-      }
-    } finally {
-      setSubmitting(false)
-    }
+      if (!res.ok) { setFeedback({ kind: 'err', text: data.error || a.officersSaveError }) }
+      else { setFeedback({ kind: 'ok', text: editing ? a.officersUpdated : a.officersAdded }); setIsAddOpen(false); await load() }
+    } finally { setSubmitting(false) }
   }
 
-  const toggleActive = async (o: Officer) => {
-    await fetch('/api/academy/admin/fiqh/officers', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: o.user_id, is_active: !o.is_active }),
-    })
-    await load()
-  }
+  const toggleActive = async (o: Officer) => { await fetch('/api/academy/admin/fiqh/officers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user_id: o.user_id, is_active: !o.is_active }) }); await load() }
 
-  const remove = async (o: Officer) => {
-    if (!confirm(`إزالة ${o.name} من قائمة المسؤولين؟`)) return
-    await fetch(`/api/academy/admin/fiqh/officers/${o.id}`, { method: 'DELETE' })
-    await load()
-  }
+  const remove = async (o: Officer) => { if (!confirm(a.officersRemoveConfirm.replace('{name}', o.name))) return; await fetch(`/api/academy/admin/fiqh/officers/${o.id}`, { method: 'DELETE' }); await load() }
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-6" dir="rtl">
+    <div className="max-w-6xl mx-auto p-6 space-y-6">
       <Link href="/academy/admin/fiqh" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary">
-        <ChevronLeft className="w-4 h-4" />
-        إدارة الأسئلة الفقهية
+        <ChevronLeft className="w-4 h-4" />{a.officersManage}
       </Link>
 
       <div className="flex justify-between items-end border-b pb-4">
         <div>
-          <h1 className="text-3xl font-black inline-flex items-center gap-2">
-            <Shield className="w-7 h-7 text-primary" />
-            مسؤولو الإجابات الفقهية
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            عيّن المسؤولين الذين يجيبون عن الأسئلة الفقهية وحدد التصنيفات المختصين بها.
-          </p>
+          <h1 className="text-3xl font-black inline-flex items-center gap-2"><Shield className="w-7 h-7 text-primary" />{a.officersTitle}</h1>
+          <p className="text-muted-foreground mt-2">{a.officersDesc}</p>
         </div>
-        <Button onClick={openAdd}>
-          <UserPlus className="w-4 h-4 me-2" />
-          إضافة مسؤول
-        </Button>
+        <Button onClick={openAdd}><UserPlus className="w-4 h-4 me-2" />{a.officersAddOfficer}</Button>
       </div>
 
-      {feedback && (
-        <div
-          className={`p-3 rounded-xl border text-sm ${
-            feedback.kind === 'ok'
-              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700'
-              : 'bg-red-500/10 border-red-500/30 text-red-700'
-          }`}
-        >
-          {feedback.text}
-        </div>
-      )}
+      {feedback && <div className={`p-3 rounded-xl border text-sm ${feedback.kind === 'ok' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700' : 'bg-red-500/10 border-red-500/30 text-red-700'}`}>{feedback.text}</div>}
 
       {loading ? (
-        <Card>
-          <CardContent className="p-12 flex items-center justify-center">
-            <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-          </CardContent>
-        </Card>
+        <Card><CardContent className="p-12 flex items-center justify-center"><Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /></CardContent></Card>
       ) : officers.length === 0 ? (
-        <Card>
-          <CardContent className="p-12 text-center text-muted-foreground">
-            لا يوجد مسؤولون حالياً. أضف أول مسؤول لتوزيع الأسئلة عليه.
-          </CardContent>
-        </Card>
+        <Card><CardContent className="p-12 text-center text-muted-foreground">{a.officersNoOfficers}</CardContent></Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {officers.map((o) => (
@@ -181,53 +94,23 @@ export default function AdminFiqhOfficersPage() {
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <h3 className="font-bold text-lg">{o.name}</h3>
-                    <div className="text-xs text-muted-foreground inline-flex items-center gap-1">
-                      <Mail className="w-3 h-3" /> {o.email}
-                    </div>
+                    <div className="text-xs text-muted-foreground inline-flex items-center gap-1"><Mail className="w-3 h-3" /> {o.email}</div>
                     {o.bio && <p className="text-sm text-muted-foreground mt-2">{o.bio}</p>}
                   </div>
                   <div className="flex flex-col items-end gap-1 shrink-0">
-                    <span
-                      className={`text-[11px] px-2 py-0.5 rounded-full font-bold inline-flex items-center gap-1 ${
-                        o.is_active
-                          ? 'bg-emerald-100 text-emerald-700'
-                          : 'bg-slate-200 text-slate-600'
-                      }`}
-                    >
-                      {o.is_active ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
-                      {o.is_active ? 'نشط' : 'موقوف'}
+                    <span className={`text-[11px] px-2 py-0.5 rounded-full font-bold inline-flex items-center gap-1 ${o.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600'}`}>
+                      {o.is_active ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}{o.is_active ? a.officersActive : a.officersInactive}
                     </span>
-                    <span className="text-[11px] text-muted-foreground">
-                      مفتوح: <strong>{o.open_count}</strong>
-                    </span>
+                    <span className="text-[11px] text-muted-foreground">{a.officersOpenQuestions} <strong>{o.open_count}</strong></span>
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-1">
-                  {o.category_names.length === 0 ? (
-                    <span className="text-[11px] text-muted-foreground">لا تصنيفات</span>
-                  ) : (
-                    o.category_names.map((n) => (
-                      <span key={n} className="text-[11px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold">
-                        {n}
-                      </span>
-                    ))
-                  )}
+                  {o.category_names.length === 0 ? <span className="text-[11px] text-muted-foreground">{a.officersNoCategories}</span> : o.category_names.map((n) => <span key={n} className="text-[11px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold">{n}</span>)}
                 </div>
                 <div className="flex gap-2 pt-2 border-t">
-                  <Button variant="outline" size="sm" onClick={() => openEdit(o)}>
-                    تعديل
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => toggleActive(o)}>
-                    {o.is_active ? 'إيقاف' : 'تفعيل'}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="text-red-600 hover:bg-red-50 hover:border-red-300"
-                    onClick={() => remove(o)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => openEdit(o)}>{a.officersEdit}</Button>
+                  <Button variant="outline" size="sm" onClick={() => toggleActive(o)}>{o.is_active ? a.officersDeactivate : a.officersActivate}</Button>
+                  <Button variant="outline" size="sm" className="text-red-600 hover:bg-red-50 hover:border-red-300" onClick={() => remove(o)}><Trash2 className="w-4 h-4" /></Button>
                 </div>
               </CardContent>
             </Card>
@@ -236,69 +119,30 @@ export default function AdminFiqhOfficersPage() {
       )}
 
       <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-        <DialogContent className="max-w-lg" dir="rtl">
-          <DialogHeader>
-            <DialogTitle>{editing ? `تعديل مسؤول: ${editing.name}` : 'إضافة مسؤول جديد'}</DialogTitle>
-          </DialogHeader>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle>{editing ? a.officersEditTitle.replace('{name}', editing.name) : a.officersAddNew}</DialogTitle></DialogHeader>
           <div className="space-y-3">
             {!editing && (
               <div>
-                <label className="text-sm font-bold block mb-1">البريد الإلكتروني للمستخدم</label>
-                <Input
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="user@example.com"
-                  type="email"
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  يجب أن يكون المستخدم لديه حساب مسجل في المنصة بالفعل.
-                </p>
+                <label className="text-sm font-bold block mb-1">{a.officersEmail}</label>
+                <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="user@example.com" type="email" />
+                <p className="text-xs text-muted-foreground mt-1">{a.officersEmailNote}</p>
               </div>
             )}
             <div>
-              <label className="text-sm font-bold block mb-1">نبذة (اختياري)</label>
-              <Textarea
-                value={bio}
-                onChange={(e) => setBio(e.target.value)}
-                placeholder="نبذة عن المؤهلات والتخصص"
-                rows={3}
-              />
+              <label className="text-sm font-bold block mb-1">{a.officersBio}</label>
+              <Textarea value={bio} onChange={(e) => setBio(e.target.value)} placeholder={a.officersBioPlaceholder} rows={3} />
             </div>
             <div>
-              <label className="text-sm font-bold block mb-2">التصنيفات المختص بها</label>
+              <label className="text-sm font-bold block mb-2">{a.officersCategories}</label>
               <div className="flex gap-2 flex-wrap">
-                {categories.map((c) => {
-                  const on = selectedCats.includes(c.id)
-                  return (
-                    <button
-                      key={c.id}
-                      type="button"
-                      onClick={() =>
-                        setSelectedCats(on ? selectedCats.filter((x) => x !== c.id) : [...selectedCats, c.id])
-                      }
-                      className={`text-xs px-3 py-1.5 rounded-full font-bold border transition-colors ${
-                        on
-                          ? 'bg-primary text-primary-foreground border-primary'
-                          : 'bg-card border-border hover:bg-muted'
-                      }`}
-                    >
-                      {c.name_ar}
-                    </button>
-                  )
-                })}
+                {categories.map((c) => { const on = selectedCats.includes(c.id); return <button key={c.id} type="button" onClick={() => setSelectedCats(on ? selectedCats.filter((x) => x !== c.id) : [...selectedCats, c.id])} className={`text-xs px-3 py-1.5 rounded-full font-bold border transition-colors ${on ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border hover:bg-muted'}`}>{c.name_ar}</button> })}
               </div>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAddOpen(false)}>
-              إلغاء
-            </Button>
-            <Button
-              onClick={submit}
-              disabled={submitting || (!editing && !email.trim()) || selectedCats.length === 0}
-            >
-              {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'حفظ'}
-            </Button>
+            <Button variant="outline" onClick={() => setIsAddOpen(false)}>{t.cancel}</Button>
+            <Button onClick={submit} disabled={submitting || (!editing && !email.trim()) || selectedCats.length === 0}>{submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : a.officersSave}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

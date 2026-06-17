@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { AcademySettings } from "../hooks/use-academy-settings"
+import { useI18n } from "@/lib/i18n/context"
 
 interface NotificationsEmailSettingsProps {
   settings: AcademySettings
@@ -19,36 +20,38 @@ interface NotificationsEmailSettingsProps {
   onTestSmtp: (smtp: AcademySettings["smtp_config"]) => Promise<boolean>
 }
 
-const emailEvents = [
-  { id: "course_approved", label: "قبول/رفض دورة" },
-  { id: "new_task", label: "مهمة جديدة" },
-  { id: "session_reminder_1h", label: "تذكير جلسة (قبل ساعة)" },
-  { id: "session_reminder_10m", label: "تذكير جلسة (قبل 10 دقائق)" },
-  { id: "new_badge", label: "شارة جديدة" },
-  { id: "level_up", label: "ترقية مستوى" },
-  { id: "streak_warning", label: "تحذير Streak" },
-  { id: "parent_report", label: "تقرير ولي الأمر الأسبوعي" },
-  { id: "werd_reminder", label: "تذكير الورد اليومي" },
-]
-
-const weekDays = [
-  { value: "sunday", label: "الأحد" },
-  { value: "monday", label: "الإثنين" },
-  { value: "tuesday", label: "الثلاثاء" },
-  { value: "wednesday", label: "الأربعاء" },
-  { value: "thursday", label: "الخميس" },
-  { value: "friday", label: "الجمعة" },
-  { value: "saturday", label: "السبت" },
-]
-
 export function NotificationsEmailSettings({
   settings,
   onUpdate,
   onReset,
   onTestSmtp,
 }: NotificationsEmailSettingsProps) {
+  const { t } = useI18n()
+  const a = t.academyAdmin
   const [testing, setTesting] = useState(false)
   const [smtpStatus, setSmtpStatus] = useState<"idle" | "success" | "error">("idle")
+
+  const emailEvents = [
+    { id: "course_approved", label: a.neEventCourseApproved },
+    { id: "new_task", label: a.neEventNewTask },
+    { id: "session_reminder_1h", label: a.neEventReminder1h },
+    { id: "session_reminder_10m", label: a.neEventReminder10m },
+    { id: "new_badge", label: a.neEventNewBadge },
+    { id: "level_up", label: a.neEventLevelUp },
+    { id: "streak_warning", label: a.neEventStreakWarning },
+    { id: "parent_report", label: a.neEventParentReport },
+    { id: "werd_reminder", label: a.neEventWerdReminder },
+  ]
+
+  const weekDays = [
+    { value: "sunday", label: a.neParentReportDay },
+    { value: "monday", label: a.neWeekdayMonday },
+    { value: "tuesday", label: a.neWeekdayTuesday },
+    { value: "wednesday", label: a.neWeekdayWednesday },
+    { value: "thursday", label: a.neWeekdayThursday },
+    { value: "friday", label: a.neWeekdayFriday },
+    { value: "saturday", label: a.neWeekdaySaturday },
+  ]
 
   const smtp = settings.smtp_config || {}
   
@@ -99,13 +102,13 @@ export function NotificationsEmailSettings({
                 <Bell className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <CardTitle className="text-lg">قنوات الإشعارات</CardTitle>
-                <CardDescription className="text-xs mt-0.5">تفعيل/تعطيل قنوات التنبيهات</CardDescription>
+                <CardTitle className="text-lg">{a.neNotificationChannels}</CardTitle>
+                <CardDescription className="text-xs mt-0.5">{a.neNotificationChannelsDesc}</CardDescription>
               </div>
             </div>
             <Button variant="ghost" size="sm" onClick={onReset} className="text-muted-foreground">
               <RotateCcw className="w-4 h-4 ml-1" />
-              استعادة
+              {a.gsRestore}
             </Button>
           </div>
         </CardHeader>
@@ -114,8 +117,8 @@ export function NotificationsEmailSettings({
             <div className="flex items-center gap-3">
               <Bell className="w-5 h-5 text-blue-500" />
               <div className="space-y-0.5">
-                <Label className="font-medium">الإشعارات داخل المنصة</Label>
-                <p className="text-xs text-muted-foreground">جرس الإشعارات في الواجهة</p>
+                <Label className="font-medium">{a.neInApp}</Label>
+                <p className="text-xs text-muted-foreground">{a.neInAppDesc}</p>
               </div>
             </div>
             <Switch
@@ -128,8 +131,8 @@ export function NotificationsEmailSettings({
             <div className="flex items-center gap-3">
               <Mail className="w-5 h-5 text-green-500" />
               <div className="space-y-0.5">
-                <Label className="font-medium">البريد الإلكتروني</Label>
-                <p className="text-xs text-muted-foreground">إرسال إيميلات للأحداث</p>
+                <Label className="font-medium">{a.neEmailLabel}</Label>
+                <p className="text-xs text-muted-foreground">{a.neEmailDesc}</p>
               </div>
             </div>
             <Switch
@@ -149,20 +152,20 @@ export function NotificationsEmailSettings({
                 <Send className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <CardTitle className="text-lg">إعدادات SMTP</CardTitle>
-                <CardDescription className="text-xs mt-0.5">خادم البريد الإلكتروني</CardDescription>
+                <CardTitle className="text-lg">{a.neSmtpSettings}</CardTitle>
+                <CardDescription className="text-xs mt-0.5">{a.neSmtpSettingsDesc}</CardDescription>
               </div>
             </div>
             {smtpStatus === "success" && (
               <Badge variant="default" className="bg-success text-success-foreground">
                 <CheckCircle className="w-3 h-3 ml-1" />
-                متصل
+                {a.neConnected}
               </Badge>
             )}
             {smtpStatus === "error" && (
               <Badge variant="destructive">
                 <XCircle className="w-3 h-3 ml-1" />
-                خطأ
+                {a.neErrorMsg}
               </Badge>
             )}
           </div>
@@ -218,7 +221,7 @@ export function NotificationsEmailSettings({
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label className="font-medium text-sm">من (الاسم)</Label>
+              <Label className="font-medium text-sm">{a.neFromNameLabel}</Label>
               <Input
                 value={smtp.fromName || ""}
                 onChange={(e) => updateSmtp({ fromName: e.target.value })}
@@ -227,7 +230,7 @@ export function NotificationsEmailSettings({
               />
             </div>
             <div className="space-y-2">
-              <Label className="font-medium text-sm">من (الإيميل)</Label>
+              <Label className="font-medium text-sm">{a.neFromEmailLabel}</Label>
               <Input
                 dir="ltr"
                 type="email"
@@ -249,7 +252,7 @@ export function NotificationsEmailSettings({
             ) : (
               <Send className="w-4 h-4 ml-2" />
             )}
-            اختبار الاتصال
+            {a.neTestConnection}
           </Button>
         </CardContent>
       </Card>
@@ -262,8 +265,8 @@ export function NotificationsEmailSettings({
               <Mail className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-lg">أحداث البريد</CardTitle>
-              <CardDescription className="text-xs mt-0.5">اختر الأحداث التي ترسل إيميلات</CardDescription>
+              <CardTitle className="text-lg">{a.neEmailEvents}</CardTitle>
+              <CardDescription className="text-xs mt-0.5">{a.neEmailEventsDesc}</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -294,17 +297,17 @@ export function NotificationsEmailSettings({
               <Clock className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-lg">التوقيتات</CardTitle>
-              <CardDescription className="text-xs mt-0.5">مواعيد التقارير والتذكيرات الدورية</CardDescription>
+              <CardTitle className="text-lg">{a.neTiming}</CardTitle>
+              <CardDescription className="text-xs mt-0.5">{a.neTimingDesc}</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent className="pt-6 space-y-6">
           <div className="p-4 bg-muted/50 rounded-xl space-y-4">
-            <Label className="font-medium">تقرير ولي الأمر الأسبوعي</Label>
+            <Label className="font-medium">{a.neParentReport}</Label>
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label className="text-sm text-muted-foreground">اليوم</Label>
+                <Label className="text-sm text-muted-foreground">{a.neParentReportDay}</Label>
                 <Select
                   value={settings.academy_notifications_parent_report_day || "sunday"}
                   onValueChange={(v) => onUpdate({ academy_notifications_parent_report_day: v })}
@@ -322,7 +325,7 @@ export function NotificationsEmailSettings({
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="text-sm text-muted-foreground">الساعة</Label>
+                <Label className="text-sm text-muted-foreground">{a.neParentReportTime}</Label>
                 <Input
                   type="time"
                   value={settings.academy_notifications_parent_report_time || "08:00"}
@@ -334,9 +337,9 @@ export function NotificationsEmailSettings({
           </div>
 
           <div className="p-4 bg-muted/50 rounded-xl space-y-4">
-            <Label className="font-medium">تذكير الورد اليومي</Label>
+            <Label className="font-medium">{a.neWerdReminder}</Label>
             <div className="space-y-2">
-              <Label className="text-sm text-muted-foreground">الساعة</Label>
+              <Label className="text-sm text-muted-foreground">{a.neParentReportTime}</Label>
               <Input
                 type="time"
                 value={settings.academy_notifications_werd_reminder_time || "06:00"}

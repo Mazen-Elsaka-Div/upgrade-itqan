@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AcademySettings } from "../hooks/use-academy-settings"
+import { useI18n } from "@/lib/i18n/context"
 
 interface SecurityPrivacySettingsProps {
   settings: AcademySettings
@@ -18,6 +19,8 @@ interface SecurityPrivacySettingsProps {
 }
 
 export function SecurityPrivacySettings({ settings, onUpdate, onReset }: SecurityPrivacySettingsProps) {
+  const { t } = useI18n()
+  const a = t.academyAdmin
   const ipWhitelist = settings.academy_security_ip_whitelist || []
 
   const updateIpWhitelist = (text: string) => {
@@ -38,9 +41,9 @@ export function SecurityPrivacySettings({ settings, onUpdate, onReset }: Securit
     if (settings.academy_security_password_numbers) score++
     if (settings.academy_security_password_symbols) score++
 
-    if (score <= 2) return { label: "ضعيفة", color: "bg-destructive", width: "w-1/4" }
-    if (score <= 4) return { label: "متوسطة", color: "bg-warning", width: "w-2/4" }
-    return { label: "قوية", color: "bg-success", width: "w-full" }
+    if (score <= 2) return { label: a.spStrengthWeak, color: "bg-destructive", width: "w-1/4" }
+    if (score <= 4) return { label: a.spStrengthMedium, color: "bg-warning", width: "w-2/4" }
+    return { label: a.spStrengthStrong, color: "bg-success", width: "w-full" }
   }
 
   const passwordStrength = getPasswordStrength()
@@ -56,20 +59,20 @@ export function SecurityPrivacySettings({ settings, onUpdate, onReset }: Securit
                 <Clock className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <CardTitle className="text-lg">الجلسات وتسجيل الدخول</CardTitle>
-                <CardDescription className="text-xs mt-0.5">إعدادات انتهاء الجلسة والحماية</CardDescription>
+                <CardTitle className="text-lg">{a.spSessionLogin}</CardTitle>
+                <CardDescription className="text-xs mt-0.5">{a.spSessionLoginDesc}</CardDescription>
               </div>
             </div>
             <Button variant="ghost" size="sm" onClick={onReset} className="text-muted-foreground">
               <RotateCcw className="w-4 h-4 ml-1" />
-              استعادة
+              {a.gsRestore}
             </Button>
           </div>
         </CardHeader>
         <CardContent className="pt-6 space-y-4">
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
-              <Label className="font-medium text-sm">مدة صلاحية الجلسة (دقيقة)</Label>
+              <Label className="font-medium text-sm">{a.spSessionTimeoutLabel}</Label>
               <Input
                 type="number"
                 value={settings.academy_security_session_timeout ?? 30}
@@ -80,7 +83,7 @@ export function SecurityPrivacySettings({ settings, onUpdate, onReset }: Securit
               />
             </div>
             <div className="space-y-2">
-              <Label className="font-medium text-sm">حد المحاولات الفاشلة</Label>
+              <Label className="font-medium text-sm">{a.spMaxLoginAttemptsLabel}</Label>
               <Input
                 type="number"
                 value={settings.academy_security_max_login_attempts ?? 5}
@@ -91,7 +94,7 @@ export function SecurityPrivacySettings({ settings, onUpdate, onReset }: Securit
               />
             </div>
             <div className="space-y-2">
-              <Label className="font-medium text-sm">مدة القفل (دقيقة)</Label>
+              <Label className="font-medium text-sm">{a.spLockoutDurationLabel}</Label>
               <Input
                 type="number"
                 value={settings.academy_security_lockout_duration ?? 15}
@@ -113,16 +116,16 @@ export function SecurityPrivacySettings({ settings, onUpdate, onReset }: Securit
               <Key className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-lg">المصادقة الثنائية (2FA)</CardTitle>
-              <CardDescription className="text-xs mt-0.5">طبقة حماية إضافية للأدمن</CardDescription>
+              <CardTitle className="text-lg">{a.spTwoFactor}</CardTitle>
+              <CardDescription className="text-xs mt-0.5">{a.spTwoFactorDesc}</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent className="pt-6 space-y-6">
           <div className="flex items-center justify-between p-4 bg-muted/50 rounded-xl">
             <div className="space-y-0.5">
-              <Label className="font-medium">تفعيل 2FA للأدمن</Label>
-              <p className="text-xs text-muted-foreground">طلب رمز تحقق عند تسجيل الدخول</p>
+              <Label className="font-medium">{a.spEnableTwoFactor}</Label>
+              <p className="text-xs text-muted-foreground">{a.spEnableTwoFactorDesc}</p>
             </div>
             <Switch
               checked={settings.academy_security_2fa_enabled ?? false}
@@ -134,14 +137,14 @@ export function SecurityPrivacySettings({ settings, onUpdate, onReset }: Securit
             <Alert className="bg-warning/10 border-warning/30">
               <AlertTriangle className="w-4 h-4 text-warning" />
               <AlertDescription className="text-sm text-warning">
-                يُنصح بشدة بتفعيل المصادقة الثنائية لحماية حسابات الإدارة.
+                {a.spTwoFactorWarning}
               </AlertDescription>
             </Alert>
           )}
 
           {settings.academy_security_2fa_enabled && (
             <div className="space-y-2">
-              <Label className="font-medium text-sm">طريقة التحقق</Label>
+              <Label className="font-medium text-sm">{a.spVerificationMethod}</Label>
               <Select
                 value={settings.academy_security_2fa_method || "email"}
                 onValueChange={(v) => onUpdate({ academy_security_2fa_method: v })}
@@ -167,16 +170,16 @@ export function SecurityPrivacySettings({ settings, onUpdate, onReset }: Securit
               <Globe className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-lg">IP Whitelist</CardTitle>
-              <CardDescription className="text-xs mt-0.5">تقييد الوصول للوحة الأدمن</CardDescription>
+              <CardTitle className="text-lg">{a.spIpWhitelist}</CardTitle>
+              <CardDescription className="text-xs mt-0.5">{a.spIpWhitelistDesc}</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent className="pt-6 space-y-6">
           <div className="flex items-center justify-between p-4 bg-muted/50 rounded-xl">
             <div className="space-y-0.5">
-              <Label className="font-medium">تفعيل IP Whitelist</Label>
-              <p className="text-xs text-muted-foreground">السماح فقط بـ IPs معينة</p>
+              <Label className="font-medium">{a.spEnableIpWhitelist}</Label>
+              <p className="text-xs text-muted-foreground">{a.spEnableIpWhitelistDesc}</p>
             </div>
             <Switch
               checked={settings.academy_security_ip_whitelist_enabled ?? false}
@@ -186,7 +189,7 @@ export function SecurityPrivacySettings({ settings, onUpdate, onReset }: Securit
 
           {settings.academy_security_ip_whitelist_enabled && (
             <div className="space-y-3">
-              <Label className="font-medium text-sm">قائمة IPs المسموح بها</Label>
+              <Label className="font-medium text-sm">{a.spAllowedIps}</Label>
               <Textarea
                 value={ipWhitelist.join("\n")}
                 onChange={(e) => updateIpWhitelist(e.target.value)}
@@ -195,7 +198,7 @@ export function SecurityPrivacySettings({ settings, onUpdate, onReset }: Securit
                 dir="ltr"
               />
               <p className="text-[11px] text-muted-foreground">
-                IP واحد في كل سطر. يدعم CIDR notation (مثل 192.168.1.0/24)
+                {a.spAllowedIpsHint}
               </p>
             </div>
           )}
@@ -210,15 +213,15 @@ export function SecurityPrivacySettings({ settings, onUpdate, onReset }: Securit
               <Upload className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-lg">حدود الاستخدام</CardTitle>
-              <CardDescription className="text-xs mt-0.5">Rate limiting وحدود الرفع</CardDescription>
+              <CardTitle className="text-lg">{a.spUsageLimits}</CardTitle>
+              <CardDescription className="text-xs mt-0.5">{a.spUsageLimitsDesc}</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent className="pt-6 space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label className="font-medium text-sm">حد رفع الملفات يومياً (GB)</Label>
+              <Label className="font-medium text-sm">{a.spDailyUploadLimit}</Label>
               <Input
                 type="number"
                 step="0.1"
@@ -228,10 +231,10 @@ export function SecurityPrivacySettings({ settings, onUpdate, onReset }: Securit
                 max={100}
                 className="h-11"
               />
-              <p className="text-[11px] text-muted-foreground">لكل مستخدم</p>
+              <p className="text-[11px] text-muted-foreground">{a.spDailyUploadLimitHint}</p>
             </div>
             <div className="space-y-2">
-              <Label className="font-medium text-sm">حد طلبات API (لكل ساعة)</Label>
+              <Label className="font-medium text-sm">{a.spRateLimit}</Label>
               <Input
                 type="number"
                 value={settings.academy_security_rate_limit ?? 1000}
@@ -253,14 +256,14 @@ export function SecurityPrivacySettings({ settings, onUpdate, onReset }: Securit
               <Lock className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-lg">سياسة كلمة السر</CardTitle>
-              <CardDescription className="text-xs mt-0.5">متطلبات قوة كلمة المرور</CardDescription>
+              <CardTitle className="text-lg">{a.spPasswordPolicy}</CardTitle>
+              <CardDescription className="text-xs mt-0.5">{a.spPasswordPolicyDesc}</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent className="pt-6 space-y-6">
           <div className="space-y-2">
-            <Label className="font-medium text-sm">طول كلمة السر الأدنى</Label>
+            <Label className="font-medium text-sm">{a.spMinPasswordLength}</Label>
             <Input
               type="number"
               value={settings.academy_security_password_min_length ?? 8}
@@ -273,28 +276,28 @@ export function SecurityPrivacySettings({ settings, onUpdate, onReset }: Securit
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-              <Label className="text-sm">أحرف كبيرة (A-Z)</Label>
+              <Label className="text-sm">{a.spUppercase}</Label>
               <Switch
                 checked={settings.academy_security_password_uppercase ?? true}
                 onCheckedChange={(v) => onUpdate({ academy_security_password_uppercase: v })}
               />
             </div>
             <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-              <Label className="text-sm">أحرف صغيرة (a-z)</Label>
+              <Label className="text-sm">{a.spLowercase}</Label>
               <Switch
                 checked={settings.academy_security_password_lowercase ?? true}
                 onCheckedChange={(v) => onUpdate({ academy_security_password_lowercase: v })}
               />
             </div>
             <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-              <Label className="text-sm">أرقام (0-9)</Label>
+              <Label className="text-sm">{a.spNumbers}</Label>
               <Switch
                 checked={settings.academy_security_password_numbers ?? true}
                 onCheckedChange={(v) => onUpdate({ academy_security_password_numbers: v })}
               />
             </div>
             <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-              <Label className="text-sm">رموز خاصة (!@#$)</Label>
+              <Label className="text-sm">{a.spSymbols}</Label>
               <Switch
                 checked={settings.academy_security_password_symbols ?? false}
                 onCheckedChange={(v) => onUpdate({ academy_security_password_symbols: v })}
@@ -305,7 +308,7 @@ export function SecurityPrivacySettings({ settings, onUpdate, onReset }: Securit
           {/* Password Strength Indicator */}
           <div className="p-4 bg-muted/30 rounded-xl space-y-2">
             <div className="flex items-center justify-between">
-              <Label className="text-sm text-muted-foreground">قوة كلمة السر المطلوبة</Label>
+              <Label className="text-sm text-muted-foreground">{a.spPasswordStrength}</Label>
               <span className="text-sm font-medium">{passwordStrength.label}</span>
             </div>
             <div className="h-2 bg-muted rounded-full overflow-hidden">
@@ -323,16 +326,16 @@ export function SecurityPrivacySettings({ settings, onUpdate, onReset }: Securit
               <FileText className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-lg">سجلات النشاط</CardTitle>
-              <CardDescription className="text-xs mt-0.5">تتبع الأنشطة والتغييرات</CardDescription>
+              <CardTitle className="text-lg">{a.spActivityLogs}</CardTitle>
+              <CardDescription className="text-xs mt-0.5">{a.spActivityLogsDesc}</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent className="pt-6 space-y-6">
           <div className="flex items-center justify-between p-4 bg-muted/50 rounded-xl">
             <div className="space-y-0.5">
-              <Label className="font-medium">تفعيل Activity Logs</Label>
-              <p className="text-xs text-muted-foreground">تسجيل كل الأنشطة الإدارية</p>
+              <Label className="font-medium">{a.spEnableActivityLogs}</Label>
+              <p className="text-xs text-muted-foreground">{a.spEnableActivityLogsDesc}</p>
             </div>
             <Switch
               checked={settings.academy_security_activity_logs ?? true}
@@ -342,7 +345,7 @@ export function SecurityPrivacySettings({ settings, onUpdate, onReset }: Securit
 
           {settings.academy_security_activity_logs !== false && (
             <div className="space-y-2">
-              <Label className="font-medium text-sm">الاحتفاظ بالسجلات (أيام)</Label>
+              <Label className="font-medium text-sm">{a.spLogsRetention}</Label>
               <Input
                 type="number"
                 value={settings.academy_security_logs_retention ?? 90}
@@ -351,7 +354,7 @@ export function SecurityPrivacySettings({ settings, onUpdate, onReset }: Securit
                 max={365}
                 className="h-11 max-w-xs"
               />
-              <p className="text-[11px] text-muted-foreground">السجلات الأقدم تُحذف تلقائياً</p>
+              <p className="text-[11px] text-muted-foreground">{a.spLogsRetentionHint}</p>
             </div>
           )}
         </CardContent>
