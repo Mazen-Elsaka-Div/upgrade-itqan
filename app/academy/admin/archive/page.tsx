@@ -13,7 +13,43 @@ interface Teacher { id: string; name: string; email: string }
 
 export default function AdminUnifiedArchivePage() {
   const { t, locale } = useI18n()
-  const a = t.academyAdmin.u
+  const uA = t.academyAdmin
+  const a = {
+    All: uA.unifiedArchiveAll,
+    Courses: uA.unifiedArchiveCourses,
+    Halaqat: uA.unifiedArchiveHalaqat,
+    Title: uA.unifiedArchiveTitle,
+    Desc: uA.unifiedArchiveDesc,
+    SearchPlaceholder: uA.unifiedArchiveSearchPlaceholder,
+    AllReasons: uA.unifiedArchiveAllReasons,
+    TeacherDeleted: uA.unifiedArchiveTeacherDeleted,
+    Manual: uA.unifiedArchiveManual,
+    NoContent: uA.unifiedArchiveNoContent,
+    NoResults: uA.unifiedArchiveNoResults,
+    ContentWillAppear: uA.unifiedArchiveContentWillAppear,
+    LoadError: uA.unifiedArchiveLoadError,
+    Retry: uA.unifiedArchiveRetry,
+    TypeAndName: uA.unifiedArchiveTypeAndName,
+    OriginalTeacher: uA.unifiedArchiveOriginalTeacher,
+    Enrolled: uA.unifiedArchiveEnrolled,
+    ArchiveReason: uA.unifiedArchiveArchiveReason,
+    ArchivedBy: uA.unifiedArchiveArchivedBy,
+    Date: uA.unifiedArchiveDate,
+    Actions: uA.unifiedArchiveActions,
+    Course: uA.unifiedArchiveCourse,
+    Halaqah: uA.unifiedArchiveHalaqah,
+    Lessons: uA.unifiedArchiveLessons,
+    Completed: uA.unifiedArchiveCompleted,
+    RestoreTitle: uA.unifiedArchiveRestoreTitle,
+    OriginalTeacherLabel: uA.unifiedArchiveOriginalTeacherLabel,
+    AssignNewTeacher: uA.unifiedArchiveAssignNewTeacher,
+    Optional: uA.unifiedArchiveOptional,
+    NoTeacherHint: uA.unifiedArchiveNoTeacherHint,
+    RestoreError: uA.unifiedArchiveRestoreError,
+    ConnectionError: uA.unifiedArchiveConnectionError,
+    Restore: uA.unifiedArchiveRestore,
+    NoTeacher: uA.unifiedArchiveNoTeacher
+  }
   const dateLocale = locale === 'ar' ? 'ar-EG' : 'en-US'
 
   const [items, setItems] = useState<ArchiveItem[]>([])
