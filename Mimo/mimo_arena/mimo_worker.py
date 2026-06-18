@@ -228,38 +228,39 @@ class MimoWorker:
         self.last_beat = time.time()
         run_cwd = cwd or str(config.ROOT)
 
-        base_flags = ["--dangerously-skip-permissions", "--format", "json"]
-        model = (model or "").strip()
-        if model:
-            base_flags += ["--model", model]
+        # NOTE: We intentionally do NOT pass `--model` to mimo. MIMO Arena runs
+        # the local `mimo` CLI, which uses whatever model is configured in the
+        # terminal/mimo itself — there is no per-persona API model here. Passing
+        # a model (e.g. a stray "SAYED" setting) only triggers
+        # ProviderModelNotFoundError. The `model` arg is accepted for API
+        # compatibility but ignored on purpose.
         cont = ["--continue"] if self._session_started else []
 
-        # Primary invocation: attach to this worker's `mimo serve` session.
-        attached_cmd = ([config.MIMO_BIN, "run", message,
-                         "--attach", f"http://{config.HOST}:{self.port}"]
-                        + base_flags + cont)
-        # Fallback: a standalone `mimo run` (no --attach). Used when the attached
-        # run returns nothing — e.g. when the reply streams out of the serve
-        # process instead of this invocation. This mirrors the standalone CLI.
-        standalone_cmd = [config.MIMO_BIN, "run", message] + base_flags + cont
+        def build(*, attach: bool) -> list[str]:
+            c = [config.MIMO_BIN, "run", message]
+            if attach:
+                c += ["--attach", f"http://{config.HOST}:{self.port}"]
+            c += ["--dangerously-skip-permissions", "--format", "json"]
+            return c + cont
 
         task_timeout = float(settings.get("task.timeout", config.TASK_TIMEOUT))
         try:
+            # 1) Attach to this worker's `mimo serve` session.
             out, raw_lines, err_text, code = self._stream_run(
-                attached_cmd, run_cwd, on_chunk, task_timeout)
+                build(attach=True), run_cwd, on_chunk, task_timeout)
 
-            # If the attached run produced nothing readable, retry standalone.
+            # 2) If nothing came back, retry as a standalone `mimo run` — the
+            # reply may stream out of the serve process instead of this call.
             if not out:
-                self._dump_raw(message, attached_cmd, raw_lines, err_text, code)
-                out2, raw2, err2, code2 = self._stream_run(
-                    standalone_cmd, run_cwd, on_chunk, task_timeout)
-                if out2:
-                    out = out2
-                else:
-                    self._dump_raw(message, standalone_cmd, raw2, err2, code2)
-                    out = (f"[{self.id}] produced no readable output "
-                           f"(mimo exit {code}/{code2}). "
-                           f"Raw saved to {self._raw_debug_file().name}.")
+                self._dump_raw(message, build(attach=True),
+                               raw_lines, err_text, code)
+                out, raw_lines, err_text, code = self._stream_run(
+                    build(attach=False), run_cwd, on_chunk, task_timeout)
+
+            if not out:
+                out = (f"[{self.id}] produced no readable output "
+                       f"(mimo exit {code}). "
+                       f"Raw saved to {self._raw_debug_file().name}.")
 
             self._session_started = True
             self.last_output = out
