@@ -17,9 +17,9 @@ interface LiveSessionsSettingsProps {
 }
 
 const videoProviders = [
-  { id: "livekit", name: "LiveKit", description: "مدمج مع المنصة" },
-  { id: "zoom", name: "Zoom", description: "روابط خارجية" },
-  { id: "google_meet", name: "Google Meet", description: "روابط خارجية" },
+  { id: "livekit", name: "LiveKit", description: "lsIntegrated" },
+  { id: "zoom", name: "Zoom", description: "lsExternalLinks" },
+  { id: "google_meet", name: "Google Meet", description: "lsExternalLinks" },
 ]
 
 export function LiveSessionsSettings({ settings, onUpdate, onReset }: LiveSessionsSettingsProps) {

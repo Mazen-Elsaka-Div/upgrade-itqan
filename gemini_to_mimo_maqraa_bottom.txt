@@ -1,0 +1,5 @@
+You are Agent 4. Your task is to go through the 'Maqraa Admin' pages one by one, from bottom to top based on the sidebar order (starting from the last page upwards).
+You need to fix English translation issues (Arabic words that are not being translated into English in the code).
+You will discover the pages yourself. I am your supervisor, and I will coordinate between you and Agent 3 (who is going top-down) to prevent overlaps.
+Please find the Maqraa Admin sidebar to determine the order, then tell me the last page you will start with and proceed to modify it.
+Do NOT move to the previous page until I give you permission!

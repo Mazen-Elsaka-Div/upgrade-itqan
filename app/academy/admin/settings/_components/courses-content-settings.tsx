@@ -30,11 +30,11 @@ const videoQualities = [
 ]
 
 const watermarkPositions = [
-  { value: "top-left", label: "أعلى يسار" },
-  { value: "top-right", label: "أعلى يمين" },
-  { value: "bottom-left", label: "أسفل يسار" },
-  { value: "bottom-right", label: "أسفل يمين" },
-  { value: "center", label: "الوسط" },
+  { value: "top-left", label: "Top Left" },
+  { value: "top-right", label: "Top Right" },
+  { value: "bottom-left", label: "Bottom Left" },
+  { value: "bottom-right", label: "Bottom Right" },
+  { value: "center", label: "Center" },
 ]
 
 const defaultFormats = ["mp4", "webm", "mov", "pdf", "docx", "pptx", "mp3", "wav"]
@@ -284,7 +284,7 @@ export function CoursesContentSettings({ settings, onUpdate, onReset }: CoursesC
                   <Input
                     value={settings.academy_courses_watermark_text || ""}
                     onChange={(e) => onUpdate({ academy_courses_watermark_text: e.target.value })}
-                    placeholder="أكاديمية إتقان"
+                    placeholder="Itqan Academy"
                     className="h-10"
                   />
                 </div>

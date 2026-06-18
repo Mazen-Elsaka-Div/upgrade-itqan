@@ -100,9 +100,15 @@ from tkinter import scrolledtext
 # ──────────────────────────────────────────────────────────────────────────────
 BASH = r"C:\Program Files\Git\bin\bash.exe"          # Git Bash on Windows
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-GEMINI_FILE = os.path.join(ROOT_DIR, "gemini_to_mimo.txt")  # IPC: Gemini -> MIMO
-REPLY_FILE = os.path.join(ROOT_DIR, "mimo_to_gemini.txt")   # IPC: MIMO -> Gemini
-MSG_FILE = os.path.join(ROOT_DIR, "_mimo_msg.txt")          # temp message buffer
+
+import sys
+INSTANCE_SUFFIX = ""
+if len(sys.argv) > 1:
+    INSTANCE_SUFFIX = f"_{sys.argv[1]}"
+
+GEMINI_FILE = os.path.join(ROOT_DIR, f"gemini_to_mimo{INSTANCE_SUFFIX}.txt")  # IPC: Gemini -> MIMO
+REPLY_FILE = os.path.join(ROOT_DIR, "mimo_to_gemini_team.txt")   # IPC: MIMO -> Gemini (SHARED FILE)
+MSG_FILE = os.path.join(ROOT_DIR, f"_mimo_msg{INSTANCE_SUFFIX}.txt")          # temp message buffer
 
 # Appended after every MIMO reply so Gemini keeps the discussion alive and does
 # not stop early. Gemini must keep iterating until it is truly finished, then
@@ -398,7 +404,10 @@ class ChatUI:
         self.busy = False
         self.turn = 0          # how many Gemini<->MIMO exchanges so far
 
-        root.title("Gemini × MIMO — Chat Arena")
+        title = "Gemini × MIMO — Chat Arena"
+        if INSTANCE_SUFFIX:
+            title += f" [Instance: {sys.argv[1]}]"
+        root.title(title)
         root.geometry("960x700")
         root.configure(bg="#0f172a")
 
@@ -414,8 +423,12 @@ class ChatUI:
 
     # ── build widgets ──────────────────────────────────────────────────────────
     def _build(self):
+        title_text = "🤖  Gemini  ×  MIMO  —  Chat Arena"
+        if INSTANCE_SUFFIX:
+            title_text += f" (Instance: {sys.argv[1]})"
+            
         tk.Label(
-            self.root, text="🤖  Gemini  ×  MIMO  —  Chat Arena",
+            self.root, text=title_text,
             font=("Segoe UI", 16, "bold"), fg="#e94560", bg="#0f172a", pady=10,
         ).pack(fill=tk.X)
 
@@ -521,8 +534,11 @@ class ChatUI:
             # CONTINUE protocol so Gemini does NOT quit early: it must either
             # send the next directive or explicitly write DONE.
             try:
-                with open(REPLY_FILE, "w", encoding="utf-8") as f:
-                    f.write(f"[MIMO · TURN {turn} REPLY]\n")
+                # Use append mode "a" so multiple agents write to the same shared file
+                with open(REPLY_FILE, "a", encoding="utf-8") as f:
+                    instance_name = sys.argv[1] if len(sys.argv) > 1 else "MAIN"
+                    f.write(f"\n====================================\n")
+                    f.write(f"[MIMO {instance_name} · TURN {turn} REPLY]\n")
                     f.write(reply.rstrip() + "\n")
                     f.write(CONTINUE_FOOTER)
             except OSError as e:
