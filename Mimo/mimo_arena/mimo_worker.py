@@ -53,13 +53,69 @@ def _port_open(port: int) -> bool:
         return s.connect_ex((config.HOST, port)) == 0
 
 
+# Event "type" values that carry tool/diagnostic noise rather than the
+# assistant's natural-language answer. We skip these when pulling text.
+_NON_TEXT_TYPES = {
+    "tool", "tool_use", "tool_call", "tool_result", "tool-call", "tool-result",
+    "reasoning", "thinking", "step-start", "step-finish", "usage", "error",
+}
+
+
 def _text_from_event(obj: dict) -> Optional[str]:
-    """Pull the assistant text out of one mimo JSON event, if present."""
-    if isinstance(obj.get("text"), str):
+    """Pull the assistant text out of one mimo JSON event, if present.
+
+    mimo's `--format json` schema has shifted across versions, so instead of
+    hard-coding one shape we check every known location and fall back to a
+    recursive search. This is what prevents the dreaded empty reply when the
+    event envelope changes.
+    """
+    if not isinstance(obj, dict):
+        return None
+
+    etype = str(obj.get("type") or obj.get("event") or "").lower()
+    if etype in _NON_TEXT_TYPES:
+        return None
+
+    # 1) Direct text on the event.
+    if isinstance(obj.get("text"), str) and obj["text"]:
         return obj["text"]
+
+    # 2) Streaming delta shapes: {"delta": "..."} or {"delta": {"text": "..."}}.
+    delta = obj.get("delta")
+    if isinstance(delta, str) and delta:
+        return delta
+    if isinstance(delta, dict) and isinstance(delta.get("text"), str):
+        return delta["text"]
+
+    # 3) A single part: {"part": {"type": "text", "text": "..."}}.
     part = obj.get("part")
-    if isinstance(part, dict) and isinstance(part.get("text"), str):
-        return part["text"]
+    if isinstance(part, dict):
+        t = _text_from_event(part)
+        if t:
+            return t
+
+    # 4) content / parts arrays (and message.content), as on assistant events.
+    for key in ("content", "parts"):
+        val = obj.get(key)
+        if isinstance(val, str) and val:
+            return val
+        if isinstance(val, list):
+            collected = [_text_from_event(p) if isinstance(p, dict) else (p if isinstance(p, str) else None)
+                         for p in val]
+            joined = "".join(c for c in collected if c)
+            if joined:
+                return joined
+
+    # 5) Nested envelopes: {"message": {...}}, {"data": {...}}, {"response": {...}}.
+    for key in ("message", "data", "response", "output"):
+        val = obj.get(key)
+        if isinstance(val, str) and val:
+            return val
+        if isinstance(val, dict):
+            t = _text_from_event(val)
+            if t:
+                return t
+
     return None
 
 
@@ -131,6 +187,27 @@ class MimoWorker:
         config.ensure_dirs()
         return config.BRIDGE_DIR / f"_msg_{self.id}.txt"
 
+    def _raw_debug_file(self) -> Path:
+        config.ensure_dirs()
+        return config.BRIDGE_DIR / f"_raw_{self.id}.txt"
+
+    def _dump_raw(self, message: str, cmd: list[str], raw_lines: list[str],
+                  err_text: str, code: Optional[int]) -> None:
+        """Persist the last empty-reply exchange so the real mimo JSON schema
+        can be inspected and the parser tuned if needed."""
+        try:
+            with open(self._raw_debug_file(), "w", encoding="utf-8") as f:
+                f.write(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] exit={code}\n")
+                f.write(f"CMD: {' '.join(cmd)}\n")
+                f.write(f"MSG: {message}\n")
+                f.write(f"STDOUT LINES ({len(raw_lines)}):\n")
+                f.write("\n".join(raw_lines) if raw_lines else "(none)")
+                f.write("\n----- STDERR -----\n")
+                f.write(err_text or "(none)")
+                f.write("\n")
+        except OSError:
+            pass
+
     def ask(self, message: str, on_chunk: Optional[Callable[[str], None]] = None,
             cwd: Optional[str] = None, model: Optional[str] = None) -> str:
         """Send a prompt and stream the reply.
@@ -164,6 +241,8 @@ class MimoWorker:
 
         task_timeout = float(settings.get("task.timeout", config.TASK_TIMEOUT))
         chunks: list[str] = []
+        raw_lines: list[str] = []   # every stdout line, for fallback parsing
+        plain_lines: list[str] = []  # lines that weren't valid JSON events
         proc: Optional[subprocess.Popen] = None
         try:
             proc = subprocess.Popen(
@@ -179,9 +258,15 @@ class MimoWorker:
                     if time.time() > deadline:
                         raise subprocess.TimeoutExpired(cmd, task_timeout)
                     continue
+                raw_lines.append(line)
                 try:
                     obj = json.loads(line)
                 except Exception:
+                    # Not a JSON event line — keep it as a plain-text fallback in
+                    # case mimo ignored --format json or printed a plain message.
+                    plain_lines.append(line)
+                    if time.time() > deadline:
+                        raise subprocess.TimeoutExpired(cmd, task_timeout)
                     continue
                 if isinstance(obj, dict):
                     t = _text_from_event(obj)
@@ -195,10 +280,29 @@ class MimoWorker:
                 if time.time() > deadline:
                     raise subprocess.TimeoutExpired(cmd, task_timeout)
             proc.wait(timeout=10)
+
             out = strip_ansi("".join(chunks)).strip()
+
+            # ── empty-reply recovery ────────────────────────────────────────
+            # If the per-line stream yielded no text, the event schema may have
+            # changed or mimo emitted multi-line / plain output. Re-parse the
+            # whole buffer, then fall back to plain lines, then stderr — and
+            # always dump the raw output so the real schema can be inspected.
             if not out:
-                err = proc.stderr.read() if proc.stderr else ""
-                out = strip_ansi(err or "").strip()
+                full_raw = "\n".join(raw_lines)
+                out = extract_text(full_raw)
+            if not out and plain_lines:
+                out = strip_ansi("\n".join(plain_lines)).strip()
+            err_text = ""
+            if not out:
+                err_text = strip_ansi((proc.stderr.read() if proc.stderr else "") or "").strip()
+                out = err_text
+            if not out:
+                self._dump_raw(message, cmd, raw_lines, err_text, proc.returncode)
+                out = (f"[{self.id}] produced no readable output "
+                       f"(mimo exit {proc.returncode}). "
+                       f"Raw saved to {self._raw_debug_file().name}.")
+
             self._session_started = True
             self.last_output = out
             return out
