@@ -11,6 +11,7 @@ import {
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { CourseCardsGridSkeleton } from "@/components/admin/skeletons"
+import { useI18n } from '@/lib/i18n/context'
 
 type CourseStatus = 'draft' | 'pending_review' | 'published' | 'archived' | 'rejected'
 type Level = 'beginner' | 'intermediate' | 'advanced'
@@ -58,45 +59,50 @@ interface FormState {
   level: Level
 }
 
-const emptyForm: FormState = {
-  title: '',
-  description: '',
-  thumbnail_url: '',
-  category_id: '',
-  teacher_id: '',
-  status: 'draft',
-  level: 'beginner',
-}
-
-const STATUS_LABELS: Record<CourseStatus, string> = {
-  published: 'منشورة',
-  draft: 'مسودة',
-  pending_review: 'بانتظار المراجعة',
-  archived: 'مؤرشفة',
-  rejected: 'مرفوضة',
-}
-
-const STATUS_BADGE_CLS: Record<CourseStatus, string> = {
-  published: 'bg-green-500/90 text-white border-green-400',
-  pending_review: 'bg-amber-500/90 text-white border-amber-400',
-  rejected: 'bg-red-500/90 text-white border-red-400',
-  archived: 'bg-gray-700/80 text-white border-gray-500',
-  draft: 'bg-slate-700/70 text-white border-slate-500',
-}
-
-const LEVEL_LABELS: Record<Level, string> = {
-  beginner: 'مبتدئ',
-  intermediate: 'متوسط',
-  advanced: 'متقدم',
-}
-
-const LEVEL_BADGE_CLS: Record<Level, string> = {
-  beginner: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
-  intermediate: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-  advanced: 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400',
-}
-
 export default function AdminCoursesPage() {
+  const { t, locale } = useI18n()
+  const a = t.academyAdmin
+
+  const STATUS_LABELS: Record<CourseStatus, string> = {
+    published: a.courseStatus.published,
+    draft: a.courseStatus.draft,
+    pending_review: a.courseStatus.pendingReview,
+    archived: a.courseStatus.archived,
+    rejected: a.courseStatus.rejected,
+  }
+
+  const STATUS_BADGE_CLS: Record<CourseStatus, string> = {
+    published: 'bg-green-500/90 text-white border-green-400',
+    pending_review: 'bg-amber-500/90 text-white border-amber-400',
+    rejected: 'bg-red-500/90 text-white border-red-400',
+    archived: 'bg-gray-700/80 text-white border-gray-500',
+    draft: 'bg-slate-700/70 text-white border-slate-500',
+  }
+
+  const LEVEL_LABELS: Record<Level, string> = {
+    beginner: a.courseLevel.beginner,
+    intermediate: a.courseLevel.intermediate,
+    advanced: a.courseLevel.advanced,
+  }
+
+  const LEVEL_BADGE_CLS: Record<Level, string> = {
+    beginner: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
+    intermediate: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+    advanced: 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400',
+  }
+
+  const dateLocale = locale === 'ar' ? 'ar-EG' : 'en-US'
+
+  const emptyForm: FormState = {
+    title: '',
+    description: '',
+    thumbnail_url: '',
+    category_id: '',
+    teacher_id: '',
+    status: 'draft',
+    level: 'beginner',
+  }
+
   const [courses, setCourses] = useState<Course[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [teachers, setTeachers] = useState<Teacher[]>([])
@@ -125,11 +131,11 @@ export default function AdminCoursesPage() {
         const data = await res.json()
         setCourses(Array.isArray(data) ? data : data.data || [])
       } else {
-        toast.error('تعذر تحميل قائمة الدورات')
+        toast.error(a.failedToLoadCourses)
       }
     } catch (error) {
       console.error('Failed to fetch courses:', error)
-      toast.error('فشل الاتصال بالخادم')
+      toast.error(a.serverConnectionFailed)
     } finally {
       setLoading(false)
     }
@@ -149,8 +155,6 @@ export default function AdminCoursesPage() {
 
   const fetchTeachers = async () => {
     try {
-      // Only fetch teachers that are eligible to be assigned (approved + active).
-      // Pending / rejected / suspended teachers must NOT appear in the dropdown.
       const res = await fetch('/api/academy/admin/teachers?assignable=1')
       if (res.ok) {
         const json = await res.json()
@@ -162,7 +166,6 @@ export default function AdminCoursesPage() {
   }
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchCourses()
     fetchCategories()
     fetchTeachers()
@@ -199,11 +202,11 @@ export default function AdminCoursesPage() {
     const file = e.target.files?.[0]
     if (!file) return
     if (!file.type.startsWith('image/')) {
-      toast.error('يجب اختيار ملف صورة')
+      toast.error(a.mustSelectImage)
       return
     }
     if (file.size > 4 * 1024 * 1024) {
-      toast.error('الحجم الأقصى للصورة 4MB')
+      toast.error(a.maxImageSize4MB)
       return
     }
 
@@ -214,15 +217,15 @@ export default function AdminCoursesPage() {
       const res = await fetch('/api/upload', { method: 'POST', body: fd })
       const json = await res.json().catch(() => ({}))
       if (!res.ok) {
-        const errMsg = json.details ? `${json.error}: ${json.details}` : (json.error || 'فشل رفع الصورة')
+        const errMsg = json.details ? `${json.error}: ${json.details}` : (json.error || a.failedToUploadImage)
         toast.error(errMsg)
         return
       }
       setForm(prev => ({ ...prev, thumbnail_url: json.url }))
-      toast.success('تم رفع الصورة')
+      toast.success(a.imageUploaded)
     } catch (err) {
       console.error(err)
-      toast.error('فشل رفع الصورة')
+      toast.error(a.failedToUploadImage)
     } finally {
       setUploadingThumb(false)
       if (fileInputRef.current) fileInputRef.current.value = ''
@@ -232,11 +235,11 @@ export default function AdminCoursesPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.title.trim()) {
-      toast.error('اسم الدورة مطلوب')
+      toast.error(a.courseNameRequired)
       return
     }
     if (!form.teacher_id) {
-      toast.error('اختر مدرساً للدورة')
+      toast.error(a.selectTeacher)
       return
     }
 
@@ -262,24 +265,24 @@ export default function AdminCoursesPage() {
       })
       const json = await res.json().catch(() => ({}))
       if (!res.ok) {
-        toast.error(json.error || json.detail || 'حدث خطأ أثناء الحفظ')
+        toast.error(json.error || json.detail || a.saveError)
         return
       }
-      toast.success(editItem ? 'تم تحديث الدورة' : 'تم إنشاء الدورة')
+      toast.success(editItem ? a.courseUpdated : a.courseCreated)
       setShowModal(false)
       setEditItem(null)
       setForm(emptyForm)
       fetchCourses()
     } catch (err) {
       console.error(err)
-      toast.error('حدث خطأ أثناء الحفظ')
+      toast.error(a.saveError)
     } finally {
       setSaving(false)
     }
   }
 
   const handleDelete = async (course: Course) => {
-    if (!confirm(`حذف الدورة "${course.title}" نهائياً؟ لا يمكن التراجع عن هذا الإجراء.`)) return
+    if (!confirm(a.confirmDeleteCourse.replace('{title}', course.title))) return
     setDeletingId(course.id)
     try {
       let res = await fetch(`/api/academy/admin/courses/${course.id}`, { method: 'DELETE' })
@@ -287,17 +290,17 @@ export default function AdminCoursesPage() {
         const json = await res.json().catch(() => ({}))
         const enrolledCount = json?.enrolled_count
         const forceMsg = enrolledCount
-          ? `يوجد ${enrolledCount} طالب مسجل في الدورة. هل تود حذفها فعلاً؟ ستفقد السجلات التعليمية للطلاب.`
-          : (json?.message || 'لا يمكن حذف الدورة. هل تود المحاولة على أي حال؟')
+          ? a.confirmForceDelete.replace('{count}', enrolledCount)
+          : (json?.message || a.cannotDeleteCourse)
         if (!confirm(forceMsg)) return
         res = await fetch(`/api/academy/admin/courses/${course.id}?force=1`, { method: 'DELETE' })
       }
       if (res.ok) {
-        toast.success('تم حذف الدورة')
+        toast.success(a.courseDeleted)
         setCourses(prev => prev.filter(c => c.id !== course.id))
       } else {
         const json = await res.json().catch(() => ({}))
-        toast.error(json?.error || json?.message || 'تعذر حذف الدورة')
+        toast.error(json?.error || json?.message || a.failedToDeleteCourse)
       }
     } finally {
       setDeletingId(null)
@@ -306,9 +309,7 @@ export default function AdminCoursesPage() {
 
   const handleToggleArchive = async (course: Course) => {
     const willDeactivate = course.is_active !== false
-    const msg = willDeactivate
-      ? 'تعطيل الدورة؟ ستختفي من الطلاب الجدد، أما الحاليون فيستكملون عادي.'
-      : 'إعادة تفعيل الدورة؟ ستظهر للطلاب الجدد من جديد.'
+    const msg = willDeactivate ? a.confirmDisableCourse : a.confirmEnableCourse
     if (!confirm(msg)) return
     setArchivingId(course.id)
     try {
@@ -318,11 +319,11 @@ export default function AdminCoursesPage() {
         body: JSON.stringify({ is_active: !willDeactivate }),
       })
       if (res.ok) {
-        toast.success(willDeactivate ? 'تم تعطيل الدورة' : 'تم تفعيل الدورة')
+        toast.success(willDeactivate ? a.courseDisabled : a.courseEnabled)
         fetchCourses()
       } else {
         const json = await res.json().catch(() => ({}))
-        toast.error(json?.error || 'حدث خطأ')
+        toast.error(json?.error || a.saveError)
       }
     } finally {
       setArchivingId(null)
@@ -364,10 +365,10 @@ export default function AdminCoursesPage() {
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <BookOpen className="w-7 h-7 text-blue-600" />
-            إدارة الدورات
+            {a.coursesTitle}
           </h1>
           <p className="text-muted-foreground mt-1 text-sm">
-            إنشاء وتعديل وأرشفة دورات الأكاديمية لجميع المدرسين
+            {a.coursesDesc}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -376,39 +377,39 @@ export default function AdminCoursesPage() {
             className="inline-flex items-center justify-center gap-2 px-4 py-2.5 border border-border bg-card hover:bg-muted text-foreground font-bold rounded-xl transition-colors"
           >
             <Archive className="w-4 h-4" />
-            الأرشيف
+            {t.administration}
           </Link>
           <button
             onClick={openAdd}
             className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors shadow-sm"
           >
             <Plus className="w-5 h-5" />
-            دورة جديدة
+            {a.newCourse}
           </button>
         </div>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-        <StatCard icon={<BookOpen className="w-5 h-5 text-blue-500" />} value={stats.total} label="إجمالي الدورات" />
-        <StatCard icon={<GraduationCap className="w-5 h-5 text-green-500" />} value={stats.published} label="منشورة" />
-        <StatCard icon={<Clock className="w-5 h-5 text-amber-500" />} value={stats.pending} label="بانتظار المراجعة" />
-        <StatCard icon={<FileText className="w-5 h-5 text-slate-500" />} value={stats.draft} label="مسودات" />
-        <StatCard icon={<Archive className="w-5 h-5 text-gray-500" />} value={stats.archived} label="مؤرشفة" />
-        <StatCard icon={<Users className="w-5 h-5 text-purple-500" />} value={stats.students} label="إجمالي الطلاب" />
+        <StatCard icon={<BookOpen className="w-5 h-5 text-blue-500" />} value={stats.total} label={a.totalCourses} />
+        <StatCard icon={<GraduationCap className="w-5 h-5 text-green-500" />} value={stats.published} label={a.courseStatus.published} />
+        <StatCard icon={<Clock className="w-5 h-5 text-amber-500" />} value={stats.pending} label={a.courseStatus.pendingReview} />
+        <StatCard icon={<FileText className="w-5 h-5 text-slate-500" />} value={stats.draft} label={a.drafts} />
+        <StatCard icon={<Archive className="w-5 h-5 text-gray-500" />} value={stats.archived} label={a.courseStatus.archived} />
+        <StatCard icon={<Users className="w-5 h-5 text-purple-500" />} value={stats.students} label={a.totalStudents} />
       </div>
 
       {stats.pending > 0 && (
         <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-3 flex items-center gap-2 text-sm text-amber-700 dark:text-amber-300">
           <ShieldCheck className="w-4 h-4 shrink-0" />
-          <span>{stats.pending} دورة بانتظار مراجعتك — اضغط &quot;مراجعة&quot; على البطاقة للموافقة أو الرفض.</span>
+          <span>{a.pendingReviewCount.replace('{count}', String(stats.pending))}</span>
         </div>
       )}
 
       {stats.rejected > 0 && (
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-3 flex items-center gap-2 text-sm text-red-700 dark:text-red-300">
           <XCircle className="w-4 h-4 shrink-0" />
-          <span>{stats.rejected} دورة مرفوضة — في انتظار أن يعدّلها المدرس ويعيد إرسالها.</span>
+          <span>{a.rejectedCount.replace('{count}', String(stats.rejected))}</span>
         </div>
       )}
 
@@ -418,7 +419,7 @@ export default function AdminCoursesPage() {
           <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             type="text"
-            placeholder="ابحث بعنوان الدورة، الوصف، المدرس، التصنيف..."
+            placeholder={a.searchCoursesPlaceholder}
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="w-full pr-9 pl-3 py-2.5 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
@@ -430,36 +431,36 @@ export default function AdminCoursesPage() {
             value={statusFilter}
             onChange={v => setStatusFilter(v as any)}
             options={[
-              { value: 'all', label: 'كل الحالات' },
-              { value: 'published', label: 'منشورة' },
-              { value: 'draft', label: 'مسودة' },
-              { value: 'pending_review', label: 'بانتظار المراجعة' },
-              { value: 'rejected', label: 'مرفوضة' },
-              { value: 'archived', label: 'مؤرشفة' },
+              { value: 'all', label: a.allStatuses },
+              { value: 'published', label: a.courseStatus.published },
+              { value: 'draft', label: a.courseStatus.draft },
+              { value: 'pending_review', label: a.courseStatus.pendingReview },
+              { value: 'rejected', label: a.courseStatus.rejected },
+              { value: 'archived', label: a.courseStatus.archived },
             ]}
           />
           <FilterSelect
             value={levelFilter}
             onChange={v => setLevelFilter(v as any)}
             options={[
-              { value: 'all', label: 'كل المستويات' },
-              { value: 'beginner', label: 'مبتدئ' },
-              { value: 'intermediate', label: 'متوسط' },
-              { value: 'advanced', label: 'متقدم' },
+              { value: 'all', label: a.allLevels },
+              { value: 'beginner', label: a.courseLevel.beginner },
+              { value: 'intermediate', label: a.courseLevel.intermediate },
+              { value: 'advanced', label: a.courseLevel.advanced },
             ]}
           />
           {categories.length > 0 && (
             <FilterSelect
               value={categoryFilter}
               onChange={v => setCategoryFilter(v)}
-              options={[{ value: 'all', label: 'كل التصنيفات' }, ...categories.map(c => ({ value: c.id, label: c.name }))]}
+              options={[{ value: 'all', label: a.allCategories }, ...categories.map(c => ({ value: c.id, label: c.name }))]}
             />
           )}
           {teachers.length > 0 && (
             <FilterSelect
               value={teacherFilter}
               onChange={v => setTeacherFilter(v)}
-              options={[{ value: 'all', label: 'كل المدرسين' }, ...teachers.map(t => ({ value: t.id, label: t.name }))]}
+              options={[{ value: 'all', label: a.allTeachers }, ...teachers.map(t => ({ value: t.id, label: t.name }))]}
             />
           )}
         </div>
@@ -473,13 +474,13 @@ export default function AdminCoursesPage() {
           <BookOpen className="w-14 h-14 mx-auto mb-4 text-muted-foreground opacity-30" />
           {courses.length === 0 ? (
             <>
-              <p className="text-muted-foreground font-medium mb-4">لا توجد دورات بعد</p>
+              <p className="text-muted-foreground font-medium mb-4">{a.noCoursesYet}</p>
               <button onClick={openAdd} className="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition-colors">
-                <Plus className="w-4 h-4 inline ml-1" /> أضف أول دورة
+                <Plus className="w-4 h-4 inline ml-1" /> {a.addFirstCourse}
               </button>
             </>
           ) : (
-            <p className="text-muted-foreground font-medium">لا توجد نتائج تطابق الفلاتر الحالية</p>
+            <p className="text-muted-foreground font-medium">{a.noResultsMatchFilters}</p>
           )}
         </div>
       ) : (
@@ -493,6 +494,7 @@ export default function AdminCoursesPage() {
               onDelete={() => handleDelete(course)}
               archiving={archivingId === course.id}
               deleting={deletingId === course.id}
+              a={a}
             />
           ))}
         </div>
@@ -508,13 +510,12 @@ export default function AdminCoursesPage() {
             <div className="flex items-center justify-between p-6 border-b border-border sticky top-0 bg-card z-10">
               <h3 className="text-lg font-bold flex items-center gap-2">
                 {editItem ? <Edit2 className="w-5 h-5 text-blue-600" /> : <Plus className="w-5 h-5 text-blue-600" />}
-                {editItem ? 'تعديل الدورة' : 'إضافة دورة جديدة'}
+                {editItem ? a.courseStatus.pendingReview + ' ' + t.edit : a.newCourse}
               </h3>
               <button
                 onClick={closeModal}
                 className="p-2 hover:bg-muted rounded-lg transition-colors disabled:opacity-50"
                 disabled={saving || uploadingThumb}
-                aria-label="إغلاق"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -523,12 +524,12 @@ export default function AdminCoursesPage() {
             <form onSubmit={handleSubmit} className="p-6 space-y-5">
               {/* Thumbnail */}
               <div>
-                <label className="text-sm font-bold block mb-2">صورة الغلاف</label>
+                <label className="text-sm font-bold block mb-2">{a.thumbnailImage}</label>
                 <div className="flex flex-col sm:flex-row items-start gap-4">
                   <div className="w-full sm:w-44 aspect-video bg-muted rounded-xl border-2 border-dashed border-border overflow-hidden flex items-center justify-center relative shrink-0">
                     {form.thumbnail_url ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={form.thumbnail_url} alt="معاينة" className="w-full h-full object-cover" />
+                      <img src={form.thumbnail_url} alt="Preview" className="w-full h-full object-cover" />
                     ) : (
                       <ImageIcon className="w-10 h-10 text-muted-foreground/40" />
                     )}
@@ -542,7 +543,6 @@ export default function AdminCoursesPage() {
                         onChange={handleThumbnailUpload}
                         disabled={uploadingThumb || saving}
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                        aria-label="رفع صورة الغلاف"
                       />
                       <button
                         type="button"
@@ -550,17 +550,17 @@ export default function AdminCoursesPage() {
                         className="px-4 py-2.5 bg-card border border-border hover:bg-muted font-bold rounded-lg flex items-center gap-2 shadow-sm transition-colors disabled:opacity-60"
                       >
                         {uploadingThumb ? <Loader2 className="w-4 h-4 animate-spin" /> : <UploadCloud className="w-4 h-4" />}
-                        {form.thumbnail_url ? 'تغيير الصورة' : 'رفع صورة'}
+                        {form.thumbnail_url ? a.changeImage : a.uploadImage}
                       </button>
                     </div>
-                    <p className="text-xs text-muted-foreground">JPG / PNG / WebP — حتى 4MB. الأمثل 1280×720.</p>
+                    <p className="text-xs text-muted-foreground">{a.imageFormatHint}</p>
                     {form.thumbnail_url && (
                       <button
                         type="button"
                         onClick={() => setForm(prev => ({ ...prev, thumbnail_url: '' }))}
                         className="text-xs text-red-600 hover:underline"
                       >
-                        إزالة الصورة
+                        {a.removeImage}
                       </button>
                     )}
                   </div>
@@ -570,26 +570,26 @@ export default function AdminCoursesPage() {
               {/* Title */}
               <div>
                 <label className="text-sm font-bold block mb-1.5">
-                  اسم الدورة <span className="text-red-500">*</span>
+                  {a.courseTitle} <span className="text-red-500">*</span>
                 </label>
                 <input
                   required
                   type="text"
                   value={form.title}
                   onChange={e => setForm({ ...form, title: e.target.value })}
-                  placeholder="مثال: دورة أحكام التجويد"
+                  placeholder={a.courseTitlePlaceholder}
                   className="w-full px-3 py-2.5 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
               {/* Description */}
               <div>
-                <label className="text-sm font-bold block mb-1.5">الوصف</label>
+                <label className="text-sm font-bold block mb-1.5">{a.courseDescription}</label>
                 <textarea
                   rows={3}
                   value={form.description}
                   onChange={e => setForm({ ...form, description: e.target.value })}
-                  placeholder="وصف مختصر لمحتوى الدورة وأهدافها..."
+                  placeholder={a.courseDescriptionPlaceholder}
                   className="w-full px-3 py-2.5 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                 />
               </div>
@@ -598,7 +598,7 @@ export default function AdminCoursesPage() {
                 {/* Teacher */}
                 <div>
                   <label className="text-sm font-bold mb-1.5 flex items-center gap-1.5">
-                    <Users className="w-4 h-4" /> المدرس <span className="text-red-500">*</span>
+                    <Users className="w-4 h-4" /> {a.teacher} <span className="text-red-500">*</span>
                   </label>
                   <select
                     required
@@ -606,7 +606,7 @@ export default function AdminCoursesPage() {
                     onChange={e => setForm({ ...form, teacher_id: e.target.value })}
                     className="w-full px-3 py-2.5 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="">اختر مدرساً</option>
+                    <option value="">{a.selectTeacher}</option>
                     {teachers.map(t => (
                       <option key={t.id} value={t.id}>{t.name}</option>
                     ))}
@@ -616,14 +616,14 @@ export default function AdminCoursesPage() {
                 {/* Category */}
                 <div>
                   <label className="text-sm font-bold mb-1.5 flex items-center gap-1.5">
-                    <Tag className="w-4 h-4" /> التصنيف
+                    <Tag className="w-4 h-4" /> {a.courseCategory}
                   </label>
                   <select
                     value={form.category_id}
                     onChange={e => setForm({ ...form, category_id: e.target.value })}
                     className="w-full px-3 py-2.5 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="">بدون تصنيف</option>
+                    <option value="">{a.noCategory}</option>
                     {categories.map(c => (
                       <option key={c.id} value={c.id}>{c.name}</option>
                     ))}
@@ -632,31 +632,31 @@ export default function AdminCoursesPage() {
 
                 {/* Level */}
                 <div>
-                  <label className="text-sm font-bold block mb-1.5">المستوى</label>
+                  <label className="text-sm font-bold block mb-1.5">{a.level}</label>
                   <select
                     value={form.level}
                     onChange={e => setForm({ ...form, level: e.target.value as Level })}
                     className="w-full px-3 py-2.5 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="beginner">مبتدئ</option>
-                    <option value="intermediate">متوسط</option>
-                    <option value="advanced">متقدم</option>
+                    <option value="beginner">{a.courseLevel.beginner}</option>
+                    <option value="intermediate">{a.courseLevel.intermediate}</option>
+                    <option value="advanced">{a.courseLevel.advanced}</option>
                   </select>
                 </div>
 
                 {/* Status */}
                 <div>
-                  <label className="text-sm font-bold block mb-1.5">الحالة</label>
+                  <label className="text-sm font-bold block mb-1.5">{a.status}</label>
                   <select
                     value={form.status}
                     onChange={e => setForm({ ...form, status: e.target.value as CourseStatus })}
                     className="w-full px-3 py-2.5 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="draft">مسودة</option>
-                    <option value="pending_review">بانتظار المراجعة</option>
-                    <option value="published">منشورة</option>
-                    <option value="rejected">مرفوضة</option>
-                    <option value="archived">مؤرشفة</option>
+                    <option value="draft">{a.courseStatus.draft}</option>
+                    <option value="pending_review">{a.courseStatus.pendingReview}</option>
+                    <option value="published">{a.courseStatus.published}</option>
+                    <option value="rejected">{a.courseStatus.rejected}</option>
+                    <option value="archived">{a.courseStatus.archived}</option>
                   </select>
                 </div>
               </div>
@@ -664,7 +664,7 @@ export default function AdminCoursesPage() {
               {editItem && (
                 <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 text-sm text-blue-700 dark:text-blue-300 flex items-center gap-2">
                   <Settings className="w-4 h-4 shrink-0" />
-                  <span>لإدارة دروس وملفات الدورة، استخدم زر &quot;إدارة الدروس&quot; من بطاقة الدورة.</span>
+                  <span>{a.manageLessonsHint}</span>
                 </div>
               )}
 
@@ -675,7 +675,7 @@ export default function AdminCoursesPage() {
                   disabled={saving || uploadingThumb}
                   className="flex-1 py-2.5 border border-border rounded-lg font-bold hover:bg-muted transition-colors disabled:opacity-50"
                 >
-                  إلغاء
+                  {t.cancel}
                 </button>
                 <button
                   type="submit"
@@ -683,7 +683,7 @@ export default function AdminCoursesPage() {
                   className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
                 >
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : (editItem ? <CheckCircle2 className="w-4 h-4" /> : <Plus className="w-4 h-4" />)}
-                  {editItem ? 'حفظ التعديلات' : 'إضافة الدورة'}
+                  {editItem ? a.saveChanges : a.addCourse}
                 </button>
               </div>
             </form>
@@ -747,6 +747,7 @@ function CourseCard({
   onDelete,
   archiving,
   deleting,
+  a,
 }: {
   course: Course
   onEdit: () => void
@@ -754,7 +755,36 @@ function CourseCard({
   onDelete: () => void
   archiving: boolean
   deleting: boolean
+  a: any
 }) {
+  const STATUS_LABELS: Record<CourseStatus, string> = {
+    published: a.courseStatus.published,
+    draft: a.courseStatus.draft,
+    pending_review: a.courseStatus.pendingReview,
+    archived: a.courseStatus.archived,
+    rejected: a.courseStatus.rejected,
+  }
+
+  const LEVEL_LABELS: Record<Level, string> = {
+    beginner: a.courseLevel.beginner,
+    intermediate: a.courseLevel.intermediate,
+    advanced: a.courseLevel.advanced,
+  }
+
+  const STATUS_BADGE_CLS: Record<CourseStatus, string> = {
+    published: 'bg-green-500/90 text-white border-green-400',
+    pending_review: 'bg-amber-500/90 text-white border-amber-400',
+    rejected: 'bg-red-500/90 text-white border-red-400',
+    archived: 'bg-gray-700/80 text-white border-gray-500',
+    draft: 'bg-slate-700/70 text-white border-slate-500',
+  }
+
+  const LEVEL_BADGE_CLS: Record<Level, string> = {
+    beginner: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
+    intermediate: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+    advanced: 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400',
+  }
+
   const status = (course.status || 'draft') as CourseStatus
   const level = (course.level || 'beginner') as Level
   const isArchived = course.is_active === false
@@ -780,7 +810,7 @@ function CourseCard({
           </span>
           {isArchived && status !== 'archived' && (
             <span className="px-2 py-0.5 text-[10px] font-bold rounded-full border shadow-sm backdrop-blur-md bg-gray-700/80 text-white border-gray-500">
-              مؤرشفة
+              {a.courseStatus.archived}
             </span>
           )}
         </div>
@@ -801,7 +831,7 @@ function CourseCard({
 
         <h3 className="font-bold text-base mb-1 line-clamp-1">{course.title}</h3>
         <p className="text-xs text-muted-foreground line-clamp-2 mb-3 min-h-[2rem]">
-          {course.description || '— لا يوجد وصف —'}
+          {course.description || `— ${a.noDescription} —`}
         </p>
 
         <div className="text-xs text-muted-foreground space-y-1 mb-3">
@@ -813,10 +843,10 @@ function CourseCard({
           )}
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1">
-              <PlayCircle className="w-3.5 h-3.5" /> {course.total_lessons} درس
+              <PlayCircle className="w-3.5 h-3.5" /> {a.lessonCount.replace('{count}', String(course.total_lessons || 0))}
             </span>
             <span className="flex items-center gap-1">
-              <Users className="w-3.5 h-3.5" /> {course.total_enrolled} مسجل
+              <Users className="w-3.5 h-3.5" /> {a.enrolledCount.replace('{count}', String(course.total_enrolled || 0))}
             </span>
             {course.pending_requests > 0 && (
               <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-bold">
@@ -828,7 +858,7 @@ function CourseCard({
 
         {status === 'rejected' && course.rejection_reason && (
           <div className="mb-3 -mt-1 bg-red-50 dark:bg-red-900/15 border border-red-200 dark:border-red-800/60 rounded-lg p-2 text-[11px] text-red-700 dark:text-red-300">
-            <div className="font-bold mb-0.5 flex items-center gap-1"><XCircle className="w-3 h-3" /> سبب رفضك السابق:</div>
+            <div className="font-bold mb-0.5 flex items-center gap-1"><XCircle className="w-3 h-3" /> {a.previousRejectionReason}</div>
             <p className="line-clamp-2">{course.rejection_reason}</p>
           </div>
         )}
@@ -838,34 +868,31 @@ function CourseCard({
             <Link
               href={`/academy/admin/courses/${course.id}`}
               className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 text-xs font-bold transition-colors shadow-sm"
-              title="مراجعة الدورة من الداخل"
             >
               <ShieldCheck className="w-3.5 h-3.5" />
-              مراجعة
+              {a.review}
             </Link>
           ) : (
             <button
               onClick={onEdit}
               className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-500/20 text-xs font-bold transition-colors"
-              title="تعديل بيانات الدورة"
             >
               <Edit2 className="w-3.5 h-3.5" />
-              تعديل
+              {a.edit}
             </button>
           )}
           <Link
             href={`/academy/admin/courses/${course.id}`}
             className="flex items-center justify-center gap-1 px-3 py-2 border border-border bg-card hover:bg-muted text-xs font-bold rounded-lg transition-colors"
-            title="عرض وإدارة دروس ومحتوى الدورة"
           >
             <Eye className="w-3.5 h-3.5" />
-            المحتوى
+            {a.content}
           </Link>
           <button
             onClick={onArchive}
             disabled={archiving}
             className="shrink-0 flex items-center justify-center w-9 h-9 border border-border bg-card rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/20 text-muted-foreground hover:text-amber-600 transition-colors disabled:opacity-60"
-            title={isArchived ? 'إعادة تفعيل' : 'تعطيل وأرشفة'}
+            title={isArchived ? a.confirmEnableCourse : a.confirmDisableCourse}
           >
             {archiving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Archive className="w-3.5 h-3.5" />}
           </button>
@@ -873,7 +900,6 @@ function CourseCard({
             onClick={onDelete}
             disabled={deleting}
             className="shrink-0 flex items-center justify-center w-9 h-9 border border-border bg-card rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-muted-foreground hover:text-red-600 transition-colors disabled:opacity-60"
-            title="حذف الدورة نهائياً"
           >
             {deleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
           </button>

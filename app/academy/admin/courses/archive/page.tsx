@@ -25,7 +25,8 @@ interface ArchivedCourse {
 
 export default function AdminCoursesArchivePage() {
   const { t, locale } = useI18n()
-  const isAr = locale === 'ar'
+  const a = t.academyAdmin
+  const dateLocale = locale === 'ar' ? 'ar-EG' : 'en-US'
   const [courses, setCourses] = useState<ArchivedCourse[]>([])
   const [search, setSearch] = useState('')
   const [searchDebounced, setSearchDebounced] = useState('')
@@ -52,7 +53,7 @@ export default function AdminCoursesArchivePage() {
   }, [searchDebounced])
 
   const handleRestore = async (id: string) => {
-    if (!confirm(isAr ? 'إعادة تفعيل الدورة؟ هتظهر للطلاب الجدد تاني.' : 'Reactivate this course? It will become visible to new students.')) return
+    if (!confirm(a.confirmEnableCourse)) return
     setRestoring(id)
     try {
       const res = await fetch(`/api/academy/teacher/courses/${id}/archive`, {
@@ -63,32 +64,28 @@ export default function AdminCoursesArchivePage() {
       if (res.ok) {
         fetchArchive()
       } else {
-        alert(isAr ? 'حدث خطأ' : 'Failed to reactivate')
+        alert(a.reactivationError)
       }
     } finally {
       setRestoring(null)
     }
   }
 
-  const titleText = t.academy?.archiveTitle || (isAr ? 'أرشيف الدورات' : 'Courses Archive')
-  const descText = t.academy?.archiveAdminDesc || (isAr ? 'الدورات المعطّلة — يمكن إعادة تفعيلها' : 'Deactivated courses — can be reactivated')
-  const searchPlaceholder = t.academy?.archiveSearchPlaceholder || (isAr ? 'ابحث بالعنوان أو الوصف...' : 'Search by title or description...')
-
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <Archive className="w-7 h-7 text-blue-600" />
-          {titleText}
+          {a.archiveTitle}
         </h1>
-        <p className="text-muted-foreground mt-1">{descText}</p>
+        <p className="text-muted-foreground mt-1">{a.archiveDesc}</p>
       </div>
 
       <div className="relative">
         <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
         <input
           type="text"
-          placeholder={searchPlaceholder}
+          placeholder={a.archiveSearchPlaceholder}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full pr-10 pl-4 py-2.5 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -102,8 +99,8 @@ export default function AdminCoursesArchivePage() {
       ) : courses.length === 0 ? (
         <div className="text-center py-12 bg-card rounded-xl border border-border">
           <Archive className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-40" />
-          <h3 className="text-lg font-semibold mb-2">{isAr ? 'لا توجد دورات مؤرشفة' : 'No archived courses'}</h3>
-          <p className="text-muted-foreground">{isAr ? 'الدورات اللي يتم تعطيلها هتظهر هنا' : 'Deactivated courses will appear here'}</p>
+          <h3 className="text-lg font-semibold mb-2">{a.noArchivedCourses}</h3>
+          <p className="text-muted-foreground">{a.archiveEmptyDesc}</p>
         </div>
       ) : (
         <div className="bg-card border border-border rounded-xl overflow-hidden">
@@ -111,12 +108,12 @@ export default function AdminCoursesArchivePage() {
             <table className="w-full">
               <thead className="bg-muted/50 border-b border-border">
                 <tr>
-                  <th className="text-right p-4 text-sm font-bold text-muted-foreground">{isAr ? 'الدورة' : 'Course'}</th>
-                  <th className="text-right p-4 text-sm font-bold text-muted-foreground">{isAr ? 'المدرس' : 'Teacher'}</th>
-                  <th className="text-right p-4 text-sm font-bold text-muted-foreground">{isAr ? 'المسجلين' : 'Enrolled'}</th>
-                  <th className="text-right p-4 text-sm font-bold text-muted-foreground">{isAr ? 'المؤرشف بواسطة' : 'Archived by'}</th>
-                  <th className="text-right p-4 text-sm font-bold text-muted-foreground">{isAr ? 'تاريخ الأرشفة' : 'Archived at'}</th>
-                  <th className="text-right p-4 text-sm font-bold text-muted-foreground">{isAr ? 'الإجراءات' : 'Actions'}</th>
+                  <th className="text-right p-4 text-sm font-bold text-muted-foreground">{a.archiveCourse}</th>
+                  <th className="text-right p-4 text-sm font-bold text-muted-foreground">{a.teacher}</th>
+                  <th className="text-right p-4 text-sm font-bold text-muted-foreground">{a.enrolledStudents}</th>
+                  <th className="text-right p-4 text-sm font-bold text-muted-foreground">{a.archivedBy}</th>
+                  <th className="text-right p-4 text-sm font-bold text-muted-foreground">{a.archivedAt}</th>
+                  <th className="text-right p-4 text-sm font-bold text-muted-foreground">{a.archiveActions}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -143,7 +140,7 @@ export default function AdminCoursesArchivePage() {
                         {course.total_enrolled}
                         {course.completed_enrolled > 0 && (
                           <span className="text-xs text-emerald-600 mr-1">
-                            ({course.completed_enrolled} {isAr ? 'مكتمل' : 'completed'})
+                            ({course.completed_enrolled} {a.reactivated})
                           </span>
                         )}
                       </span>
@@ -151,7 +148,7 @@ export default function AdminCoursesArchivePage() {
                     <td className="p-4 text-sm text-muted-foreground">{course.archived_by_name || '—'}</td>
                     <td className="p-4 text-sm text-muted-foreground">
                       {course.archived_at
-                        ? new Date(course.archived_at).toLocaleDateString(isAr ? 'ar-EG' : 'en-US')
+                        ? new Date(course.archived_at).toLocaleDateString(dateLocale)
                         : '—'}
                     </td>
                     <td className="p-4">
@@ -163,7 +160,7 @@ export default function AdminCoursesArchivePage() {
                         {restoring === course.id
                           ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
                           : <RotateCcw className="w-3.5 h-3.5" />}
-                        {isAr ? 'إعادة تفعيل' : 'Reactivate'}
+                        {a.reactivate}
                       </button>
                     </td>
                   </tr>

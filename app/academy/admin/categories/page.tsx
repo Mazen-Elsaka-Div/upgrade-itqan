@@ -6,6 +6,7 @@ import {
   ChevronDown, ChevronRight, BookOpen, Video, Lightbulb, Tag,
   AlertTriangle, Eye, EyeOff
 } from 'lucide-react'
+import { useI18n } from '@/lib/i18n/context'
 
 interface Category {
   id: string
@@ -38,14 +39,17 @@ interface FormState {
   is_active: boolean
 }
 
-const emptyForm: FormState = {
-  name: '', slug: '', description: '', short_description: '',
-  parent_id: '', color: '#1E3A5F', icon: '', display_order: 0, is_active: true,
-}
-
 const PRESET_COLORS = ['#1E3A5F', '#2563EB', '#059669', '#D97706', '#DC2626', '#7C3AED', '#0891B2', '#65A30D', '#9333EA', '#475569']
 
 export default function CategoriesPage() {
+  const { t } = useI18n()
+  const a = t.academyAdmin
+
+  const emptyForm: FormState = {
+    name: '', slug: '', description: '', short_description: '',
+    parent_id: '', color: '#1E3A5F', icon: '', display_order: 0, is_active: true,
+  }
+
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [warning, setWarning] = useState<string | null>(null)
@@ -65,7 +69,7 @@ export default function CategoriesPage() {
         const json = await res.json()
         setCategories(json.data || [])
         if (json.warning === 'migration_pending') {
-          setWarning('لم يتم تشغيل ترحيلة (029) بعد. يتم عرض التصنيفات بدون إحصاءات الاستخدام.')
+          setWarning(a.migrationWarning)
         } else {
           setWarning(null)
         }
@@ -76,7 +80,6 @@ export default function CategoriesPage() {
   }
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchCats()
   }, [])
 
@@ -120,7 +123,7 @@ export default function CategoriesPage() {
         setForm(emptyForm)
       } else {
         const json = await res.json().catch(() => ({}))
-        alert(json?.error || json?.message || 'فشل الحفظ')
+        alert(json?.error || json?.message || a.failedToSave)
       }
     } finally {
       setSaving(false)
@@ -128,13 +131,13 @@ export default function CategoriesPage() {
   }
 
   const handleDelete = async (cat: Category) => {
-    if (!confirm(`حذف التصنيف "${cat.name}"؟`)) return
+    if (!confirm(a.confirmDeleteCategory.replace('{name}', cat.name))) return
     setDeletingId(cat.id)
     try {
       let res = await fetch(`/api/academy/admin/categories/${cat.id}`, { method: 'DELETE' })
       if (res.status === 409) {
         const json = await res.json().catch(() => ({}))
-        const proceed = confirm(json?.message || 'هذا التصنيف مستخدم. هل تريد المتابعة؟')
+        const proceed = confirm(json?.message || a.categoryInUse)
         if (!proceed) return
         res = await fetch(`/api/academy/admin/categories/${cat.id}?force=1`, { method: 'DELETE' })
       }
@@ -142,14 +145,13 @@ export default function CategoriesPage() {
         await fetchCats()
       } else {
         const json = await res.json().catch(() => ({}))
-        alert(json?.error || json?.message || 'فشل الحذف')
+        alert(json?.error || json?.message || a.failedToDelete)
       }
     } finally {
       setDeletingId(null)
     }
   }
 
-  // Build hierarchical tree from flat list.
   const tree = useMemo(() => {
     const map = new Map<string, Category & { children: Category[] }>()
     categories.forEach(c => map.set(c.id, { ...c, children: [] as any }))
@@ -173,7 +175,6 @@ export default function CategoriesPage() {
   }
 
   const filteredTree = useMemo(() => {
-    // If a search term is set, flatten + filter all rows; otherwise show full hierarchy.
     if (!search.trim() && showInactive) return tree
     const flat: Category[] = []
     const walk = (nodes: (Category & { children: Category[] })[]) => {
@@ -184,7 +185,6 @@ export default function CategoriesPage() {
     }
     walk(tree as any)
     return flat.map(c => ({ ...c, children: [] as any }))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tree, search, showInactive])
 
   const toggle = (id: string) => {
@@ -196,7 +196,6 @@ export default function CategoriesPage() {
     })
   }
 
-  // Totals across academy
   const totals = useMemo(() => {
     return categories.reduce((acc, c) => {
       acc.categories += 1
@@ -213,10 +212,10 @@ export default function CategoriesPage() {
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <FolderTree className="w-6 h-6 text-blue-600" />
-            تصنيفات الأكاديمية
+            {a.categoriesTitle}
           </h1>
           <p className="text-muted-foreground mt-1">
-            نظّم محتوى الأكاديمية بالكامل (الدورات، الدروس، الحلقات، الأسئلة) من خلال شجرة تصنيفات موحّدة.
+            {a.categoriesDesc}
           </p>
         </div>
         <button
@@ -224,7 +223,7 @@ export default function CategoriesPage() {
           className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-sm"
         >
           <Plus className="w-4 h-4" />
-          تصنيف جديد
+          {a.newCategory}
         </button>
       </div>
 
@@ -237,10 +236,10 @@ export default function CategoriesPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <StatTile icon={<Tag className="w-5 h-5" />} label="إجمالي التصنيفات" value={totals.categories} color="blue" />
-        <StatTile icon={<BookOpen className="w-5 h-5" />} label="دورات مرتبطة" value={totals.courses} color="emerald" />
-        <StatTile icon={<Lightbulb className="w-5 h-5" />} label="دروس داخل دورات" value={totals.lessons} color="amber" />
-        <StatTile icon={<Video className="w-5 h-5" />} label="حلقات عامة" value={totals.public_lessons} color="purple" />
+        <StatTile icon={<Tag className="w-5 h-5" />} label={a.totalCategories} value={totals.categories} color="blue" />
+        <StatTile icon={<BookOpen className="w-5 h-5" />} label={a.linkedCourses} value={totals.courses} color="emerald" />
+        <StatTile icon={<Lightbulb className="w-5 h-5" />} label={a.courseLessons} value={totals.lessons} color="amber" />
+        <StatTile icon={<Video className="w-5 h-5" />} label={a.publicSessions} value={totals.public_lessons} color="purple" />
       </div>
 
       {/* Toolbar */}
@@ -250,7 +249,7 @@ export default function CategoriesPage() {
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="ابحث بالاسم، الرابط، أو الوصف..."
+            placeholder={a.searchCategoriesPlaceholder}
             className="w-full ps-9 pe-3 py-2 rounded-lg border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/50"
           />
         </div>
@@ -259,7 +258,7 @@ export default function CategoriesPage() {
           className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border text-sm font-medium ${showInactive ? 'border-border bg-card' : 'border-amber-200 bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-300'}`}
         >
           {showInactive ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-          {showInactive ? 'إظهار كل التصنيفات' : 'إخفاء التصنيفات المعطّلة'}
+          {showInactive ? a.showAllCategories : a.hideDisabledCategories}
         </button>
       </div>
 
@@ -272,7 +271,7 @@ export default function CategoriesPage() {
         ) : categories.length === 0 ? (
           <div className="p-12 text-center text-muted-foreground">
             <FolderTree className="w-12 h-12 mx-auto mb-3 opacity-50" />
-            <p>لا توجد تصنيفات بعد. أنشئ تصنيفًا جديدًا للبدء.</p>
+            <p>{a.noCategoriesYet}</p>
           </div>
         ) : (
           <ul className="divide-y divide-border">
@@ -287,6 +286,7 @@ export default function CategoriesPage() {
                 openCreate={openCreate}
                 handleDelete={handleDelete}
                 deletingId={deletingId}
+                a={a}
               />
             ))}
           </ul>
@@ -302,7 +302,7 @@ export default function CategoriesPage() {
             className="bg-card rounded-2xl border border-border shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
           >
             <div className="px-6 py-4 border-b border-border flex items-center justify-between sticky top-0 bg-card z-10">
-              <h2 className="text-lg font-bold">{form.id ? 'تعديل التصنيف' : 'إضافة تصنيف جديد'}</h2>
+              <h2 className="text-lg font-bold">{form.id ? a.editCategory : a.addNewCategory}</h2>
               <button type="button" onClick={() => setShowForm(false)} className="p-2 rounded-lg hover:bg-muted">
                 <X className="w-4 h-4" />
               </button>
@@ -310,7 +310,7 @@ export default function CategoriesPage() {
 
             <div className="p-6 space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
-                <Field label="اسم التصنيف *">
+                <Field label={`${a.categoryName} *`}>
                   <input
                     required
                     type="text"
@@ -319,7 +319,7 @@ export default function CategoriesPage() {
                     className="w-full p-2 border border-border rounded-lg bg-background"
                   />
                 </Field>
-                <Field label="الرابط (يُولّد تلقائياً إذا تركته فارغاً)">
+                <Field label={a.slugAutoGenerate}>
                   <input
                     type="text"
                     value={form.slug}
@@ -331,7 +331,7 @@ export default function CategoriesPage() {
                 </Field>
               </div>
 
-              <Field label="وصف مختصر (يظهر في البطاقات)">
+              <Field label={a.shortDescription}>
                 <input
                   type="text"
                   value={form.short_description}
@@ -340,7 +340,7 @@ export default function CategoriesPage() {
                 />
               </Field>
 
-              <Field label="الوصف الكامل">
+              <Field label={a.fullDescription}>
                 <textarea
                   rows={3}
                   value={form.description}
@@ -350,13 +350,13 @@ export default function CategoriesPage() {
               </Field>
 
               <div className="grid md:grid-cols-2 gap-4">
-                <Field label="التصنيف الأب">
+                <Field label={a.parentCategory}>
                   <select
                     value={form.parent_id}
                     onChange={e => setForm({ ...form, parent_id: e.target.value })}
                     className="w-full p-2 border border-border rounded-lg bg-background"
                   >
-                    <option value="">— بدون (تصنيف رئيسي)</option>
+                    <option value="">{a.noParent}</option>
                     {categories
                       .filter(c => c.id !== form.id)
                       .map(c => (
@@ -366,7 +366,7 @@ export default function CategoriesPage() {
                       ))}
                   </select>
                 </Field>
-                <Field label="ترتيب العرض">
+                <Field label={a.displayOrder}>
                   <input
                     type="number"
                     value={form.display_order}
@@ -377,7 +377,7 @@ export default function CategoriesPage() {
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
-                <Field label="اللون">
+                <Field label={a.color}>
                   <div className="flex items-center gap-2">
                     <input
                       type="color"
@@ -406,7 +406,7 @@ export default function CategoriesPage() {
                     ))}
                   </div>
                 </Field>
-                <Field label="رمز / أيقونة (اختياري)">
+                <Field label={a.iconOptional}>
                   <input
                     type="text"
                     value={form.icon}
@@ -423,7 +423,7 @@ export default function CategoriesPage() {
                   checked={form.is_active}
                   onChange={e => setForm({ ...form, is_active: e.target.checked })}
                 />
-                <span className="text-sm">تفعيل التصنيف</span>
+                <span className="text-sm">{a.activateCategory}</span>
               </label>
             </div>
 
@@ -433,7 +433,7 @@ export default function CategoriesPage() {
                 onClick={() => setShowForm(false)}
                 className="px-4 py-2 border border-border rounded-lg text-sm hover:bg-muted"
               >
-                إلغاء
+                {t.cancel}
               </button>
               <button
                 type="submit"
@@ -441,7 +441,7 @@ export default function CategoriesPage() {
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-bold flex items-center gap-2 hover:bg-blue-700 disabled:opacity-60"
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                {form.id ? 'حفظ التغييرات' : 'إنشاء التصنيف'}
+                {form.id ? a.categorySaveChanges : a.createCategory}
               </button>
             </div>
           </form>
@@ -487,9 +487,10 @@ interface CategoryNodeProps {
   openCreate: (parentId?: string) => void
   handleDelete: (cat: Category) => void
   deletingId: string | null
+  a: any
 }
 
-function CategoryNode({ node, depth, expanded, toggle, openEdit, openCreate, handleDelete, deletingId }: CategoryNodeProps) {
+function CategoryNode({ node, depth, expanded, toggle, openEdit, openCreate, handleDelete, deletingId, a }: CategoryNodeProps) {
   const hasChildren = (node.children?.length ?? 0) > 0
   const isExpanded = expanded.has(node.id) || depth === 0
   const totalUsage = Number(node.courses_count) + Number(node.public_lessons_count)
@@ -521,17 +522,17 @@ function CategoryNode({ node, depth, expanded, toggle, openEdit, openCreate, han
               <h3 className={`font-bold ${node.is_active ? 'text-foreground' : 'text-muted-foreground line-through'}`}>{node.name}</h3>
               {node.slug && <span className="text-xs text-muted-foreground font-mono">/{node.slug}</span>}
               {!node.is_active && (
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">معطّل</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{a.disabled}</span>
               )}
             </div>
             {node.short_description && (
               <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{node.short_description}</p>
             )}
             <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground flex-wrap">
-              <span className="inline-flex items-center gap-1"><BookOpen className="w-3 h-3" /> {node.courses_count} دورة</span>
-              <span className="inline-flex items-center gap-1"><Video className="w-3 h-3" /> {node.public_lessons_count} حلقة عامة</span>
-              <span className="inline-flex items-center gap-1"><Lightbulb className="w-3 h-3" /> {node.lessons_count} درس</span>
-              {totalUsage === 0 && <span className="text-amber-600 dark:text-amber-400">— غير مستخدم</span>}
+              <span className="inline-flex items-center gap-1"><BookOpen className="w-3 h-3" /> {a.coursesCount.replace('{count}', String(node.courses_count))}</span>
+              <span className="inline-flex items-center gap-1"><Video className="w-3 h-3" /> {a.publicSessionsCount.replace('{count}', String(node.public_lessons_count))}</span>
+              <span className="inline-flex items-center gap-1"><Lightbulb className="w-3 h-3" /> {a.lessonsCount.replace('{count}', String(node.lessons_count))}</span>
+              {totalUsage === 0 && <span className="text-amber-600 dark:text-amber-400">— {a.unused}</span>}
             </div>
           </div>
 
@@ -539,7 +540,7 @@ function CategoryNode({ node, depth, expanded, toggle, openEdit, openCreate, han
             <button
               type="button"
               onClick={() => openCreate(node.id)}
-              title="إضافة تصنيف فرعي"
+              title={a.addSubcategory}
               className="p-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-600"
             >
               <Plus className="w-4 h-4" />
@@ -547,7 +548,7 @@ function CategoryNode({ node, depth, expanded, toggle, openEdit, openCreate, han
             <button
               type="button"
               onClick={() => openEdit(node)}
-              title="تعديل"
+              title={a.edit}
               className="p-2 rounded-lg hover:bg-muted"
             >
               <Edit2 className="w-4 h-4" />
@@ -556,7 +557,7 @@ function CategoryNode({ node, depth, expanded, toggle, openEdit, openCreate, han
               type="button"
               onClick={() => handleDelete(node)}
               disabled={deletingId === node.id}
-              title="حذف"
+              title={a.delete}
               className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 disabled:opacity-50"
             >
               {deletingId === node.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
@@ -577,6 +578,7 @@ function CategoryNode({ node, depth, expanded, toggle, openEdit, openCreate, han
               openCreate={openCreate}
               handleDelete={handleDelete}
               deletingId={deletingId}
+              a={a}
             />
           ))}
         </>

@@ -1,0 +1,5 @@
+You are Agent 1. Your task is to go through the 'Academy Admin' pages one by one, from top to bottom based on the sidebar order (starting from Dashboard downwards).
+You need to fix English translation issues (Arabic words that are not being translated into English in the code).
+You will discover the pages yourself. I am your supervisor, and I will coordinate between you and Agent 2 (who is going bottom-up) to prevent overlaps.
+Please find the Academy Admin sidebar to determine the order, then tell me the first page you will start with and proceed to modify it.
+Do NOT move to the next page until I give you permission!

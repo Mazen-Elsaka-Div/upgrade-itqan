@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Plus, Edit2, Trash2, Eye, Layers, X, Loader2, BookOpen, Route, ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
+import { useI18n } from '@/lib/i18n/context'
 
 interface Series {
   id: string
@@ -18,21 +19,24 @@ interface Series {
   created_at: string
 }
 
-const SUBJECTS = [
-  { value: '', label: 'بدون تصنيف' },
-  { value: 'quran', label: 'القرآن الكريم' },
-  { value: 'tajweed', label: 'التجويد' },
-  { value: 'fiqh', label: 'الفقه' },
-  { value: 'aqeedah', label: 'العقيدة' },
-  { value: 'seerah', label: 'السيرة النبوية' },
-  { value: 'tafseer', label: 'التفسير' },
-  { value: 'arabic', label: 'اللغة العربية' },
-  { value: 'general', label: 'عام' },
-]
-
-const emptyForm = { title: '', description: '', subject: '', teacher_id: '' }
-
 export default function AdminSeriesPage() {
+  const { t, locale } = useI18n()
+  const a = t.academyAdmin
+
+  const SUBJECTS = [
+    { value: '', label: a.seriesSubjects.none },
+    { value: 'quran', label: a.seriesSubjects.quran },
+    { value: 'tajweed', label: a.seriesSubjects.tajweed },
+    { value: 'fiqh', label: a.seriesSubjects.fiqh },
+    { value: 'aqeedah', label: a.seriesSubjects.aqeedah },
+    { value: 'seerah', label: a.seriesSubjects.seerah },
+    { value: 'tafseer', label: a.seriesSubjects.tafseer },
+    { value: 'arabic', label: a.seriesSubjects.arabic },
+    { value: 'general', label: a.seriesSubjects.general },
+  ]
+
+  const emptyForm = { title: '', description: '', subject: '', teacher_id: '' }
+
   const [seriesList, setSeriesList] = useState<Series[]>([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
@@ -41,6 +45,8 @@ export default function AdminSeriesPage() {
   const [saving, setSaving] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [teachers, setTeachers] = useState<{ id: string; name: string }[]>([])
+
+  const dateLocale = locale === 'ar' ? 'ar-EG' : 'en-US'
 
   const fetchSeries = async () => {
     try {
@@ -58,7 +64,6 @@ export default function AdminSeriesPage() {
 
   const fetchTeachers = async () => {
     try {
-      // Only show assignable teachers (approved + active) in the picker.
       const res = await fetch('/api/academy/admin/teachers?assignable=1')
       if (res.ok) {
         const json = await res.json()
@@ -105,7 +110,7 @@ export default function AdminSeriesPage() {
         setShowModal(false)
         fetchSeries()
       } else {
-        alert('حدث خطأ في الحفظ')
+        alert(a.saveError)
       }
     } finally {
       setSaving(false)
@@ -113,12 +118,12 @@ export default function AdminSeriesPage() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('هل أنت متأكد من حذف هذه السلسلة؟ سيتم حذف جميع الربط بالدورات والمسارات.')) return
+    if (!confirm(a.confirmDeleteSeries)) return
     setDeletingId(id)
     try {
       const res = await fetch(`/api/academy/admin/series/${id}`, { method: 'DELETE' })
       if (res.ok) fetchSeries()
-      else alert('لا يمكن الحذف')
+      else alert(a.cannotDelete)
     } finally {
       setDeletingId(null)
     }
@@ -135,7 +140,7 @@ export default function AdminSeriesPage() {
     } catch {}
   }
 
-  const getSubjectLabel = (val: string) => SUBJECTS.find(s => s.value === val)?.label || val || 'بدون تصنيف'
+  const getSubjectLabel = (val: string) => SUBJECTS.find(s => s.value === val)?.label || val || a.seriesSubjects.none
 
   if (loading) {
     return (
@@ -151,26 +156,26 @@ export default function AdminSeriesPage() {
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Layers className="w-7 h-7 text-emerald-600" />
-            السلاسل التعليمية
+            {a.seriesTitle}
           </h1>
-          <p className="text-muted-foreground mt-1">إجمالي: {seriesList.length} سلسلة</p>
+          <p className="text-muted-foreground mt-1">{a.seriesDesc.replace('{count}', String(seriesList.length))}</p>
         </div>
         <button
           onClick={openAdd}
           className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition-colors shadow-sm"
         >
           <Plus className="w-5 h-5" />
-          سلسلة جديدة
+          {a.newSeries}
         </button>
       </div>
 
       {seriesList.length === 0 ? (
         <div className="bg-card border border-border rounded-xl p-16 text-center">
           <Layers className="w-14 h-14 mx-auto mb-4 text-muted-foreground opacity-30" />
-          <p className="text-muted-foreground font-medium mb-2">لا توجد سلاسل تعليمية بعد</p>
-          <p className="text-sm text-muted-foreground mb-4">السلسلة تجمع دورات ومسارات مترابطة في موضوع واحد</p>
+          <p className="text-muted-foreground font-medium mb-2">{a.noSeriesYet}</p>
+          <p className="text-sm text-muted-foreground mb-4">{a.seriesDescription}</p>
           <button onClick={openAdd} className="px-6 py-2.5 bg-emerald-600 text-white rounded-lg font-bold hover:bg-emerald-700 transition-colors">
-            <Plus className="w-4 h-4 inline ml-1" /> أضف أول سلسلة
+            <Plus className="w-4 h-4 inline ml-1" /> {a.addFirstSeries}
           </button>
         </div>
       ) : (
@@ -187,7 +192,7 @@ export default function AdminSeriesPage() {
                       : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400'
                   }`}
                 >
-                  {series.is_published ? 'منشورة' : 'مسودة'}
+                  {series.is_published ? a.courseStatus.published : a.courseStatus.draft}
                 </button>
               </div>
               {series.description && (
@@ -200,11 +205,11 @@ export default function AdminSeriesPage() {
               <div className="flex items-center gap-3 text-xs text-muted-foreground mb-4">
                 <span className="flex items-center gap-1">
                   <BookOpen className="w-3.5 h-3.5" />
-                  {series.courses_count || 0} دورة
+                  {series.courses_count || 0} {a.lessons}
                 </span>
                 <span className="flex items-center gap-1">
                   <Route className="w-3.5 h-3.5" />
-                  {series.paths_count || 0} مسار
+                  {series.paths_count || 0} {a.series}
                 </span>
               </div>
               <div className="flex gap-2">
@@ -212,7 +217,7 @@ export default function AdminSeriesPage() {
                   href={`/academy/admin/series/${series.id}`}
                   className="flex-1 flex items-center justify-center gap-1.5 py-2 border border-emerald-200 dark:border-emerald-800 rounded-lg text-sm font-medium text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors"
                 >
-                  <Eye className="w-3.5 h-3.5" /> إدارة المحتوى
+                  <Eye className="w-3.5 h-3.5" /> {a.contentManagement}
                 </Link>
                 <button onClick={() => openEdit(series)} className="flex items-center justify-center py-2 px-3 border border-border rounded-lg text-sm font-medium hover:bg-muted transition-colors">
                   <Edit2 className="w-3.5 h-3.5" />
@@ -235,36 +240,36 @@ export default function AdminSeriesPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={(e) => e.target === e.currentTarget && setShowModal(false)}>
           <div className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-lg">
             <div className="flex items-center justify-between p-6 border-b border-border">
-              <h3 className="text-lg font-bold">{editItem ? 'تعديل السلسلة' : 'إضافة سلسلة جديدة'}</h3>
+              <h3 className="text-lg font-bold">{editItem ? a.editCategory : a.addNewCategory}</h3>
               <button onClick={() => setShowModal(false)} className="p-2 hover:bg-muted rounded-lg transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div>
-                <label className="text-sm font-bold block mb-1.5">اسم السلسلة <span className="text-red-500">*</span></label>
+                <label className="text-sm font-bold block mb-1.5">{a.seriesName} <span className="text-red-500">*</span></label>
                 <input
                   required
                   type="text"
                   value={form.title}
                   onChange={e => setForm({ ...form, title: e.target.value })}
-                  placeholder="مثال: سلسلة تفسير القرآن الكريم"
+                  placeholder={a.seriesDescriptionPlaceholder}
                   className="w-full px-3 py-2.5 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
               <div>
-                <label className="text-sm font-bold block mb-1.5">الوصف</label>
+                <label className="text-sm font-bold block mb-1.5">{a.seriesDescriptionLabel}</label>
                 <textarea
                   rows={3}
                   value={form.description}
                   onChange={e => setForm({ ...form, description: e.target.value })}
-                  placeholder="وصف مختصر للسلسلة..."
+                  placeholder={a.seriesDescriptionPlaceholder}
                   className="w-full px-3 py-2.5 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-bold block mb-1.5">التخصص</label>
+                  <label className="text-sm font-bold block mb-1.5">{a.subject}</label>
                   <select
                     value={form.subject}
                     onChange={e => setForm({ ...form, subject: e.target.value })}
@@ -274,13 +279,13 @@ export default function AdminSeriesPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="text-sm font-bold block mb-1.5">الشيخ / المدرس</label>
+                  <label className="text-sm font-bold block mb-1.5">{a.teacherOptional}</label>
                   <select
                     value={form.teacher_id}
                     onChange={e => setForm({ ...form, teacher_id: e.target.value })}
                     className="w-full px-3 py-2.5 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   >
-                    <option value="">اختياري</option>
+                    <option value="">{t.next}</option>
                     {teachers.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
                   </select>
                 </div>
@@ -292,10 +297,10 @@ export default function AdminSeriesPage() {
                   className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white rounded-lg font-bold transition-colors flex items-center justify-center gap-2"
                 >
                   {saving && <Loader2 className="w-4 h-4 animate-spin" />}
-                  {editItem ? 'حفظ التعديلات' : 'إضافة السلسلة'}
+                  {editItem ? a.saveChanges : a.contentManagement}
                 </button>
                 <button type="button" onClick={() => setShowModal(false)} className="px-6 py-2.5 border border-border rounded-lg font-medium hover:bg-muted transition-colors">
-                  إلغاء
+                  {t.cancel}
                 </button>
               </div>
             </form>

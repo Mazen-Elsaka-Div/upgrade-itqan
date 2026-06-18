@@ -3,6 +3,7 @@
 import useSWR from "swr"
 import { useCallback, useState } from "react"
 import { toast } from "sonner"
+import { useI18n } from "@/lib/i18n/context"
 
 // Types for all settings
 export interface AcademySettings {
@@ -219,6 +220,9 @@ export const defaultSettings: AcademySettings = {
 const fetcher = (url: string) => fetch(url).then((res) => res.json())
 
 export function useAcademySettings() {
+  const { t } = useI18n()
+  const a = t.academyAdmin
+
   const { data, error, isLoading, mutate } = useSWR(
     "/api/academy/admin/settings",
     fetcher,
@@ -265,7 +269,7 @@ export function useAcademySettings() {
   // Save all unsaved changes
   const saveChanges = useCallback(async () => {
     if (Object.keys(unsavedChanges).length === 0) {
-      toast.info("لا توجد تغييرات للحفظ")
+      toast.info(a.settingsNoChanges || "No changes to save")
       return false
     }
 
@@ -279,20 +283,20 @@ export function useAcademySettings() {
 
       if (!res.ok) {
         const err = await res.json()
-        throw new Error(err.error || "فشل في الحفظ")
+        throw new Error(err.error || a.settingsSaveFailed)
       }
 
-      toast.success("تم حفظ الإعدادات بنجاح")
+      toast.success(a.settingsSavedSuccess)
       setUnsavedChanges({})
       mutate() // Revalidate
       return true
     } catch (err: any) {
-      toast.error(err.message || "حدث خطأ أثناء الحفظ")
+      toast.error(err.message || a.settingsSaveFailed)
       return false
     } finally {
       setSaving(false)
     }
-  }, [unsavedChanges, mutate])
+  }, [unsavedChanges, mutate, a])
 
   // Discard unsaved changes
   const discardChanges = useCallback(() => {
@@ -322,13 +326,13 @@ export function useAcademySettings() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || data.details)
 
-      toast.success(data.message || "تم إرسال البريد التجريبي")
+      toast.success(data.message || a.settingsSmtpSuccess)
       return true
     } catch (err: any) {
-      toast.error(err.message || "فشل في اختبار الاتصال")
+      toast.error(err.message || a.settingsSmtpFailed)
       return false
     }
-  }, [])
+  }, [a])
 
   // Get merged settings (saved + unsaved)
   const mergedSettings: AcademySettings = { ...settings, ...unsavedChanges }

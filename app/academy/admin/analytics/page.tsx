@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 import {
   Activity,
   Award,
@@ -29,6 +29,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { toast } from "sonner"
+import { useI18n } from "@/lib/i18n/context"
 import {
   AreaChart,
   Area,
@@ -129,42 +130,46 @@ function CounterCard({ label, value, hint, icon: Icon, color }: CounterCardProps
   )
 }
 
-const monthLabels: Record<string, string> = {
-  "01": "يناير", "02": "فبراير", "03": "مارس", "04": "أبريل",
-  "05": "مايو", "06": "يونيو", "07": "يوليو", "08": "أغسطس",
-  "09": "سبتمبر", "10": "أكتوبر", "11": "نوفمبر", "12": "ديسمبر",
-}
-
-const genderLabels: Record<string, string> = {
-  male: "ذكور",
-  female: "إناث",
-  unknown: "غير محدد",
-}
-
-const enrollmentStatusLabels: Record<string, string> = {
-  active: "نشط",
-  ACTIVE: "نشط",
-  completed: "مكتمل",
-  COMPLETED: "مكتمل",
-  paused: "متوقف",
-  PAUSED: "متوقف",
-  dropped: "متروك",
-  DROPPED: "متروك",
-  accepted: "مقبول",
-  unknown: "غير محدد",
-}
-
-const sessionStatusLabels: Record<string, string> = {
-  scheduled: "مجدولة",
-  in_progress: "قيد التنفيذ",
-  completed: "مكتملة",
-  cancelled: "ملغاة",
-  unknown: "غير محدد",
-}
-
 const COLORS = ['#3b82f6', '#ec4899', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#06b6d4', '#6366f1'];
 
 export default function AdminAnalyticsPage() {
+  const { t, locale } = useI18n()
+  const a = t.academyAdmin
+  const dateLocale = locale === 'ar' ? 'ar-SA' : 'en-US'
+
+  const monthLabels: Record<string, string> = {
+    "01": a.month01, "02": a.month02, "03": a.month03, "04": a.month04,
+    "05": a.month05, "06": a.month06, "07": a.month07, "08": a.month08,
+    "09": a.month09, "10": a.month10, "11": a.month11, "12": a.month12,
+  }
+
+  const genderLabels: Record<string, string> = {
+    male: a.analyticsMale,
+    female: a.analyticsFemale,
+    unknown: a.analyticsUnknown,
+  }
+
+  const enrollmentStatusLabels: Record<string, string> = {
+    active: a.analyticsActive,
+    ACTIVE: a.analyticsActive,
+    completed: a.analyticsCompleted,
+    COMPLETED: a.analyticsCompleted,
+    paused: a.analyticsPaused,
+    PAUSED: a.analyticsPaused,
+    dropped: a.analyticsDropped,
+    DROPPED: a.analyticsDropped,
+    accepted: a.analyticsAccepted,
+    unknown: a.analyticsUnknown,
+  }
+
+  const sessionStatusLabels: Record<string, string> = {
+    scheduled: a.analyticsScheduled,
+    in_progress: a.analyticsInProgress,
+    completed: a.analyticsCompleted,
+    cancelled: a.analyticsCancelled,
+    unknown: a.analyticsUnknown,
+  }
+
   const [data, setData] = useState<AnalyticsData | null>(null)
   const [loading, setLoading] = useState(true)
   const [exporting, setExporting] = useState(false)
@@ -184,16 +189,16 @@ export default function AdminAnalyticsPage() {
       if (!res.ok) throw new Error()
       const blob = await res.blob()
       const url = URL.createObjectURL(blob)
-      const a = document.createElement("a")
-      a.href = url
-      a.download = `academy-analytics-${new Date().toISOString().slice(0, 10)}.xlsx`
-      document.body.appendChild(a)
-      a.click()
-      a.remove()
+      const el = document.createElement("a")
+      el.href = url
+      el.download = `academy-analytics-${new Date().toISOString().slice(0, 10)}.xlsx`
+      document.body.appendChild(el)
+      el.click()
+      el.remove()
       URL.revokeObjectURL(url)
-      toast.success("تم تصدير التقرير")
+      toast.success(a.analyticsExportSuccess)
     } catch {
-      toast.error("تعذر تصدير التقرير")
+      toast.error(a.analyticsExportFailed)
     } finally {
       setExporting(false)
     }
@@ -206,7 +211,7 @@ export default function AdminAnalyticsPage() {
       <div className="flex items-center justify-center min-h-[500px]">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-12 h-12 animate-spin text-primary" />
-          <p className="text-muted-foreground font-medium animate-pulse">جاري تحميل البيانات الذكية...</p>
+          <p className="text-muted-foreground font-medium animate-pulse">{a.analyticsLoading}</p>
         </div>
       </div>
     )
@@ -214,33 +219,33 @@ export default function AdminAnalyticsPage() {
 
   if (!data || !stats) {
     return (
-      <div className="text-center text-muted-foreground py-20 bg-muted/20 rounded-2xl border border-border/50 backdrop-blur-sm" dir="rtl">
+      <div className="text-center text-muted-foreground py-20 bg-muted/20 rounded-2xl border border-border/50 backdrop-blur-sm">
         <Activity className="w-16 h-16 mx-auto mb-4 opacity-50" />
-        <h2 className="text-xl font-bold mb-2">تعذر تحميل التحليلات</h2>
-        <p className="text-sm">تأكد من اتصالك بالإنترنت أو حاول تحديث الصفحة</p>
+        <h2 className="text-xl font-bold mb-2">{a.analyticsLoadError}</h2>
+        <p className="text-sm">{a.analyticsRetryHint}</p>
       </div>
     )
   }
 
   const userCounters: CounterCardProps[] = [
-    { label: "الطلاب", value: stats.totalStudents.toLocaleString(), icon: Users, color: "bg-blue-500" },
-    { label: "المدرسون", value: stats.totalTeachers.toLocaleString(), icon: GraduationCap, color: "bg-purple-500" },
-    { label: "أولياء الأمور", value: stats.totalParents.toLocaleString(), icon: UserCog, color: "bg-amber-500" },
-    { label: "النشطون اليوم", value: stats.dailyActiveStudents.toLocaleString(), hint: `${stats.dailyActivityRate}% من الطلاب`, icon: Activity, color: "bg-emerald-500" },
+    { label: a.analyticsStudents, value: stats.totalStudents.toLocaleString(), icon: Users, color: "bg-blue-500" },
+    { label: a.analyticsTeachers, value: stats.totalTeachers.toLocaleString(), icon: GraduationCap, color: "bg-purple-500" },
+    { label: a.analyticsParents, value: stats.totalParents.toLocaleString(), icon: UserCog, color: "bg-amber-500" },
+    { label: a.analyticsActiveToday, value: stats.dailyActiveStudents.toLocaleString(), hint: a.analyticsActiveTodayHint.replace('{rate}', String(stats.dailyActivityRate)), icon: Activity, color: "bg-emerald-500" },
   ]
 
   const contentCounters: CounterCardProps[] = [
-    { label: "الدورات", value: stats.activeCourses.toLocaleString(), hint: `${stats.totalLessons} درس إجمالي`, icon: BookOpen, color: "bg-indigo-500" },
-    { label: "الجلسات المكتملة", value: stats.completedSessions.toLocaleString(), hint: `من أصل ${stats.totalSessions} جلسة`, icon: Calendar, color: "bg-pink-500" },
-    { label: "المسارات التعليمية", value: stats.learningPaths.toLocaleString(), icon: Route, color: "bg-orange-500" },
-    { label: "المكتبة والكتب", value: stats.totalBooks.toLocaleString(), hint: `${stats.totalBookFiles} ملف`, icon: Library, color: "bg-teal-500" },
+    { label: a.analyticsCourses, value: stats.activeCourses.toLocaleString(), hint: a.analyticsTotalLessons.replace('{count}', String(stats.totalLessons)), icon: BookOpen, color: "bg-indigo-500" },
+    { label: a.analyticsCompletedSessions, value: stats.completedSessions.toLocaleString(), hint: a.analyticsSessionsTotal.replace('{count}', String(stats.totalSessions)), icon: Calendar, color: "bg-pink-500" },
+    { label: a.analyticsLearningPaths, value: stats.learningPaths.toLocaleString(), icon: Route, color: "bg-orange-500" },
+    { label: a.analyticsLibrary, value: stats.totalBooks.toLocaleString(), hint: a.analyticsFiles.replace('{count}', String(stats.totalBookFiles)), icon: Library, color: "bg-teal-500" },
   ]
 
   const engagementCounters: CounterCardProps[] = [
-    { label: "التسجيلات النشطة", value: stats.activeEnrollments.toLocaleString(), hint: `${stats.totalEnrollments} إجمالي التسجيلات`, icon: UserCheck, color: "bg-cyan-500" },
-    { label: "معدل الإنجاز", value: `${stats.completionRate}%`, icon: Target, color: "bg-yellow-500" },
-    { label: "المهام المنجزة", value: `${stats.taskCompletionRate}%`, hint: `${stats.completedTasks} مهمة`, icon: Sparkles, color: "bg-rose-500" },
-    { label: "الشهادات المصدرة", value: stats.totalCertificates.toLocaleString(), icon: Award, color: "bg-emerald-400" },
+    { label: a.analyticsActiveEnrollments, value: stats.activeEnrollments.toLocaleString(), hint: `${stats.totalEnrollments} ${a.analyticsTotalEnrollments}`, icon: UserCheck, color: "bg-cyan-500" },
+    { label: a.analyticsCompletionRate, value: `${stats.completionRate}%`, icon: Target, color: "bg-yellow-500" },
+    { label: a.analyticsCompletedTasks, value: `${stats.taskCompletionRate}%`, hint: a.analyticsTasksCount.replace('{count}', String(stats.completedTasks)), icon: Sparkles, color: "bg-rose-500" },
+    { label: a.analyticsIssuedCertificates, value: stats.totalCertificates.toLocaleString(), icon: Award, color: "bg-emerald-400" },
   ]
 
   // Prepare chart data
@@ -268,7 +273,7 @@ export default function AdminAnalyticsPage() {
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-card border border-border shadow-xl rounded-lg p-3 text-sm" dir="rtl">
+        <div className="bg-card border border-border shadow-xl rounded-lg p-3 text-sm">
           <p className="font-bold text-foreground mb-2 border-b border-border pb-1">{label}</p>
           {payload.map((entry: any, index: number) => (
             <p key={index} style={{ color: entry.color }} className="flex justify-between gap-4 font-medium">
@@ -283,16 +288,16 @@ export default function AdminAnalyticsPage() {
   };
 
   return (
-    <div className="space-y-8 max-w-[1600px] mx-auto pb-12" dir="rtl">
+    <div className="space-y-8 max-w-[1600px] mx-auto pb-12">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card/40 backdrop-blur-md p-6 rounded-2xl border border-border shadow-sm">
         <div>
           <h1 className="text-3xl font-black text-foreground flex items-center gap-3">
             <BarChart3 className="w-8 h-8 text-primary" />
-            التحليلات الذكية
+            {a.analyticsTitle}
           </h1>
           <p className="text-sm text-muted-foreground mt-2 font-medium">
-            لوحة قيادة تفاعلية لأداء الأكاديمية ونمو المجتمع
+            {a.analyticsDesc}
           </p>
         </div>
         <Button onClick={handleExport} disabled={exporting} size="lg" className="gap-2 font-bold shadow-lg hover:shadow-primary/25 transition-all">
@@ -301,7 +306,7 @@ export default function AdminAnalyticsPage() {
           ) : (
             <FileSpreadsheet className="w-5 h-5" />
           )}
-          تصدير التقرير
+          {a.analyticsExport}
           {!exporting && <Download className="w-5 h-5 mr-1 opacity-70" />}
         </Button>
       </div>
@@ -325,7 +330,7 @@ export default function AdminAnalyticsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg font-bold">
               <TrendingUp className="w-5 h-5 text-primary" />
-              نمو التسجيلات والمستخدمين (آخر 6 أشهر)
+              {a.analyticsEnrollmentGrowth}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -342,7 +347,7 @@ export default function AdminAnalyticsPage() {
                   <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12 }} className="text-muted-foreground" />
                   <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12 }} className="text-muted-foreground" />
                   <Tooltip content={<CustomTooltip />} />
-                  <Area type="monotone" dataKey="count" name="التسجيلات" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorCount)" />
+                  <Area type="monotone" dataKey="count" name={a.analyticsEnrollments} stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorCount)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -354,7 +359,7 @@ export default function AdminAnalyticsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg font-bold">
               <Users className="w-5 h-5 text-primary" />
-              توزيع النوع
+              {a.analyticsGenderDistribution}
             </CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col items-center justify-center">
@@ -389,7 +394,7 @@ export default function AdminAnalyticsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg font-bold">
               <Activity className="w-5 h-5 text-emerald-500" />
-              النشاط اليومي (آخر 14 يوم)
+              {a.analyticsDailyActivity}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -400,7 +405,7 @@ export default function AdminAnalyticsPage() {
                   <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 11 }} className="text-muted-foreground" />
                   <YAxis yAxisId="left" orientation="right" axisLine={false} tickLine={false} tick={{ fontSize: 11 }} className="text-muted-foreground" />
                   <Tooltip content={<CustomTooltip />} cursor={{fill: 'currentColor', opacity: 0.05}} />
-                  <Bar yAxisId="left" dataKey="students" name="الطلاب النشطين" fill="#10b981" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                  <Bar yAxisId="left" dataKey="students" name={a.analyticsActiveStudents} fill="#10b981" radius={[4, 4, 0, 0]} maxBarSize={40} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -412,7 +417,7 @@ export default function AdminAnalyticsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg font-bold">
               <Target className="w-5 h-5 text-amber-500" />
-              حالات التسجيلات
+              {a.analyticsEnrollmentStatuses}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -423,7 +428,7 @@ export default function AdminAnalyticsPage() {
                   <XAxis type="number" axisLine={false} tickLine={false} tick={{ fontSize: 11 }} className="text-muted-foreground" />
                   <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 12, fontWeight: 'bold' }} width={80} className="text-foreground" />
                   <Tooltip content={<CustomTooltip />} cursor={{fill: 'currentColor', opacity: 0.05}} />
-                  <Bar dataKey="value" name="عدد التسجيلات" fill="#f59e0b" radius={[0, 4, 4, 0]} barSize={24}>
+                  <Bar dataKey="value" name={a.analyticsEnrollmentCount} fill="#f59e0b" radius={[0, 4, 4, 0]} barSize={24}>
                     {enrollStatusData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
@@ -443,7 +448,7 @@ export default function AdminAnalyticsPage() {
             <CardTitle className="flex items-center justify-between text-lg font-bold">
               <div className="flex items-center gap-2">
                 <Award className="w-5 h-5 text-primary" />
-                لوحة الشرف للطلاب
+                {a.analyticsHonorRoll}
               </div>
             </CardTitle>
           </CardHeader>
@@ -460,7 +465,7 @@ export default function AdminAnalyticsPage() {
                       <div className="flex-1 min-w-0">
                         <p className="font-bold text-foreground truncate">{s.name}</p>
                         <p className="text-xs text-muted-foreground mt-0.5">
-                          {s.enrollments} دورة • {s.completed} إنجاز
+                          {s.enrollments} {a.analyticsCourses} • {s.completed} {a.analyticsStudentsCount}
                         </p>
                       </div>
                       <div className="text-left shrink-0">
@@ -473,7 +478,7 @@ export default function AdminAnalyticsPage() {
                 })}
               </div>
             ) : (
-              <div className="py-12 text-center text-muted-foreground">لا توجد بيانات</div>
+              <div className="py-12 text-center text-muted-foreground">{a.analyticsNoData}</div>
             )}
           </CardContent>
         </Card>
@@ -483,7 +488,7 @@ export default function AdminAnalyticsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg font-bold">
               <GraduationCap className="w-5 h-5 text-purple-500" />
-              أفضل المدرسين
+              {a.analyticsTopTeachers}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
@@ -497,18 +502,18 @@ export default function AdminAnalyticsPage() {
                     <div className="flex-1 min-w-0">
                       <p className="font-bold text-foreground truncate">{t.name}</p>
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        {t.courses_count} مادة تعليمية
+                        {t.courses_count} {a.analyticsCourseMaterials}
                       </p>
                     </div>
                     <div className="text-left shrink-0">
                       <span className="font-black text-foreground">{t.students_count}</span>
-                      <span className="text-xs text-muted-foreground block">طالب</span>
+                      <span className="text-xs text-muted-foreground block">{a.analyticsStudentsCount}</span>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="py-12 text-center text-muted-foreground">لا توجد بيانات</div>
+              <div className="py-12 text-center text-muted-foreground">{a.analyticsNoData}</div>
             )}
           </CardContent>
         </Card>
@@ -518,7 +523,7 @@ export default function AdminAnalyticsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg font-bold">
               <BookOpen className="w-5 h-5 text-indigo-500" />
-              أكثر الدورات تسجيلاً
+              {a.analyticsTopCourses}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
@@ -531,7 +536,7 @@ export default function AdminAnalyticsPage() {
                     <div key={idx} className="p-4 hover:bg-muted/30 transition-colors">
                       <div className="flex items-center justify-between mb-2">
                         <p className="font-bold text-foreground truncate flex-1 ml-4">{c.title}</p>
-                        <span className="font-black text-indigo-500 shrink-0">{c.enrollments} طالب</span>
+                        <span className="font-black text-indigo-500 shrink-0">{c.enrollments} {a.analyticsStudentsCount}</span>
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
@@ -547,7 +552,7 @@ export default function AdminAnalyticsPage() {
                 })}
               </div>
             ) : (
-              <div className="py-12 text-center text-muted-foreground">لا توجد بيانات</div>
+              <div className="py-12 text-center text-muted-foreground">{a.analyticsNoData}</div>
             )}
           </CardContent>
         </Card>
@@ -559,7 +564,7 @@ export default function AdminAnalyticsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg font-bold">
               <Globe2 className="w-5 h-5 text-blue-500" />
-              الانتشار الجغرافي للطلاب
+              {a.analyticsGeoDistribution}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -593,7 +598,7 @@ export default function AdminAnalyticsPage() {
               </div>
             ) : (
               <div className="h-48 flex items-center justify-center text-muted-foreground">
-                لا توجد بيانات جغرافية
+                {a.analyticsNoGeoData}
               </div>
             )}
           </CardContent>
@@ -603,7 +608,7 @@ export default function AdminAnalyticsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg font-bold">
               <MessageSquare className="w-5 h-5 text-teal-500" />
-              نبض المجتمع والمنتدى
+              {a.analyticsCommunityPulse}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -613,21 +618,21 @@ export default function AdminAnalyticsPage() {
                 <p className="text-4xl font-black text-teal-600 dark:text-teal-400 drop-shadow-sm relative z-10">
                   {stats.forumPosts.toLocaleString()}
                 </p>
-                <p className="text-sm font-bold text-teal-700/70 dark:text-teal-300/70 mt-2 relative z-10">إجمالي المشاركات</p>
+                <p className="text-sm font-bold text-teal-700/70 dark:text-teal-300/70 mt-2 relative z-10">{a.analyticsTotalPosts}</p>
               </div>
               <div className="relative overflow-hidden bg-gradient-to-br from-blue-500/10 to-blue-500/5 border border-blue-500/20 rounded-2xl p-6 text-center hover:scale-[1.02] transition-transform">
                 <Users className="absolute -left-4 -bottom-4 w-24 h-24 text-blue-500/10" />
                 <p className="text-4xl font-black text-blue-600 dark:text-blue-400 drop-shadow-sm relative z-10">
                   {stats.communityMembers.toLocaleString()}
                 </p>
-                <p className="text-sm font-bold text-blue-700/70 dark:text-blue-300/70 mt-2 relative z-10">أعضاء المجتمع</p>
+                <p className="text-sm font-bold text-blue-700/70 dark:text-blue-300/70 mt-2 relative z-10">{a.analyticsCommunityMembers}</p>
               </div>
             </div>
             
             <div className="mt-6">
               <h4 className="text-sm font-bold text-muted-foreground mb-3 flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-amber-500" />
-                أحدث المسجلين بالأكاديمية
+                {a.analyticsRecentSignups}
               </h4>
               {data.lastSignups.length > 0 ? (
                 <div className="space-y-2">
@@ -637,14 +642,14 @@ export default function AdminAnalyticsPage() {
                       <div className="flex items-center gap-3">
                         <span className="text-[11px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold">{u.role}</span>
                         <span className="text-[11px] text-muted-foreground">
-                          {new Date(u.created_at).toLocaleDateString("ar-EG", { month: 'short', day: 'numeric' })}
+                          {new Date(u.created_at).toLocaleDateString(dateLocale, { month: 'short', day: 'numeric' })}
                         </span>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-xs text-muted-foreground text-center py-4">لا توجد تسجيلات حديثة</p>
+                <p className="text-xs text-muted-foreground text-center py-4">{a.analyticsNoRecentSignups}</p>
               )}
             </div>
           </CardContent>

@@ -11,6 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { AcademySettings } from "../hooks/use-academy-settings"
+import { useI18n } from "@/lib/i18n/context"
 
 interface RegistrationSettingsProps {
   settings: AcademySettings
@@ -18,17 +19,12 @@ interface RegistrationSettingsProps {
   onReset: () => void
 }
 
-const requiredFieldOptions = [
-  { id: "birthdate", label: "تاريخ الميلاد" },
-  { id: "gender", label: "الجنس" },
-  { id: "country", label: "الدولة" },
-  { id: "education_level", label: "المستوى التعليمي" },
-  { id: "phone", label: "رقم الهاتف" },
-]
-
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
 
 export function RegistrationSettings({ settings, onUpdate, onReset }: RegistrationSettingsProps) {
+  const { t } = useI18n()
+  const a = t.academyAdmin
+
   const { data: coursesData } = useSWR<{ data: Array<{ id: string; title: string; status: string }> }>(
     "/api/academy/admin/courses",
     fetcher,
@@ -37,6 +33,14 @@ export function RegistrationSettings({ settings, onUpdate, onReset }: Registrati
   const publishedCourses = (coursesData?.data || []).filter((c) => c.status === "published")
 
   const requiredFields = settings.academy_registration_required_fields || []
+
+  const requiredFieldOptions = [
+    { id: "birthdate", label: a.rsFieldBirthdate },
+    { id: "gender", label: a.rsFieldGender },
+    { id: "country", label: a.rsFieldCountry },
+    { id: "education_level", label: a.rsFieldEducation },
+    { id: "phone", label: a.rsFieldPhone },
+  ]
 
   const toggleRequiredField = (fieldId: string) => {
     const newFields = requiredFields.includes(fieldId)
@@ -56,21 +60,21 @@ export function RegistrationSettings({ settings, onUpdate, onReset }: Registrati
                 <UserPlus className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <CardTitle className="text-lg">التسجيل</CardTitle>
-                <CardDescription className="text-xs mt-0.5">التحكم في فتح/غلق التسجيل</CardDescription>
+                <CardTitle className="text-lg">{a.rsTitle}</CardTitle>
+                <CardDescription className="text-xs mt-0.5">{a.rsDesc}</CardDescription>
               </div>
             </div>
             <Button variant="ghost" size="sm" onClick={onReset} className="text-muted-foreground">
               <RotateCcw className="w-4 h-4 ml-1" />
-              استعادة
+              {a.gsRestore}
             </Button>
           </div>
         </CardHeader>
         <CardContent className="pt-6 space-y-6">
           <div className="flex items-center justify-between p-4 bg-muted/50 rounded-xl">
             <div className="space-y-0.5">
-              <Label className="font-medium">تفعيل تسجيل الطلاب</Label>
-              <p className="text-xs text-muted-foreground">السماح للطلاب الجدد بإنشاء حساب</p>
+              <Label className="font-medium">{a.rsEnableStudent}</Label>
+              <p className="text-xs text-muted-foreground">{a.rsEnableStudentDesc}</p>
             </div>
             <Switch
               checked={settings.academy_registration_student_enabled ?? true}
@@ -80,8 +84,8 @@ export function RegistrationSettings({ settings, onUpdate, onReset }: Registrati
 
           <div className="flex items-center justify-between p-4 bg-muted/50 rounded-xl">
             <div className="space-y-0.5">
-              <Label className="font-medium">تفعيل تسجيل الأساتذة</Label>
-              <p className="text-xs text-muted-foreground">السماح للأساتذة بتقديم طلب انضمام</p>
+              <Label className="font-medium">{a.rsEnableTeacher}</Label>
+              <p className="text-xs text-muted-foreground">{a.rsEnableTeacherDesc}</p>
             </div>
             <Switch
               checked={settings.academy_registration_teacher_enabled ?? true}
@@ -99,19 +103,19 @@ export function RegistrationSettings({ settings, onUpdate, onReset }: Registrati
               <Shield className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-lg">الموافقات</CardTitle>
-              <CardDescription className="text-xs mt-0.5">هل يحتاج المستخدمون موافقة قبل الدخول؟</CardDescription>
+              <CardTitle className="text-lg">{a.rsApprovals}</CardTitle>
+              <CardDescription className="text-xs mt-0.5">{a.rsApprovalsDesc}</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent className="pt-6 space-y-6">
           <div className="flex items-center justify-between p-4 bg-muted/50 rounded-xl">
             <div className="space-y-0.5">
-              <Label className="font-medium">موافقة الأدمن على الطلاب</Label>
+              <Label className="font-medium">{a.rsStudentApproval}</Label>
               <p className="text-xs text-muted-foreground">
                 {settings.academy_registration_student_approval
-                  ? "الطالب ينتظر الموافقة قبل الدخول"
-                  : "الطالب يدخل مباشرة بعد التسجيل"}
+                  ? a.rsStudentApprovalPending
+                  : a.rsStudentApprovalAuto}
               </p>
             </div>
             <Switch
@@ -122,11 +126,11 @@ export function RegistrationSettings({ settings, onUpdate, onReset }: Registrati
 
           <div className="flex items-center justify-between p-4 bg-muted/50 rounded-xl">
             <div className="space-y-0.5">
-              <Label className="font-medium">موافقة الأدمن على الأساتذة</Label>
+              <Label className="font-medium">{a.rsTeacherApproval}</Label>
               <p className="text-xs text-muted-foreground">
                 {settings.academy_registration_teacher_approval
-                  ? "الأستاذ ينتظر مراجعة الطلب"
-                  : "الأستاذ يدخل مباشرة"}
+                  ? a.rsTeacherApprovalPending
+                  : a.rsTeacherApprovalAuto}
               </p>
             </div>
             <Switch
@@ -137,8 +141,8 @@ export function RegistrationSettings({ settings, onUpdate, onReset }: Registrati
 
           <div className="flex items-center justify-between p-4 bg-muted/50 rounded-xl">
             <div className="space-y-0.5">
-              <Label className="font-medium">التحقق من البريد الإلكتروني</Label>
-              <p className="text-xs text-muted-foreground">إرسال رابط تأكيد للإيميل بعد التسجيل</p>
+              <Label className="font-medium">{a.rsEmailVerification}</Label>
+              <p className="text-xs text-muted-foreground">{a.rsEmailVerificationDesc}</p>
             </div>
             <Switch
               checked={settings.academy_registration_email_verification ?? true}
@@ -156,8 +160,8 @@ export function RegistrationSettings({ settings, onUpdate, onReset }: Registrati
               <CheckSquare className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-lg">الحقول الإلزامية</CardTitle>
-              <CardDescription className="text-xs mt-0.5">الحقول المطلوبة في نموذج التسجيل</CardDescription>
+              <CardTitle className="text-lg">{a.rsRequiredFields}</CardTitle>
+              <CardDescription className="text-xs mt-0.5">{a.rsRequiredFieldsDesc}</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -188,8 +192,8 @@ export function RegistrationSettings({ settings, onUpdate, onReset }: Registrati
               <Mail className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-lg">الرسالة الترحيبية</CardTitle>
-              <CardDescription className="text-xs mt-0.5">تُرسل للطالب بعد التسجيل</CardDescription>
+              <CardTitle className="text-lg">{a.rsWelcomeMessage}</CardTitle>
+              <CardDescription className="text-xs mt-0.5">{a.rsWelcomeMessageDesc}</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -197,10 +201,10 @@ export function RegistrationSettings({ settings, onUpdate, onReset }: Registrati
           <Textarea
             value={settings.academy_registration_welcome_message || ""}
             onChange={(e) => onUpdate({ academy_registration_welcome_message: e.target.value })}
-            placeholder="مرحباً بك في أكاديمية إتقان! نتمنى لك رحلة تعليمية ممتعة ومباركة..."
+            placeholder={a.rsWelcomeMessagePlaceholder}
             className="min-h-[150px] resize-none"
           />
-          <p className="text-[11px] text-muted-foreground">يمكنك استخدام HTML بسيط (bold, italic, links)</p>
+          <p className="text-[11px] text-muted-foreground">{a.rsWelcomeMessageHint}</p>
         </CardContent>
       </Card>
 
@@ -212,8 +216,8 @@ export function RegistrationSettings({ settings, onUpdate, onReset }: Registrati
               <BookOpen className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-lg">الدورة الافتراضية</CardTitle>
-              <CardDescription className="text-xs mt-0.5">دورة يُضاف لها الطالب تلقائياً</CardDescription>
+              <CardTitle className="text-lg">{a.rsDefaultCourse}</CardTitle>
+              <CardDescription className="text-xs mt-0.5">{a.rsDefaultCourseDesc}</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -223,10 +227,10 @@ export function RegistrationSettings({ settings, onUpdate, onReset }: Registrati
             onValueChange={(v) => onUpdate({ academy_registration_default_course: v === "none" ? "" : v })}
           >
             <SelectTrigger className="h-11">
-              <SelectValue placeholder="اختر دورة (اختياري)" />
+              <SelectValue placeholder={a.rsDefaultCoursePlaceholder} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="none">بدون دورة افتراضية</SelectItem>
+              <SelectItem value="none">{a.rsNoDefaultCourse}</SelectItem>
               {publishedCourses.map((c) => (
                 <SelectItem key={c.id} value={c.id}>
                   {c.title}
@@ -234,7 +238,7 @@ export function RegistrationSettings({ settings, onUpdate, onReset }: Registrati
               ))}
             </SelectContent>
           </Select>
-          <p className="text-[11px] text-muted-foreground mt-2">اختياري - الطالب يُسجل تلقائياً في هذه الدورة</p>
+          <p className="text-[11px] text-muted-foreground mt-2">{a.rsDefaultCourseHint}</p>
         </CardContent>
       </Card>
     </div>

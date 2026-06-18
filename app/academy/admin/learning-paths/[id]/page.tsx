@@ -57,6 +57,7 @@ export default function AcademyAdminLearningPathDetailPage() {
   const pathId = params.id
   const { t } = useI18n()
   const tp = (t as any).tajweedPaths
+  const a = t.academyAdmin
 
   const [path, setPath] = useState<any>(null)
   const [stages, setStages] = useState<Stage[]>([])
@@ -215,11 +216,11 @@ export default function AcademyAdminLearningPathDetailPage() {
 
   async function handleStageFileUpload(file: File, type: "video" | "pdf") {
     if (type === "video" && !file.type.startsWith("video/") && !file.type.startsWith("audio/")) {
-      toast.error("يجب اختيار ملف فيديو أو صوت")
+      toast.error(a.lpVideoOrAudioRequired)
       return
     }
     if (type === "pdf" && file.type !== "application/pdf" && !file.type.startsWith("image/")) {
-      toast.error("يجب اختيار ملف PDF أو صورة")
+      toast.error(a.lpPdfOrImageRequired)
       return
     }
     
@@ -227,22 +228,22 @@ export default function AcademyAdminLearningPathDetailPage() {
     const MAX_VIDEO_SIZE = 50 * 1024 * 1024 // 50MB
     const MAX_PDF_SIZE = 10 * 1024 * 1024 // 10MB
     if (type === "video" && file.size > MAX_VIDEO_SIZE) {
-      toast.error("الحجم الأقصى للفيديو 50MB")
+      toast.error(a.lpMaxSizeVideo50MB)
       return
     }
     if (type === "pdf" && file.size > MAX_PDF_SIZE) {
-      toast.error("الحجم الأقصى للملف 10MB")
+      toast.error(a.lpMaxSizeFile10MB)
       return
     }
 
-    const toastId = toast.loading("جاري الرفع...")
+    const toastId = toast.loading(a.lpUploadUploading)
     try {
       const fd = new FormData()
       fd.append("file", file)
       const res = await fetch("/api/upload", { method: "POST", body: fd })
       const json = await res.json()
       if (!res.ok || !json.url) {
-        throw new Error(json.error || "فشل الرفع")
+        throw new Error(json.error || a.lpUploadError)
       }
       
       if (type === "video") {
@@ -251,37 +252,37 @@ export default function AcademyAdminLearningPathDetailPage() {
         setStageForm(prev => ({ ...prev, pdf_url: json.url }))
       }
       
-      toast.success("تم الرفع بنجاح", { id: toastId })
+      toast.success(a.lpUploadSuccess, { id: toastId })
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "حدث خطأ أثناء الرفع", { id: toastId })
+      toast.error(err instanceof Error ? err.message : a.lpFileUploadError, { id: toastId })
     }
   }
 
   async function handleThumbnailUpload(file: File) {
     if (!file.type.startsWith("image/")) {
-      toast.error("يجب اختيار ملف صورة")
+      toast.error(a.lpMustSelectImage)
       return
     }
     const MAX_SIZE = 4 * 1024 * 1024 // 4MB
     if (file.size > MAX_SIZE) {
-      toast.error("الحجم الأقصى للصورة 4MB")
+      toast.error(a.lpMaxImageSize4MB)
       return
     }
 
     setUploadingThumb(true)
-    const toastId = toast.loading("جاري رفع صورة الغلاف...")
+    const toastId = toast.loading(a.lpUploadingCoverImage)
     try {
       const fd = new FormData()
       fd.append("file", file)
       const res = await fetch("/api/upload", { method: "POST", body: fd })
       const json = await res.json()
       if (!res.ok || !json.url) {
-        throw new Error(json.error || "فشل الرفع")
+        throw new Error(json.error || a.lpUploadError)
       }
       setEdit(prev => ({ ...prev, thumbnail_url: json.url }))
-      toast.success("تم رفع الصورة بنجاح", { id: toastId })
+      toast.success(a.lpUploadCoverImageSuccess, { id: toastId })
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "حدث خطأ أثناء الرفع", { id: toastId })
+      toast.error(err instanceof Error ? err.message : a.lpFileUploadError, { id: toastId })
     } finally {
       setUploadingThumb(false)
     }
@@ -544,16 +545,16 @@ export default function AcademyAdminLearningPathDetailPage() {
         <TabsContent value="settings">
           <Card className="p-6 max-w-xl space-y-4">
             <div className="space-y-2">
-              <Label>صورة الغلاف (Thumbnail)</Label>
+              <Label>{a.lpCoverImage}</Label>
               <div className="border-2 border-dashed border-border/60 rounded-xl p-4 text-center bg-muted/10 hover:bg-muted/30 transition-colors">
                 <div className="mx-auto w-full max-w-xs aspect-[16/9] bg-background shadow-sm rounded-lg overflow-hidden border border-border/50 mb-3 relative flex items-center justify-center">
                   {edit.thumbnail_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={edit.thumbnail_url} alt="معاينة الغلاف" className="w-full h-full object-cover" />
+                    <img src={edit.thumbnail_url} alt="Preview" className="w-full h-full object-cover" />
                   ) : (
                     <div className="text-center p-4">
                       <ImageIcon className="h-8 w-8 text-muted-foreground/30 mx-auto mb-1" />
-                      <span className="text-xs text-muted-foreground">لا توجد صورة غلاف (16:9)</span>
+                      <span className="text-xs text-muted-foreground">{a.lpNoCoverImage}</span>
                     </div>
                   )}
                 </div>
@@ -569,18 +570,18 @@ export default function AcademyAdminLearningPathDetailPage() {
                     }}
                     disabled={uploadingThumb || saving}
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                    aria-label="رفع صورة الغلاف"
+                    aria-label={a.lpUploadImage}
                   />
                   <Button type="button" variant="outline" size="sm" disabled={uploadingThumb || saving} className="gap-2">
                     {uploadingThumb ? <Loader2 className="h-4 w-4 animate-spin" /> : <UploadCloud className="h-4 w-4" />}
-                    {edit.thumbnail_url ? "تغيير الصورة" : "اختيار ورفع صورة"}
+                    {edit.thumbnail_url ? a.lpChangeImageTooltip : a.lpSelectUploadImage}
                   </Button>
                 </div>
                 
                 {edit.thumbnail_url && (
                   <div className="mt-2">
                     <button type="button" onClick={() => setEdit(prev => ({ ...prev, thumbnail_url: "" }))} className="text-xs text-red-500 hover:text-red-700 underline underline-offset-2">
-                      إزالة الصورة
+                      {a.lpRemoveImagePermanently}
                     </button>
                   </div>
                 )}
@@ -650,9 +651,9 @@ export default function AcademyAdminLearningPathDetailPage() {
             <div className="flex items-start gap-2 rounded-lg border border-emerald-200 bg-emerald-50/60 p-3">
               <input id="t_cert_e" type="checkbox" className="h-4 w-4 mt-0.5 accent-emerald-600" checked={edit.certificate_enabled} onChange={e => setEdit({ ...edit, certificate_enabled: e.target.checked })} />
               <Label htmlFor="t_cert_e" className="cursor-pointer leading-relaxed">
-                إصدار شهادة عند إكمال المسار
+                {a.lpCertificateOnCompletion}
                 <span className="block text-xs font-normal text-muted-foreground mt-0.5">
-                  عند التفعيل، يصبح الطالب مؤهلاً تلقائياً لشهادة بمجرد إنهاء كل مراحل المسار.
+                  {a.lpCertificateOnCompletionDesc}
                 </span>
               </Label>
             </div>
@@ -665,10 +666,22 @@ export default function AcademyAdminLearningPathDetailPage() {
 
         <TabsContent value="landing">
           <Card className="p-6 max-w-2xl space-y-4">
-            <h3 className="font-semibold text-lg border-b pb-2">إعدادات صفحة الهبوط</h3>
+            <h3 className="font-semibold text-lg border-b pb-2">{a.lpLandingPageSettings}</h3>
             <div className="space-y-1">
-              <Label>الفيديو التعريفي (Promo Video URL)</Label>
-              <Input value={edit.promo_video_url} onChange={e => setEdit({ ...edit, promo_video_url: e.target.value })} placeholder="رابط يوتيوب أو فيديو تعريفي..." />
+              <Label>{a.lpPromoVideoUrl}</Label>
+              <Input value={edit.promo_video_url} onChange={e => setEdit({ ...edit, promo_video_url: e.target.value })} placeholder={a.lpPromoVideoPlaceholder} />
+            </div>
+            <div className="space-y-1">
+              <Label>{a.lpTargetAudience}</Label>
+              <Textarea rows={2} value={edit.target_audience} onChange={e => setEdit({ ...edit, target_audience: e.target.value })} placeholder={a.lpTargetAudiencePlaceholder} />
+            </div>
+            <div className="space-y-1">
+              <Label>{a.lpWhatYouWillLearn}</Label>
+              <Textarea rows={3} value={edit.what_you_will_learn.join(', ')} onChange={e => setEdit({ ...edit, what_you_will_learn: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })} placeholder={a.lpWhatYouWillLearnPlaceholder} />
+            </div>
+            <div className="space-y-1">
+              <Label>{a.lpPrerequisites}</Label>
+              <Textarea rows={2} value={edit.prerequisites.join(', ')} onChange={e => setEdit({ ...edit, prerequisites: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })} placeholder={a.lpPrerequisitesPlaceholder} />
             </div>
             <div className="space-y-1">
               <Label>الفئة المستهدفة (Target Audience)</Label>
@@ -684,35 +697,35 @@ export default function AcademyAdminLearningPathDetailPage() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <Label>نوع التسجيل</Label>
+                <Label>{a.lpEnrollmentType}</Label>
                 <Select value={edit.enrollment_type} onValueChange={v => setEdit({ ...edit, enrollment_type: v })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="open">مفتوح للجميع</SelectItem>
-                    <SelectItem value="cohort">نظام دفعات (Cohorts)</SelectItem>
-                    <SelectItem value="invite_only">بدعوة فقط</SelectItem>
+                    <SelectItem value="open">{a.lpOpenToAll}</SelectItem>
+                    <SelectItem value="cohort">{a.lpCohortSystem}</SelectItem>
+                    <SelectItem value="invite_only">{a.lpInviteOnly}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-1">
-                <Label>نوع الشهادة</Label>
+                <Label>{a.lpCertificationType}</Label>
                 <Select value={edit.certification_type} onValueChange={v => setEdit({ ...edit, certification_type: v })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="certificate_of_completion">شهادة إتمام</SelectItem>
-                    <SelectItem value="ijazah">إجازة</SelectItem>
-                    <SelectItem value="none">بدون شهادة</SelectItem>
+                    <SelectItem value="certificate_of_completion">{a.lpCertificateOfCompletion}</SelectItem>
+                    <SelectItem value="ijazah">{a.lpIjazah}</SelectItem>
+                    <SelectItem value="none">{a.lpNoCertificate}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
             <div className="space-y-1">
-              <Label>سعر المسار (إذا كان مدفوعاً، 0 للمجاني)</Label>
+              <Label>{a.lpPathPrice}</Label>
               <Input type="number" min="0" value={edit.price} onChange={e => setEdit({ ...edit, price: parseFloat(e.target.value) || 0 })} />
             </div>
             <Button onClick={savePath} disabled={saving} className="gap-2 mt-4">
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-              حفظ بيانات صفحة الهبوط
+              {a.lpSaveLandingPage}
             </Button>
           </Card>
         </TabsContent>
@@ -779,7 +792,7 @@ export default function AcademyAdminLearningPathDetailPage() {
                         }}
                       />
                       <Button type="button" variant="secondary" className="gap-2 w-full hover:bg-secondary/80">
-                        <UploadCloud className="h-4 w-4" /> رفع
+                        <UploadCloud className="h-4 w-4" /> {a.lpUpload}
                       </Button>
                     </div>
                   </div>
@@ -804,7 +817,7 @@ export default function AcademyAdminLearningPathDetailPage() {
                         }}
                       />
                       <Button type="button" variant="secondary" className="gap-2 w-full hover:bg-secondary/80">
-                        <UploadCloud className="h-4 w-4" /> رفع
+                        <UploadCloud className="h-4 w-4" /> {a.lpUpload}
                       </Button>
                     </div>
                   </div>
@@ -820,11 +833,11 @@ export default function AcademyAdminLearningPathDetailPage() {
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div className="md:col-span-1 space-y-1.5">
-                  <Label className="text-muted-foreground font-medium">الدورة المرتبطة (اختياري)</Label>
+                  <Label className="text-muted-foreground font-medium">{a.lpLinkedCourse}</Label>
                   <Select value={stageForm.course_id || "none"} onValueChange={v => setStageForm({ ...stageForm, course_id: v === "none" ? "" : v })}>
-                    <SelectTrigger className="bg-background shadow-sm border-input/50"><SelectValue placeholder="اختر دورة من المنصة لربطها بهذه المرحلة" /></SelectTrigger>
+                    <SelectTrigger className="bg-background shadow-sm border-input/50"><SelectValue placeholder={a.lpSelectCoursePlaceholder} /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="none">بدون دورة</SelectItem>
+                      <SelectItem value="none">{a.lpNoCourse}</SelectItem>
                       {courses.map(c => (
                         <SelectItem key={c.id} value={c.id}>{c.title}</SelectItem>
                       ))}
@@ -833,13 +846,13 @@ export default function AcademyAdminLearningPathDetailPage() {
                 </div>
                 <div className="md:col-span-1 space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <Label className="text-muted-foreground font-medium">الحلقة المرتبطة (اختياري)</Label>
-                    <Link href="/academy/admin/halaqat" target="_blank" className="text-[11px] text-emerald-600 hover:text-emerald-700 underline font-medium">إنشاء حلقة جديدة</Link>
+                    <Label className="text-muted-foreground font-medium">{a.lpLinkedHalaqa}</Label>
+                    <Link href="/academy/admin/halaqat" target="_blank" className="text-[11px] text-emerald-600 hover:text-emerald-700 underline font-medium">{a.lpCreateNewHalaqa}</Link>
                   </div>
                   <Select value={stageForm.halaqa_id || "none"} onValueChange={v => setStageForm({ ...stageForm, halaqa_id: v === "none" ? "" : v })}>
-                    <SelectTrigger className="bg-background shadow-sm border-input/50"><SelectValue placeholder="اختر حلقة لربطها بهذه المرحلة" /></SelectTrigger>
+                    <SelectTrigger className="bg-background shadow-sm border-input/50"><SelectValue placeholder={a.lpSelectHalaqaPlaceholder} /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="none">بدون حلقة</SelectItem>
+                      <SelectItem value="none">{a.lpNoHalaqa}</SelectItem>
                       {halaqat.map(h => (
                         <SelectItem key={h.id} value={h.id}>{h.name}</SelectItem>
                       ))}

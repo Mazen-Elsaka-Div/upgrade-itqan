@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AcademySettings } from "../hooks/use-academy-settings"
+import { useI18n } from "@/lib/i18n/context"
 
 interface ForumFiqhSettingsProps {
   settings: AcademySettings
@@ -20,6 +21,8 @@ interface ForumFiqhSettingsProps {
 }
 
 export function ForumFiqhSettings({ settings, onUpdate, onReset }: ForumFiqhSettingsProps) {
+  const { t } = useI18n()
+  const a = t.academyAdmin
   const { data: officersData } = useSWR<{
     officers: Array<{ user_id: string; name: string; is_active: boolean }>
   }>("/api/academy/admin/fiqh/officers", (url: string) => fetch(url).then((r) => r.json()), {
@@ -49,21 +52,21 @@ export function ForumFiqhSettings({ settings, onUpdate, onReset }: ForumFiqhSett
                 <MessageSquare className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <CardTitle className="text-lg">إعدادات المنتدى</CardTitle>
-                <CardDescription className="text-xs mt-0.5">التحكم في منتدى النقاش</CardDescription>
+                <CardTitle className="text-lg">{a.ffForumSettings}</CardTitle>
+                <CardDescription className="text-xs mt-0.5">{a.ffForumSettingsDesc}</CardDescription>
               </div>
             </div>
             <Button variant="ghost" size="sm" onClick={onReset} className="text-muted-foreground">
               <RotateCcw className="w-4 h-4 ml-1" />
-              استعادة
+              {a.gsRestore}
             </Button>
           </div>
         </CardHeader>
         <CardContent className="pt-6 space-y-6">
           <div className="flex items-center justify-between p-4 bg-muted/50 rounded-xl">
             <div className="space-y-0.5">
-              <Label className="font-medium">تفعيل المنتدى</Label>
-              <p className="text-xs text-muted-foreground">السماح بإنشاء موضوعات والرد عليها</p>
+              <Label className="font-medium">{a.ffEnableForum}</Label>
+              <p className="text-xs text-muted-foreground">{a.ffEnableForumDesc}</p>
             </div>
             <Switch
               checked={settings.academy_forum_enabled ?? true}
@@ -75,11 +78,11 @@ export function ForumFiqhSettings({ settings, onUpdate, onReset }: ForumFiqhSett
             <>
               <div className="flex items-center justify-between p-4 bg-muted/50 rounded-xl">
                 <div className="space-y-0.5">
-                  <Label className="font-medium">موافقة قبل النشر</Label>
+                  <Label className="font-medium">{a.ffApprovalRequired}</Label>
                   <p className="text-xs text-muted-foreground">
                     {settings.academy_forum_approval_required
-                      ? "الموضوعات تنتظر موافقة المشرف"
-                      : "الموضوعات تُنشر مباشرة"}
+                      ? a.ffApprovalRequiredPending
+                      : a.ffApprovalRequiredAuto}
                   </p>
                 </div>
                 <Switch
@@ -90,7 +93,7 @@ export function ForumFiqhSettings({ settings, onUpdate, onReset }: ForumFiqhSett
 
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label className="font-medium text-sm">الحد الأدنى للنقاط لإنشاء موضوع</Label>
+                  <Label className="font-medium text-sm">{a.ffMinPoints}</Label>
                   <Input
                     type="number"
                     value={settings.academy_forum_min_points ?? 50}
@@ -99,20 +102,20 @@ export function ForumFiqhSettings({ settings, onUpdate, onReset }: ForumFiqhSett
                     max={10000}
                     className="h-11"
                   />
-                  <p className="text-[11px] text-muted-foreground">0 = لا يوجد حد أدنى</p>
+                  <p className="text-[11px] text-muted-foreground">{a.ffMinPointsHint}</p>
                 </div>
               </div>
 
               <div className="space-y-3">
-                <Label className="font-medium text-sm">الكلمات الممنوعة (Auto-moderation)</Label>
+                <Label className="font-medium text-sm">{a.ffBannedWords}</Label>
                 <Textarea
                   value={bannedWords.join(", ")}
                   onChange={(e) => updateBannedWords(e.target.value)}
-                  placeholder="كلمة1, كلمة2, كلمة3..."
+                  placeholder={a.ffBannedWordsPlaceholder}
                   className="min-h-[100px] resize-none"
                 />
                 <p className="text-[11px] text-muted-foreground">
-                  افصل بين الكلمات بفاصلة أو سطر جديد. المنشورات المحتوية على هذه الكلمات ستُحجب تلقائياً.
+                  {a.ffBannedWordsHint}
                 </p>
                 {bannedWords.length > 0 && (
                   <div className="flex flex-wrap gap-2">
@@ -123,7 +126,7 @@ export function ForumFiqhSettings({ settings, onUpdate, onReset }: ForumFiqhSett
                     ))}
                     {bannedWords.length > 10 && (
                       <Badge variant="outline" className="text-xs">
-                        +{bannedWords.length - 10} أخرى
+                        +{bannedWords.length - 10} {a.ffMore}
                       </Badge>
                     )}
                   </div>
@@ -142,16 +145,16 @@ export function ForumFiqhSettings({ settings, onUpdate, onReset }: ForumFiqhSett
               <BookOpen className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-lg">إعدادات الفقه</CardTitle>
-              <CardDescription className="text-xs mt-0.5">التحكم في صفحة الأسئلة الفقهية</CardDescription>
+              <CardTitle className="text-lg">{a.ffFiqhSettings}</CardTitle>
+              <CardDescription className="text-xs mt-0.5">{a.ffFiqhSettingsDesc}</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent className="pt-6 space-y-6">
           <div className="flex items-center justify-between p-4 bg-muted/50 rounded-xl">
             <div className="space-y-0.5">
-              <Label className="font-medium">تفعيل صفحة الفقه</Label>
-              <p className="text-xs text-muted-foreground">السماح للطلاب بإرسال أسئلة فقهية</p>
+              <Label className="font-medium">{a.ffEnableFiqh}</Label>
+              <p className="text-xs text-muted-foreground">{a.ffEnableFiqhDesc}</p>
             </div>
             <Switch
               checked={settings.academy_fiqh_enabled ?? true}
@@ -163,7 +166,7 @@ export function ForumFiqhSettings({ settings, onUpdate, onReset }: ForumFiqhSett
             <>
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label className="font-medium text-sm">مدة الرد المتوقعة (أيام)</Label>
+                  <Label className="font-medium text-sm">{a.ffResponseDays}</Label>
                   <Input
                     type="number"
                     value={settings.academy_fiqh_response_days ?? 3}
@@ -178,7 +181,7 @@ export function ForumFiqhSettings({ settings, onUpdate, onReset }: ForumFiqhSett
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="font-medium text-sm">مشرف الفقه الافتراضي</Label>
+                  <Label className="font-medium text-sm">{a.ffDefaultSupervisor}</Label>
                   <Select
                     value={settings.academy_fiqh_default_supervisor || "none"}
                     onValueChange={(v) =>
@@ -186,10 +189,10 @@ export function ForumFiqhSettings({ settings, onUpdate, onReset }: ForumFiqhSett
                     }
                   >
                     <SelectTrigger className="h-11">
-                      <SelectValue placeholder="اختر مشرف (اختياري)" />
+                      <SelectValue placeholder={a.ffSelectSupervisor} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="none">بدون مشرف افتراضي</SelectItem>
+                      <SelectItem value="none">{a.ffNoSupervisor}</SelectItem>
                       {activeOfficers.map((o) => (
                         <SelectItem key={o.user_id} value={o.user_id}>
                           {o.name}
@@ -197,7 +200,7 @@ export function ForumFiqhSettings({ settings, onUpdate, onReset }: ForumFiqhSett
                       ))}
                     </SelectContent>
                   </Select>
-                  <p className="text-[11px] text-muted-foreground">للأسئلة بدون تصنيف</p>
+                  <p className="text-[11px] text-muted-foreground">{a.ffSupervisorHint}</p>
                 </div>
               </div>
 
@@ -205,7 +208,7 @@ export function ForumFiqhSettings({ settings, onUpdate, onReset }: ForumFiqhSett
                 <Alert className="bg-warning/10 border-warning/30">
                   <AlertTriangle className="w-4 h-4 text-warning" />
                   <AlertDescription className="text-sm text-warning">
-                    الأسئلة الفقهية بدون مشرف معيّن قد لا تُرد بسرعة. يُنصح بتعيين مشرف افتراضي.
+                    {a.ffWarning}
                   </AlertDescription>
                 </Alert>
               )}

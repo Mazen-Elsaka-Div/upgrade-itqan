@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { AcademySettings } from "../hooks/use-academy-settings"
+import { useI18n } from "@/lib/i18n/context"
 
 interface CoursesContentSettingsProps {
   settings: AcademySettings
@@ -29,16 +30,19 @@ const videoQualities = [
 ]
 
 const watermarkPositions = [
-  { value: "top-left", label: "أعلى يسار" },
-  { value: "top-right", label: "أعلى يمين" },
-  { value: "bottom-left", label: "أسفل يسار" },
-  { value: "bottom-right", label: "أسفل يمين" },
-  { value: "center", label: "الوسط" },
+  { value: "top-left", label: "Top Left" },
+  { value: "top-right", label: "Top Right" },
+  { value: "bottom-left", label: "Bottom Left" },
+  { value: "bottom-right", label: "Bottom Right" },
+  { value: "center", label: "Center" },
 ]
 
 const defaultFormats = ["mp4", "webm", "mov", "pdf", "docx", "pptx", "mp3", "wav"]
 
 export function CoursesContentSettings({ settings, onUpdate, onReset }: CoursesContentSettingsProps) {
+  const { t } = useI18n()
+  const a = t.academyAdmin
+
   const allowedFormats = settings.academy_courses_allowed_formats || defaultFormats
 
   const { data: storageStatus, isLoading: storageLoading } = useSWR<{
@@ -71,24 +75,24 @@ export function CoursesContentSettings({ settings, onUpdate, onReset }: CoursesC
                 <Video className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <CardTitle className="text-lg">مراجعة المحتوى</CardTitle>
-                <CardDescription className="text-xs mt-0.5">التحكم في سير عمل نشر الدروس</CardDescription>
+                <CardTitle className="text-lg">{a.csReviewTitle}</CardTitle>
+                <CardDescription className="text-xs mt-0.5">{a.csReviewDesc}</CardDescription>
               </div>
             </div>
             <Button variant="ghost" size="sm" onClick={onReset} className="text-muted-foreground">
               <RotateCcw className="w-4 h-4 ml-1" />
-              استعادة
+              {a.gsRestore}
             </Button>
           </div>
         </CardHeader>
         <CardContent className="pt-6">
           <div className="flex items-center justify-between p-4 bg-muted/50 rounded-xl">
             <div className="space-y-0.5">
-              <Label className="font-medium">موافقة مشرف المحتوى قبل النشر</Label>
+              <Label className="font-medium">{a.csApprovalRequired}</Label>
               <p className="text-xs text-muted-foreground">
                 {settings.academy_courses_approval_required
-                  ? "الدرس يذهب لـ «انتظار المراجعة» قبل النشر"
-                  : "الأستاذ ينشر مباشرة بدون مراجعة"}
+                  ? a.csApprovalRequiredPending
+                  : a.csApprovalRequiredAuto}
               </p>
             </div>
             <Switch
@@ -107,15 +111,15 @@ export function CoursesContentSettings({ settings, onUpdate, onReset }: CoursesC
               <Upload className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-lg">حدود الملفات</CardTitle>
-              <CardDescription className="text-xs mt-0.5">الحجم الأقصى والصيغ المسموحة</CardDescription>
+              <CardTitle className="text-lg">{a.csFileLimits}</CardTitle>
+              <CardDescription className="text-xs mt-0.5">{a.csFileLimitsDesc}</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent className="pt-6 space-y-6">
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label className="font-medium text-sm">الحد الأقصى لحجم الفيديو (MB)</Label>
+              <Label className="font-medium text-sm">{a.csMaxVideoSize}</Label>
               <Input
                 type="number"
                 value={settings.academy_courses_max_video_size || 500}
@@ -126,7 +130,7 @@ export function CoursesContentSettings({ settings, onUpdate, onReset }: CoursesC
               />
             </div>
             <div className="space-y-2">
-              <Label className="font-medium text-sm">الحد الأقصى لحجم المرفقات (MB)</Label>
+              <Label className="font-medium text-sm">{a.csMaxAttachmentSize}</Label>
               <Input
                 type="number"
                 value={settings.academy_courses_max_attachment_size || 50}
@@ -139,7 +143,7 @@ export function CoursesContentSettings({ settings, onUpdate, onReset }: CoursesC
           </div>
 
           <div className="space-y-3">
-            <Label className="font-medium text-sm">الصيغ المسموح بها</Label>
+            <Label className="font-medium text-sm">{a.csAllowedFormats}</Label>
             <div className="flex flex-wrap gap-2">
               {defaultFormats.map((format) => (
                 <Badge
@@ -152,7 +156,7 @@ export function CoursesContentSettings({ settings, onUpdate, onReset }: CoursesC
                 </Badge>
               ))}
             </div>
-            <p className="text-[11px] text-muted-foreground">اضغط لتفعيل/تعطيل الصيغة</p>
+            <p className="text-[11px] text-muted-foreground">{a.csFormatsHint}</p>
           </div>
         </CardContent>
       </Card>
@@ -165,8 +169,8 @@ export function CoursesContentSettings({ settings, onUpdate, onReset }: CoursesC
               <HardDrive className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-lg">خدمة التخزين</CardTitle>
-              <CardDescription className="text-xs mt-0.5">مزود تخزين الفيديوهات والملفات</CardDescription>
+              <CardTitle className="text-lg">{a.csStorageProvider}</CardTitle>
+              <CardDescription className="text-xs mt-0.5">{a.csStorageProviderDesc}</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -195,17 +199,17 @@ export function CoursesContentSettings({ settings, onUpdate, onReset }: CoursesC
                 {storageLoading ? (
                   <Badge variant="secondary">
                     <Loader2 className="w-3 h-3 ml-1 animate-spin" />
-                    جاري الفحص
+                    {a.csChecking}
                   </Badge>
                 ) : provider.connected ? (
                   <Badge variant="default" className="bg-success text-success-foreground">
                     <CheckCircle className="w-3 h-3 ml-1" />
-                    متصل
+                    {a.csConnected}
                   </Badge>
                 ) : (
                   <Badge variant="secondary">
                     <XCircle className="w-3 h-3 ml-1" />
-                    غير مكوّن
+                    {a.csNotConfigured}
                   </Badge>
                 )}
               </div>
@@ -213,7 +217,7 @@ export function CoursesContentSettings({ settings, onUpdate, onReset }: CoursesC
           </div>
 
           <div className="space-y-2">
-            <Label className="font-medium text-sm">جودة الفيديو الافتراضية</Label>
+            <Label className="font-medium text-sm">{a.csDefaultQuality}</Label>
             <Select
               value={settings.academy_courses_default_quality || "720p"}
               onValueChange={(v) => onUpdate({ academy_courses_default_quality: v })}
@@ -241,16 +245,16 @@ export function CoursesContentSettings({ settings, onUpdate, onReset }: CoursesC
               <Download className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-lg">التحميل والحماية</CardTitle>
-              <CardDescription className="text-xs mt-0.5">خيارات تحميل الدروس والعلامة المائية</CardDescription>
+              <CardTitle className="text-lg">{a.csDownloadWatermark}</CardTitle>
+              <CardDescription className="text-xs mt-0.5">{a.csDownloadWatermarkDesc}</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent className="pt-6 space-y-6">
           <div className="flex items-center justify-between p-4 bg-muted/50 rounded-xl">
             <div className="space-y-0.5">
-              <Label className="font-medium">السماح بتحميل الدروس</Label>
-              <p className="text-xs text-muted-foreground">يمكن للطلاب تنزيل الفيديوهات والمرفقات</p>
+              <Label className="font-medium">{a.csAllowDownloads}</Label>
+              <p className="text-xs text-muted-foreground">{a.csAllowDownloadsDesc}</p>
             </div>
             <Switch
               checked={settings.academy_courses_download_enabled ?? false}
@@ -263,9 +267,9 @@ export function CoursesContentSettings({ settings, onUpdate, onReset }: CoursesC
               <div className="space-y-0.5">
                 <Label className="font-medium flex items-center gap-2">
                   <Droplet className="w-4 h-4" />
-                  العلامة المائية
+                  {a.csWatermark}
                 </Label>
-                <p className="text-xs text-muted-foreground">إضافة نص على الفيديوهات</p>
+                <p className="text-xs text-muted-foreground">{a.csWatermarkDesc}</p>
               </div>
               <Switch
                 checked={settings.academy_courses_watermark_enabled ?? false}
@@ -276,16 +280,16 @@ export function CoursesContentSettings({ settings, onUpdate, onReset }: CoursesC
             {settings.academy_courses_watermark_enabled && (
               <div className="grid gap-4 md:grid-cols-2 pt-4 border-t">
                 <div className="space-y-2">
-                  <Label className="text-sm">نص العلامة المائية</Label>
+                  <Label className="text-sm">{a.csWatermarkText}</Label>
                   <Input
                     value={settings.academy_courses_watermark_text || ""}
                     onChange={(e) => onUpdate({ academy_courses_watermark_text: e.target.value })}
-                    placeholder="أكاديمية إتقان"
+                    placeholder="Itqan Academy"
                     className="h-10"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-sm">الموضع</Label>
+                  <Label className="text-sm">{a.csWatermarkPosition}</Label>
                   <Select
                     value={settings.academy_courses_watermark_position || "bottom-right"}
                     onValueChange={(v) => onUpdate({ academy_courses_watermark_position: v })}

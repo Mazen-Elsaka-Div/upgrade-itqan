@@ -29,6 +29,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { cn } from "@/lib/utils"
+import { useI18n } from "@/lib/i18n/context"
 import { useAcademySettings } from "./hooks/use-academy-settings"
 import {
   GeneralSettings,
@@ -41,18 +42,6 @@ import {
   SecurityPrivacySettings,
   MaintenanceSettings,
 } from "./_components"
-
-const tabs = [
-  { id: "general", label: "الإعدادات العامة", icon: Globe, keywords: ["اسم", "شعار", "رابط", "وصف", "لغة", "توقيت"] },
-  { id: "registration", label: "التسجيل والقبول", icon: UserPlus, keywords: ["تسجيل", "طالب", "أستاذ", "موافقة", "حقول"] },
-  { id: "courses", label: "الدورات والمحتوى", icon: Video, keywords: ["دورة", "فيديو", "ملف", "تخزين", "تحميل", "علامة مائية"] },
-  { id: "sessions", label: "الجلسات الحية", icon: VideoIcon, keywords: ["جلسة", "فيديو", "تذكير", "zoom", "livekit"] },
-  { id: "gamification", label: "النقاط والمستويات", icon: Trophy, keywords: ["نقاط", "مستوى", "شارة", "streak", "leaderboard"] },
-  { id: "notifications", label: "الإشعارات والبريد", icon: Bell, keywords: ["إشعار", "بريد", "smtp", "إيميل", "تذكير"] },
-  { id: "forum", label: "المنتدى والفقه", icon: MessageSquare, keywords: ["منتدى", "فقه", "سؤال", "موضوع", "كلمات ممنوعة"] },
-  { id: "security", label: "الأمان والخصوصية", icon: Shield, keywords: ["أمان", "كلمة سر", "2fa", "ip", "جلسة", "rate limit"] },
-  { id: "maintenance", label: "الصيانة", icon: Wrench, keywords: ["صيانة", "cache", "backup", "نسخة احتياطية"] },
-]
 
 export default function AcademyAdminSettingsPage() {
   const {
@@ -69,6 +58,21 @@ export default function AcademyAdminSettingsPage() {
     resetSection,
     testSmtp,
   } = useAcademySettings()
+
+  const { t } = useI18n()
+  const a = t.academyAdmin
+
+  const tabs = [
+    { id: "general", label: a.settingsGeneral, icon: Globe, keywords: ["اسم", "شعار", "رابط", "وصف", "لغة", "توقيت"] },
+    { id: "registration", label: a.settingsRegistration, icon: UserPlus, keywords: ["تسجيل", "طالب", "أستاذ", "موافقة", "حقول"] },
+    { id: "courses", label: a.settingsCourses, icon: Video, keywords: ["دورة", "فيديو", "ملف", "تخزين", "تحميل", "علامة مائية"] },
+    { id: "sessions", label: a.settingsLiveSessions, icon: VideoIcon, keywords: ["جلسة", "فيديو", "تذكير", "zoom", "livekit"] },
+    { id: "gamification", label: a.settingsGamification, icon: Trophy, keywords: ["نقاط", "مستوى", "شارة", "streak", "leaderboard"] },
+    { id: "notifications", label: a.settingsNotifications, icon: Bell, keywords: ["إشعار", "بريد", "smtp", "إيميل", "تذكير"] },
+    { id: "forum", label: a.settingsForum, icon: MessageSquare, keywords: ["منتدى", "فقه", "سؤال", "موضوع", "كلمات ممنوعة"] },
+    { id: "security", label: a.settingsSecurity, icon: Shield, keywords: ["أمان", "كلمة سر", "2fa", "ip", "جلسة", "rate limit"] },
+    { id: "maintenance", label: a.settingsMaintenance, icon: Wrench, keywords: ["صيانة", "cache", "backup", "نسخة احتياطية"] },
+  ]
 
   const [activeTab, setActiveTab] = useState("general")
   const [searchQuery, setSearchQuery] = useState("")
@@ -190,7 +194,7 @@ export default function AcademyAdminSettingsPage() {
 
   if (isLoading) {
     return (
-      <div className="p-6 space-y-6" dir="rtl">
+      <div className="p-6 space-y-6">
         <div className="flex items-center justify-between">
           <Skeleton className="h-8 w-48" />
           <Skeleton className="h-10 w-32" />
@@ -211,7 +215,7 @@ export default function AcademyAdminSettingsPage() {
   }
 
   return (
-    <div className="bg-background -mx-6 lg:-mx-8 -mt-6 lg:-mt-8" dir="rtl">
+    <div className="bg-background -mx-6 lg:-mx-8 -mt-6 lg:-mt-8">
       {/* Sticky Header */}
       <div className="sticky -top-6 lg:-top-8 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
         <div className="flex items-center justify-between px-6 lg:px-8 py-4">
@@ -220,7 +224,7 @@ export default function AcademyAdminSettingsPage() {
               <Settings className="w-6 h-6 text-primary" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-foreground">إعدادات الأكاديمية</h1>
+              <h1 className="text-xl font-bold text-foreground">{a.settingsTitle}</h1>
               <p className="text-xs text-muted-foreground">
                 {tabs.find((t) => t.id === activeTab)?.label}
               </p>
@@ -230,7 +234,7 @@ export default function AcademyAdminSettingsPage() {
           <div className="flex items-center gap-3">
             {hasUnsavedChanges && (
               <span className="text-sm text-muted-foreground bg-muted px-3 py-1 rounded-full">
-                {unsavedCount} تغيير غير محفوظ
+                {unsavedCount} {a.settingsUnsavedChanges}
               </span>
             )}
             <Button
@@ -240,7 +244,7 @@ export default function AcademyAdminSettingsPage() {
               className="gap-2"
             >
               <X className="w-4 h-4" />
-              إلغاء
+              {a.settingsCancel}
             </Button>
             <Button
               onClick={saveChanges}
@@ -252,7 +256,7 @@ export default function AcademyAdminSettingsPage() {
               ) : (
                 <Save className="w-4 h-4" />
               )}
-              حفظ التغييرات
+              {a.settingsSaveChanges}
             </Button>
           </div>
         </div>
@@ -269,7 +273,7 @@ export default function AcademyAdminSettingsPage() {
                 <Input
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="بحث في الإعدادات..."
+                  placeholder={a.settingsSearchPlaceholder}
                   className="pr-10 h-10"
                 />
               </div>

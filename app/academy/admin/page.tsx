@@ -47,8 +47,9 @@ interface AcademyStats {
 }
 
 export default function AcademyAdminPage() {
-  const { t } = useI18n()
-  const isAr = t.locale === 'ar'
+  const { t, locale } = useI18n()
+  const a = t.academyAdmin
+  const dateLocale = locale === 'ar' ? 'ar-SA' : 'en-US'
 
   const [stats, setStats] = useState<AcademyStats | null>(null)
   const [analytics, setAnalytics] = useState<any>(null)
@@ -84,7 +85,7 @@ export default function AcademyAdminPage() {
 
   if (loading) {
     return (
-      <div className="space-y-6 pb-20 lg:pb-0 font-sans" dir={isAr ? 'rtl' : 'ltr'}>
+      <div className="space-y-6 pb-20 lg:pb-0 font-sans">
         {/* Title */}
         <div className="flex items-center gap-3 mb-6">
           <Skeleton className="w-12 h-12 rounded-xl" />
@@ -107,10 +108,10 @@ export default function AcademyAdminPage() {
     return (
       <div className="flex flex-col items-center justify-center p-20 gap-4">
         <div className="text-red-500 font-bold text-xl">
-          {isAr ? 'حدث خطأ أثناء تحميل البيانات' : 'Failed to load dashboard'}
+          {a.dashLoadError}
         </div>
         <div className="text-muted-foreground">
-          {isAr ? 'يرجى المحاولة مرة أخرى أو التواصل مع الدعم.' : 'Please try again or contact support.'}
+          {a.dashRetryHint}
         </div>
         {error && (
           <code className="bg-red-50 text-red-800 p-2 rounded text-sm">{error}</code>
@@ -119,7 +120,7 @@ export default function AcademyAdminPage() {
     )
   }
 
-  const fmt = (num: number) => num.toLocaleString(isAr ? 'ar-EG' : 'en-US')
+  const fmt = (num: number) => num.toLocaleString(dateLocale)
 
   // Analytics derived data (shared page_views table covers both platforms; we only show high-level usage)
   const chartData = (analytics?.overTime || []).map((d: any) => ({
@@ -151,33 +152,33 @@ export default function AcademyAdminPage() {
   // Stats grid cards
   const statCards = [
     {
-      label: isAr ? 'الطلاب' : 'Students',
+      label: a.analyticsStudents,
       value: stats.total_students,
       icon: Users,
       iconBg: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
     },
     {
-      label: isAr ? 'المدرسون' : 'Teachers',
+      label: a.analyticsTeachers,
       value: stats.total_teachers,
       icon: GraduationCap,
       iconBg:
         'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
     },
     {
-      label: isAr ? 'الدورات' : 'Courses',
+      label: a.analyticsCourses,
       value: stats.total_courses,
       icon: BookOpen,
       iconBg:
         'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20',
     },
     {
-      label: isAr ? 'طلبات تدريس' : 'Teacher Applications',
+      label: a.dashTeacherApplications,
       value: stats.pending_teacher_apps,
       icon: UserCheck,
       iconBg: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
     },
     {
-      label: isAr ? 'الشهادات الصادرة' : 'Certificates',
+      label: a.dashCertificates,
       value: stats.certificates_issued,
       icon: Award,
       iconBg: 'bg-pink-500/10 text-pink-600 dark:text-pink-400 border-pink-500/20',
@@ -185,14 +186,14 @@ export default function AcademyAdminPage() {
   ]
 
   return (
-    <div className="space-y-6 pb-20 lg:pb-0 font-sans" dir={isAr ? 'rtl' : 'ltr'}>
+    <div className="space-y-6 pb-20 lg:pb-0 font-sans">
       {/* Title */}
       <div className="flex items-center gap-3 mb-6">
         <div className="p-2 sm:p-3 bg-blue-500/10 rounded-xl border border-blue-500/20">
           <GraduationCap className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600 dark:text-blue-400" />
         </div>
         <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-          {t.academy?.dashboard || 'لوحة تحكم الأكاديمية'}
+          {a.dashAcademyDashboard}
         </h1>
       </div>
 
@@ -207,7 +208,7 @@ export default function AcademyAdminPage() {
               {fmt(totalViews)}
             </p>
             <p className="text-xs sm:text-sm text-muted-foreground">
-              {isAr ? 'إجمالي المشاهدات (٣٠ يوم)' : 'Total Views (30 Days)'}
+              {a.dashTotalViews}
             </p>
           </div>
         </div>
@@ -221,7 +222,7 @@ export default function AcademyAdminPage() {
               {fmt(uniqueVisitors)}
             </p>
             <p className="text-xs sm:text-sm text-muted-foreground">
-              {isAr ? 'الزوار الفريدون' : 'Unique Visitors'}
+              {a.dashUniqueVisitors}
             </p>
           </div>
         </div>
@@ -235,7 +236,7 @@ export default function AcademyAdminPage() {
               {fmt(stats.total_students + stats.total_teachers)}
             </p>
             <p className="text-xs sm:text-sm text-muted-foreground">
-              {isAr ? 'إجمالي الأعضاء' : 'Total Members'}
+              {a.dashTotalMembers}
             </p>
           </div>
         </div>
@@ -249,7 +250,7 @@ export default function AcademyAdminPage() {
               {fmt(stats.enrollments_today)}
             </p>
             <p className="text-xs sm:text-sm text-muted-foreground">
-              {isAr ? 'تسجيلات اليوم' : "Today's Enrollments"}
+              {a.dashTodaysEnrollments}
             </p>
           </div>
         </div>
@@ -292,7 +293,7 @@ export default function AcademyAdminPage() {
             <TrendingUp className="w-5 h-5 text-emerald-600" />
             <div>
               <p className="text-xs text-muted-foreground">
-                {isAr ? 'تسجيلات هذا الأسبوع' : 'Enrollments this week'}
+                {a.dashEnrollmentsThisWeek}
               </p>
               <p className="text-2xl font-bold">{fmt(stats.enrollments_week)}</p>
             </div>
@@ -303,7 +304,7 @@ export default function AcademyAdminPage() {
             <BookOpen className="w-5 h-5 text-purple-600" />
             <div>
               <p className="text-xs text-muted-foreground">
-                {isAr ? 'تسجيلات نشطة' : 'Active Enrollments'}
+                {a.dashActiveEnrollments}
               </p>
               <p className="text-2xl font-bold">{fmt(stats.active_enrollments)}</p>
             </div>
@@ -314,7 +315,7 @@ export default function AcademyAdminPage() {
             <Award className="w-5 h-5 text-amber-600" />
             <div>
               <p className="text-xs text-muted-foreground">
-                {isAr ? 'إجمالي النقاط الموزعة' : 'Total Points Distributed'}
+                {a.dashTotalPointsDistributed}
               </p>
               <p className="text-2xl font-bold">
                 {fmt(stats.total_points_distributed)}
@@ -341,17 +342,17 @@ export default function AcademyAdminPage() {
           <div className="p-6 border-b border-border flex items-center justify-between bg-muted/50">
             <div>
               <h3 className="font-bold text-foreground">
-                {isAr ? 'أحدث الدورات' : 'Latest Courses'}
+                {a.dashLatestCourses}
               </h3>
               <p className="text-sm text-muted-foreground mt-1">
-                {isAr ? 'الدورات المضافة مؤخراً' : 'Recently added courses'}
+                {a.dashRecentlyAdded}
               </p>
             </div>
             <Link
               href="/academy/admin/courses"
               className="text-sm text-blue-600 dark:text-blue-400 font-medium hover:underline flex items-center gap-1"
             >
-              {isAr ? 'عرض الكل' : 'View All'}
+              {a.dashViewAll}
               <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
             </Link>
           </div>
@@ -371,7 +372,7 @@ export default function AcademyAdminPage() {
                       {course.title}
                     </p>
                     <p className="text-xs text-muted-foreground truncate">
-                      {course.teacher_name || (isAr ? 'بدون مدرس' : 'No teacher')}
+                      {course.teacher_name || a.dashNoTeacher}
                     </p>
                   </div>
                   <div className="text-end flex-shrink-0">
@@ -379,7 +380,7 @@ export default function AcademyAdminPage() {
                       {fmt(course.enrollments)}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {isAr ? 'مسجل' : 'enrolled'}
+                      {a.dashEnrolled}
                     </p>
                   </div>
                 </Link>
@@ -389,7 +390,7 @@ export default function AcademyAdminPage() {
             <div className="p-10 flex-1 flex flex-col items-center justify-center text-center">
               <BookOpen className="w-12 h-12 text-muted-foreground/20 mb-4" />
               <p className="text-muted-foreground font-medium">
-                {isAr ? 'لا توجد دورات بعد' : 'No courses yet'}
+                {a.dashNoCoursesYet}
               </p>
             </div>
           )}
@@ -400,19 +401,17 @@ export default function AcademyAdminPage() {
           <div className="p-6 border-b border-border flex items-center justify-between bg-muted/50">
             <div>
               <h3 className="font-bold text-foreground">
-                {isAr ? 'أنشط الطلاب' : 'Top Students'}
+                {a.dashTopStudents}
               </h3>
               <p className="text-sm text-muted-foreground mt-1">
-                {isAr
-                  ? 'الطلاب الأكثر حصولاً على النقاط'
-                  : 'Students with most points'}
+                {a.dashTopStudentsDesc}
               </p>
             </div>
             <Link
               href="/academy/admin/leaderboard"
               className="text-sm text-blue-600 dark:text-blue-400 font-medium hover:underline flex items-center gap-1"
             >
-              {isAr ? 'عرض الكل' : 'View All'}
+              {a.dashViewAll}
               <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
             </Link>
           </div>
@@ -467,7 +466,7 @@ export default function AcademyAdminPage() {
             <div className="p-10 flex-1 flex flex-col items-center justify-center text-center">
               <Sparkles className="w-12 h-12 text-amber-500/20 mb-4" />
               <p className="text-muted-foreground font-medium">
-                {isAr ? 'لا توجد بيانات بعد' : 'No data yet'}
+                {a.dashNoDataYet}
               </p>
             </div>
           )}

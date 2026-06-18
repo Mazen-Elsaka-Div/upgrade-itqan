@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { AcademySettings } from "../hooks/use-academy-settings"
+import { useI18n } from "@/lib/i18n/context"
 
 interface GeneralSettingsProps {
   settings: AcademySettings
@@ -31,6 +32,9 @@ const timezones = [
 ]
 
 export function GeneralSettings({ settings, metadata, onUpdate, onReset }: GeneralSettingsProps) {
+  const { t } = useI18n()
+  const a = t.academyAdmin
+
   const [uploadingLogo, setUploadingLogo] = useState(false)
   const [uploadingFavicon, setUploadingFavicon] = useState(false)
 
@@ -40,7 +44,7 @@ export function GeneralSettings({ settings, metadata, onUpdate, onReset }: Gener
     const res = await fetch("/api/upload", { method: "POST", body: formData })
     if (!res.ok) {
       const err = await res.json().catch(() => ({}))
-      throw new Error(err.error || "فشل رفع الملف")
+      throw new Error(err.error || a.settingsUploadFailed)
     }
     const data = await res.json()
     return data.url || data.imageUrl || null
@@ -50,7 +54,7 @@ export function GeneralSettings({ settings, metadata, onUpdate, onReset }: Gener
     const file = e.target.files?.[0]
     if (!file) return
     if (file.size > 4 * 1024 * 1024) {
-      toast.error("حجم الشعار يجب أن يكون أقل من 4MB")
+      toast.error(a.settingsLogoSizeError)
       return
     }
     setUploadingLogo(true)
@@ -58,10 +62,10 @@ export function GeneralSettings({ settings, metadata, onUpdate, onReset }: Gener
       const url = await uploadFile(file)
       if (url) {
         onUpdate({ academy_general_logo: url })
-        toast.success("تم رفع الشعار")
+        toast.success(a.settingsLogoUploaded)
       }
     } catch (err: any) {
-      toast.error(err.message || "فشل رفع الشعار")
+      toast.error(err.message || a.settingsLogoFailed)
     } finally {
       setUploadingLogo(false)
       e.target.value = ""
@@ -72,7 +76,7 @@ export function GeneralSettings({ settings, metadata, onUpdate, onReset }: Gener
     const file = e.target.files?.[0]
     if (!file) return
     if (file.size > 1 * 1024 * 1024) {
-      toast.error("حجم الـ Favicon يجب أن يكون أقل من 1MB")
+      toast.error(a.settingsFaviconSizeError)
       return
     }
     setUploadingFavicon(true)
@@ -80,10 +84,10 @@ export function GeneralSettings({ settings, metadata, onUpdate, onReset }: Gener
       const url = await uploadFile(file)
       if (url) {
         onUpdate({ academy_general_favicon: url })
-        toast.success("تم رفع الـ Favicon")
+        toast.success(a.settingsFaviconUploaded)
       }
     } catch (err: any) {
-      toast.error(err.message || "فشل رفع الـ Favicon")
+      toast.error(err.message || a.settingsFaviconFailed)
     } finally {
       setUploadingFavicon(false)
       e.target.value = ""
@@ -101,30 +105,30 @@ export function GeneralSettings({ settings, metadata, onUpdate, onReset }: Gener
                 <Globe className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <CardTitle className="text-lg">الهوية</CardTitle>
-                <CardDescription className="text-xs mt-0.5">اسم وشعار الأكاديمية</CardDescription>
+                <CardTitle className="text-lg">{a.gsIdentity}</CardTitle>
+                <CardDescription className="text-xs mt-0.5">{a.gsIdentityDesc}</CardDescription>
               </div>
             </div>
             <Button variant="ghost" size="sm" onClick={onReset} className="text-muted-foreground">
               <RotateCcw className="w-4 h-4 ml-1" />
-              استعادة
+              {a.gsRestore}
             </Button>
           </div>
         </CardHeader>
         <CardContent className="pt-6 space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label className="font-medium text-sm">اسم الأكاديمية</Label>
+              <Label className="font-medium text-sm">{a.gsAcademyName}</Label>
               <Input
                 value={settings.academy_general_name || ""}
                 onChange={(e) => onUpdate({ academy_general_name: e.target.value })}
-                placeholder="أكاديمية إتقان"
+                placeholder={a.gsAcademyNamePlaceholder}
                 className="h-11"
               />
-              <p className="text-[11px] text-muted-foreground">يظهر في العنوان والإيميلات</p>
+              <p className="text-[11px] text-muted-foreground">{a.gsAcademyNameHint}</p>
             </div>
             <div className="space-y-2">
-              <Label className="font-medium text-sm">رابط الموقع (App URL)</Label>
+              <Label className="font-medium text-sm">{a.gsAcademyUrl}</Label>
               <Input
                 dir="ltr"
                 value={settings.app_url || ""}
@@ -132,13 +136,13 @@ export function GeneralSettings({ settings, metadata, onUpdate, onReset }: Gener
                 placeholder="https://your-domain.com"
                 className="h-11"
               />
-              <p className="text-[11px] text-muted-foreground">يُستخدم في روابط الدعوات</p>
+              <p className="text-[11px] text-muted-foreground">{a.gsAcademyUrlHint}</p>
             </div>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label className="font-medium text-sm">شعار الأكاديمية</Label>
+              <Label className="font-medium text-sm">{a.gsLogo}</Label>
               <div className="flex items-center gap-3">
                 {settings.academy_general_logo ? (
                   <div className="relative">
@@ -151,7 +155,7 @@ export function GeneralSettings({ settings, metadata, onUpdate, onReset }: Gener
                       type="button"
                       onClick={() => onUpdate({ academy_general_logo: "" })}
                       className="absolute -top-2 -left-2 w-5 h-5 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center hover:bg-destructive/90"
-                      aria-label="حذف الشعار"
+                      aria-label={a.gsDeleteLogo}
                     >
                       <X className="w-3 h-3" />
                     </button>
@@ -173,10 +177,10 @@ export function GeneralSettings({ settings, metadata, onUpdate, onReset }: Gener
                   onChange={handleLogoChange}
                 />
               </div>
-              <p className="text-[11px] text-muted-foreground">حد أقصى 4MB. PNG/JPG/SVG/WEBP</p>
+              <p className="text-[11px] text-muted-foreground">{a.gsLogoHint}</p>
             </div>
             <div className="space-y-2">
-              <Label className="font-medium text-sm">Favicon</Label>
+              <Label className="font-medium text-sm">{a.gsFavicon}</Label>
               <div className="flex items-center gap-3">
                 {settings.academy_general_favicon ? (
                   <div className="relative">
@@ -189,7 +193,7 @@ export function GeneralSettings({ settings, metadata, onUpdate, onReset }: Gener
                       type="button"
                       onClick={() => onUpdate({ academy_general_favicon: "" })}
                       className="absolute -top-2 -left-2 w-4 h-4 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center hover:bg-destructive/90"
-                      aria-label="حذف الـ Favicon"
+                      aria-label={a.gsDeleteFavicon}
                     >
                       <X className="w-2.5 h-2.5" />
                     </button>
@@ -211,24 +215,24 @@ export function GeneralSettings({ settings, metadata, onUpdate, onReset }: Gener
                   onChange={handleFaviconChange}
                 />
               </div>
-              <p className="text-[11px] text-muted-foreground">32x32 بكسل، حد أقصى 1MB</p>
+              <p className="text-[11px] text-muted-foreground">{a.gsFaviconHint}</p>
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label className="font-medium text-sm">وصف الأكاديمية</Label>
+            <Label className="font-medium text-sm">{a.gsAcademyDescription}</Label>
             <Textarea
               value={settings.academy_general_description || ""}
               onChange={(e) => onUpdate({ academy_general_description: e.target.value })}
-              placeholder="وصف مختصر للأكاديمية يظهر في نتائج البحث..."
+              placeholder={a.gsAcademyDescriptionPlaceholder}
               className="min-h-[100px] resize-none"
             />
-            <p className="text-[11px] text-muted-foreground">للـ SEO meta description</p>
+            <p className="text-[11px] text-muted-foreground">{a.gsDescriptionHint}</p>
           </div>
 
           {metadata.academy_general_name?.modifiedBy && (
             <p className="text-[11px] text-muted-foreground border-t pt-3 mt-4">
-              آخر تعديل بواسطة: {metadata.academy_general_name.modifiedBy}
+              {a.gsLastModified} {metadata.academy_general_name.modifiedBy}
               {metadata.academy_general_name.updatedAt && (
                 <> • {new Date(metadata.academy_general_name.updatedAt).toLocaleString("ar-EG")}</>
               )}
@@ -245,8 +249,8 @@ export function GeneralSettings({ settings, metadata, onUpdate, onReset }: Gener
               <Mail className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-lg">التواصل</CardTitle>
-              <CardDescription className="text-xs mt-0.5">معلومات الاتصال</CardDescription>
+              <CardTitle className="text-lg">{a.gsContact}</CardTitle>
+              <CardDescription className="text-xs mt-0.5">{a.gsContactDesc}</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -255,7 +259,7 @@ export function GeneralSettings({ settings, metadata, onUpdate, onReset }: Gener
             <div className="space-y-2">
               <Label className="font-medium text-sm flex items-center gap-2">
                 <Mail className="w-4 h-4" />
-                البريد الرسمي
+                {a.gsEmail}
               </Label>
               <Input
                 type="email"
@@ -269,7 +273,7 @@ export function GeneralSettings({ settings, metadata, onUpdate, onReset }: Gener
             <div className="space-y-2">
               <Label className="font-medium text-sm flex items-center gap-2">
                 <Phone className="w-4 h-4" />
-                رقم الواتساب
+                {a.gsWhatsapp}
               </Label>
               <Input
                 dir="ltr"
@@ -278,7 +282,7 @@ export function GeneralSettings({ settings, metadata, onUpdate, onReset }: Gener
                 placeholder="+966500000000"
                 className="h-11"
               />
-              <p className="text-[11px] text-muted-foreground">اختياري</p>
+              <p className="text-[11px] text-muted-foreground">{a.gsOptional}</p>
             </div>
           </div>
         </CardContent>
@@ -292,8 +296,8 @@ export function GeneralSettings({ settings, metadata, onUpdate, onReset }: Gener
               <Clock className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-lg">التوطين</CardTitle>
-              <CardDescription className="text-xs mt-0.5">المنطقة الزمنية واللغة</CardDescription>
+              <CardTitle className="text-lg">{a.gsLocalization}</CardTitle>
+              <CardDescription className="text-xs mt-0.5">{a.gsLocalizationDesc}</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -302,7 +306,7 @@ export function GeneralSettings({ settings, metadata, onUpdate, onReset }: Gener
             <div className="space-y-2">
               <Label className="font-medium text-sm flex items-center gap-2">
                 <Clock className="w-4 h-4" />
-                المنطقة الزمنية
+                {a.gsTimezone}
               </Label>
               <Select
                 value={settings.academy_general_timezone || "Asia/Riyadh"}
@@ -319,12 +323,12 @@ export function GeneralSettings({ settings, metadata, onUpdate, onReset }: Gener
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-[11px] text-muted-foreground">مهم للجلسات والتذكيرات</p>
+              <p className="text-[11px] text-muted-foreground">{a.gsTimezoneHint}</p>
             </div>
             <div className="space-y-2">
               <Label className="font-medium text-sm flex items-center gap-2">
                 <Languages className="w-4 h-4" />
-                اللغة الافتراضية
+                {a.gsLanguageLabel}
               </Label>
               <Select
                 value={settings.academy_general_language || "ar"}
@@ -334,15 +338,15 @@ export function GeneralSettings({ settings, metadata, onUpdate, onReset }: Gener
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="ar">العربية</SelectItem>
-                  <SelectItem value="en">English</SelectItem>
+                  <SelectItem value="ar">{a.gsArabic}</SelectItem>
+                  <SelectItem value="en">{a.gsEnglish}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
               <Label className="font-medium text-sm flex items-center gap-2">
                 <ArrowLeftRight className="w-4 h-4" />
-                اتجاه الواجهة
+                {a.gsDirectionLabel}
               </Label>
               <Select
                 value={settings.academy_general_direction || "rtl"}
@@ -352,8 +356,8 @@ export function GeneralSettings({ settings, metadata, onUpdate, onReset }: Gener
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="rtl">من اليمين لليسار (RTL)</SelectItem>
-                  <SelectItem value="ltr">من اليسار لليمين (LTR)</SelectItem>
+                  <SelectItem value="rtl">{a.gsDirectionRtl}</SelectItem>
+                  <SelectItem value="ltr">{a.gsDirectionLtr}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
