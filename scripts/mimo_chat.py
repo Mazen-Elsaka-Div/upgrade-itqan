@@ -103,6 +103,7 @@ ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 GEMINI_FILE = os.path.join(ROOT_DIR, "gemini_to_mimo.txt")  # IPC: Gemini -> MIMO
 REPLY_FILE = os.path.join(ROOT_DIR, "mimo_to_gemini.txt")   # IPC: MIMO -> Gemini
 MSG_FILE = os.path.join(ROOT_DIR, "_mimo_msg.txt")          # temp message buffer
+RAW_DEBUG_FILE = os.path.join(ROOT_DIR, "_mimo_raw_last.txt")  # last raw mimo output
 
 # Appended after every MIMO reply so Gemini keeps the discussion alive and does
 # not stop early. Gemini must keep iterating until it is truly finished, then
@@ -330,6 +331,36 @@ class MimoBackend:
                 pass
 
     # ── ask MIMO ───────────────────────────────────────────────────────────────
+    def _build_cmd(self, *, attach: bool, cont: bool) -> str:
+        """Compose one `mimo run` shell line."""
+        parts = ["mimo run",
+                 "--dangerously-skip-permissions",
+                 "--format json"]
+        if attach and self.port:
+            parts.append(f"--attach http://127.0.0.1:{self.port}")
+        if cont:
+            parts.append("--continue")
+        parts.append('"$(cat _mimo_msg.txt)"')
+        parts.append("< /dev/null")
+        parts.append("2>&1")
+        return " ".join(parts)
+
+    def _run_once(self, shell_line: str) -> tuple[str, int]:
+        """Run one mimo command; return (raw_output, returncode)."""
+        no_window = subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0
+        result = subprocess.run(
+            bash_cmd(shell_line),
+            cwd=ROOT_DIR,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=RUN_TIMEOUT,
+            creationflags=no_window,
+        )
+        # stderr is already merged via `2>&1`, but keep the fallback.
+        return (result.stdout or result.stderr or ""), result.returncode
+
     def ask(self, message: str) -> str:
         """Send one message to MIMO and return its text answer (blocking)."""
         with self.lock:
@@ -341,33 +372,38 @@ class MimoBackend:
             except Exception as e:
                 return f"[ERROR] could not write temp message file: {e}"
 
-            parts = ["mimo run",
-                     "--dangerously-skip-permissions",
-                     "--format json"]
-            if self.port:
-                parts.append(f"--attach http://127.0.0.1:{self.port}")
-            if self.started_conversation:
-                parts.append("--continue")
-            parts.append('"$(cat _mimo_msg.txt)"')
-            parts.append("< /dev/null")
-            parts.append("2>&1")
-            shell_line = " ".join(parts)
-
-            no_window = subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0
             try:
-                result = subprocess.run(
-                    bash_cmd(shell_line),
-                    cwd=ROOT_DIR,
-                    capture_output=True,
-                    text=True,
-                    encoding="utf-8",
-                    errors="replace",
-                    timeout=RUN_TIMEOUT,
-                    creationflags=no_window,
-                )
-                raw = result.stdout or result.stderr or ""
+                # Attempt 1: normal path (attach to our server, continue session).
+                shell_line = self._build_cmd(attach=True, cont=self.started_conversation)
+                raw, code = self._run_once(shell_line)
                 answer = extract_text(raw)
+
+                # Empty/blank reply is almost always a stale session or a server
+                # that went away. Retry ONCE as a fresh, standalone run so the
+                # user gets a real answer instead of an empty bubble.
+                blanks = ("(no response)", "(parsed JSON but found no text)")
+                if (not raw.strip() or answer in blanks) and (self.started_conversation or self.port):
+                    self.log("System",
+                             f"⚠ Empty reply (exit {code}). Retrying as a fresh run "
+                             f"(no --attach/--continue) …")
+                    self.started_conversation = False
+                    shell_line = self._build_cmd(attach=False, cont=False)
+                    raw2, code2 = self._run_once(shell_line)
+                    if raw2.strip():
+                        raw, code = raw2, code2
+                        answer = extract_text(raw)
+
+                # Persist the raw output for debugging the JSON event schema.
+                self._dump_raw(message, shell_line, raw, code)
+
                 self.started_conversation = True
+
+                if answer in blanks or not answer.strip():
+                    tail = (raw or "").strip()[-800:]
+                    return (f"[EMPTY REPLY] mimo exited with code {code} and produced "
+                            f"no readable text.\n"
+                            f"Raw output saved to {os.path.basename(RAW_DEBUG_FILE)}.\n"
+                            f"--- raw tail ---\n{tail or '(completely empty)'}")
                 return answer
             except subprocess.TimeoutExpired:
                 return f"[TIMEOUT] MIMO took longer than {RUN_TIMEOUT}s."
@@ -379,6 +415,20 @@ class MimoBackend:
                         os.remove(MSG_FILE)
                     except OSError:
                         pass
+
+    @staticmethod
+    def _dump_raw(message: str, shell_line: str, raw: str, code: int):
+        """Append the last mimo exchange to a debug log for inspection."""
+        try:
+            with open(RAW_DEBUG_FILE, "w", encoding="utf-8") as f:
+                f.write(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] exit={code}\n")
+                f.write(f"CMD: {shell_line}\n")
+                f.write(f"MSG: {message}\n")
+                f.write("----- RAW OUTPUT -----\n")
+                f.write(raw if raw else "(empty)")
+                f.write("\n")
+        except OSError:
+            pass
 
 
 # ──────────────────────────────────────────────────────────────────────────────
