@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useI18n } from '@/lib/i18n/context'
 import Link from 'next/link'
 import {
   Search, Clock, CheckCircle, XCircle, BookOpen,
@@ -23,14 +24,23 @@ interface Lesson {
 
 type FilterType = 'pending' | 'approved' | 'rejected' | 'all'
 
-const FILTER_TABS: { key: FilterType; label: string; icon: any }[] = [
-  { key: 'pending',  label: 'بانتظار المراجعة', icon: Clock },
-  { key: 'approved', label: 'المعتمدة', icon: CheckCircle },
-  { key: 'rejected', label: 'المرفوضة', icon: XCircle },
-  { key: 'all',      label: 'الكل', icon: Filter },
+interface FilterTab {
+  key: FilterType
+  labelAr: string
+  labelEn: string
+  icon: any
+}
+
+const FILTER_TABS: FilterTab[] = [
+  { key: 'pending',  labelAr: 'بانتظار المراجعة', labelEn: 'Pending Review', icon: Clock },
+  { key: 'approved', labelAr: 'المعتمدة', labelEn: 'Approved', icon: CheckCircle },
+  { key: 'rejected', labelAr: 'المرفوضة', labelEn: 'Rejected', icon: XCircle },
+  { key: 'all',      labelAr: 'الكل', labelEn: 'All', icon: Filter },
 ]
 
 export default function ContentLessonsListPage() {
+  const { locale } = useI18n()
+  const isAr = locale === 'ar'
   const [lessons, setLessons] = useState<Lesson[]>([])
   const [counts, setCounts] = useState({ pending: 0, approved: 0, rejected: 0, all: 0 })
   const [loading, setLoading] = useState(true)
@@ -68,17 +78,17 @@ export default function ContentLessonsListPage() {
             className="inline-flex items-center gap-1 text-sm font-semibold text-muted-foreground hover:text-primary transition-colors mb-2"
           >
             <ArrowLeft className="w-4 h-4" />
-            العودة للوحة الإشراف
+            {isAr ? 'العودة للوحة الإشراف' : 'Back to Dashboard'}
           </Link>
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
             <div className="p-2.5 bg-primary/10 rounded-xl text-primary">
               <BookOpen className="w-6 h-6" />
             </div>
-            مراجعة الدروس
+            {isAr ? 'مراجعة الدروس' : 'Review Lessons'}
           </h1>
           <p className="text-muted-foreground text-sm flex items-center gap-2">
             <Sparkles className="w-4 h-4" />
-            إدارة ومراجعة الدروس المرفوعة من قبل المعلمين
+            {isAr ? 'إدارة ومراجعة الدروس المرفوعة من قبل المعلمين' : 'Manage and review lessons uploaded by teachers'}
           </p>
         </div>
       </div>
@@ -89,7 +99,7 @@ export default function ContentLessonsListPage() {
           <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
           <input
             type="text"
-            placeholder="ابحث بعنوان الدرس، الدورة، أو اسم المعلم..."
+            placeholder={isAr ? 'ابحث بعنوان الدرس، الدورة، أو اسم المعلم...' : 'Search by lesson title, course, or teacher name...'}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full bg-background border border-border/50 rounded-xl px-4 py-3 pr-12 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm"
@@ -97,7 +107,7 @@ export default function ContentLessonsListPage() {
         </div>
 
         <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-          {FILTER_TABS.map(({ key, label, icon: Icon }) => {
+          {FILTER_TABS.map(({ key, labelAr, labelEn, icon: Icon }) => {
             const isActive = filter === key;
             return (
               <button
@@ -111,7 +121,7 @@ export default function ContentLessonsListPage() {
                 }`}
               >
                 <Icon className={`w-4 h-4 ${isActive ? 'text-primary-foreground' : 'text-muted-foreground'}`} />
-                {label}
+                {isAr ? labelAr : labelEn}
                 <span className={`ml-1 text-xs px-2 py-0.5 rounded-full ${isActive ? 'bg-primary-foreground/20' : 'bg-muted text-muted-foreground'}`}>
                   {counts[key]}
                 </span>
@@ -131,11 +141,11 @@ export default function ContentLessonsListPage() {
           <div className="w-20 h-20 bg-muted/50 rounded-full flex items-center justify-center mb-6">
             <BookOpen className="w-10 h-10 text-muted-foreground/50" />
           </div>
-          <h3 className="text-lg font-bold text-foreground mb-2">لا توجد دروس حالياً</h3>
+          <h3 className="text-lg font-bold text-foreground mb-2">{isAr ? 'لا توجد دروس حالياً' : 'No lessons found'}</h3>
           <p className="text-sm text-muted-foreground max-w-sm">
             {searchDebounced 
-              ? 'لم نعثر على أي نتائج مطابقة لبحثك، جرب كلمات مفتاحية أخرى.' 
-              : 'لا توجد دروس في هذا القسم حالياً، ستظهر الدروس هنا عند رفعها.'}
+              ? (isAr ? 'لم نعثر على أي نتائج مطابقة لبحثك، جرب كلمات مفتاحية أخرى.' : 'No matching results found. Try other keywords.')
+              : (isAr ? 'لا توجد دروس في هذا القسم حالياً، ستظهر الدروس هنا عند رفعها.' : 'No lessons in this section currently. Lessons will appear here when uploaded.')}
           </p>
         </div>
       ) : (
@@ -178,21 +188,21 @@ export default function ContentLessonsListPage() {
                   </span>
                   <span className="flex items-center gap-1.5">
                     <Calendar className="w-3.5 h-3.5" />
-                    {new Date(l.created_at).toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric' })}
+                    {new Date(l.created_at).toLocaleDateString(isAr ? 'ar-EG' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                   </span>
                   {l.duration_minutes && (
                     <span className="flex items-center gap-1.5">
                       <Clock className="w-3.5 h-3.5" />
-                      {l.duration_minutes} دقيقة
+                      {l.duration_minutes} {isAr ? 'دقيقة' : 'mins'}
                     </span>
                   )}
                 </div>
               </div>
 
               <div className="flex sm:flex-col items-center sm:items-end justify-between gap-3 mt-4 sm:mt-0 pl-2">
-                <StatusBadge status={l.status} />
+                <StatusBadge status={l.status} isAr={isAr} />
                 <span className="flex items-center gap-1 text-xs font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                  المراجعة
+                  {isAr ? 'المراجعة' : 'Review'}
                   <ChevronLeft className="w-4 h-4" />
                 </span>
               </div>
@@ -204,19 +214,19 @@ export default function ContentLessonsListPage() {
   )
 }
 
-function StatusBadge({ status }: { status: string }) {
-  const config: Record<string, { label: string; cls: string; Icon: any }> = {
-    pending_review: { label: 'بانتظار المراجعة', cls: 'bg-amber-500/10 text-amber-700 border border-amber-500/20 dark:text-amber-400',     Icon: Clock },
-    approved:       { label: 'معتمد',          cls: 'bg-emerald-500/10 text-emerald-700 border border-emerald-500/20 dark:text-emerald-400', Icon: CheckCircle },
-    rejected:       { label: 'مرفوض',          cls: 'bg-rose-500/10 text-rose-700 border border-rose-500/20 dark:text-rose-400',          Icon: XCircle },
-    draft:          { label: 'مسودة',          cls: 'bg-muted text-muted-foreground border border-border/50',                            Icon: BookOpen },
+function StatusBadge({ status, isAr }: { status: string; isAr: boolean }) {
+  const config: Record<string, { labelAr: string; labelEn: string; cls: string; Icon: any }> = {
+    pending_review: { labelAr: 'بانتظار المراجعة', labelEn: 'Pending Review', cls: 'bg-amber-500/10 text-amber-700 border border-amber-500/20 dark:text-amber-400',     Icon: Clock },
+    approved:       { labelAr: 'معتمد',          labelEn: 'Approved',       cls: 'bg-emerald-500/10 text-emerald-700 border border-emerald-500/20 dark:text-emerald-400', Icon: CheckCircle },
+    rejected:       { labelAr: 'مرفوض',          labelEn: 'Rejected',       cls: 'bg-rose-500/10 text-rose-700 border border-rose-500/20 dark:text-rose-400',          Icon: XCircle },
+    draft:          { labelAr: 'مسودة',          labelEn: 'Draft',          cls: 'bg-muted text-muted-foreground border border-border/50',                            Icon: BookOpen },
   }
   const c = config[status] || config.draft
   const Icon = c.Icon
   return (
     <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full shrink-0 shadow-sm ${c.cls}`}>
       <Icon className="w-3.5 h-3.5" />
-      {c.label}
+      {isAr ? c.labelAr : c.labelEn}
     </span>
   )
 }

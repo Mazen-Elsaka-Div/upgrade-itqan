@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useI18n } from '@/lib/i18n/context'
 import { User, Mail, Lock, Save, Loader2, CheckCircle, Eye, EyeOff, ShieldCheck, Sparkles } from 'lucide-react'
 import { AvatarUpload } from '@/components/avatar-upload'
 
@@ -13,6 +14,8 @@ interface Profile {
 }
 
 export default function ContentSupervisorProfilePage() {
+  const { locale } = useI18n()
+  const isAr = locale === 'ar'
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -61,8 +64,8 @@ export default function ContentSupervisorProfilePage() {
   async function handleChangePassword(e: React.FormEvent) {
     e.preventDefault()
     setPwError('')
-    if (newPw !== confirmPw) { setPwError('كلمتا المرور غير متطابقتين'); return }
-    if (newPw.length < 8)    { setPwError('كلمة المرور يجب أن تكون 8 أحرف على الأقل'); return }
+    if (newPw !== confirmPw) { setPwError(isAr ? 'كلمتا المرور غير متطابقتين' : 'Passwords do not match'); return }
+    if (newPw.length < 8)    { setPwError(isAr ? 'كلمة المرور يجب أن تكون 8 أحرف على الأقل' : 'Password must be at least 8 characters long'); return }
     setPwSaving(true)
     try {
       const res = await fetch('/api/auth/change-password', {
@@ -72,7 +75,7 @@ export default function ContentSupervisorProfilePage() {
       })
       if (!res.ok) {
         const d = await res.json()
-        setPwError(d.error || 'حدث خطأ')
+        setPwError(d.error || (isAr ? 'حدث خطأ' : 'An error occurred'))
         return
       }
       setPwSaved(true)
@@ -99,11 +102,11 @@ export default function ContentSupervisorProfilePage() {
           <div className="p-2.5 bg-primary/10 rounded-xl text-primary">
             <User className="w-6 h-6" />
           </div>
-          الملف الشخصي
+          {isAr ? 'الملف الشخصي' : 'Profile'}
         </h1>
         <p className="text-muted-foreground text-sm flex items-center gap-2">
           <Sparkles className="w-4 h-4" />
-          إدارة بياناتك الشخصية وحماية حسابك
+          {isAr ? 'إدارة بياناتك الشخصية وحماية حسابك' : 'Manage your personal details and secure your account'}
         </p>
       </div>
 
@@ -116,8 +119,8 @@ export default function ContentSupervisorProfilePage() {
                 <User className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <h2 className="font-bold text-lg text-foreground">البيانات الأساسية</h2>
-                <p className="text-xs text-muted-foreground mt-0.5">المعلومات التي تظهر للآخرين</p>
+                <h2 className="font-bold text-lg text-foreground">{isAr ? 'البيانات الأساسية' : 'Personal Details'}</h2>
+                <p className="text-xs text-muted-foreground mt-0.5">{isAr ? 'المعلومات التي تظهر للآخرين' : 'Information visible to others'}</p>
               </div>
             </div>
 
@@ -136,7 +139,7 @@ export default function ContentSupervisorProfilePage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-foreground px-1">الاسم الكامل</label>
+                <label className="text-sm font-semibold text-foreground px-1">{isAr ? 'الاسم الكامل' : 'Full Name'}</label>
                 <input
                   type="text"
                   value={name}
@@ -146,12 +149,14 @@ export default function ContentSupervisorProfilePage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-foreground px-1">البريد الإلكتروني</label>
+                <label className="text-sm font-semibold text-foreground px-1">{isAr ? 'البريد الإلكتروني' : 'Email Address'}</label>
                 <div className="flex items-center gap-3 px-4 py-3 bg-muted/40 border border-border/50 rounded-xl shadow-sm">
                   <Mail className="w-4 h-4 text-muted-foreground shrink-0" />
                   <span className="text-sm text-muted-foreground font-medium">{profile?.email}</span>
                 </div>
-                <p className="text-xs text-muted-foreground px-1">البريد الإلكتروني لا يمكن تغييره. للتعديل يرجى التواصل مع الإدارة.</p>
+                <p className="text-xs text-muted-foreground px-1">
+                  {isAr ? 'البريد الإلكتروني لا يمكن تغييره. للتعديل يرجى التواصل مع الإدارة.' : 'Email address cannot be changed. Contact admin for updates.'}
+                </p>
               </div>
 
               <div className="pt-4 border-t border-border/50 flex items-center justify-between gap-4">
@@ -159,7 +164,7 @@ export default function ContentSupervisorProfilePage() {
                   {saved && (
                     <div className="flex items-center gap-2 p-2 px-3 bg-emerald-500/10 rounded-lg text-xs font-bold text-emerald-700 dark:text-emerald-400 animate-in slide-in-from-bottom-2">
                       <CheckCircle className="w-4 h-4 shrink-0" />
-                      تم الحفظ بنجاح
+                      {isAr ? 'تم الحفظ بنجاح' : 'Saved successfully'}
                     </div>
                   )}
                 </div>
@@ -169,7 +174,7 @@ export default function ContentSupervisorProfilePage() {
                   className="shrink-0 group flex items-center justify-center gap-2 px-8 py-3 bg-primary text-primary-foreground rounded-xl font-bold text-sm hover:bg-primary/90 transition-all shadow-sm hover:shadow disabled:opacity-60 overflow-hidden relative"
                 >
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4 group-hover:scale-110 transition-transform" />}
-                  {saving ? 'جاري الحفظ...' : 'حفظ التغييرات'}
+                  {saving ? (isAr ? 'جاري الحفظ...' : 'Saving...') : (isAr ? 'حفظ التغييرات' : 'Save Changes')}
                   <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform" />
                 </button>
               </div>
@@ -185,16 +190,16 @@ export default function ContentSupervisorProfilePage() {
                 <ShieldCheck className="w-5 h-5 text-amber-600 dark:text-amber-500" />
               </div>
               <div>
-                <h2 className="font-bold text-lg text-foreground">تأمين الحساب</h2>
-                <p className="text-xs text-muted-foreground mt-0.5">تغيير كلمة المرور الخاصة بك</p>
+                <h2 className="font-bold text-lg text-foreground">{isAr ? 'تأمين الحساب' : 'Account Security'}</h2>
+                <p className="text-xs text-muted-foreground mt-0.5">{isAr ? 'تغيير كلمة المرور الخاصة بك' : 'Change your account password'}</p>
               </div>
             </div>
 
             <form onSubmit={handleChangePassword} className="space-y-5">
               {[
-                { label: 'كلمة المرور الحالية', value: currentPw, setter: setCurrentPw },
-                { label: 'كلمة المرور الجديدة', value: newPw,     setter: setNewPw     },
-                { label: 'تأكيد كلمة المرور',   value: confirmPw, setter: setConfirmPw  },
+                { label: isAr ? 'كلمة المرور الحالية' : 'Current Password', value: currentPw, setter: setCurrentPw },
+                { label: isAr ? 'كلمة المرور الجديدة' : 'New Password', value: newPw,     setter: setNewPw     },
+                { label: isAr ? 'تأكيد كلمة المرور' : 'Confirm Password',   value: confirmPw, setter: setConfirmPw  },
               ].map(({ label, value, setter }) => (
                 <div key={label} className="space-y-2">
                   <label className="text-sm font-semibold text-foreground px-1">{label}</label>
@@ -226,7 +231,7 @@ export default function ContentSupervisorProfilePage() {
               {pwSaved && (
                 <div className="flex items-center gap-2 p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-sm font-medium text-emerald-700 dark:text-emerald-400 animate-in slide-in-from-top-2">
                   <CheckCircle className="w-4 h-4 shrink-0" />
-                  تم تغيير كلمة المرور بنجاح
+                  {isAr ? 'تم تغيير كلمة المرور بنجاح' : 'Password changed successfully'}
                 </div>
               )}
 
@@ -237,7 +242,7 @@ export default function ContentSupervisorProfilePage() {
                   className="w-full group flex items-center justify-center gap-2 px-6 py-3.5 bg-amber-500 text-amber-950 rounded-xl font-bold text-sm hover:bg-amber-400 transition-all shadow-sm hover:shadow disabled:opacity-60 overflow-hidden relative"
                 >
                   {pwSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4 group-hover:scale-110 transition-transform" />}
-                  {pwSaving ? 'جاري التغيير...' : 'تحديث كلمة المرور'}
+                  {pwSaving ? (isAr ? 'جاري التغيير...' : 'Changing...') : (isAr ? 'تحديث كلمة المرور' : 'Update Password')}
                   <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform" />
                 </button>
               </div>

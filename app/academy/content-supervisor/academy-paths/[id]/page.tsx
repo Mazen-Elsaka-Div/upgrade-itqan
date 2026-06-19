@@ -2,10 +2,12 @@
 
 import { useEffect, useState, use } from 'react'
 import { useRouter } from 'next/navigation'
+import { useI18n } from '@/lib/i18n/context'
 import Link from 'next/link'
 import {
-  ArrowRight, GraduationCap, Clock, CheckCircle, XCircle,
-  Loader2, AlertCircle, User, BookMarked, Timer, Sparkles, FileText, Send
+  ArrowRight, ArrowLeft, GraduationCap, Clock, CheckCircle, XCircle,
+  Loader2, AlertCircle, User, BookMarked, Timer, Sparkles, FileText, Send,
+  ChevronRight, ChevronLeft
 } from 'lucide-react'
 
 interface PathDetail {
@@ -30,6 +32,8 @@ interface PathDetail {
 export default function AcademyPathDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const router = useRouter()
+  const { locale } = useI18n()
+  const isAr = locale === 'ar'
 
   const [path, setPath] = useState<PathDetail | null>(null)
   const [loading, setLoading] = useState(true)
@@ -42,13 +46,13 @@ export default function AcademyPathDetailPage({ params }: { params: Promise<{ id
     fetch(`/api/academy/supervisor/academy-paths/${id}`)
       .then(r => r.ok ? r.json() : Promise.reject(r.status))
       .then(d => setPath(d.data))
-      .catch(() => setError('تعذّر تحميل بيانات المسار'))
+      .catch(() => setError(isAr ? 'تعذّر تحميل بيانات المسار' : 'Failed to load path details'))
       .finally(() => setLoading(false))
-  }, [id])
+  }, [id, isAr])
 
   async function handleAction(action: 'approve' | 'reject') {
     if (action === 'reject' && !notes.trim()) {
-      setError('يرجى كتابة سبب الرفض')
+      setError(isAr ? 'يرجى كتابة سبب الرفض' : 'Please specify the rejection reason')
       return
     }
     setSubmitting(action)
@@ -61,7 +65,7 @@ export default function AcademyPathDetailPage({ params }: { params: Promise<{ id
       })
       if (!res.ok) {
         const d = await res.json()
-        throw new Error(d.error || 'فشل الإجراء')
+        throw new Error(d.error || (isAr ? 'فشل الإجراء' : 'Action failed'))
       }
       setDone(true)
     } catch (e: any) {
@@ -83,11 +87,11 @@ export default function AcademyPathDetailPage({ params }: { params: Promise<{ id
     return (
       <div className="bg-card border border-border/50 rounded-2xl p-16 text-center max-w-2xl mx-auto shadow-sm flex flex-col items-center">
         <AlertCircle className="w-16 h-16 text-rose-500/50 mb-4" />
-        <p className="text-xl font-bold text-foreground mb-2">المسار غير موجود</p>
-        <p className="text-muted-foreground text-sm mb-6">قد يكون تم حذفه أو ليس لديك صلاحية للوصول إليه.</p>
+        <p className="text-xl font-bold text-foreground mb-2">{isAr ? 'المسار غير موجود' : 'Path not found'}</p>
+        <p className="text-muted-foreground text-sm mb-6">{isAr ? 'قد يكون تم حذفه أو ليس لديك صلاحية للوصول إليه.' : 'It may have been deleted or you do not have permission to access it.'}</p>
         <Link href="/academy/content-supervisor/academy-paths" className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-2.5 rounded-xl font-semibold hover:bg-primary/90 transition-colors">
-          <ArrowRight className="w-4 h-4" />
-          العودة إلى القائمة
+          {isAr ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
+          {isAr ? 'العودة إلى القائمة' : 'Back to List'}
         </Link>
       </div>
     )
@@ -100,15 +104,19 @@ export default function AcademyPathDetailPage({ params }: { params: Promise<{ id
           <CheckCircle className="w-12 h-12" />
         </div>
         <div>
-          <h2 className="text-2xl font-black text-foreground mb-2">تم تنفيذ الإجراء بنجاح</h2>
-          <p className="text-muted-foreground">تم {submitting === 'approve' ? 'اعتماد المسار ونشره' : 'رفض المسار'} بنجاح.</p>
+          <h2 className="text-2xl font-black text-foreground mb-2">{isAr ? 'تم تنفيذ الإجراء بنجاح' : 'Action completed successfully'}</h2>
+          <p className="text-muted-foreground">
+            {isAr 
+              ? `تم ${submitting === 'approve' ? 'اعتماد المسار ونشره' : 'رفض المسار'} بنجاح.`
+              : `Path has been successfully ${submitting === 'approve' ? 'approved and published' : 'rejected'}.`}
+          </p>
         </div>
         <button
           onClick={() => router.push('/academy/content-supervisor/academy-paths')}
           className="inline-flex items-center justify-center gap-2 w-full px-6 py-3 rounded-xl bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-colors shadow-sm"
         >
-          <ArrowRight className="w-4 h-4" />
-          العودة لقائمة المسارات
+          {isAr ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
+          {isAr ? 'العودة لقائمة المسارات' : 'Back to Paths List'}
         </button>
       </div>
     )
@@ -124,8 +132,8 @@ export default function AcademyPathDetailPage({ params }: { params: Promise<{ id
           onClick={() => router.back()}
           className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground hover:text-primary transition-colors bg-card hover:bg-muted border border-border/50 px-4 py-2 rounded-xl shadow-sm"
         >
-          <ArrowRight className="w-4 h-4" />
-          العودة إلى المسارات
+          {isAr ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
+          {isAr ? 'العودة إلى المسارات' : 'Back to Paths'}
         </button>
       </div>
 
@@ -141,7 +149,7 @@ export default function AcademyPathDetailPage({ params }: { params: Promise<{ id
                   {path.subject}
                 </span>
               )}
-              <StatusBadge status={path.status} />
+              <StatusBadge status={path.status} isAr={isAr} />
             </div>
             
             <h1 className="text-2xl md:text-3xl font-black text-foreground leading-tight">
@@ -154,14 +162,20 @@ export default function AcademyPathDetailPage({ params }: { params: Promise<{ id
                 <>
                   <span className="flex items-center gap-1.5">
                     <Timer className="w-4 h-4" />
-                    المدة: <strong className="text-foreground">{path.estimated_hours}</strong> ساعة
+                    {isAr ? (
+                      <>المدة: <strong className="text-foreground">{path.estimated_hours}</strong> ساعة</>
+                    ) : (
+                      <>Duration: <strong className="text-foreground">{path.estimated_hours}</strong> hours</>
+                    )}
                   </span>
                   <span className="w-1 h-1 rounded-full bg-border" />
                 </>
               ) : null}
               <span className="flex items-center gap-1.5">
                 <Clock className="w-4 h-4" />
-                رُفع للمراجعة في {new Date(path.submitted_for_review_at || path.created_at).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}
+                {isAr 
+                  ? `رُفع للمراجعة في ${new Date(path.submitted_for_review_at || path.created_at).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}`
+                  : `Submitted for review on ${new Date(path.submitted_for_review_at || path.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`}
               </span>
             </div>
           </div>
@@ -177,7 +191,7 @@ export default function AcademyPathDetailPage({ params }: { params: Promise<{ id
                 )}
               </div>
               <div>
-                <p className="text-xs text-muted-foreground mb-0.5">المعلم المرفق</p>
+                <p className="text-xs text-muted-foreground mb-0.5">{isAr ? 'المعلم المرفق' : 'Assigned Teacher'}</p>
                 <p className="font-bold text-foreground text-sm">{path.creator_name}</p>
               </div>
             </div>
@@ -191,7 +205,7 @@ export default function AcademyPathDetailPage({ params }: { params: Promise<{ id
           <div className="bg-card border border-border/50 rounded-2xl p-6 md:p-8 shadow-sm">
             <h2 className="font-bold text-foreground mb-4 flex items-center gap-2 text-lg">
               <FileText className="w-5 h-5 text-primary" />
-              الوصف والأهداف
+              {isAr ? 'الوصف والأهداف' : 'Description and Goals'}
             </h2>
             <div className="prose prose-sm dark:prose-invert max-w-none">
               <p className="text-foreground/80 leading-relaxed whitespace-pre-wrap">
@@ -208,7 +222,7 @@ export default function AcademyPathDetailPage({ params }: { params: Promise<{ id
               <XCircle className="w-6 h-6 text-rose-600 dark:text-rose-500" />
             </div>
             <div>
-              <p className="font-bold text-lg text-rose-900 dark:text-rose-400 mb-1">سبب الرفض السابق</p>
+              <p className="font-bold text-lg text-rose-900 dark:text-rose-400 mb-1">{isAr ? 'سبب الرفض السابق' : 'Previous Rejection Reason'}</p>
               <p className="text-sm text-rose-800/80 dark:text-rose-500/80 leading-relaxed whitespace-pre-wrap">
                 {path.rejection_reason}
               </p>
@@ -224,12 +238,12 @@ export default function AcademyPathDetailPage({ params }: { params: Promise<{ id
             {isPending ? (
               <>
                 <Sparkles className="w-6 h-6 text-primary" />
-                قرار المراجعة للمسار
+                {isAr ? 'قرار المراجعة للمسار' : 'Review Decision for Path'}
               </>
             ) : (
               <>
                 <FileText className="w-6 h-6 text-muted-foreground" />
-                سجل المراجعة
+                {isAr ? 'سجل المراجعة' : 'Review Log'}
               </>
             )}
           </h2>
@@ -237,8 +251,8 @@ export default function AcademyPathDetailPage({ params }: { params: Promise<{ id
           {!isPending && path.reviewer_name && (
             <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-muted px-3 py-1.5 rounded-lg border border-border/50">
               <User className="w-3 h-3 text-muted-foreground" />
-              المراجع: {path.reviewer_name}
-              {path.reviewed_at && <span className="text-muted-foreground ml-1">({new Date(path.reviewed_at).toLocaleDateString('ar-EG')})</span>}
+              {isAr ? `المراجع: ${path.reviewer_name}` : `Reviewer: ${path.reviewer_name}`}
+              {path.reviewed_at && <span className="text-muted-foreground ml-1">({new Date(path.reviewed_at).toLocaleDateString(isAr ? 'ar-EG' : 'en-US')})</span>}
             </span>
           )}
         </div>
@@ -252,12 +266,14 @@ export default function AcademyPathDetailPage({ params }: { params: Promise<{ id
           )}
 
           <div>
-            <label className="block text-sm font-semibold text-foreground mb-2">ملاحظات / أسباب الرفض</label>
+            <label className="block text-sm font-semibold text-foreground mb-2">{isAr ? 'ملاحظات / أسباب الرفض' : 'Notes / Rejection Reasons'}</label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               disabled={!isPending}
-              placeholder={isPending ? "أضف أسباب الرفض (مطلوبة عند الرفض) أو ملاحظات إيجابية للمسار (اختياري)..." : "لا توجد ملاحظات."}
+              placeholder={isPending 
+                ? (isAr ? "أضف أسباب الرفض (مطلوبة عند الرفض) أو ملاحظات إيجابية للمسار (اختياري)..." : "Add rejection reasons (required for rejection) or positive notes for the path (optional)...") 
+                : (isAr ? "لا توجد ملاحظات." : "No notes.")}
               rows={4}
               className="w-full bg-background border border-border/50 rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 resize-none disabled:opacity-70 disabled:bg-muted/50 transition-all shadow-sm"
             />
@@ -276,7 +292,7 @@ export default function AcademyPathDetailPage({ params }: { params: Promise<{ id
                 ) : (
                   <CheckCircle className="w-5 h-5 group-hover:scale-110 transition-transform" />
                 )}
-                اعتماد ونشر
+                {isAr ? 'اعتماد ونشر' : 'Approve and Publish'}
                 <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform" />
               </button>
               
@@ -291,7 +307,7 @@ export default function AcademyPathDetailPage({ params }: { params: Promise<{ id
                 ) : (
                   <XCircle className="w-5 h-5 group-hover:scale-110 transition-transform" />
                 )}
-                رفض المسار
+                {isAr ? 'رفض المسار' : 'Reject Path'}
                 <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform" />
               </button>
             </div>
@@ -302,20 +318,20 @@ export default function AcademyPathDetailPage({ params }: { params: Promise<{ id
   )
 }
 
-function StatusBadge({ status }: { status: string }) {
-  const config: Record<string, { label: string; cls: string; icon: any }> = {
-    pending_review: { label: 'بانتظار المراجعة', cls: 'bg-amber-500/10 text-amber-700 border-amber-500/20 dark:text-amber-400', icon: Clock },
-    published:      { label: 'منشور',          cls: 'bg-emerald-500/10 text-emerald-700 border-emerald-500/20 dark:text-emerald-400', icon: CheckCircle },
-    approved:       { label: 'معتمد',          cls: 'bg-emerald-500/10 text-emerald-700 border-emerald-500/20 dark:text-emerald-400', icon: CheckCircle },
-    rejected:       { label: 'مرفوض',          cls: 'bg-rose-500/10 text-rose-700 border-rose-500/20 dark:text-rose-400', icon: XCircle },
-    draft:          { label: 'مسودة',          cls: 'bg-muted text-muted-foreground border-border/50', icon: BookMarked },
+function StatusBadge({ status, isAr }: { status: string; isAr: boolean }) {
+  const config: Record<string, { labelAr: string; labelEn: string; cls: string; icon: any }> = {
+    pending_review: { labelAr: 'بانتظار المراجعة', labelEn: 'Pending Review', cls: 'bg-amber-500/10 text-amber-700 border-amber-500/20 dark:text-amber-400', icon: Clock },
+    published:      { labelAr: 'منشور',          labelEn: 'Published',      cls: 'bg-emerald-500/10 text-emerald-700 border-emerald-500/20 dark:text-emerald-400', icon: CheckCircle },
+    approved:       { labelAr: 'معتمد',          labelEn: 'Approved',       cls: 'bg-emerald-500/10 text-emerald-700 border-emerald-500/20 dark:text-emerald-400', icon: CheckCircle },
+    rejected:       { labelAr: 'مرفوض',          labelEn: 'Rejected',       cls: 'bg-rose-500/10 text-rose-700 border-rose-500/20 dark:text-rose-400', icon: XCircle },
+    draft:          { labelAr: 'مسودة',          labelEn: 'Draft',          cls: 'bg-muted text-muted-foreground border-border/50', icon: BookMarked },
   }
   const c = config[status] || config.draft
   const Icon = c.icon
   return (
     <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-md border shadow-sm ${c.cls}`}>
       <Icon className="w-3.5 h-3.5" />
-      {c.label}
+      {isAr ? c.labelAr : c.labelEn}
     </span>
   )
 }

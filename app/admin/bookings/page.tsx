@@ -21,11 +21,6 @@ const STATUS_OPTIONS = [
     { value: 'no_show', key: 'bkgStatusNoShow' },
 ]
 
-export default function BookingsPage() {
-  const { t, locale } = useI18n()
-  const a = t.admin
-  const isAr = locale === 'ar'
-
 const STATUS_COLOR: Record<string, string> = {
     pending: 'bg-amber-500/10 text-amber-500 border border-amber-500/20',
     confirmed: 'bg-blue-500/10 text-blue-500 border border-blue-500/20',

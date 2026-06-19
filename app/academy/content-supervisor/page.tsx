@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useI18n } from '@/lib/i18n/context'
 import {
   BookOpen, Clock, CheckCircle, XCircle, ArrowLeft,
   FileCheck, Loader2, GraduationCap, Library, Route, BookMarked,
@@ -28,7 +29,8 @@ interface RecentLesson {
 
 interface QueueInfo {
   key: string
-  label: string
+  labelAr: string
+  labelEn: string
   href: string
   icon: React.ComponentType<{ className?: string }>
   endpoint: string
@@ -37,14 +39,16 @@ interface QueueInfo {
 }
 
 const QUEUES: QueueInfo[] = [
-  { key: 'lessons', label: 'الدروس', href: '/academy/content-supervisor/lessons', icon: BookOpen, endpoint: '/api/academy/supervisor/content?status=pending', colorClass: 'text-blue-600 dark:text-blue-400', bgClass: 'bg-blue-500/10' },
-  { key: 'courses', label: 'الدورات', href: '/academy/content-supervisor/courses', icon: GraduationCap, endpoint: '/api/academy/supervisor/courses?status=pending', colorClass: 'text-purple-600 dark:text-purple-400', bgClass: 'bg-purple-500/10' },
-  { key: 'series', label: 'السلاسل', href: '/academy/content-supervisor/series', icon: Library, endpoint: '/api/academy/supervisor/series?status=pending', colorClass: 'text-indigo-600 dark:text-indigo-400', bgClass: 'bg-indigo-500/10' },
-  { key: 'paths', label: 'مسارات المقرئ', href: '/academy/content-supervisor/paths', icon: Route, endpoint: '/api/academy/supervisor/paths?status=pending', colorClass: 'text-orange-600 dark:text-orange-400', bgClass: 'bg-orange-500/10' },
-  { key: 'academy-paths', label: 'مسارات الأكاديمية', href: '/academy/content-supervisor/academy-paths', icon: BookMarked, endpoint: '/api/academy/supervisor/academy-paths?status=pending', colorClass: 'text-pink-600 dark:text-pink-400', bgClass: 'bg-pink-500/10' },
+  { key: 'lessons', labelAr: 'الدروس', labelEn: 'Lessons', href: '/academy/content-supervisor/lessons', icon: BookOpen, endpoint: '/api/academy/supervisor/content?status=pending', colorClass: 'text-blue-600 dark:text-blue-400', bgClass: 'bg-blue-500/10' },
+  { key: 'courses', labelAr: 'الدورات', labelEn: 'Courses', href: '/academy/content-supervisor/courses', icon: GraduationCap, endpoint: '/api/academy/supervisor/courses?status=pending', colorClass: 'text-purple-600 dark:text-purple-400', bgClass: 'bg-purple-500/10' },
+  { key: 'series', labelAr: 'السلاسل', labelEn: 'Series', href: '/academy/content-supervisor/series', icon: Library, endpoint: '/api/academy/supervisor/series?status=pending', colorClass: 'text-indigo-600 dark:text-indigo-400', bgClass: 'bg-indigo-500/10' },
+  { key: 'paths', labelAr: 'مسارات المقرئ', labelEn: 'Reciter Paths', href: '/academy/content-supervisor/paths', icon: Route, endpoint: '/api/academy/supervisor/paths?status=pending', colorClass: 'text-orange-600 dark:text-orange-400', bgClass: 'bg-orange-500/10' },
+  { key: 'academy-paths', labelAr: 'مسارات الأكاديمية', labelEn: 'Academy Paths', href: '/academy/content-supervisor/academy-paths', icon: BookMarked, endpoint: '/api/academy/supervisor/academy-paths?status=pending', colorClass: 'text-pink-600 dark:text-pink-400', bgClass: 'bg-pink-500/10' },
 ]
 
 export default function ContentSupervisorDashboard() {
+  const { locale } = useI18n()
+  const isAr = locale === 'ar'
   const [countsByQueue, setCountsByQueue] = useState<Record<string, Counts>>({})
   const [recent, setRecent] = useState<RecentLesson[]>([])
   const [loading, setLoading] = useState(true)
@@ -102,11 +106,15 @@ export default function ContentSupervisorDashboard() {
             <div className="p-2.5 bg-primary/10 rounded-xl text-primary">
               <Sparkles className="w-6 h-6" />
             </div>
-            {name ? `مرحباً بك، ${name}` : 'لوحة تحكم الإشراف'}
+            {name 
+              ? (isAr ? `مرحباً بك، ${name}` : `Welcome, ${name}`) 
+              : (isAr ? 'لوحة تحكم الإشراف' : 'Supervisor Dashboard')}
           </h1>
           <p className="text-muted-foreground text-sm flex items-center gap-2">
             <Activity className="w-4 h-4" />
-            مشرف المحتوى — إدارة ومراجعة محتوى المعلمين قبل نشره بالأكاديمية
+            {isAr 
+              ? 'مشرف المحتوى — إدارة ومراجعة محتوى المعلمين قبل نشره بالأكاديمية' 
+              : 'Content Supervisor — Manage and review teacher content before publishing to the academy'}
           </p>
         </div>
       </div>
@@ -114,7 +122,7 @@ export default function ContentSupervisorDashboard() {
       {/* Stats grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         <StatCard
-          label="بانتظار المراجعة"
+          label={isAr ? 'بانتظار المراجعة' : 'Pending Review'}
           value={totals.pending}
           icon={Clock}
           color="text-amber-600 dark:text-amber-400"
@@ -122,7 +130,7 @@ export default function ContentSupervisorDashboard() {
           border="border-amber-500/20"
         />
         <StatCard
-          label="تم اعتمادها"
+          label={isAr ? 'تم اعتمادها' : 'Approved'}
           value={totals.approved}
           icon={CheckCircle}
           color="text-emerald-600 dark:text-emerald-400"
@@ -130,7 +138,7 @@ export default function ContentSupervisorDashboard() {
           border="border-emerald-500/20"
         />
         <StatCard
-          label="مرفوضة"
+          label={isAr ? 'مرفوضة' : 'Rejected'}
           value={totals.rejected}
           icon={XCircle}
           color="text-rose-600 dark:text-rose-400"
@@ -138,7 +146,7 @@ export default function ContentSupervisorDashboard() {
           border="border-rose-500/20"
         />
         <StatCard
-          label="إجمالي المحتوى"
+          label={isAr ? 'إجمالي المحتوى' : 'Total Content'}
           value={totals.all}
           icon={BookOpen}
           color="text-primary"
@@ -152,7 +160,7 @@ export default function ContentSupervisorDashboard() {
         <div className="p-5 border-b border-border/50 bg-muted/20">
           <h2 className="font-bold text-foreground text-lg flex items-center gap-2">
             <Route className="w-5 h-5 text-primary" />
-            طوابير المراجعة النشطة
+            {isAr ? 'طوابير المراجعة النشطة' : 'Active Review Queues'}
           </h2>
         </div>
         <div className="p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -174,20 +182,24 @@ export default function ContentSupervisorDashboard() {
                   {pending > 0 ? (
                     <span className="flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20">
                       <AlertCircle className="w-3 h-3" />
-                      {pending} طلب جديد
+                      {pending} {isAr ? 'طلب جديد' : 'new requests'}
                     </span>
                   ) : (
                     <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-muted text-muted-foreground border border-border/50">
-                      مكتمل
+                      {isAr ? 'مكتمل' : 'Completed'}
                     </span>
                   )}
                 </div>
                 
                 <div className="relative z-10">
-                  <h3 className="font-bold text-foreground text-lg group-hover:text-primary transition-colors">{q.label}</h3>
+                  <h3 className="font-bold text-foreground text-lg group-hover:text-primary transition-colors">
+                    {isAr ? q.labelAr : q.labelEn}
+                  </h3>
                   <div className="flex items-center justify-between mt-2">
                     <p className="text-sm text-muted-foreground">
-                      {pending > 0 ? 'يتطلب إجراء' : 'لا يوجد مهام حالية'}
+                      {pending > 0 
+                        ? (isAr ? 'يتطلب إجراء' : 'Action Required') 
+                        : (isAr ? 'لا يوجد مهام حالية' : 'No tasks pending')}
                     </p>
                     <ChevronLeft className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:-translate-x-1 transition-all" />
                   </div>
@@ -203,13 +215,13 @@ export default function ContentSupervisorDashboard() {
         <div className="flex items-center justify-between p-5 border-b border-border/50 bg-muted/20">
           <div className="flex items-center gap-2">
             <FileCheck className="w-5 h-5 text-primary" />
-            <h2 className="font-bold text-foreground text-lg">أحدث الدروس بانتظار المراجعة</h2>
+            <h2 className="font-bold text-foreground text-lg">{isAr ? 'أحدث الدروس بانتظار المراجعة' : 'Recent Lessons Pending Review'}</h2>
           </div>
           <Link
             href="/academy/content-supervisor/lessons"
             className="flex items-center gap-1 text-sm font-semibold text-primary hover:underline bg-primary/5 px-3 py-1.5 rounded-lg transition-colors"
           >
-            تصفح الكل
+            {isAr ? 'تصفح الكل' : 'Browse All'}
             <ArrowLeft className="w-4 h-4" />
           </Link>
         </div>
@@ -219,9 +231,11 @@ export default function ContentSupervisorDashboard() {
             <div className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mb-6">
               <CheckCircle className="w-10 h-10 text-emerald-500" />
             </div>
-            <h3 className="text-lg font-bold text-foreground mb-2">ممتاز! لا توجد دروس بانتظار المراجعة</h3>
+            <h3 className="text-lg font-bold text-foreground mb-2">{isAr ? 'ممتاز! لا توجد دروس بانتظار المراجعة' : 'Excellent! No lessons pending review'}</h3>
             <p className="text-sm text-muted-foreground max-w-sm">
-              لقد قمت بإنجاز عملك بنجاح. سيتم إشعارك عند وجود دروس جديدة بانتظار مراجعتك.
+              {isAr 
+                ? 'لقد قمت بإنجاز عملك بنجاح. سيتم إشعارك عند وجود دروس جديدة بانتظار مراجعتك.' 
+                : 'You have completed your work successfully. You will be notified when new lessons await your review.'}
             </p>
           </div>
         ) : (
@@ -246,7 +260,7 @@ export default function ContentSupervisorDashboard() {
                       </span>
                       <span className="text-muted-foreground/40 text-xs">•</span>
                       <span className="text-xs text-muted-foreground truncate">
-                        المعلم: <span className="font-medium text-foreground/80">{l.teacher_name}</span>
+                        {isAr ? 'المعلم:' : 'Teacher:'} <span className="font-medium text-foreground/80">{l.teacher_name}</span>
                       </span>
                     </div>
                   </div>
@@ -254,7 +268,7 @@ export default function ContentSupervisorDashboard() {
                 <div className="flex items-center gap-3">
                   <span className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 shrink-0">
                     <Clock className="w-3.5 h-3.5" />
-                    قيد الانتظار
+                    {isAr ? 'قيد الانتظار' : 'Pending'}
                   </span>
                   <ChevronLeft className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:-translate-x-1 transition-all" />
                 </div>

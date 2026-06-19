@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, use } from 'react'
+import { useI18n } from '@/lib/i18n/context'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
@@ -43,6 +44,8 @@ export default function SeriesReviewPage({
 }) {
   const { id } = use(params)
   const router = useRouter()
+  const { locale } = useI18n()
+  const isAr = locale === 'ar'
   const [series, setSeries] = useState<Series | null>(null)
   const [loading, setLoading] = useState(true)
   const [notes, setNotes] = useState('')
@@ -62,7 +65,7 @@ export default function SeriesReviewPage({
 
   async function handleReview(action: 'approve' | 'reject') {
     if (action === 'reject' && !notes.trim()) {
-      toast.error('يجب كتابة سبب الرفض')
+      toast.error(isAr ? 'يجب كتابة سبب الرفض' : 'Rejection reason is required')
       return
     }
     setSubmitting(action)
@@ -74,13 +77,15 @@ export default function SeriesReviewPage({
       })
       const data = await res.json()
       if (res.ok) {
-        toast.success(action === 'approve' ? 'تم اعتماد السلسلة ونشرها' : 'تم رفض السلسلة')
+        toast.success(action === 'approve' 
+          ? (isAr ? 'تم اعتماد السلسلة ونشرها' : 'Series approved and published') 
+          : (isAr ? 'تم رفض السلسلة' : 'Series rejected'))
         router.push('/academy/content-supervisor/series')
       } else {
-        toast.error(data.error || 'حدث خطأ')
+        toast.error(data.error || (isAr ? 'حدث خطأ' : 'An error occurred'))
       }
     } catch {
-      toast.error('حدث خطأ في الاتصال')
+      toast.error(isAr ? 'حدث خطأ في الاتصال' : 'Connection error occurred')
     } finally {
       setSubmitting(null)
     }
@@ -98,11 +103,13 @@ export default function SeriesReviewPage({
     return (
       <div className="bg-card border border-border/50 rounded-2xl p-16 text-center max-w-2xl mx-auto shadow-sm flex flex-col items-center">
         <ShieldAlert className="w-16 h-16 text-rose-500/50 mb-4" />
-        <p className="text-xl font-bold text-foreground mb-2">السلسلة غير موجودة</p>
-        <p className="text-muted-foreground text-sm mb-6">قد تكون تم حذفها أو ليس لديك صلاحية للوصول إليها.</p>
+        <p className="text-xl font-bold text-foreground mb-2">{isAr ? 'السلسلة غير موجودة' : 'Series not found'}</p>
+        <p className="text-muted-foreground text-sm mb-6">
+          {isAr ? 'قد تكون تم حذفها أو ليس لديك صلاحية للوصول إليها.' : 'It may have been deleted or you do not have permission to access it.'}
+        </p>
         <Link href="/academy/content-supervisor/series" className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-2.5 rounded-xl font-semibold hover:bg-primary/90 transition-colors">
           <ArrowRight className="w-4 h-4" />
-          العودة إلى القائمة
+          {isAr ? 'العودة إلى القائمة' : 'Back to List'}
         </Link>
       </div>
     )
@@ -119,7 +126,7 @@ export default function SeriesReviewPage({
           className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground hover:text-primary transition-colors bg-card hover:bg-muted border border-border/50 px-4 py-2 rounded-xl shadow-sm"
         >
           <ArrowRight className="w-4 h-4" />
-          العودة إلى السلاسل
+          {isAr ? 'العودة إلى السلاسل' : 'Back to Series'}
         </Link>
       </div>
 
@@ -135,7 +142,7 @@ export default function SeriesReviewPage({
                   {series.subject}
                 </span>
               )}
-              <StatusBadge status={series.status} />
+              <StatusBadge status={series.status} isAr={isAr} />
             </div>
             
             <h1 className="text-2xl md:text-3xl font-black text-foreground leading-tight">
@@ -146,12 +153,12 @@ export default function SeriesReviewPage({
             <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mt-4">
               <span className="flex items-center gap-1.5">
                 <Layers className="w-4 h-4" />
-                <strong className="text-foreground">{series.items.length}</strong> عنصر
+                <strong className="text-foreground">{series.items.length}</strong> {isAr ? 'عنصر' : 'items'}
               </span>
               <span className="w-1 h-1 rounded-full bg-border" />
               <span className="flex items-center gap-1.5">
                 <Clock className="w-4 h-4" />
-                رُفعت للمراجعة في {new Date(series.submitted_for_review_at || series.created_at).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}
+                {isAr ? 'رُفعت للمراجعة في' : 'Submitted for review on'} {new Date(series.submitted_for_review_at || series.created_at).toLocaleDateString(isAr ? 'ar-EG' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
               </span>
             </div>
           </div>
@@ -167,7 +174,7 @@ export default function SeriesReviewPage({
                 )}
               </div>
               <div>
-                <p className="text-xs text-muted-foreground mb-0.5">المعلم</p>
+                <p className="text-xs text-muted-foreground mb-0.5">{isAr ? 'المعلم' : 'Teacher'}</p>
                 <p className="font-bold text-foreground text-sm">{series.teacher_name}</p>
                 {series.teacher_email && (
                   <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
@@ -189,7 +196,7 @@ export default function SeriesReviewPage({
           <div className="bg-card border border-border/50 rounded-2xl p-6 md:p-8 shadow-sm">
             <h2 className="font-bold text-foreground mb-4 flex items-center gap-2 text-lg">
               <FileText className="w-5 h-5 text-primary" />
-              وصف السلسلة والأهداف
+              {isAr ? 'وصف السلسلة والأهداف' : 'Series Description & Objectives'}
             </h2>
             <div className="prose prose-sm dark:prose-invert max-w-none">
               <p className="text-foreground/80 leading-relaxed whitespace-pre-wrap">
@@ -203,13 +210,13 @@ export default function SeriesReviewPage({
         <div className="bg-card border border-border/50 rounded-2xl p-6 md:p-8 shadow-sm">
           <h2 className="font-bold text-foreground mb-6 flex items-center gap-2 text-lg">
             <Library className="w-5 h-5 text-blue-500" />
-            عناصر السلسلة ({series.items.length} عنصر)
+            {isAr ? `عناصر السلسلة (${series.items.length} عنصر)` : `Series Items (${series.items.length} items)`}
           </h2>
           
           {series.items.length === 0 ? (
             <div className="text-center py-8 bg-muted/20 rounded-xl border border-border/50 border-dashed">
               <Layers className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
-              <p className="text-sm text-muted-foreground">لا توجد عناصر في هذه السلسلة بعد.</p>
+              <p className="text-sm text-muted-foreground">{isAr ? 'لا توجد عناصر في هذه السلسلة بعد.' : 'No items in this series yet.'}</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -232,13 +239,13 @@ export default function SeriesReviewPage({
                   
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold text-sm text-foreground truncate group-hover:text-primary transition-colors">
-                      {item.course_title || item.path_title || 'عنصر غير معروف'}
+                      {item.course_title || item.path_title || (isAr ? 'عنصر غير معروف' : 'Unknown Item')}
                     </p>
                   </div>
                   
                   <div className="shrink-0">
                     <span className="inline-flex items-center px-2 py-1 bg-muted rounded border border-border/50 text-xs font-medium text-muted-foreground">
-                      {item.item_type === 'course' ? 'دورة' : 'مسار'}
+                      {item.item_type === 'course' ? (isAr ? 'دورة' : 'Course') : (isAr ? 'مسار' : 'Path')}
                     </span>
                   </div>
                 </div>
@@ -255,12 +262,12 @@ export default function SeriesReviewPage({
             {isPending ? (
               <>
                 <Sparkles className="w-6 h-6 text-primary" />
-                قرار المراجعة للسلسلة
+                {isAr ? 'قرار المراجعة للسلسلة' : 'Review Decision for Series'}
               </>
             ) : (
               <>
                 <FileText className="w-6 h-6 text-muted-foreground" />
-                سجل المراجعة
+                {isAr ? 'سجل المراجعة' : 'Review Log'}
               </>
             )}
           </h2>
@@ -268,20 +275,20 @@ export default function SeriesReviewPage({
           {!isPending && series.reviewer_name && (
             <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-muted px-3 py-1.5 rounded-lg border border-border/50">
               <User className="w-3 h-3 text-muted-foreground" />
-              المراجع: {series.reviewer_name}
-              {series.reviewed_at && <span className="text-muted-foreground ml-1">({new Date(series.reviewed_at).toLocaleDateString('ar-EG')})</span>}
+              {isAr ? 'المراجع:' : 'Reviewer:'} {series.reviewer_name}
+              {series.reviewed_at && <span className="text-muted-foreground ml-1">({new Date(series.reviewed_at).toLocaleDateString(isAr ? 'ar-EG' : 'en-US')})</span>}
             </span>
           )}
         </div>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-semibold text-foreground mb-2">ملاحظات / أسباب الرفض</label>
+            <label className="block text-sm font-semibold text-foreground mb-2">{isAr ? 'ملاحظات / أسباب الرفض' : 'Notes / Rejection Reasons'}</label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               disabled={!isPending}
-              placeholder={isPending ? "أضف أسباب الرفض أو ملاحظاتك على السلسلة... (مطلوبة عند الرفض وتظهر للمعلم)" : "لا توجد ملاحظات."}
+              placeholder={isPending ? (isAr ? "أضف أسباب الرفض أو ملاحظاتك على السلسلة... (مطلوبة عند الرفض وتظهر للمعلم)" : "Add rejection reasons or notes on the series... (Required for rejection and visible to teacher)") : (isAr ? "لا توجد ملاحظات." : "No notes.")}
               rows={4}
               className="w-full bg-background border border-border/50 rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 resize-none disabled:opacity-70 disabled:bg-muted/50 transition-all shadow-sm"
             />
@@ -300,7 +307,7 @@ export default function SeriesReviewPage({
                 ) : (
                   <CheckCircle className="w-5 h-5 group-hover:scale-110 transition-transform" />
                 )}
-                اعتماد ونشر
+                {isAr ? 'اعتماد ونشر' : 'Approve and Publish'}
                 <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform" />
               </button>
               
@@ -315,7 +322,7 @@ export default function SeriesReviewPage({
                 ) : (
                   <XCircle className="w-5 h-5 group-hover:scale-110 transition-transform" />
                 )}
-                رفض السلسلة
+                {isAr ? 'رفض السلسلة' : 'Reject Series'}
                 <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform" />
               </button>
             </div>
@@ -326,20 +333,20 @@ export default function SeriesReviewPage({
   )
 }
 
-function StatusBadge({ status }: { status: string }) {
-  const config: Record<string, { label: string; cls: string; icon: any }> = {
-    pending_review: { label: 'بانتظار المراجعة', cls: 'bg-amber-500/10 text-amber-700 border-amber-500/20 dark:text-amber-400', icon: Clock },
-    published:      { label: 'منشورة',          cls: 'bg-emerald-500/10 text-emerald-700 border-emerald-500/20 dark:text-emerald-400', icon: CheckCircle },
-    approved:       { label: 'معتمدة',          cls: 'bg-emerald-500/10 text-emerald-700 border-emerald-500/20 dark:text-emerald-400', icon: CheckCircle },
-    rejected:       { label: 'مرفوضة',          cls: 'bg-rose-500/10 text-rose-700 border-rose-500/20 dark:text-rose-400', icon: XCircle },
-    draft:          { label: 'مسودة',          cls: 'bg-muted text-muted-foreground border-border/50', icon: Library },
+function StatusBadge({ status, isAr }: { status: string; isAr: boolean }) {
+  const config: Record<string, { labelAr: string; labelEn: string; cls: string; icon: any }> = {
+    pending_review: { labelAr: 'بانتظار المراجعة', labelEn: 'Pending Review', cls: 'bg-amber-500/10 text-amber-700 border-amber-500/20 dark:text-amber-400', icon: Clock },
+    published:      { labelAr: 'منشورة',          labelEn: 'Published',      cls: 'bg-emerald-500/10 text-emerald-700 border-emerald-500/20 dark:text-emerald-400', icon: CheckCircle },
+    approved:       { labelAr: 'معتمدة',          labelEn: 'Approved',       cls: 'bg-emerald-500/10 text-emerald-700 border-emerald-500/20 dark:text-emerald-400', icon: CheckCircle },
+    rejected:       { labelAr: 'مرفوضة',          labelEn: 'Rejected',       cls: 'bg-rose-500/10 text-rose-700 border-rose-500/20 dark:text-rose-400', icon: XCircle },
+    draft:          { labelAr: 'مسودة',          labelEn: 'Draft',          cls: 'bg-muted text-muted-foreground border-border/50', icon: Library },
   }
   const c = config[status] || config.draft
   const Icon = c.icon
   return (
     <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-md border shadow-sm ${c.cls}`}>
       <Icon className="w-3.5 h-3.5" />
-      {c.label}
+      {isAr ? c.labelAr : c.labelEn}
     </span>
   )
 }

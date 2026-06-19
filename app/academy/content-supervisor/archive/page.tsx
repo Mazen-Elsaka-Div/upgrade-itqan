@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useI18n } from '@/lib/i18n/context'
 import Link from 'next/link'
 import {
-  Archive, Search, BookOpen, Users, User, Loader2, Sparkles, ArrowLeft
+  Archive, Search, BookOpen, Users, User, Loader2, Sparkles, ArrowLeft, ArrowRight
 } from 'lucide-react'
 
 interface ArchivedCourse {
@@ -53,7 +53,7 @@ export default function ContentSupervisorArchivePage() {
             href="/academy/content-supervisor"
             className="inline-flex items-center gap-1 text-sm font-semibold text-muted-foreground hover:text-primary transition-colors mb-2"
           >
-            <ArrowLeft className="w-4 h-4" />
+            {isAr ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
             {isAr ? 'العودة للوحة الإشراف' : 'Back to Dashboard'}
           </Link>
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
@@ -74,13 +74,13 @@ export default function ContentSupervisorArchivePage() {
       {/* Toolbar: Search */}
       <div className="bg-card border border-border/50 rounded-2xl shadow-sm p-4">
         <div className="relative">
-          <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+          <Search className={`absolute ${isAr ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground`} />
           <input
             type="text"
             placeholder={isAr ? 'ابحث بالعنوان أو الوصف...' : 'Search by title or description...'}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-background border border-border/50 rounded-xl px-4 py-3 pr-12 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all shadow-sm"
+            className={`w-full bg-background border border-border/50 rounded-xl px-4 py-3 ${isAr ? 'pr-12 pl-4' : 'pl-12 pr-4'} text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all shadow-sm`}
           />
         </div>
       </div>
@@ -100,7 +100,7 @@ export default function ContentSupervisorArchivePage() {
           </h3>
           <p className="text-sm text-muted-foreground max-w-sm">
             {searchDebounced 
-              ? (isAr ? 'لم نعثر على نتائج مطابقة לבحثك.' : 'No results matching your search.')
+              ? (isAr ? 'لم نعثر على نتائج مطابقة لبحثك.' : 'No results matching your search.')
               : (isAr ? 'يظهر الأرشيف الدورات المعطلة المتعلقة بتخصصك فقط.' : 'The archive only shows deactivated courses in your specialization.')}
           </p>
         </div>

@@ -1264,11 +1264,8 @@ export const ar = {
 
     // Student Sidebar
     sidebarSubmitTask: 'تسليم تلاوة',
-    sidebarMemorizationPaths: 'مسارات الحفظ',
-    sidebarTajweedPaths: 'مسارات التجويد',
     sidebarMyMushaf: 'مصحفي',
     sidebarMushafMap: 'خريطة مصحفي',
-    sidebarCompetitions: 'المسابقات',
     sidebarMyHalaqat: 'حلقاتي',
     sidebarMyPoints: 'نقاطي',
     sidebarMyBadges: 'أوسمتي',
@@ -2870,9 +2867,7 @@ export const ar = {
     lpNoMatchingResults: 'لا توجد نتائج تطابق الفلاتر الحالية',
     lpNoMatchingDesc: 'جرب تخفيف الفلاتر أو تغيير نص البحث للعثور على المسار المطلوب.',
     lpStagesUnit: '{count} مرحلة',
-    lpLegacy: 'قديم',
     lpNoDescription: 'لا يوجد وصف متوفر لهذا المسار حالياً.',
-    lpEnrolledLabel: 'المسجلون',
     lpAchievementLabel: 'الإنجاز',
     lpTablePath: 'المسار',
     lpTableCategory: 'التصنيف',
@@ -4146,7 +4141,6 @@ export const ar = {
     // Settings - Gamification Explanation
     gmExampleText1: 'مثال: إذا سجّل طالب تلاوة (',
     gmExampleText2: ' نقطة) وعنده Streak 7+ أيام، يحصل',
-    gmExamplePoints: ' نقطة',
     gmRangeFrom: 'من 0 إلى',
     gmRangeFromLabel: 'من',
     gmRangeTo: 'إلى',

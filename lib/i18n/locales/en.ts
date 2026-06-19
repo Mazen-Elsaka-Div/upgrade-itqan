@@ -1271,11 +1271,8 @@ export const en = {
 
     // Student Sidebar
     sidebarSubmitTask: 'Submit Recitation',
-    sidebarMemorizationPaths: 'Memorization Paths',
-    sidebarTajweedPaths: 'Tajweed Paths',
     sidebarMyMushaf: 'My Mushaf',
     sidebarMushafMap: 'Mushaf Progress Map',
-    sidebarCompetitions: 'Competitions',
     sidebarMyHalaqat: 'My Halaqat',
     sidebarMyPoints: 'My Points',
     sidebarMyBadges: 'My Badges',
@@ -2862,9 +2859,7 @@ export const en = {
     lpNoMatchingResults: 'No results match the current filters',
     lpNoMatchingDesc: 'Try relaxing the filters or changing the search text to find the path you need.',
     lpStagesUnit: '{count} stage | {count} stages',
-    lpLegacy: 'Legacy',
     lpNoDescription: 'No description available for this path currently.',
-    lpEnrolledLabel: 'Enrolled',
     lpAchievementLabel: 'Progress',
     lpTablePath: 'Path',
     lpTableCategory: 'Category',
@@ -4140,7 +4135,6 @@ export const en = {
     // Settings - Gamification Explanation
     gmExampleText1: 'Example: If a student scores a recitation (',
     gmExampleText2: ' points) and has a Streak of 7+ days, they get',
-    gmExamplePoints: ' points',
     gmRangeFrom: 'From 0 to',
     gmRangeFromLabel: 'From',
     gmRangeTo: 'to',

@@ -300,7 +300,7 @@ export default function AdminReadersPage() {
                                         {r.memorized_parts && (
                                           <>
                                             <span className="mx-2 opacity-30">·</span>
-                                            <span className="text-primary truncate">{a.bkgMemorizedParts.replace('{count}', String(r.memorized_parts))}}</span>
+                                            <span className="text-primary truncate">{a.bkgMemorizedParts.replace('{count}', String(r.memorized_parts))}</span>
                                           </>
                                         )}
                                     </p>
