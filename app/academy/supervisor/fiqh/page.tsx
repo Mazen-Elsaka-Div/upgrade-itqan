@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { HelpCircle, Clock, User, Filter, Eye, CheckCircle, Loader2, MessageSquare, AlertCircle, Sparkles } from 'lucide-react'
+import { useI18n } from '@/lib/i18n/context'
 
 interface FiqhQuestion {
   id: string
@@ -16,6 +17,8 @@ interface FiqhQuestion {
 }
 
 export default function SupervisorFiqhPage() {
+  const { t } = useI18n()
+  const a = t.admin
   const [questions, setQuestions] = useState<FiqhQuestion[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<string>('unanswered')
@@ -56,11 +59,11 @@ export default function SupervisorFiqhPage() {
             </div>
             <div>
               <h1 className="text-3xl md:text-4xl font-black text-foreground tracking-tight mb-2 flex items-center gap-3">
-                الأسئلة الفقهية
+{a.svfFiqhTitle}
                 <Sparkles className="w-6 h-6 text-amber-500" />
               </h1>
               <p className="text-muted-foreground font-medium max-w-lg">
-                مراجعة وتدقيق الإجابات الفقهية الموجهة للطلاب والإشراف العام على فتاوى المنصة.
+                {a.svfFiqhDesc}
               </p>
             </div>
           </div>
@@ -72,9 +75,9 @@ export default function SupervisorFiqhPage() {
               onChange={(e) => setFilter(e.target.value)}
               className="bg-transparent border-none text-sm font-bold text-foreground focus:outline-none focus:ring-0 cursor-pointer pr-8"
             >
-              <option value="unanswered">الأسئلة غير المُجابة</option>
-              <option value="answered">الأسئلة المُجابة</option>
-              <option value="all">عرض جميع الأسئلة</option>
+              <option value="unanswered">{a.svfUnansweredFilter}</option>
+              <option value="answered">{a.svfAnsweredFilter}</option>
+              <option value="all">{a.svfAllFilter}</option>
             </select>
           </div>
         </div>
@@ -83,9 +86,9 @@ export default function SupervisorFiqhPage() {
       {/* Stats Grid (Bento Style) */}
       <div className="grid grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-8 duration-500">
         {[
-          { label: 'بانتظار الإجابة', value: unanswered, color: 'text-amber-500', bg: 'bg-amber-500/10' },
-          { label: 'تمت الإجابة',     value: answered,   color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-          { label: 'منشور للعامة',    value: published,  color: 'text-primary', bg: 'bg-primary/10' },
+    { label: a.svfAwaitingAnswer, value: unanswered, color: 'text-amber-500', bg: 'bg-amber-500/10' },
+    { label: a.svfAnswered,     value: answered,   color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+    { label: a.svfPublishedPublic,    value: published,  color: 'text-primary', bg: 'bg-primary/10' },
         ].map(stat => (
           <div key={stat.label} className="group bg-card/60 backdrop-blur-xl border border-white/20 dark:border-white/5 rounded-[32px] p-6 hover:-translate-y-2 hover:scale-[1.02] transition-all duration-500 overflow-hidden relative shadow-lg shadow-black/5 text-center">
             <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent dark:from-white/5 opacity-50 pointer-events-none" />
@@ -108,10 +111,10 @@ export default function SupervisorFiqhPage() {
                 <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shadow-inner border border-primary/20">
                     <MessageSquare className="w-5 h-5 text-primary" />
                 </div>
-                <h3 className="font-black text-xl text-foreground">صندوق الأسئلة الفقهية</h3>
+                <h3 className="font-black text-xl text-foreground">{a.svfFiqhInbox}</h3>
             </div>
             <span className="text-sm font-bold text-muted-foreground bg-muted/50 px-4 py-1.5 rounded-lg border border-border">
-                {questions.length} سؤال
+                {questions.length} {a.svfQuestionsUnit}
             </span>
         </div>
 
@@ -119,15 +122,15 @@ export default function SupervisorFiqhPage() {
           {loading ? (
             <div className="flex flex-col items-center justify-center py-20 gap-4">
               <Loader2 className="w-10 h-10 animate-spin text-primary opacity-50" />
-              <p className="text-sm font-bold text-muted-foreground animate-pulse">جاري تحميل صندوق الأسئلة...</p>
+              <p className="text-sm font-bold text-muted-foreground animate-pulse">{a.svfLoadingInbox}</p>
             </div>
           ) : questions.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-24 text-center">
               <div className="w-24 h-24 bg-emerald-500/10 rounded-full flex items-center justify-center mb-6 shadow-inner border border-emerald-500/20">
                 <CheckCircle className="w-10 h-10 text-emerald-500 opacity-80" />
               </div>
-              <h3 className="text-2xl font-black text-foreground mb-2">الصندوق فارغ</h3>
-              <p className="text-muted-foreground font-medium">لا توجد أسئلة مطابقة للفلتر المختار حالياً.</p>
+              <h3 className="text-2xl font-black text-foreground mb-2">{a.svfEmptyInbox}</h3>
+              <p className="text-muted-foreground font-medium">{a.svfNoMatchingQuestions}</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4 animate-in fade-in slide-in-from-bottom-8 duration-700">
@@ -162,15 +165,15 @@ export default function SupervisorFiqhPage() {
                   <div className="flex flex-col items-center gap-3 shrink-0 relative z-10 w-full md:w-auto pt-4 md:pt-0 border-t md:border-t-0 border-border">
                     {q.answer !== null ? (
                       <span className="w-full text-center px-4 py-2 text-xs font-black uppercase tracking-widest rounded-xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 shadow-sm">
-                        تمت الإجابة
+                        {a.svfAnsweredLabel}
                       </span>
                     ) : (
                       <span className="w-full text-center flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-black uppercase tracking-widest rounded-xl bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 shadow-sm">
-                        <AlertCircle className="w-3.5 h-3.5" /> بانتظار الإجابة
+                        <AlertCircle className="w-3.5 h-3.5" /> {a.svfPendingLabel}
                       </span>
                     )}
                     <span className="w-full text-center px-6 py-2.5 rounded-xl bg-blue-500/10 text-blue-600 hover:bg-blue-500 hover:text-white transition-all font-bold text-sm shadow-sm flex items-center justify-center gap-2">
-                        <Eye className="w-4 h-4" /> عرض السؤال
+                        <Eye className="w-4 h-4" /> {a.svfViewQuestion}
                     </span>
                   </div>
                 </Link>

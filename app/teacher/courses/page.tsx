@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSession } from '@/lib/auth'
+import { useI18n } from '@/lib/i18n/context'
 
 interface Course {
   id: string
@@ -14,6 +15,8 @@ interface Course {
 }
 
 export default function TeacherCoursesPage() {
+  const { t } = useI18n()
+  const a = t.admin
   const router = useRouter()
   const [session, setSession] = useState<any>(null)
   const [courses, setCourses] = useState<Course[]>([])
@@ -99,7 +102,7 @@ export default function TeacherCoursesPage() {
         return
       }
 
-      setSuccess('تم إنشاء الدورة بنجاح!')
+      setSuccess(a.tchCoursesCreated)
       setFormData({ title: '', description: '', category: 'General' })
 
       // Refresh courses list
@@ -113,7 +116,7 @@ export default function TeacherCoursesPage() {
 
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
-      setError('حدث خطأ ما. يرجى المحاولة مرة أخرى.')
+      setError(a.tchCoursesError)
     } finally {
       setSubmitting(false)
     }
@@ -122,7 +125,7 @@ export default function TeacherCoursesPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
-        <div className="text-muted-foreground">جاري التحميل...</div>
+        <div className="text-muted-foreground">{a.tchCoursesLoading}</div>
       </div>
     )
   }
@@ -131,8 +134,8 @@ export default function TeacherCoursesPage() {
     <main className="min-h-screen bg-background text-foreground">
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">إدارة الدورات</h1>
-          <p className="text-gray-600 dark:text-gray-400">قم بإنشاء وإدارة دوراتك التعليمية</p>
+          <h1 className="text-4xl font-bold mb-2">{a.tchCoursesManage}</h1>
+          <p className="text-gray-600 dark:text-gray-400">{a.tchCoursesManageDesc}</p>
         </div>
 
         {/* Error Alert */}
@@ -153,35 +156,35 @@ export default function TeacherCoursesPage() {
           {/* Create Course Form */}
           <div className="lg:col-span-1">
             <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 sticky top-8">
-              <h2 className="text-xl font-semibold mb-6">إنشاء دورة جديدة</h2>
+              <h2 className="text-xl font-semibold mb-6">{a.tchCoursesNew}</h2>
               <form onSubmit={handleCreateCourse} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">عنوان الدورة</label>
+                  <label className="block text-sm font-medium mb-2">{a.tchCoursesTitle}</label>
                   <input
                     type="text"
                     name="title"
                     value={formData.title}
                     onChange={handleInputChange}
-                    placeholder="مثال: تعليم القرآن الكريم"
+                    placeholder={a.tchCoursesTitlePlaceholder}
                     required
                     className="w-full px-3 py-2 border border-border rounded-md bg-muted text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">الوصف</label>
+                  <label className="block text-sm font-medium mb-2">{a.tchCoursesDescription}</label>
                   <textarea
                     name="description"
                     value={formData.description}
                     onChange={handleInputChange}
-                    placeholder="اكتب وصفًا للدورة..."
+                    placeholder={a.tchCoursesDescPlaceholder}
                     rows={3}
                     className="w-full px-3 py-2 border border-border rounded-md bg-muted text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">الفئة</label>
+                  <label className="block text-sm font-medium mb-2">{a.tchCoursesCategory}</label>
                   <select
                     name="category"
                     value={formData.category}
@@ -200,7 +203,7 @@ export default function TeacherCoursesPage() {
                   disabled={submitting}
                   className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white font-medium py-2 px-4 rounded-md transition disabled:opacity-50"
                 >
-                  {submitting ? 'جاري الإنشاء...' : 'إنشاء دورة'}
+                  {submitting ? a.tchCoursesCreating : a.tchCoursesCreate}
                 </button>
               </form>
             </div>
@@ -208,11 +211,11 @@ export default function TeacherCoursesPage() {
 
           {/* Courses List */}
           <div className="lg:col-span-2">
-            <h2 className="text-2xl font-semibold mb-6">دوراتك</h2>
+            <h2 className="text-2xl font-semibold mb-6">{a.tchCoursesList}</h2>
 
             {courses.length === 0 ? (
               <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-8 text-center">
-                <p className="text-gray-600 dark:text-gray-400">لم تقم بإنشاء أي دورات بعد</p>
+                <p className="text-gray-600 dark:text-gray-400">{a.tchCoursesEmpty}</p>
               </div>
             ) : (
               <div className="grid gap-4">
@@ -236,7 +239,7 @@ export default function TeacherCoursesPage() {
                         {new Date(course.created_at).toLocaleDateString('ar-EG')}
                       </span>
                       <span className={`text-xs font-medium ${course.is_public ? 'text-green-600 dark:text-green-400' : 'text-gray-600 dark:text-gray-400'}`}>
-                        {course.is_public ? 'عام' : 'خاص'}
+                        {course.is_public ? a.tchCoursesPublic : a.tchCoursesPrivate}
                       </span>
                     </div>
                   </div>

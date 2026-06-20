@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { BarChart3, Users, Clock, Star, TrendingUp, AlertCircle, Download, CheckCircle, ArrowDownToLine, Award, Sparkles } from 'lucide-react'
+import { useI18n } from '@/lib/i18n/context'
 
 interface TeacherQuality {
     teacher_id: string
@@ -21,6 +22,8 @@ interface QualityStats {
 }
 
 export default function SupervisorQualityPage() {
+  const { t } = useI18n()
+  const a = t.admin
     const [stats, setStats] = useState<QualityStats | null>(null)
     const [loading, setLoading] = useState(true)
 
@@ -43,7 +46,7 @@ export default function SupervisorQualityPage() {
                         if (!teacherMap[tid]) {
                             teacherMap[tid] = {
                                 teacher_id: tid,
-                                teacher_name: course.teacher_name || 'غير محدد',
+                                teacher_name: course.teacher_name || a.svUnassigned,
                                 total_grades: 0,
                                 avg_grade: 0,
                                 avg_response_hours: 0,
@@ -79,15 +82,15 @@ export default function SupervisorQualityPage() {
                 <div className="absolute inset-0 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
                 <BarChart3 className="absolute inset-0 m-auto w-10 h-10 animate-spin text-primary opacity-50" />
             </div>
-            <p className="text-xl font-black text-muted-foreground animate-pulse">جاري جمع بيانات الجودة...</p>
+            <p className="text-xl font-black text-muted-foreground animate-pulse">{a.svqLoadingData}</p>
         </div>
     )
 
     const statCards = [
-        { label: 'إجمالي التقييمات', value: stats?.total_assessments || 0, icon: Star, color: 'text-yellow-500', bg: 'bg-yellow-500/10' },
-        { label: 'متوسط الدرجات', value: `${(stats?.average_grade || 0).toFixed(1)}%`, icon: TrendingUp, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-        { label: 'وقت الاستجابة (متوسط)', value: `${(stats?.average_response_time || 0).toFixed(1)} ساعة`, icon: Clock, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-        { label: 'إجمالي الشكاوى', value: stats?.total_complaints || 0, icon: AlertCircle, color: 'text-rose-500', bg: 'bg-rose-500/10' },
+    { label: a.svqTotalAssessments, value: stats?.total_assessments || 0, icon: Star, color: 'text-yellow-500', bg: 'bg-yellow-500/10' },
+    { label: a.svqAvgGrade, value: `${(stats?.average_grade || 0).toFixed(1)}%`, icon: TrendingUp, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+    { label: a.svqResponseTime, value: `${(stats?.average_response_time || 0).toFixed(1)} ${a.svqHours}`, icon: Clock, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+    { label: a.svqTotalComplaints, value: stats?.total_complaints || 0, icon: AlertCircle, color: 'text-rose-500', bg: 'bg-rose-500/10' },
     ]
 
     return (
@@ -108,18 +111,18 @@ export default function SupervisorQualityPage() {
                         </div>
                         <div>
                             <h1 className="text-3xl md:text-4xl font-black text-foreground tracking-tight mb-2 flex items-center gap-3">
-                                مراقبة الجودة
+                                {a.svqQualityMonitorFull}
                                 <Sparkles className="w-6 h-6 text-amber-500" />
                             </h1>
                             <p className="text-muted-foreground font-medium max-w-lg">
-                                لوحة تحليلية متكاملة لمتابعة الأداء العام للأكاديمية، جودة التقييمات، ومستويات الأساتذة.
+                                {a.svqQualityMonitorDesc}
                             </p>
                         </div>
                     </div>
                     
                     <button className="w-full md:w-auto px-6 py-4 rounded-2xl bg-primary text-primary-foreground font-black text-sm flex items-center justify-center gap-2 hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 hover:shadow-xl hover:-translate-y-1">
                         <ArrowDownToLine className="w-5 h-5" />
-                        تصدير التقرير
+                        {a.svqExportReport}
                     </button>
                 </div>
             </div>
@@ -154,14 +157,14 @@ export default function SupervisorQualityPage() {
                             <Users className="w-6 h-6 text-blue-500" />
                         </div>
                         <div>
-                            <h3 className="font-black text-xl text-foreground">سجل أداء الأساتذة</h3>
-                            <p className="text-xs font-bold text-muted-foreground mt-1">ترتيب وتقييم الأداء والمستوى التدريسي</p>
+                            <h3 className="font-black text-xl text-foreground">{a.svqTeacherPerformanceLog}</h3>
+                            <p className="text-xs font-bold text-muted-foreground mt-1">{a.svqTeacherPerformanceDesc}</p>
                         </div>
                     </div>
                     
                     <div className="flex items-center gap-2 bg-muted/50 px-4 py-2 rounded-xl border border-border shadow-inner">
                         <Award className="w-4 h-4 text-amber-500" />
-                        <span className="text-sm font-bold text-foreground">{stats?.teachers?.length || 0} أستاذ</span>
+                        <span className="text-sm font-bold text-foreground">{stats?.teachers?.length || 0} {a.svqTeachersCount}</span>
                     </div>
                 </div>
 
@@ -171,19 +174,19 @@ export default function SupervisorQualityPage() {
                             <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mb-6 border border-border shadow-inner">
                                 <Users className="w-8 h-8 text-muted-foreground opacity-50" />
                             </div>
-                            <p className="text-lg font-black text-foreground">لا توجد بيانات كافية للأساتذة</p>
-                            <p className="text-sm text-muted-foreground font-medium mt-2">ستظهر هنا تفاصيل الأداء عندما يتفاعل الأساتذة مع المنصة.</p>
+                            <p className="text-lg font-black text-foreground">{a.svqNoTeacherData}</p>
+                            <p className="text-sm text-muted-foreground font-medium mt-2">{a.svqNoTeacherDataDesc}</p>
                         </div>
                     ) : (
                         <div className="overflow-x-auto">
                             <table className="w-full text-sm whitespace-nowrap">
                                 <thead>
                                     <tr className="bg-black/5 dark:bg-white/5 border-b border-white/10 dark:border-white/5">
-                                        <th className="text-right p-5 font-black text-foreground tracking-wide">الاسم الكامل</th>
-                                        <th className="text-center p-5 font-black text-foreground tracking-wide">التقييمات</th>
-                                        <th className="text-center p-5 font-black text-foreground tracking-wide">متوسط الدرجات</th>
-                                        <th className="text-center p-5 font-black text-foreground tracking-wide">وقت الاستجابة</th>
-                                        <th className="text-center p-5 font-black text-foreground tracking-wide">حالة الشكاوى</th>
+                                        <th className="text-right p-5 font-black text-foreground tracking-wide">{a.svqFullName}</th>
+                                        <th className="text-center p-5 font-black text-foreground tracking-wide">{a.svqAssessments}</th>
+                                        <th className="text-center p-5 font-black text-foreground tracking-wide">{a.svqAvgGradeShort}</th>
+                                        <th className="text-center p-5 font-black text-foreground tracking-wide">{a.svqResponseTimeShort}</th>
+                                        <th className="text-center p-5 font-black text-foreground tracking-wide">{a.svqComplaintsStatus}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-border/50">
@@ -192,7 +195,7 @@ export default function SupervisorQualityPage() {
                                             <td className="p-5">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center font-black text-primary border border-primary/20 shadow-inner group-hover/row:scale-110 transition-transform">
-                                                        {teacher.teacher_name[0] || 'م'}
+                                                        {teacher.teacher_name[0] || a.svqInitialLetter}
                                                     </div>
                                                     <div>
                                                         <p className="font-bold text-foreground text-base group-hover/row:text-primary transition-colors">{teacher.teacher_name}</p>
@@ -213,19 +216,19 @@ export default function SupervisorQualityPage() {
                                             <td className="p-5 text-center">
                                                 <div className="flex items-center justify-center gap-2 text-foreground font-bold text-base">
                                                     <Clock className="w-4 h-4 text-muted-foreground" />
-                                                    {teacher.avg_response_hours.toFixed(1)} ساعة
+                                                    {teacher.avg_response_hours.toFixed(1)} {a.svqHours}
                                                 </div>
                                             </td>
                                             <td className="p-5 text-center">
                                                 {teacher.complaints_count > 0 ? (
                                                     <span className="inline-flex items-center gap-1.5 font-bold text-rose-700 bg-rose-500/10 px-3 py-1.5 rounded-xl border border-rose-500/20 dark:text-rose-400">
                                                         <AlertCircle className="w-4 h-4" />
-                                                        {teacher.complaints_count} شكوى
+                                                        {teacher.complaints_count} {a.svqComplaints}
                                                     </span>
                                                 ) : (
                                                     <span className="inline-flex items-center gap-1.5 font-bold text-emerald-700 bg-emerald-500/10 px-3 py-1.5 rounded-xl border border-emerald-500/20 dark:text-emerald-400">
                                                         <CheckCircle className="w-4 h-4" />
-                                                        سجل نظيف
+                                                        {a.svqCleanRecord}
                                                     </span>
                                                 )}
                                             </td>
@@ -244,9 +247,9 @@ export default function SupervisorQualityPage() {
                     <AlertCircle className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
-                    <p className="text-lg font-black text-blue-800 dark:text-blue-300 tracking-wide">بيانات للقراءة والمراقبة فقط</p>
+                    <p className="text-lg font-black text-blue-800 dark:text-blue-300 tracking-wide">{a.svqReadOnlyNote}</p>
                     <p className="text-sm font-bold text-blue-700/80 dark:text-blue-400/80 mt-1 max-w-2xl">
-                        تعكس هذه الصفحة مؤشرات الأداء بشكل حي ومباشر. لا يتم إجراء أي تعديلات على التقييمات من هذه الشاشة حفاظاً على شفافية الإحصائيات الأكاديمية.
+                        {a.svqReadOnlyDesc}
                     </p>
                 </div>
             </div>

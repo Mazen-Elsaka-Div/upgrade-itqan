@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Loader2, PlayCircle, Search, Users, Clock, Calendar, Filter } from 'lucide-react'
 import { VideoPlayerModal } from '@/components/video/video-player-modal'
+import { useI18n } from '@/lib/i18n/context'
 
 interface Recording {
   id: string
@@ -22,24 +23,18 @@ interface Recording {
   participants_count: number
 }
 
-const KIND_LABEL: Record<string, string> = {
-  halaqa: 'حلقة',
-  booking: 'جلسة فردية',
-  course_session: 'درس دورة',
-}
-
-function fmtDuration(seconds: number | null): string {
+function fmtDuration(seconds: number | null, a: any): string {
   if (!seconds || seconds <= 0) return '—'
   const m = Math.floor(seconds / 60)
   const h = Math.floor(m / 60)
   const rem = m % 60
-  if (h > 0) return `${h}س ${rem}د`
-  return `${m}د`
+  if (h > 0) return `${h}${a.recHour} ${rem}${a.recMinute}`
+  return `${m}${a.recMinute}`
 }
 
-function fmtDate(s: string) {
+function fmtDate(s: string, locale: string) {
   try {
-    return new Intl.DateTimeFormat('ar-EG', {
+    return new Intl.DateTimeFormat(locale === 'ar' ? 'ar-EG' : 'en-US', {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
@@ -52,6 +47,8 @@ function fmtDate(s: string) {
 }
 
 export default function RecordingsIndexPage() {
+  const { t, locale } = useI18n()
+  const a = t.admin
   const [data, setData] = useState<Recording[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -59,6 +56,12 @@ export default function RecordingsIndexPage() {
   const [kind, setKind] = useState<'all' | 'halaqa' | 'booking' | 'course_session'>('all')
   const [platform, setPlatform] = useState<'all' | 'academy' | 'maqraa'>('all')
   const [q, setQ] = useState('')
+
+  const kindLabels: Record<string, string> = {
+    halaqa: a.recHalaqa,
+    booking: a.recBooking,
+    course_session: a.recCourseSession,
+  }
 
   const load = useCallback(async () => {
     setError(null)
@@ -71,32 +74,31 @@ export default function RecordingsIndexPage() {
       const res = await fetch(`/api/video/recordings?${params.toString()}`)
       if (!res.ok) {
         const j = await res.json().catch(() => ({}))
-        throw new Error(j.error || 'فشل تحميل التسجيلات')
+        throw new Error(j.error || a.recLoadFailed)
       }
       const json = await res.json()
       setData(json.data || [])
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'حدث خطأ غير متوقع')
+      setError(e instanceof Error ? e.message : a.recUnexpectedError)
     } finally {
       setLoading(false)
     }
   }, [scope, kind, platform, q])
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { void load() }, [load])
 
   const filtered = useMemo(() => data, [data])
 
   return (
-    <div dir="rtl" className="min-h-screen bg-gradient-to-b from-zinc-50 to-white">
+    <div dir={locale === 'ar' ? 'rtl' : 'ltr'} className="min-h-screen bg-gradient-to-b from-zinc-50 to-white">
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <PlayCircle className="w-7 h-7 text-emerald-600" />
-            التسجيلات
+            {a.recTitle}
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            استعرض تسجيلات الجلسات السابقة. يظهر هنا التسجيلات التي قمت بحضورها أو بدأتها.
+            {a.recDesc}
           </p>
         </div>
 
@@ -108,7 +110,7 @@ export default function RecordingsIndexPage() {
                 <Input
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
-                  placeholder="بحث بالعنوان أو اسم المضيف..."
+                  placeholder={a.recSearchPlaceholder}
                   className="pr-9"
                 />
               </div>
@@ -118,27 +120,27 @@ export default function RecordingsIndexPage() {
                   onChange={(e) => setScope(e.target.value as 'mine' | 'admin')}
                   className="h-10 px-3 rounded-md border bg-background text-sm"
                 >
-                  <option value="mine">تسجيلاتي</option>
-                  <option value="admin">كل التسجيلات (إدارة)</option>
+                  <option value="mine">{a.recMyRecordings}</option>
+                  <option value="admin">{a.recAllRecordingsAdmin}</option>
                 </select>
                 <select
                   value={kind}
                   onChange={(e) => setKind(e.target.value as typeof kind)}
                   className="h-10 px-3 rounded-md border bg-background text-sm"
                 >
-                  <option value="all">كل الأنواع</option>
-                  <option value="halaqa">الحلقات</option>
-                  <option value="course_session">دروس الدورات</option>
-                  <option value="booking">الجلسات الفردية</option>
+                  <option value="all">{a.recAllTypes}</option>
+                  <option value="halaqa">{a.recHalaqat}</option>
+                  <option value="course_session">{a.recCourseLessons}</option>
+                  <option value="booking">{a.recPrivateSessions}</option>
                 </select>
                 <select
                   value={platform}
                   onChange={(e) => setPlatform(e.target.value as typeof platform)}
                   className="h-10 px-3 rounded-md border bg-background text-sm"
                 >
-                  <option value="all">كل المنصات</option>
-                  <option value="academy">الأكاديمية</option>
-                  <option value="maqraa">المقرأة</option>
+                  <option value="all">{a.recAllPlatforms}</option>
+                  <option value="academy">{a.recAcademyPlatform}</option>
+                  <option value="maqraa">{a.recMaqraaPlatform}</option>
                 </select>
               </div>
             </div>
@@ -153,7 +155,7 @@ export default function RecordingsIndexPage() {
           <Card>
             <CardContent className="py-10 text-center space-y-3">
               <p className="text-destructive font-medium">{error}</p>
-              <Button onClick={load}>إعادة المحاولة</Button>
+              <Button onClick={load}>{a.recRetry}</Button>
             </CardContent>
           </Card>
         ) : filtered.length === 0 ? (
@@ -162,8 +164,8 @@ export default function RecordingsIndexPage() {
               <div className="w-16 h-16 mx-auto rounded-2xl bg-muted grid place-items-center">
                 <Filter className="w-8 h-8 text-muted-foreground" />
               </div>
-              <h3 className="font-semibold">لا توجد تسجيلات</h3>
-              <p className="text-sm text-muted-foreground">جرّب تغيير عوامل التصفية أعلاه.</p>
+              <h3 className="font-semibold">{a.recNoRecordings}</h3>
+              <p className="text-sm text-muted-foreground">{a.recNoRecordingsDesc}</p>
             </CardContent>
           </Card>
         ) : (
@@ -171,7 +173,7 @@ export default function RecordingsIndexPage() {
             {filtered.map((r) => (
               <Card key={r.id} className="hover:shadow-lg transition-shadow overflow-hidden">
                 {r.recording_url ? (
-                  <VideoPlayerModal url={r.recording_url} title={r.title || KIND_LABEL[r.kind]}>
+                  <VideoPlayerModal url={r.recording_url} title={r.title || kindLabels[r.kind]}>
                     <button className="block aspect-video w-full bg-gradient-to-br from-emerald-500/10 to-blue-500/10 grid place-items-center group focus:outline-none">
                       <PlayCircle className="w-14 h-14 text-emerald-600 group-hover:scale-110 transition-transform" />
                     </button>
@@ -184,42 +186,42 @@ export default function RecordingsIndexPage() {
                 <CardContent className="pt-4 space-y-2.5">
                   <div className="flex items-start justify-between gap-2">
                     <h3 className="font-semibold truncate flex-1">
-                      {r.title || KIND_LABEL[r.kind]}
+                      {r.title || kindLabels[r.kind]}
                     </h3>
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-muted">
-                      {KIND_LABEL[r.kind]}
+                      {kindLabels[r.kind]}
                     </span>
                   </div>
                   <div className="space-y-1 text-xs text-muted-foreground">
                     <p className="flex items-center gap-1.5">
                       <Calendar className="w-3.5 h-3.5" />
-                      {fmtDate(r.started_at)}
+                      {fmtDate(r.started_at, locale)}
                     </p>
                     <p className="flex items-center gap-1.5">
                       <Clock className="w-3.5 h-3.5" />
-                      {fmtDuration(r.duration_seconds)}
+                      {fmtDuration(r.duration_seconds, a)}
                     </p>
                     <p className="flex items-center gap-1.5">
                       <Users className="w-3.5 h-3.5" />
-                      {r.participants_count} حاضر
+                      {r.participants_count} {a.recAttendees}
                     </p>
                     {r.started_by_name && (
                       <p className="text-muted-foreground/80 truncate">
-                        المضيف: {r.started_by_name}
+                        {a.recHost} {r.started_by_name}
                       </p>
                     )}
                   </div>
                   <div className="flex gap-2 pt-1">
                     {r.recording_url ? (
-                      <VideoPlayerModal url={r.recording_url} title={r.title || KIND_LABEL[r.kind]} />
+                      <VideoPlayerModal url={r.recording_url} title={r.title || kindLabels[r.kind]} />
                     ) : (
                       <Button size="sm" disabled className="flex-1">
-                        لا يوجد رابط
+                        {a.recNoLink}
                       </Button>
                     )}
                     {r.kind === 'course_session' && (
                       <Button asChild size="sm" variant="outline">
-                        <Link href={`/academy/student/sessions/${r.ref_id}`}>التفاصيل</Link>
+                        <Link href={`/academy/student/sessions/${r.ref_id}`}>{a.recDetails}</Link>
                       </Button>
                     )}
                   </div>

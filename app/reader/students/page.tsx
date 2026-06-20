@@ -8,6 +8,7 @@ import {
   Users, Search, Mail, BookOpen, Mic, Calendar,
   TrendingUp, CheckCircle2, Clock, Star, Route,
 } from 'lucide-react'
+import { useI18n } from '@/lib/i18n/context'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { SimpleListSkeleton } from '@/components/ui/skeletons'
@@ -31,6 +32,8 @@ interface Student {
 }
 
 export default function ReaderStudentsPage() {
+  const { t } = useI18n()
+  const a = t.admin
   const router = useRouter()
   const [students, setStudents] = useState<Student[]>([])
   const [loading, setLoading] = useState(true)
@@ -72,26 +75,26 @@ export default function ReaderStudentsPage() {
           <Users className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
         </div>
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-balance">طلابي</h1>
-          <p className="text-sm text-muted-foreground font-medium">
-            جميع الطلاب المرتبطين بك عبر التلاوات والجلسات والمسارات
-          </p>
+<h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-balance">{a.rdsMyStudents}</h1>
+            <p className="text-sm text-muted-foreground font-medium">
+              {a.rdsMyStudentsDesc}
+            </p>
         </div>
       </div>
 
       {/* Summary Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatTile icon={<Users className="w-5 h-5" />}        label="إجمالي الطلاب"         value={summary.total}              tint="emerald" />
-        <StatTile icon={<Mic className="w-5 h-5" />}          label="تلاوات معلقة"           value={summary.pendingRecitations} tint="amber" />
-        <StatTile icon={<TrendingUp className="w-5 h-5" />}   label="آيات هذا الأسبوع"       value={summary.weekVerses}         tint="blue" />
-        <StatTile icon={<Calendar className="w-5 h-5" />}     label="إجمالي الجلسات"         value={summary.totalSessions}      tint="violet" />
+        <StatTile icon={<Users className="w-5 h-5" />}        label={a.rdsTotalStudents}         value={summary.total}              tint="emerald" />
+        <StatTile icon={<Mic className="w-5 h-5" />}          label={a.rdsPendingRecitations}           value={summary.pendingRecitations} tint="amber" />
+        <StatTile icon={<TrendingUp className="w-5 h-5" />}   label={a.rdsWeeklyVerses}       value={summary.weekVerses}         tint="blue" />
+        <StatTile icon={<Calendar className="w-5 h-5" />}     label={a.rdsTotalSessions}         value={summary.totalSessions}      tint="violet" />
       </div>
 
       {/* Search */}
       <div className="relative max-w-md">
         <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
         <Input
-          placeholder="ابحث بالاسم أو البريد الإلكتروني..."
+          placeholder={a.rdsSearchPlaceholder}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="pr-11 h-12 rounded-xl bg-card"
@@ -143,9 +146,9 @@ export default function ReaderStudentsPage() {
                 {/* Weekly progress bar */}
                 <div>
                   <div className="flex items-center justify-between text-xs font-bold mb-1.5">
-                    <span className="text-muted-foreground">آيات هذا الأسبوع</span>
+                    <span className="text-muted-foreground">{a.rdsWeeklyVersesShort}</span>
                     <span className="text-emerald-600 dark:text-emerald-400">
-                      {s.week_new_verses} جديدة · {s.week_revised_verses} مراجعة
+                      {s.week_new_verses} {a.rdsNewVerses} · {s.week_revised_verses} {a.rdsRevisedVerses}
                     </span>
                   </div>
                   <div className="h-2 rounded-full bg-muted overflow-hidden">
@@ -158,10 +161,10 @@ export default function ReaderStudentsPage() {
 
                 {/* Mini stats */}
                 <div className="grid grid-cols-4 gap-2">
-                  <MiniStat icon={<Mic className="w-4 h-4" />}         label="تلاوات"   value={s.total_recitations} />
-                  <MiniStat icon={<Calendar className="w-4 h-4" />}     label="جلسات"    value={s.total_sessions} />
-                  <MiniStat icon={<Star className="w-4 h-4" />}         label="نشاط/30"  value={s.active_days_30} />
-                  <MiniStat icon={<Route className="w-4 h-4" />}        label="مسارات"   value={s.tajweed_paths + s.memorization_paths} />
+                  <MiniStat icon={<Mic className="w-4 h-4" />}         label={a.rdsRecitations}   value={s.total_recitations} />
+                  <MiniStat icon={<Calendar className="w-4 h-4" />}     label={a.rdsSessions}    value={s.total_sessions} />
+                  <MiniStat icon={<Star className="w-4 h-4" />}         label={a.rdsActivity30}  value={s.active_days_30} />
+                  <MiniStat icon={<Route className="w-4 h-4" />}        label={a.rdsPaths}   value={s.tajweed_paths + s.memorization_paths} />
                 </div>
 
                 {/* Actions */}
@@ -173,7 +176,7 @@ export default function ReaderStudentsPage() {
                     onClick={(e) => { e.stopPropagation(); router.push(`/reader/recitations?studentId=${s.student_id}`) }}
                   >
                     <Mic className="w-4 h-4 ml-1.5" />
-                    التلاوات
+{a.rdsRecitations}
                   </Button>
                   <Button
                     size="sm"
@@ -181,7 +184,7 @@ export default function ReaderStudentsPage() {
                     onClick={(e) => { e.stopPropagation(); router.push(`/reader/chat?studentId=${s.student_id}`) }}
                   >
                     <Mail className="w-4 h-4 ml-1.5" />
-                    مراسلة
+                    {a.rdsMessage}
                   </Button>
                 </div>
               </CardContent>
@@ -195,16 +198,16 @@ export default function ReaderStudentsPage() {
               <Users className="w-8 h-8 text-muted-foreground opacity-50" />
             </div>
             <h3 className="font-bold text-lg mb-1">
-              {search ? 'لا توجد نتائج مطابقة' : 'لا يوجد طلاب بعد'}
+              {search ? a.rdsNoResults : a.rdsNoStudents}
             </h3>
             <p className="text-muted-foreground text-sm mb-4 max-w-xs">
               {search
-                ? 'جرّب البحث بكلمة مختلفة أو امسح حقل البحث.'
-                : 'سيظهر هنا الطلاب المرتبطين بك عبر التلاوات أو الجلسات أو المسارات.'}
+                ? a.rdsNoResultsHint
+                : a.rdsNoStudentsHint}
             </p>
             {search && (
               <Button variant="outline" className="rounded-xl" onClick={() => setSearch('')}>
-                مسح البحث
+                {a.rdsClearSearch}
               </Button>
             )}
           </CardContent>

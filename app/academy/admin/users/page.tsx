@@ -354,23 +354,23 @@ export default function AdminUsersPage() {
                           </Badge>
                         ) : user.role === 'academy_admin' ? (
                           <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 font-black text-[10px] uppercase tracking-widest rounded-lg pointer-events-none">
-                            أدمن أكاديمية
+                            {a.auRoleAdmin}
                           </Badge>
                         ) : user.role === 'supervisor' ? (
                           <Badge className="bg-purple-500/10 text-purple-400 border-purple-500/20 font-black text-[10px] uppercase tracking-widest rounded-lg pointer-events-none">
-                            مشرف عام
+                            {a.auRoleSupervisor}
                           </Badge>
                         ) : user.role === 'content_supervisor' ? (
                           <Badge className="bg-orange-500/10 text-orange-400 border-orange-500/20 font-black text-[10px] uppercase tracking-widest rounded-lg pointer-events-none">
-                            مشرف محتوى
+                            {a.auRoleContentSupervisor}
                           </Badge>
                         ) : user.role === 'fiqh_supervisor' ? (
                           <Badge className="bg-pink-500/10 text-pink-400 border-pink-500/20 font-black text-[10px] uppercase tracking-widest rounded-lg pointer-events-none">
-                            مشرف فقه
+                            {a.auRoleFiqhSupervisor}
                           </Badge>
                         ) : user.role === 'quality_supervisor' ? (
                           <Badge className="bg-rose-500/10 text-rose-400 border-rose-500/20 font-black text-[10px] uppercase tracking-widest rounded-lg pointer-events-none">
-                            مشرف جودة
+                            {a.auRoleQualitySupervisor}
                           </Badge>
                         ) : user.role === 'reader' ? (
                           <Badge className="bg-purple-500/10 text-purple-400 border-purple-500/20 font-black text-[10px] uppercase tracking-widest rounded-lg pointer-events-none">
@@ -563,11 +563,11 @@ export default function AdminUsersPage() {
                     <option value="parent">{a.usersParent}</option>
                     <option value="teacher">{a.usersTeacher}</option>
                     <option value="admin">{a.usersAdmin}</option>
-                    <option value="academy_admin">أدمن أكاديمية</option>
-                    <option value="supervisor">مشرف عام</option>
-                    <option value="content_supervisor">مشرف محتوى</option>
-                    <option value="fiqh_supervisor">مشرف فقه</option>
-                    <option value="quality_supervisor">مشرف جودة</option>
+                    <option value="academy_admin">{a.auRoleAdmin}</option>
+                    <option value="supervisor">{a.auRoleSupervisor}</option>
+                    <option value="content_supervisor">{a.auRoleContentSupervisor}</option>
+                    <option value="fiqh_supervisor">{a.auRoleFiqhSupervisor}</option>
+                    <option value="quality_supervisor">{a.auRoleQualitySupervisor}</option>
                   </>
                 )}
               </select>
@@ -643,11 +643,11 @@ export default function AdminUsersPage() {
                     <option value="parent">{a.usersParent}</option>
                     <option value="teacher">{a.usersTeacher}</option>
                     <option value="admin">{a.usersAdmin}</option>
-                    <option value="academy_admin">أدمن أكاديمية</option>
-                    <option value="supervisor">مشرف عام</option>
-                    <option value="content_supervisor">مشرف محتوى</option>
-                    <option value="fiqh_supervisor">مشرف فقه</option>
-                    <option value="quality_supervisor">مشرف جودة</option>
+                    <option value="academy_admin">{a.auRoleAdmin}</option>
+                    <option value="supervisor">{a.auRoleSupervisor}</option>
+                    <option value="content_supervisor">{a.auRoleContentSupervisor}</option>
+                    <option value="fiqh_supervisor">{a.auRoleFiqhSupervisor}</option>
+                    <option value="quality_supervisor">{a.auRoleQualitySupervisor}</option>
                   </>
                 )}
               </select>

@@ -8,6 +8,7 @@ import {
   ShieldCheck, ArrowRight, Sparkles, AlertCircle
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useI18n } from '@/lib/i18n/context'
 
 interface Stats {
   total: number
@@ -28,6 +29,8 @@ interface RecentQuestion {
 }
 
 export default function FiqhSupervisorDashboard() {
+  const { t } = useI18n()
+  const a = t.admin
   const [stats, setStats] = useState<Stats>({ total: 0, unanswered: 0, answered: 0, published: 0 })
   const [recent, setRecent] = useState<RecentQuestion[]>([])
   const [loading, setLoading] = useState(true)
@@ -70,10 +73,10 @@ export default function FiqhSupervisorDashboard() {
   const answerRate = stats.total > 0 ? Math.round((stats.answered / stats.total) * 100) : 0
 
   const statCards = [
-    { label: 'إجمالي الأسئلة', value: stats.total, icon: HelpCircle, color: 'text-primary', bg: 'bg-primary/10', border: 'border-primary/20', shadow: 'shadow-primary/10' },
-    { label: 'تنتظر الإجابة', value: stats.unanswered, icon: Clock, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20', shadow: 'shadow-amber-500/10' },
-    { label: 'تمت الإجابة', value: stats.answered, icon: CheckCircle, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', shadow: 'shadow-emerald-500/10' },
-    { label: 'منشورة للعموم', value: stats.published, icon: Globe, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20', shadow: 'shadow-blue-500/10' },
+    { label: a.fsqTotalQuestionsShort, value: stats.total, icon: HelpCircle, color: 'text-primary', bg: 'bg-primary/10', border: 'border-primary/20', shadow: 'shadow-primary/10' },
+    { label: a.fsqAwaitingAnswer, value: stats.unanswered, icon: Clock, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20', shadow: 'shadow-amber-500/10' },
+    { label: a.fsqAnswered, value: stats.answered, icon: CheckCircle, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', shadow: 'shadow-emerald-500/10' },
+    { label: a.fsqPublished, value: stats.published, icon: Globe, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20', shadow: 'shadow-blue-500/10' },
   ]
 
   return (
@@ -88,16 +91,14 @@ export default function FiqhSupervisorDashboard() {
         <div className="space-y-3 relative z-10">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-primary/10 border border-primary/20 text-primary mb-2 shadow-inner">
             <ShieldCheck className="w-5 h-5" />
-            <span className="text-sm font-bold tracking-wide uppercase">لوحة مشرف الفقه</span>
+            <span className="text-sm font-bold tracking-wide uppercase">{a.fsqDashboard}</span>
           </div>
           <h1 className="text-4xl md:text-5xl font-black text-foreground tracking-tight leading-tight flex flex-col gap-2">
-            مرحباً، 
-            <span className="bg-clip-text text-transparent bg-gradient-to-l from-primary via-blue-600 to-primary animate-gradient-x">
-              {supervisorName || 'أيها المشرف'}
-            </span>
-          </h1>
-          <p className="text-muted-foreground/80 font-medium max-w-2xl text-lg leading-relaxed">
-            مرحباً بك في مساحتك المخصصة. يمكنك هنا مراجعة أسئلة الطلاب، تقديم الإجابات الفقهية المعتمدة، وإدارة الفتاوى المنشورة.
+            {a.fsqWelcome} 
+
+              {supervisorName || a.fsqWelcomeName}
+
+            {a.fsqDashboardDesc}
           </p>
         </div>
       </div>
@@ -109,7 +110,7 @@ export default function FiqhSupervisorDashboard() {
             <div className="absolute inset-0 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
             <Loader2 className="absolute inset-0 m-auto w-8 h-8 animate-spin text-primary opacity-50" />
           </div>
-          <p className="text-lg font-bold text-muted-foreground animate-pulse">جاري تحميل بيانات اللوحة...</p>
+          <p className="text-lg font-bold text-muted-foreground animate-pulse">{a.fsqLoadingDashboard}</p>
         </div>
       ) : (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700">
@@ -154,7 +155,7 @@ export default function FiqhSupervisorDashboard() {
                   <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20">
                     <BarChart3 className="w-6 h-6 text-primary" />
                   </div>
-                  <span className="text-lg font-black text-foreground">معدل الإنجاز</span>
+                  <span className="text-lg font-black text-foreground">{a.fsqCompletionRate}</span>
                 </div>
                 
                 <div className="flex items-end justify-between mb-4 relative z-10">
@@ -162,7 +163,7 @@ export default function FiqhSupervisorDashboard() {
                     {answerRate}%
                   </span>
                   <span className="text-sm font-bold text-muted-foreground mb-2">
-                    {stats.answered} / {stats.total} سؤال
+                    {stats.answered} / {stats.total} {a.fsqQuestionsUnit}
                   </span>
                 </div>
                 
@@ -180,9 +181,9 @@ export default function FiqhSupervisorDashboard() {
                   <div className="flex items-start gap-3">
                     <Sparkles className="w-5 h-5 text-primary shrink-0 mt-0.5" />
                     <p className="text-xs text-primary/80 font-bold leading-relaxed">
-                      {answerRate >= 90 ? 'أداء ممتاز! واصل هذا المجهود الرائع في إجابة أسئلة الطلاب.' 
-                       : answerRate >= 50 ? 'أداء جيد، هناك المزيد من الأسئلة في انتظار خبرتك.' 
-                       : 'يوجد العديد من الأسئلة التي تحتاج إلى إجابتك، حاول تفقد صندوق الوارد قريباً.'}
+                    {answerRate >= 90 ? a.fsqExcellentPerformance
+                     : answerRate >= 50 ? a.fsqGoodPerformance
+                     : a.fsqNeedsAttention}
                     </p>
                   </div>
                 </div>
@@ -200,8 +201,8 @@ export default function FiqhSupervisorDashboard() {
                       <TrendingUp className="w-6 h-6 text-amber-600 dark:text-amber-400" />
                     </div>
                     <div>
-                      <h2 className="font-black text-foreground text-xl">آخر الأسئلة</h2>
-                      <p className="text-xs font-semibold text-muted-foreground mt-1">أسئلة وردت مؤخراً تحتاج لاهتمامك</p>
+                      <h2 className="font-black text-foreground text-xl">{a.fsqLatestQuestions}</h2>
+                      <p className="text-xs font-semibold text-muted-foreground mt-1">{a.fsqLatestQuestionsDesc}</p>
                     </div>
                   </div>
                   
@@ -209,7 +210,7 @@ export default function FiqhSupervisorDashboard() {
                     href="/academy/fiqh-supervisor/questions"
                     className="mt-4 sm:mt-0 text-sm font-bold text-primary bg-primary/10 hover:bg-primary/20 px-6 py-3 rounded-2xl transition-all flex items-center justify-center gap-2 group/btn"
                   >
-                    عرض الصندوق
+                    {a.fsqViewInbox}
                     <ArrowLeft className="w-4 h-4 group-hover/btn:-translate-x-1 transition-transform" />
                   </Link>
                 </div>
@@ -220,9 +221,9 @@ export default function FiqhSupervisorDashboard() {
                       <div className="w-20 h-20 bg-muted/50 rounded-full flex items-center justify-center mb-6 shadow-inner border border-white/10">
                         <CheckCircle className="w-8 h-8 text-muted-foreground opacity-50" />
                       </div>
-                      <p className="text-lg font-black text-foreground">لا توجد أسئلة حالياً</p>
-                      <p className="text-sm text-muted-foreground font-medium mt-2 max-w-sm">
-                        صندوق الأسئلة فارغ، يبدو أنك أجبت على كل شيء!
+<p className="text-lg font-black text-foreground">{a.fsqNoQuestionsYet}</p>
+                        <p className="text-sm text-muted-foreground mt-2">
+                          {a.fsqNoQuestionsDesc}
                       </p>
                     </div>
                   ) : (
@@ -250,7 +251,7 @@ export default function FiqhSupervisorDashboard() {
                             <div className="flex flex-wrap items-center gap-3 mt-2 text-[11px] font-bold text-muted-foreground">
                               <span className="flex items-center gap-1.5 bg-muted/50 px-2.5 py-1 rounded-lg border border-border">
                                 <User className="w-3 h-3" />
-                                {q.is_anonymous ? 'سائل مجهول' : q.asker_name || '—'}
+                                {q.is_anonymous ? a.fsqAnonymous : q.asker_name || '—'}
                               </span>
                               {q.category_name_ar && (
                                 <span className="bg-primary/10 text-primary px-2.5 py-1 rounded-lg border border-primary/20 flex items-center gap-1.5">
@@ -267,7 +268,7 @@ export default function FiqhSupervisorDashboard() {
                                 ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20'
                                 : 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20'
                             }`}>
-                              {q.answer !== null ? 'مُجاب' : 'بانتظار الإجابة'}
+                              {q.answer !== null ? a.fsqAnsweredLabel : a.fsqPendingLabel}
                             </span>
                             <span className="text-[10px] text-muted-foreground font-semibold px-2">
                               {new Date(q.asked_at).toLocaleDateString('ar-EG', { month: 'short', day: 'numeric' })}

@@ -8,6 +8,7 @@ import {
   ShieldCheck, Sparkles
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useI18n } from '@/lib/i18n/context'
 
 interface Stats {
   pendingLessons: number
@@ -28,6 +29,8 @@ interface PendingLesson {
 const typeIcon: Record<string, any> = { video: Video, audio: Mic, text: FileText }
 
 export default function AcademySupervisorDashboard() {
+  const { t } = useI18n()
+  const a = t.admin
   const [stats, setStats] = useState<Stats>({ pendingLessons: 0, totalLessons: 0, fiqhUnanswered: 0, fiqhTotal: 0 })
   const [recentLessons, setRecentLessons] = useState<PendingLesson[]>([])
   const [loading, setLoading] = useState(true)
@@ -54,7 +57,7 @@ export default function AcademySupervisorDashboard() {
                   id: lesson.id,
                   title: lesson.title,
                   course_name: course.title,
-                  teacher_name: course.teacher_name || 'غير محدد',
+                  teacher_name: course.teacher_name || a.svUnassigned,
                   type: lesson.type || 'text',
                   created_at: lesson.created_at,
                 })
@@ -89,17 +92,17 @@ export default function AcademySupervisorDashboard() {
   }, [])
 
   const statCards = [
-    { label: 'دروس تنتظر المراجعة', value: stats.pendingLessons, icon: Clock, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20', href: '/academy/supervisor/content' },
-    { label: 'إجمالي الدروس', value: stats.totalLessons, icon: BookOpen, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20', href: '/academy/supervisor/content' },
-    { label: 'أسئلة فقهية معلقة', value: stats.fiqhUnanswered, icon: HelpCircle, color: 'text-rose-600 dark:text-rose-400', bg: 'bg-rose-500/10', border: 'border-rose-500/20', href: '/academy/fiqh-supervisor/questions' },
-    { label: 'إجمالي الأسئلة', value: stats.fiqhTotal, icon: CheckCircle, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', href: '/academy/fiqh-supervisor/questions' },
+    { label: a.svqPendingReviews, value: stats.pendingLessons, icon: Clock, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20', href: '/academy/supervisor/content' },
+    { label: a.svTotalLessons, value: stats.totalLessons, icon: BookOpen, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20', href: '/academy/supervisor/content' },
+    { label: a.svPendingFiqh, value: stats.fiqhUnanswered, icon: HelpCircle, color: 'text-rose-600 dark:text-rose-400', bg: 'bg-rose-500/10', border: 'border-rose-500/20', href: '/academy/fiqh-supervisor/questions' },
+    { label: a.svTotalQuestions, value: stats.fiqhTotal, icon: CheckCircle, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', href: '/academy/fiqh-supervisor/questions' },
   ]
 
   const quickLinks = [
-    { href: '/academy/supervisor/content', label: 'إشراف المحتوى', desc: 'مراجعة واعتماد الدروس والمناهج', icon: BookOpen, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-    { href: '/academy/fiqh-supervisor/questions', label: 'الأسئلة الفقهية', desc: 'متابعة الإجابات الفقهية واعتمادها', icon: HelpCircle, color: 'text-rose-500', bg: 'bg-rose-500/10' },
-    { href: '/academy/supervisor/teachers', label: 'توثيق المدرسين', desc: 'مراجعة طلبات التوثيق والملفات', icon: UserCheck, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-    { href: '/academy/supervisor/quality', label: 'مراقبة الجودة', desc: 'متابعة الأداء العام والتقييمات', icon: BarChart3, color: 'text-purple-500', bg: 'bg-purple-500/10' },
+    { href: '/academy/supervisor/content', label: a.svContentSupervision, desc: a.svContentSupervisionDesc, icon: BookOpen, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+    { href: '/academy/fiqh-supervisor/questions', label: a.svFiqhQuestions, desc: a.svFiqhQuestionsDesc, icon: HelpCircle, color: 'text-rose-500', bg: 'bg-rose-500/10' },
+    { href: '/academy/supervisor/teachers', label: a.svTeacherVerification, desc: a.svTeacherVerificationDesc, icon: UserCheck, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+    { href: '/academy/supervisor/quality', label: a.svQualityMonitorShort, desc: a.svQualityMonitorDesc, icon: BarChart3, color: 'text-purple-500', bg: 'bg-purple-500/10' },
   ]
 
   return (
@@ -115,16 +118,16 @@ export default function AcademySupervisorDashboard() {
         <div className="space-y-3 relative z-10">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-primary/10 border border-primary/20 text-primary mb-2 shadow-inner">
             <ShieldCheck className="w-5 h-5" />
-            <span className="text-sm font-bold tracking-wide uppercase">لوحة المشرف العام</span>
+            <span className="text-sm font-bold tracking-wide uppercase">{a.svGeneralSupervisor}</span>
           </div>
           <h1 className="text-4xl md:text-5xl font-black text-foreground tracking-tight leading-tight flex flex-col gap-2">
-            مرحباً، 
-            <span className="bg-clip-text text-transparent bg-gradient-to-l from-primary via-blue-600 to-primary animate-gradient-x">
-              {name || 'أيها المشرف'}
+            {a.svWelcome} 
+
+              {name || a.svWelcomeName}
             </span>
           </h1>
           <p className="text-muted-foreground/80 font-medium max-w-2xl text-lg leading-relaxed">
-            نظرة عامة وشاملة على مهام الإدارة العليا للأكاديمية، مراجعة المحتوى التعليمي، الإشراف على الفتاوى، وضمان الجودة.
+            {a.svOverviewDesc}
           </p>
         </div>
       </div>
@@ -136,7 +139,7 @@ export default function AcademySupervisorDashboard() {
             <div className="absolute inset-0 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
             <Loader2 className="absolute inset-0 m-auto w-8 h-8 animate-spin text-primary opacity-50" />
           </div>
-          <p className="text-lg font-bold text-muted-foreground animate-pulse">جاري تحميل بيانات اللوحة...</p>
+          <p className="text-lg font-bold text-muted-foreground animate-pulse">{a.svLoadingDashboard}</p>
         </div>
       ) : (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700">
@@ -175,7 +178,7 @@ export default function AcademySupervisorDashboard() {
             <div className="lg:col-span-1 flex flex-col gap-4">
               <h3 className="font-black text-xl px-2 flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-amber-500" />
-                الوصول السريع
+                {a.svQuickAccess}
               </h3>
               <div className="grid grid-cols-1 gap-4">
                 {quickLinks.map(({ href, label, desc, icon: Icon, color, bg }) => (
@@ -209,12 +212,12 @@ export default function AcademySupervisorDashboard() {
                       <TrendingUp className="w-6 h-6 text-amber-600 dark:text-amber-400" />
                     </div>
                     <div>
-                      <h2 className="font-black text-foreground text-xl">دروس تنتظر المراجعة</h2>
-                      <p className="text-xs font-semibold text-muted-foreground mt-1">المحتوى التعليمي المرفوع مؤخراً</p>
+                      <h2 className="font-black text-foreground text-xl">{a.svPendingLessonsTitle}</h2>
+                      <p className="text-xs font-semibold text-muted-foreground mt-1">{a.svPendingLessonsDesc}</p>
                     </div>
                   </div>
                   <Link href="/academy/supervisor/content" className="text-sm font-bold text-primary hover:text-primary/80 bg-primary/10 hover:bg-primary/20 px-5 py-2.5 rounded-xl transition-all flex items-center gap-2 group/btn">
-                    عرض الكل
+                    {a.svViewAll}
                     <ArrowLeft className="w-4 h-4 group-hover/btn:-translate-x-1 transition-transform" />
                   </Link>
                 </div>
@@ -225,9 +228,9 @@ export default function AcademySupervisorDashboard() {
                       <div className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mb-6 shadow-inner border border-emerald-500/20">
                         <CheckCircle className="w-8 h-8 text-emerald-500 opacity-80" />
                       </div>
-                      <p className="text-lg font-black text-foreground">لا توجد دروس معلقة</p>
-                      <p className="text-sm text-muted-foreground font-medium mt-2 max-w-sm">
-                        لقد تمت مراجعة جميع الدروس المرفوعة. أحسنت عملاً!
+<p className="text-lg font-black text-foreground">{a.svNoPendingLessons}</p>
+                        <p className="text-sm text-muted-foreground mt-2">
+                          {a.svNoPendingLessonsDesc}
                       </p>
                     </div>
                   ) : (
@@ -253,7 +256,7 @@ export default function AcademySupervisorDashboard() {
                               </div>
                             </div>
                             <span className="shrink-0 px-4 py-1.5 text-[11px] font-black uppercase tracking-widest rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400">
-                              قيد المراجعة
+                              {a.svUnderReview}
                             </span>
                           </Link>
                         )

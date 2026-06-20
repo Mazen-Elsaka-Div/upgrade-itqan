@@ -8,6 +8,7 @@ import {
   Users, Search, Mail, Award, UserPlus, BookOpen,
   TrendingUp, CheckCircle2, ArrowLeft, Sparkles,
 } from 'lucide-react'
+import { useI18n } from '@/lib/i18n/context'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { PageLoadingSkeleton } from '@/components/ui/page-loading-skeleton'
@@ -27,6 +28,8 @@ interface Student {
 }
 
 export default function TeacherStudentsPage() {
+  const { t } = useI18n()
+  const a = t.admin
   const router = useRouter()
   const [students, setStudents] = useState<Student[]>([])
   const [loading, setLoading] = useState(true)
@@ -85,33 +88,33 @@ export default function TeacherStudentsPage() {
             <Users className="w-6 h-6 text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-balance">الطلاب</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-balance">{a.tchsStudents}</h1>
             <p className="text-sm text-muted-foreground font-medium">
-              إدارة ومتابعة طلابك في الأكاديمية
+              {a.tchsStudentsDesc}
             </p>
           </div>
         </div>
         <Link href="/academy/teacher/students/create">
           <Button className="flex items-center gap-2 rounded-xl font-bold shadow-sm">
             <UserPlus className="w-4 h-4" />
-            إضافة طالب جديد
+            {a.tchsAddStudent}
           </Button>
         </Link>
       </div>
 
       {/* Summary Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatTile icon={<Users className="w-5 h-5" />} label="إجمالي الطلاب" value={summary.total} tint="primary" />
-        <StatTile icon={<BookOpen className="w-5 h-5" />} label="إجمالي التسجيلات" value={summary.totalCourses} tint="blue" />
-        <StatTile icon={<TrendingUp className="w-5 h-5" />} label="متوسط التقدم" value={`${summary.avgProgress}%`} tint="green" />
-        <StatTile icon={<Award className="w-5 h-5" />} label="الشارات الممنوحة" value={summary.totalBadges} tint="amber" />
+        <StatTile icon={<Users className="w-5 h-5" />} label={a.tchsTotalStudents} value={summary.total} tint="primary" />
+        <StatTile icon={<BookOpen className="w-5 h-5" />} label={a.tchsTotalEnrollments} value={summary.totalCourses} tint="blue" />
+        <StatTile icon={<TrendingUp className="w-5 h-5" />} label={a.tchsAvgProgress} value={`${summary.avgProgress}%`} tint="green" />
+        <StatTile icon={<Award className="w-5 h-5" />} label={a.tchsBadgesAwarded} value={summary.totalBadges} tint="amber" />
       </div>
 
       {/* Search */}
       <div className="relative max-w-md">
         <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
         <Input
-          placeholder="ابحث بالاسم أو البريد الإلكتروني..."
+          placeholder={a.tchsSearchPlaceholder}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="pr-11 h-12 rounded-xl bg-card"
@@ -152,7 +155,7 @@ export default function TeacherStudentsPage() {
                     {student.badges_count > 0 && (
                       <span className="inline-flex items-center gap-1 mt-1 text-[11px] font-medium text-amber-600 dark:text-amber-400">
                         <Award className="w-3 h-3" />
-                        {student.badges_count} شارة
+                        {student.badges_count} {a.tchsBadges}
                       </span>
                     )}
                   </div>
@@ -161,7 +164,7 @@ export default function TeacherStudentsPage() {
                 {/* Progress bar */}
                 <div>
                   <div className="flex items-center justify-between text-xs font-bold mb-1.5">
-                    <span className="text-muted-foreground">نسبة التقدم</span>
+                    <span className="text-muted-foreground">{a.tchsProgress}</span>
                     <span className="text-primary">{Math.round(Number(student.progress_percentage || 0))}%</span>
                   </div>
                   <div className="h-2 rounded-full bg-muted overflow-hidden">
@@ -174,14 +177,14 @@ export default function TeacherStudentsPage() {
 
                 {/* Mini stats */}
                 <div className="grid grid-cols-3 gap-2">
-                  <MiniStat icon={<BookOpen className="w-4 h-4" />} label="الدورات" value={student.courses_count} />
-                  <MiniStat icon={<CheckCircle2 className="w-4 h-4" />} label="المهام" value={`${student.tasks_completed}/${student.tasks_total}`} />
-                  <MiniStat icon={<Sparkles className="w-4 h-4" />} label="النقاط" value={student.total_points} />
+                  <MiniStat icon={<BookOpen className="w-4 h-4" />} label={a.tchsCourses} value={student.courses_count} />
+                  <MiniStat icon={<CheckCircle2 className="w-4 h-4" />} label={a.tchsTasks} value={`${student.tasks_completed}/${student.tasks_total}`} />
+                  <MiniStat icon={<Sparkles className="w-4 h-4" />} label={a.tchsPoints} value={student.total_points} />
                 </div>
 
                 {student.last_activity && (
                   <p className="text-[11px] text-muted-foreground">
-                    آخر نشاط: {new Date(student.last_activity).toLocaleDateString('ar-EG')}
+                    {a.tchsLastActivity} {new Date(student.last_activity).toLocaleDateString('ar-EG')}
                   </p>
                 )}
 
@@ -189,7 +192,7 @@ export default function TeacherStudentsPage() {
                 <div className="flex gap-2 pt-1">
                   <Link href={`/academy/teacher/students/${student.id}`} className="flex-1">
                     <Button size="sm" variant="outline" className="w-full rounded-xl font-bold">
-                      عرض البروفايل
+                      {a.tchsViewProfile}
                     </Button>
                   </Link>
                   <Button
@@ -198,7 +201,7 @@ export default function TeacherStudentsPage() {
                     onClick={() => router.push(`/academy/teacher/chat?studentId=${student.id}`)}
                   >
                     <Mail className="w-4 h-4 ml-1.5" />
-                    مراسلة
+                    {a.tchsMessage}
                   </Button>
                 </div>
               </CardContent>
@@ -212,23 +215,23 @@ export default function TeacherStudentsPage() {
               <Users className="w-8 h-8 text-muted-foreground opacity-50" />
             </div>
             <h3 className="font-bold text-lg mb-1">
-              {searchTerm ? 'لا توجد نتائج مطابقة' : 'لا يوجد طلاب بعد'}
+              {searchTerm ? a.tchsNoResults : a.tchsNoStudents}
             </h3>
             <p className="text-muted-foreground text-sm mb-6 max-w-xs">
               {searchTerm
-                ? 'جرّب البحث بكلمة مختلفة أو امسح حقل البحث.'
-                : 'سيظهر الطلاب هنا بمجرد تسجيلهم في دوراتك أو إضافتهم يدوياً.'}
+                ? a.tchsNoResultsHint
+                : a.tchsNoStudentsHint}
             </p>
             {searchTerm ? (
               <Button variant="outline" className="rounded-xl" onClick={() => setSearchTerm('')}>
                 <ArrowLeft className="w-4 h-4 ml-1.5" />
-                مسح البحث
+                {a.tchsClearSearch}
               </Button>
             ) : (
               <Link href="/academy/teacher/students/create">
                 <Button className="rounded-xl font-bold">
                   <UserPlus className="w-4 h-4 ml-1.5" />
-                  إضافة طالب جديد
+                  {a.tchsAddStudent}
                 </Button>
               </Link>
             )}

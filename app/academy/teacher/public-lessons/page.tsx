@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Plus, Globe, Eye, UserPlus, Calendar, Clock, Edit2, Trash2, ExternalLink } from 'lucide-react'
+import { useI18n } from '@/lib/i18n/context'
 
 interface PublicLesson {
   id: string
@@ -21,6 +22,8 @@ interface PublicLesson {
 }
 
 export default function TeacherPublicLessonsPage() {
+  const { t } = useI18n()
+  const a = t.admin
   const [lessons, setLessons] = useState<PublicLesson[]>([])
   const [loading, setLoading] = useState(true)
   const [origin, setOrigin] = useState('')
@@ -34,12 +37,12 @@ export default function TeacherPublicLessonsPage() {
   }, [])
 
   const handleDelete = async (id: string) => {
-    if (!confirm('متأكد من حذف الدرس؟ سيتعطل الرابط المنشور.')) return
+    if (!confirm(a.tplDeleteConfirm)) return
     const res = await fetch(`/api/academy/teacher/public-lessons/${id}`, { method: 'DELETE' })
     if (res.ok) setLessons(lessons.filter(l => l.id !== id))
   }
 
-  if (loading) return <div className="text-center py-12">جارٍ التحميل...</div>
+  if (loading) return <div className="text-center py-12">{a.tplLoading}</div>
 
   const upcoming = lessons.filter(l => new Date(l.scheduled_at) > new Date())
   const past = lessons.filter(l => new Date(l.scheduled_at) <= new Date())
@@ -50,16 +53,16 @@ export default function TeacherPublicLessonsPage() {
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <Globe className="w-7 h-7 text-emerald-600" />
-            الدروس العامة
+            {a.tplPublicLessons}
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            افتح درساً عاماً برابط قابل للمشاركة عبر وسائل التواصل الاجتماعي — يمكن لأي شخص الحضور دون تسجيل.
+            {a.tplPublicLessonsDesc}
           </p>
         </div>
         <Button asChild>
           <Link href="/academy/teacher/public-lessons/new">
             <Plus className="w-4 h-4 me-1" />
-            درس عام جديد
+            {a.tplAddLesson}
           </Link>
         </Button>
       </div>
@@ -68,11 +71,11 @@ export default function TeacherPublicLessonsPage() {
         <Card>
           <CardContent className="py-16 text-center">
             <Globe className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
-            <p className="text-muted-foreground mb-4">لم تنشئ أي دروس عامة بعد</p>
+            <p className="text-muted-foreground mb-4">{a.tplNoLessons}</p>
             <Button asChild>
               <Link href="/academy/teacher/public-lessons/new">
                 <Plus className="w-4 h-4 me-1" />
-                أنشئ أول درس
+                {a.tplCreateFirst}
               </Link>
             </Button>
           </CardContent>
@@ -80,12 +83,12 @@ export default function TeacherPublicLessonsPage() {
       ) : (
         <>
           {upcoming.length > 0 && (
-            <Section title="الدروس القادمة">
+            <Section title={a.tplUpcoming}>
               {upcoming.map(l => <LessonRow key={l.id} lesson={l} origin={origin} onDelete={handleDelete} />)}
             </Section>
           )}
           {past.length > 0 && (
-            <Section title="الدروس السابقة">
+            <Section title={a.tplPast}>
               {past.map(l => <LessonRow key={l.id} lesson={l} origin={origin} onDelete={handleDelete} />)}
             </Section>
           )}
@@ -123,7 +126,7 @@ function LessonRow({ lesson, origin, onDelete }: {
             <div className="flex items-center gap-2 flex-wrap">
               <h3 className="font-semibold text-lg">{lesson.title}</h3>
               <span className="px-2 py-0.5 text-xs rounded-full bg-emerald-100 text-emerald-700">
-                {lesson.is_published ? 'منشور' : 'مسودة'}
+                {lesson.is_published ? a.tplPublished : a.tplDraft}
               </span>
             </div>
             <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
@@ -137,33 +140,33 @@ function LessonRow({ lesson, origin, onDelete }: {
               </span>
               <span className="flex items-center gap-1">
                 <Eye className="w-4 h-4" />
-                {lesson.view_count} مشاهدة
+                {lesson.view_count} {a.tplViews}
               </span>
               <span className="flex items-center gap-1">
                 <UserPlus className="w-4 h-4" />
-                {lesson.signup_count} تسجيل
+                {lesson.signup_count} {a.tplSignups}
               </span>
             </div>
             <div className="flex items-center gap-2 flex-wrap text-xs">
               <code className="bg-muted px-2 py-1 rounded text-muted-foreground break-all" dir="ltr">{url}</code>
               <button onClick={copyUrl} className="px-2 py-1 rounded border border-border hover:bg-muted">
-                نسخ
+                {a.tplCopy}
               </button>
             </div>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row md:flex-col">
             <Button asChild size="sm" variant="outline">
               <a href={url} target="_blank" rel="noopener noreferrer">
-                <ExternalLink className="w-4 h-4 me-1" /> عرض
+                <ExternalLink className="w-4 h-4 me-1" /> {a.tplView}
               </a>
             </Button>
             <Button asChild size="sm" variant="outline">
               <Link href={`/academy/teacher/public-lessons/${lesson.id}`}>
-                <Edit2 className="w-4 h-4 me-1" /> تعديل
+                <Edit2 className="w-4 h-4 me-1" /> {a.tplEdit}
               </Link>
             </Button>
             <Button size="sm" variant="outline" onClick={() => onDelete(lesson.id)} className="text-red-600 hover:text-red-700">
-              <Trash2 className="w-4 h-4 me-1" /> حذف
+              <Trash2 className="w-4 h-4 me-1" /> {a.tplDelete}
             </Button>
           </div>
         </div>
