@@ -42,6 +42,17 @@ const SUBJECT_OPTIONS = [
   'لغة عربية',
 ]
 
+const SUBJECT_MAP: Record<string, { ar: string; en: string }> = {
+  'تلاوة': { ar: 'تلاوة', en: 'Recitation' },
+  'تجويد': { ar: 'تجويد', en: 'Tajweed' },
+  'حفظ': { ar: 'حفظ', en: 'Memorization' },
+  'فقه': { ar: 'فقه', en: 'Fiqh' },
+  'عقيدة': { ar: 'عقيدة', en: 'Aqeedah' },
+  'سيرة': { ar: 'سيرة', en: 'Seerah' },
+  'تفسير': { ar: 'تفسير', en: 'Tafseer' },
+  'لغة عربية': { ar: 'لغة عربية', en: 'Arabic Language' },
+}
+
 export default function TeacherProfilePage() {
   const { locale } = useI18n()
   const isAr = locale === 'ar'
@@ -308,6 +319,7 @@ export default function TeacherProfilePage() {
                 <div className="flex flex-wrap gap-2">
                   {SUBJECT_OPTIONS.map((s) => {
                     const active = subjects.includes(s)
+                    const label = isAr ? s : (SUBJECT_MAP[s]?.en || s)
                     return (
                       <button
                         type="button"
@@ -319,7 +331,7 @@ export default function TeacherProfilePage() {
                             : 'bg-card text-foreground border-border hover:bg-muted/50'
                         }`}
                       >
-                        {s}
+                        {label}
                       </button>
                     )
                   })}

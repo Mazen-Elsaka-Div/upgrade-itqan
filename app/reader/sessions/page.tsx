@@ -155,13 +155,13 @@ export default function ReaderSessionsPage() {
         body: JSON.stringify({ proposedSlotStart, proposedSlotEnd }),
       })
       if (res.ok) {
-        alert("تم إرسال طلب تعديل الموعد. سيتم إشعارك بعد رد الطالب.")
+        alert(isAr ? "تم إرسال طلب تعديل الموعد. سيتم إشعارك بعد رد الطالب." : "Reschedule request sent. You will be notified when the student responds.")
         setRescheduleSession(null)
         setProposedDate("")
         setProposedTime("")
       } else {
         const d = await res.json()
-        alert(d.error || "حدث خطأ")
+        alert(d.error || (isAr ? "حدث خطأ" : "An error occurred"))
       }
     } finally {
       setSubmittingReschedule(false)
@@ -189,10 +189,12 @@ export default function ReaderSessionsPage() {
           delete next[bookingId]
           return next
         })
-        alert(action === "accept" ? "تم قبول طلب التعديل وتحديث الموعد." : "تم رفض طلب التعديل.")
+        alert(action === "accept" 
+          ? (isAr ? "تم قبول طلب التعديل وتحديث الموعد." : "Reschedule request accepted and appointment updated.") 
+          : (isAr ? "تم رفض طلب التعديل." : "Reschedule request rejected."))
       }
     } catch {
-      alert("حدث خطأ")
+      alert(isAr ? "حدث خطأ" : "An error occurred")
     }
   }
 
@@ -219,7 +221,7 @@ export default function ReaderSessionsPage() {
   }
 
   return (
-    <div className="space-y-8 pb-12">
+    <div className="space-y-8 pb-12" dir={isAr ? "rtl" : "ltr"}>
       {/* Premium Header */}
       <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-[#0B3D2E] via-[#0f543f] to-[#0a2920] p-8 md:p-12 shadow-2xl shadow-[#0B3D2E]/20 text-white">
         <div className="absolute top-0 right-0 -translate-y-12 translate-x-1/3 opacity-20 blur-[80px]">
@@ -331,7 +333,7 @@ export default function ReaderSessionsPage() {
                   <div className="flex items-center gap-6 ml-2">
                     <div className={`w-16 h-16 rounded-[1.25rem] flex items-center justify-center shrink-0 border-2 font-black text-2xl shadow-sm transition-transform duration-500 group-hover:scale-105 group-hover:rotate-3
                       ${isActive ? avatarColors[idx % avatarColors.length] : 'bg-muted border-border text-muted-foreground'}`}>
-                      {(session.student_name || "ط").charAt(0)}
+                      {(session.student_name || (isAr ? "ط" : "S")).charAt(0)}
                     </div>
                     <div>
                       <div className="flex items-center gap-3 mb-2">
@@ -600,7 +602,7 @@ export default function ReaderSessionsPage() {
               <div className="space-y-5">
                 <div className="bg-card border border-border rounded-xl p-4 flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center font-bold text-muted-foreground">
-                    {(rescheduleSession.student_name || "ط").charAt(0)}
+                    {(rescheduleSession.student_name || (isAr ? "ط" : "S")).charAt(0)}
                   </div>
                   <div>
                     <p className="text-xs font-medium text-muted-foreground">{isAr ? "الطالب" : "Student"}</p>

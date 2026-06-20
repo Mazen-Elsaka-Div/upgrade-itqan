@@ -5,7 +5,7 @@ import { useI18n } from '@/lib/i18n/context'
 import { CheckCircle2, XCircle, Clock, Search, BookOpen, GraduationCap } from 'lucide-react'
 
 export default function EnrollmentRequestsPage() {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const [requests, setRequests] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -58,8 +58,8 @@ export default function EnrollmentRequestsPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">طلبات الانضمام</h1>
-          <p className="text-muted-foreground mt-1">إدارة طلبات الطلاب للالتحاق بدوراتك ومساراتك</p>
+          <h1 className="text-2xl font-bold">{t.teacher.enrollmentRequests.title}</h1>
+          <p className="text-muted-foreground mt-1">{t.teacher.enrollmentRequests.subtitle}</p>
         </div>
       </div>
 
@@ -69,12 +69,12 @@ export default function EnrollmentRequestsPage() {
           <div className="p-4 border-b border-border bg-yellow-50/50 dark:bg-yellow-900/10">
             <h2 className="font-bold flex items-center gap-2 text-yellow-700 dark:text-yellow-500">
               <Clock className="w-5 h-5" />
-              في الانتظار ({pendingRequests.length})
+              {t.teacher.enrollmentRequests.pending.replace('{count}', String(pendingRequests.length))}
             </h2>
           </div>
           <div className="divide-y divide-border">
             {pendingRequests.length === 0 ? (
-              <div className="p-8 text-center text-muted-foreground">لا توجد طلبات معلقة.</div>
+              <div className="p-8 text-center text-muted-foreground">{t.teacher.enrollmentRequests.noPending}</div>
             ) : (
               pendingRequests.map(req => (
                 <div key={req.id} className="p-4 hover:bg-muted/30 transition-colors">
@@ -89,11 +89,11 @@ export default function EnrollmentRequestsPage() {
                         {req.kind === 'tajweed_path' ? <GraduationCap className="w-4 h-4" /> : <BookOpen className="w-4 h-4" />}
                         {req.course_title}
                         {req.kind === 'tajweed_path' && (
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">مسار</span>
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">{t.teacher.enrollmentRequests.pathLabel}</span>
                         )}
                       </p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        {req.enrolled_at ? new Date(req.enrolled_at).toLocaleDateString('ar') : '—'}
+                        {req.enrolled_at ? new Date(req.enrolled_at).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US') : '—'}
                       </p>
                     </div>
                     <div className="flex flex-col sm:flex-row gap-2 shrink-0">
@@ -102,14 +102,14 @@ export default function EnrollmentRequestsPage() {
                         className="p-2 bg-green-50 text-green-600 hover:bg-green-100 dark:bg-green-900/20 dark:hover:bg-green-900/40 rounded-lg flex items-center gap-2 font-bold text-sm"
                       >
                         <CheckCircle2 className="w-4 h-4" />
-                        قبول
+                        {t.teacher.enrollmentRequests.approveBtn}
                       </button>
                       <button
                         onClick={() => handleAction(req, 'rejected')}
                         className="p-2 bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 rounded-lg flex items-center gap-2 font-bold text-sm"
                       >
                         <XCircle className="w-4 h-4" />
-                        رفض
+                        {t.teacher.enrollmentRequests.rejectBtn}
                       </button>
                     </div>
                   </div>
@@ -124,12 +124,12 @@ export default function EnrollmentRequestsPage() {
           <div className="p-4 border-b border-border bg-muted/30">
             <h2 className="font-bold flex items-center gap-2 text-muted-foreground">
               <CheckCircle2 className="w-5 h-5" />
-              سجل الطلبات
+              {t.teacher.enrollmentRequests.history}
             </h2>
           </div>
           <div className="divide-y divide-border">
             {completedRequests.length === 0 ? (
-              <div className="p-8 text-center text-muted-foreground">لا يوجد سجل طلبات مقبولة أو مرفوضة بعد.</div>
+              <div className="p-8 text-center text-muted-foreground">{t.teacher.enrollmentRequests.noHistory}</div>
             ) : (
               completedRequests.map(req => (
                 <div key={req.id} className="p-4">
@@ -140,9 +140,9 @@ export default function EnrollmentRequestsPage() {
                     </div>
                     <div>
                       {req.status === 'active' ? (
-                        <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full">مقبول</span>
+                        <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full">{t.teacher.enrollmentRequests.approved}</span>
                       ) : (
-                        <span className="px-2 py-1 bg-red-100 text-red-700 text-xs font-bold rounded-full">مرفوض</span>
+                        <span className="px-2 py-1 bg-red-100 text-red-700 text-xs font-bold rounded-full">{t.teacher.enrollmentRequests.rejected}</span>
                       )}
                     </div>
                   </div>

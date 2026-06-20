@@ -49,7 +49,7 @@ interface UpcomingSession {
 }
 
 export default function TeacherDashboard() {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const [stats, setStats] = useState<TeacherStats | null>(null)
   const [courses, setCourses] = useState<Course[]>([])
   const [submissions, setSubmissions] = useState<PendingSubmission[]>([])
@@ -90,7 +90,7 @@ export default function TeacherDashboard() {
 
   const formatDateTime = (dateStr: string) => {
     const date = new Date(dateStr)
-    return new Intl.DateTimeFormat('ar-SA', {
+    return new Intl.DateTimeFormat(locale === 'ar' ? 'ar-SA' : 'en-US', {
       weekday: 'short',
       month: 'short',
       day: 'numeric',
@@ -105,10 +105,10 @@ export default function TeacherDashboard() {
     const diff = now.getTime() - date.getTime()
     const hours = Math.floor(diff / (1000 * 60 * 60))
     
-    if (hours < 1) return 'منذ قليل'
-    if (hours < 24) return `منذ ${hours} ساعة`
+    if (hours < 1) return t.teacher.dashboard.timeAgoJustNow
+    if (hours < 24) return t.teacher.dashboard.timeAgoHours.replace('{count}', String(hours))
     const days = Math.floor(hours / 24)
-    return `منذ ${days} يوم`
+    return t.teacher.dashboard.timeAgoDays.replace('{count}', String(days))
   }
 
   if (loading) {
@@ -133,7 +133,7 @@ export default function TeacherDashboard() {
           }
         }
       }}
-      className="space-y-8 max-w-7xl mx-auto pb-12 relative" dir="rtl"
+      className="space-y-8 max-w-7xl mx-auto pb-12 relative" dir={locale === 'ar' ? 'rtl' : 'ltr'}
     >
       {/* Background ambient glow */}
       <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-blue-500/10 blur-[120px] rounded-full pointer-events-none -z-10" />
@@ -147,13 +147,13 @@ export default function TeacherDashboard() {
           <div className="space-y-3">
             <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/20 shadow-sm">
               <LayoutDashboard className="w-4 h-4 text-blue-100" />
-              <span className="text-sm font-bold tracking-wide">لوحة تحكم المعلم</span>
+              <span className="text-sm font-bold tracking-wide">{t.teacher.dashboard.title}</span>
             </div>
             <h1 className="text-3xl font-black sm:text-4xl drop-shadow-sm">
-              {t.academy?.teacherWelcome || 'مرحباً بك أيها المعلم'}
+              {t.teacher.dashboard.welcome}
             </h1>
             <p className="text-blue-100 max-w-xl leading-relaxed text-base">
-              {t.academy?.teacherWelcomeDesc || 'تابع طلابك، أدر دوراتك، وراقب أداءك من مكان واحد بكل سهولة.'}
+              {t.teacher.dashboard.welcomeDesc}
             </p>
           </div>
           
@@ -161,11 +161,11 @@ export default function TeacherDashboard() {
           <div className="flex shrink-0 gap-3">
             <Link href="/academy/teacher/live" className="flex items-center gap-2 bg-white text-blue-700 px-5 py-3 rounded-xl font-bold hover:bg-blue-50 transition-colors shadow-lg">
               <Video className="w-5 h-5" />
-              بدء جلسة مباشرة
+              {t.teacher.dashboard.liveSessionBtn}
             </Link>
             <Link href="/academy/teacher/courses/new" className="flex items-center gap-2 bg-white/20 backdrop-blur-md text-white border border-white/30 px-5 py-3 rounded-xl font-bold hover:bg-white/30 transition-colors shadow-lg">
               <Plus className="w-5 h-5" />
-              دورة جديدة
+              {t.teacher.dashboard.newCourseBtn}
             </Link>
           </div>
         </div>
@@ -187,7 +187,7 @@ export default function TeacherDashboard() {
         />
         <StatCard 
           icon={Star}
-          label={'متوسط التقييم'}
+          label={t.teacher.dashboard.ratingLabel}
           value={stats?.average_rating ? Number(stats.average_rating).toFixed(1) : '—'}
           color="yellow"
         />
@@ -220,13 +220,13 @@ export default function TeacherDashboard() {
                 <div className="p-2.5 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-600">
                   <GraduationCap className="w-6 h-6" />
                 </div>
-                <h2 className="text-xl font-bold">{t.academy?.myCourses || 'أحدث الدورات'}</h2>
+                <h2 className="text-xl font-bold">{t.teacher.dashboard.latestCourses}</h2>
               </div>
               <Link 
                 href="/academy/teacher/courses"
                 className="text-sm font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 flex items-center gap-1 bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-lg transition-colors"
               >
-                {t.academy?.viewAll || 'عرض الكل'}
+                {t.teacher.dashboard.viewAllBtn}
                 <ArrowUpRight className="w-4 h-4 rtl:-scale-x-100" />
               </Link>
             </div>
@@ -236,14 +236,14 @@ export default function TeacherDashboard() {
                 <div className="w-16 h-16 bg-muted/50 rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <BookOpen className="w-8 h-8 opacity-50" />
                 </div>
-                <p className="font-semibold text-lg">{t.academy?.noCoursesYet || 'لم تنشئ أي دورة بعد'}</p>
-                <p className="text-sm mt-2 max-w-sm mx-auto">ابدأ رحلتك في التعليم بإنشاء أول دورة لك ونشرها للطلاب.</p>
+                <p className="font-semibold text-lg">{t.teacher.dashboard.noCourses}</p>
+                <p className="text-sm mt-2 max-w-sm mx-auto">{t.teacher.dashboard.noCoursesDesc}</p>
                 <Link 
                   href="/academy/teacher/courses/new"
                   className="inline-flex items-center gap-2 mt-6 px-6 py-2.5 bg-blue-600 text-white rounded-xl font-bold shadow-md hover:bg-blue-700 transition-colors"
                 >
                   <Plus className="w-5 h-5" />
-                  {t.academy?.createCourse || 'إنشاء دورة'}
+                  {t.teacher.dashboard.createCourseBtn}
                 </Link>
               </div>
             ) : (
@@ -281,9 +281,9 @@ export default function TeacherDashboard() {
                         course.status === 'draft' && "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200/50",
                         course.status === 'archived' && "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400 border border-slate-200/50"
                       )}>
-                        {course.status === 'published' && (t.academy?.published || 'منشورة')}
-                        {course.status === 'draft' && (t.academy?.draft || 'مسودة')}
-                        {course.status === 'archived' && (t.academy?.archived || 'مؤرشفة')}
+                        {course.status === 'published' && t.teacher.dashboard.published}
+                        {course.status === 'draft' && t.teacher.dashboard.draft}
+                        {course.status === 'archived' && t.teacher.dashboard.archived}
                       </span>
                     </div>
                   </Link>
@@ -311,7 +311,7 @@ export default function TeacherDashboard() {
             {sessions.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground bg-muted/20 rounded-2xl border border-dashed border-border/50">
                 <Video className="w-8 h-8 mx-auto mb-3 opacity-30" />
-                <p className="text-sm font-semibold">{t.academy?.noSessions || 'لا توجد جلسات قادمة قريباً'}</p>
+                <p className="text-sm font-semibold">{t.teacher.dashboard.noSessions}</p>
               </div>
             ) : (
               <div className="space-y-3 overflow-y-auto scrollbar-thin scrollbar-thumb-border hover:scrollbar-thumb-muted-foreground/30 pr-1 -mr-1">
@@ -349,15 +349,15 @@ export default function TeacherDashboard() {
                     <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse ring-2 ring-white dark:ring-slate-900" />
                   )}
                 </div>
-                <h2 className="text-lg font-bold">{t.academy?.pendingSubmissions || 'مهام التقييم'}</h2>
+                <h2 className="text-lg font-bold">{t.teacher.dashboard.tasksToReview}</h2>
               </div>
-              <Link href="/academy/teacher/tasks" className="text-xs font-bold text-orange-600 hover:text-orange-700">كل المهام</Link>
+              <Link href="/academy/teacher/tasks" className="text-xs font-bold text-orange-600 hover:text-orange-700">{t.teacher.dashboard.allTasksLink}</Link>
             </div>
 
             {submissions.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground bg-muted/20 rounded-2xl border border-dashed border-border/50">
                 <CheckCircle2 className="w-8 h-8 mx-auto mb-3 text-emerald-500/50" />
-                <p className="text-sm font-semibold">ممتاز! قمت بتقييم جميع المهام.</p>
+                <p className="text-sm font-semibold">{t.teacher.dashboard.allTasksGraded}</p>
               </div>
             ) : (
               <div className="space-y-3">

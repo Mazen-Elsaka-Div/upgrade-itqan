@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { AlertTriangle, RefreshCcw, Home } from 'lucide-react'
 import Link from 'next/link'
+import { useI18n } from '@/lib/i18n/context'
 
 /**
  * Academy-wide error boundary.
@@ -28,11 +29,21 @@ export default function AcademyError({
     console.error('[academy/error]', error)
   }, [error])
 
+  let locale = 'ar'
+  try {
+    const i18n = useI18n()
+    if (i18n) {
+      locale = i18n.locale
+    }
+  } catch {
+    // fallback
+  }
+  const isAr = locale === 'ar'
   const isDev = process.env.NODE_ENV !== 'production'
 
   return (
     <div
-      dir="rtl"
+      dir={isAr ? "rtl" : "ltr"}
       className="min-h-[60vh] flex items-center justify-center p-6"
     >
       <div className="max-w-lg w-full bg-card border border-border rounded-2xl p-8 text-center space-y-5">
@@ -41,16 +52,17 @@ export default function AcademyError({
         </div>
         <div className="space-y-2">
           <h2 className="text-2xl font-bold text-foreground">
-            تعذّر تحميل الصفحة
+            {isAr ? 'تعذّر تحميل الصفحة' : 'Failed to load page'}
           </h2>
-          <p className="text-muted-foreground leading-relaxed">
-            حدث خطأ غير متوقّع أثناء عرض هذه الصفحة. حاول إعادة التحميل، وإن
-            استمرت المشكلة عُد إلى لوحة التحكم.
+          <p className="text-muted-foreground leading-relaxed text-sm sm:text-base">
+            {isAr 
+              ? 'حدث خطأ غير متوقّع أثناء عرض هذه الصفحة. حاول إعادة التحميل، وإن استمرت المشكلة عُد إلى لوحة التحكم.' 
+              : 'An unexpected error occurred while rendering this page. Try reloading, and if the problem persists, return to the dashboard.'}
           </p>
         </div>
 
         {isDev && (
-          <pre className="text-start text-xs bg-muted text-muted-foreground p-3 rounded-md overflow-auto max-h-48 whitespace-pre-wrap">
+          <pre className="text-start text-xs bg-muted text-muted-foreground p-3 rounded-md overflow-auto max-h-48 whitespace-pre-wrap" dir="ltr">
             {error.message}
             {error.digest ? `\n\ndigest: ${error.digest}` : ''}
           </pre>
@@ -59,12 +71,12 @@ export default function AcademyError({
         <div className="flex flex-col sm:flex-row gap-2 justify-center">
           <Button onClick={() => reset()} className="gap-2">
             <RefreshCcw className="w-4 h-4" />
-            إعادة المحاولة
+            {isAr ? 'إعادة المحاولة' : 'Retry'}
           </Button>
           <Button asChild variant="outline" className="gap-2 bg-transparent">
             <Link href="/academy/student">
               <Home className="w-4 h-4" />
-              لوحة التحكم
+              {isAr ? 'لوحة التحكم' : 'Dashboard'}
             </Link>
           </Button>
         </div>

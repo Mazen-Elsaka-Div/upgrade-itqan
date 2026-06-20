@@ -54,6 +54,12 @@ const KIND_LABEL: Record<string, string> = {
   course_session: 'درس دورة',
 }
 
+const KIND_LABEL_EN: Record<string, string> = {
+  halaqa: 'Halaqa Recitation',
+  booking: 'Individual Session',
+  course_session: 'Course Lesson',
+}
+
 const KIND_COLORS: Record<string, string> = {
   halaqa: 'from-emerald-500/20 to-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20',
   booking: 'from-blue-500/20 to-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20',
@@ -121,12 +127,12 @@ export default function StudentSessionsPage() {
       const res = await fetch('/api/video/recordings?scope=mine&platform=academy&limit=200')
       if (!res.ok) {
         const j = await res.json().catch(() => ({}))
-        throw new Error(j.error || 'فشل تحميل التسجيلات')
+        throw new Error(j.error || (isAr ? 'فشل تحميل التسجيلات' : 'Failed to load recordings'))
       }
       const json = await res.json()
       setRecordings(json.data || [])
     } catch (e) {
-      setRecordingsError(e instanceof Error ? e.message : 'حدث خطأ غير متوقع أثناء الاتصال بالخادم')
+      setRecordingsError(e instanceof Error ? e.message : (isAr ? 'حدث خطأ غير متوقع أثناء الاتصال بالخادم' : 'An unexpected error occurred while connecting to the server'))
     } finally {
       setRecordingsLoading(false)
     }
@@ -405,7 +411,7 @@ export default function StudentSessionsPage() {
                     <div className="space-y-2">
                       <h3 className="text-xl font-bold">{search ? (t.studentPages?.sessions?.noResults || (isAr ? 'لا توجد نتائج' : 'No results')) : (t.studentPages?.sessions?.noRecordingsYet || (isAr ? 'لا توجد تسجيلات حتى الآن' : 'No recordings yet'))}</h3>
                       <p className="text-muted-foreground max-w-sm mx-auto leading-relaxed">
-                        {search ? (t.studentPages?.sessions?.noRecordingsMatched || (isAr ? `لم نعثر على تسجيلات تطابق "${search}".` : `No recordings matched "${search}".`)).replace('{search}', search) : (t.studentPages?.sessions?.noRecordingsDesc || (isAr ? 'لم يتم العثور على أي تسجيلات للجلسات التي حضرتها. بمجرد أن يقوم المعلم بمشاركة تسجيل جلسة سابقة، سيظهر هنا مباشرة.' : 'لم يتم العثور على أي تسجيلات للجلسات التي حضرتها. بمجرد أن يقوم المعلم بمشاركة تسجيل جلسة سابقة، سيظهر هنا مباشرة.'))}
+                        {search ? (t.studentPages?.sessions?.noRecordingsMatched || (isAr ? `لم نعثر على تسجيلات تطابق "${search}".` : `No recordings matched "${search}".`)).replace('{search}', search) : (t.studentPages?.sessions?.noRecordingsDesc || (isAr ? 'لم يتم العثور على أي تسجيلات للجلسات التي حضرتها. بمجرد أن يقوم المعلم بمشاركة تسجيل جلسة سابقة، سيظهر هنا مباشرة.' : 'No recordings found for the sessions you attended. Once the teacher shares a recording, it will appear here.'))}
                       </p>
                     </div>
                     {!search && (
@@ -425,10 +431,10 @@ export default function StudentSessionsPage() {
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex flex-col gap-2 flex-1">
                           <Badge variant="secondary" className={cn("w-fit font-bold border bg-gradient-to-r", KIND_COLORS[r.kind] || KIND_COLORS.halaqa)}>
-                            {t.studentPages?.sessions?.[r.kind] || (isAr ? KIND_LABEL[r.kind] : r.kind) || 'جلسة'}
+                            {t.studentPages?.sessions?.[r.kind] || (isAr ? KIND_LABEL[r.kind] : KIND_LABEL_EN[r.kind] || r.kind) || (isAr ? 'جلسة' : 'Session')}
                           </Badge>
                           <h3 className="font-bold text-lg leading-tight line-clamp-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
-                            {r.title || t.studentPages?.sessions?.[r.kind] || (isAr ? KIND_LABEL[r.kind] : r.kind)}
+                            {r.title || t.studentPages?.sessions?.[r.kind] || (isAr ? KIND_LABEL[r.kind] : KIND_LABEL_EN[r.kind] || r.kind)}
                           </h3>
                         </div>
                       </div>
@@ -451,7 +457,7 @@ export default function StudentSessionsPage() {
                       <div className="flex items-center gap-3 pt-2">
                         {r.recording_url ? (
                           <div className="flex-1">
-                            <VideoPlayerModal url={r.recording_url} title={r.title || t.studentPages?.sessions?.[r.kind] || r.kind || 'جلسة'}>
+                            <VideoPlayerModal url={r.recording_url} title={r.title || t.studentPages?.sessions?.[r.kind] || (isAr ? KIND_LABEL[r.kind] : KIND_LABEL_EN[r.kind] || r.kind) || (isAr ? 'جلسة' : 'Session')}>
                               <button className="inline-flex items-center justify-center gap-2 px-5 py-2 w-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl hover:scale-105 font-bold shadow-md shadow-emerald-500/20 transition-all text-sm">
                                 <PlayCircle className="w-4 h-4" />
                                 {t.studentPages?.sessions?.watchRecording || (isAr ? 'شاهد التسجيل' : 'Watch')}

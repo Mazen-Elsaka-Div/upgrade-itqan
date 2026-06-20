@@ -15,6 +15,7 @@ import {
   Users,
 } from 'lucide-react'
 import { PageLoadingSkeleton } from '@/components/ui/page-loading-skeleton'
+import { useI18n } from '@/lib/i18n/context'
 
 type DisplayStatus = 'pending' | 'submitted' | 'graded'
 
@@ -43,6 +44,7 @@ function deriveStatus(task: TaskRow): DisplayStatus {
 }
 
 export default function TeacherTasksPage() {
+  const { t, locale, dir } = useI18n()
   const [tasks, setTasks] = useState<TaskRow[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | DisplayStatus>('all')
@@ -80,9 +82,9 @@ export default function TeacherTasksPage() {
   }
 
   const statusLabel: Record<DisplayStatus, string> = {
-    pending: 'بانتظار التسليم',
-    submitted: 'بحاجة لتصحيح',
-    graded: 'مصححة',
+    pending: t.teacher.tasks.statusLabels.pending,
+    submitted: t.teacher.tasks.statusLabels.submitted,
+    graded: t.teacher.tasks.statusLabels.graded,
   }
 
   const statusIcon: Record<DisplayStatus, React.ReactNode> = {
@@ -92,13 +94,13 @@ export default function TeacherTasksPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir={dir}>
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">المهام</h1>
+        <h1 className="text-3xl font-bold">{t.teacher.tasks.title}</h1>
         <Link href="/academy/teacher/tasks/new">
           <Button>
             <Plus className="w-4 h-4 ml-2" />
-            مهمة جديدة
+            {t.teacher.tasks.newSuccessBtn}
           </Button>
         </Link>
       </div>
@@ -110,7 +112,7 @@ export default function TeacherTasksPage() {
             variant={filter === f ? 'default' : 'outline'}
             onClick={() => setFilter(f)}
           >
-            {f === 'all' ? 'الكل' : statusLabel[f]}
+            {f === 'all' ? t.teacher.tasks.filterAll : statusLabel[f]}
           </Button>
         ))}
       </div>
@@ -133,7 +135,7 @@ export default function TeacherTasksPage() {
                       {isQuiz && (
                         <Badge variant="outline" className="text-emerald-600 border-emerald-300">
                           <ListChecks className="w-3.5 h-3.5 ml-1" />
-                          اختبار
+                          {t.teacher.tasks.quizLabel}
                         </Badge>
                       )}
                     </div>
@@ -141,25 +143,33 @@ export default function TeacherTasksPage() {
                       <p className="text-sm text-muted-foreground line-clamp-2">{task.description}</p>
                     )}
                     <div className="text-xs text-muted-foreground flex flex-wrap gap-x-4 gap-y-1">
-                      {task.course_name && <span>الدورة: {task.course_name}</span>}
+                      {task.course_name && (
+                        <span>{t.teacher.tasks.courseLabel.replace('{course}', task.course_name)}</span>
+                      )}
                       {task.due_date && (
-                        <span>موعد التسليم: {new Date(task.due_date).toLocaleDateString('ar-EG')}</span>
+                        <span>
+                          {t.teacher.tasks.dueDateLabel.replace(
+                            '{date}',
+                            new Date(task.due_date).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US')
+                          )}
+                        </span>
                       )}
                       <span className="inline-flex items-center gap-1">
                         <Users className="w-3.5 h-3.5" />
-                        {task.submitted_count} مُسلِّم
-                        {task.graded_count > 0 && ` · ${task.graded_count} مُصحَّح`}
+                        {t.teacher.tasks.submittedCount.replace('{count}', String(task.submitted_count))}
+                        {task.graded_count > 0 &&
+                          ` · ${t.teacher.tasks.gradedCount.replace('{count}', String(task.graded_count))}`}
                       </span>
                     </div>
                   </div>
                   <div className="flex gap-2 shrink-0">
                     <Link href={`/academy/teacher/tasks/${task.id}/grade`}>
-                      <Button size="sm" variant="outline">عرض التسليمات</Button>
+                      <Button size="sm" variant="outline">{t.teacher.tasks.viewSubmissionsBtn}</Button>
                     </Link>
                     <Link href={`/academy/teacher/tasks/${task.id}/edit`}>
                       <Button size="sm" variant="outline">
                         <Pencil className="w-3.5 h-3.5 ml-1" />
-                        تعديل
+                        {t.teacher.tasks.editBtn}
                       </Button>
                     </Link>
                   </div>
@@ -173,7 +183,7 @@ export default function TeacherTasksPage() {
       {filteredTasks.length === 0 && (
         <Card className="text-center py-12">
           <CheckCircle className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-          <p className="text-muted-foreground">لا توجد مهام</p>
+          <p className="text-muted-foreground">{t.teacher.tasks.noTasks}</p>
         </Card>
       )}
     </div>

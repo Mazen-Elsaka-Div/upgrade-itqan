@@ -1,5 +1,9 @@
 "use client"
 
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { ArrowRight, Tag } from 'lucide-react'
 import { useI18n } from '@/lib/i18n/context'
 
 const SPEC_LABELS_AR: Record<string, string> = {

@@ -241,7 +241,7 @@ export default function MushafPage() {
       })
       .catch(err => {
         console.error('[v0] audio play error', err)
-        setAudioError('تعذّر تشغيل الصوت')
+        setAudioError(isAr ? 'تعذّر تشغيل الصوت' : 'Failed to play audio')
         setIsPlaying(false)
       })
   }, [reciterId])
@@ -482,7 +482,7 @@ export default function MushafPage() {
               className="whitespace-nowrap font-bold text-sm opacity-0 max-w-0 group-hover/item:max-w-[250px] group-hover/item:opacity-100 transition-all duration-500 overflow-hidden"
             >
               <div className="px-4">
-                {headerInfo ? (isAr ? `${stripSurahPrefix(headerInfo.surahName)} • الجزء ${toArabicDigits(headerInfo.juz)}` : `${headerInfo.surahEnglish} • Juz ${headerInfo.juz}`) : (t.student?.mushaf || 'مصحفي')}
+                {headerInfo ? (isAr ? `${stripSurahPrefix(headerInfo.surahName)} • الجزء ${toArabicDigits(headerInfo.juz)}` : `${headerInfo.surahEnglish} • Juz ${headerInfo.juz}`) : (isAr ? (t.student?.mushaf || 'مصحفي') : (t.student?.mushaf || 'My Mushaf'))}
               </div>
             </div>
           </div>
@@ -574,7 +574,7 @@ export default function MushafPage() {
                   <Input
                     value={search}
                     onChange={e => setSearch(e.target.value)}
-                    placeholder={t.student?.searchSurah || 'ابحث عن سورة...'}
+                    placeholder={t.student?.searchSurah || (isAr ? 'ابحث عن سورة...' : 'Search for surah...')}
                     className="ps-10 h-11 rounded-xl bg-muted/50 border-transparent focus:bg-background focus:border-emerald-500 focus:ring-emerald-500/20 transition-all"
                   />
                 </div>
@@ -597,10 +597,10 @@ export default function MushafPage() {
                         <div className="text-xs text-muted-foreground font-bold flex items-center gap-1.5 opacity-80">
                           <span className="truncate">{s.englishName}</span>
                           <span>•</span>
-                          <span className="whitespace-nowrap">{isAr ? toArabicDigits(s.numberOfAyahs) : s.numberOfAyahs} {t.student?.versesCount || 'آية'}</span>
+                          <span className="whitespace-nowrap">{isAr ? toArabicDigits(s.numberOfAyahs) : s.numberOfAyahs} {t.student?.versesCount || (isAr ? 'آية' : 'verses')}</span>
                           <span>•</span>
                           <span className="text-[10px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 px-1.5 py-0.5 rounded-md">
-                            {s.revelationType === 'Meccan' ? (t.student?.revelationMakkah || 'مكية') : (t.student?.revelationMadinah || 'مدنية')}
+                            {s.revelationType === 'Meccan' ? (t.student?.revelationMakkah || (isAr ? 'مكية' : 'Meccan')) : (t.student?.revelationMadinah || (isAr ? 'مدنية' : 'Medinan'))}
                           </span>
                         </div>
                       </div>
@@ -659,13 +659,13 @@ export default function MushafPage() {
                           <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-transparent via-amber-700/50 dark:via-primary/50 to-transparent" />
                           <div className="flex items-center justify-between gap-4">
                             <div className="text-[10px] font-black tracking-widest text-amber-800 dark:text-primary/80 uppercase">
-                              {g.surah.revelationType === 'Meccan' ? (t.student?.revelationMakkah || 'مكية') : (t.student?.revelationMadinah || 'مدنية')}
+                              {g.surah.revelationType === 'Meccan' ? (t.student?.revelationMakkah || (isAr ? 'مكية' : 'Meccan')) : (t.student?.revelationMadinah || (isAr ? 'مدنية' : 'Medinan'))}
                             </div>
                             <div
-                              className="text-3xl sm:text-4xl text-amber-900 dark:text-foreground"
-                              style={{ fontFamily: "'Amiri Quran', serif", fontWeight: 400 }}
+                              className="text-3xl sm:text-4xl text-amber-900 dark:text-foreground animate-pulse-subtle"
+                              style={{ fontFamily: isAr ? "'Amiri Quran', serif" : "'Reem Kufi', sans-serif", fontWeight: 400 }}
                             >
-                              سُورَةُ {stripSurahPrefix(g.surah.name)}
+                              {isAr ? `سُورَةُ ${stripSurahPrefix(g.surah.name)}` : `Surah ${g.surah.englishName}`}
                             </div>
                             <div className="text-sm font-black text-amber-800 dark:text-primary/80">
                               {toArabicDigits(g.surah.number)}
@@ -813,7 +813,7 @@ export default function MushafPage() {
               className="rounded-2xl h-11 px-5 font-black w-full sm:w-auto bg-[#fbf6e6]/90 dark:bg-card border-amber-700/40 hover:bg-[#fbf6e6] dark:hover:bg-card/80"
             >
               <ChevronRight className="w-4 h-4 me-2" />
-              {t.student?.prevPage || 'الصفحة السابقة'}
+              {t.student?.prevPage || (isAr ? 'الصفحة السابقة' : 'Previous Page')}
             </Button>
 
             <div className="flex items-center gap-2">
@@ -839,7 +839,7 @@ export default function MushafPage() {
               disabled={pageNumber >= TOTAL_PAGES}
               className="rounded-2xl h-11 px-5 font-black w-full sm:w-auto bg-[#fbf6e6]/90 dark:bg-card border-amber-700/40 hover:bg-[#fbf6e6] dark:hover:bg-card/80"
             >
-              {t.student?.nextPage || 'الصفحة التالية'}
+              {t.student?.nextPage || (isAr ? 'الصفحة التالية' : 'Next Page')}
               <ChevronLeft className="w-4 h-4 ms-2" />
             </Button>
           </div>

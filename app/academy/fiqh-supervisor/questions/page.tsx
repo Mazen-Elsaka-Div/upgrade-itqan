@@ -16,6 +16,7 @@ import {
   BookOpen
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useI18n } from '@/lib/i18n/context'
 
 interface Question {
   id: string
@@ -38,18 +39,20 @@ interface Question {
   category_slug: string | null
 }
 
-type Tab = 'open' | 'awaiting' | 'published' | 'closed'
-
-const TABS: { id: Tab; label: string; bucket: string; icon: any; color: string }[] = [
-  { id: 'open', label: 'تنتظر الرد', bucket: 'open', icon: Clock, color: 'text-amber-500 bg-amber-500/10 border-amber-500/20' },
-  { id: 'awaiting', label: 'بانتظار موافقة السائل', bucket: 'awaiting_consent', icon: User, color: 'text-orange-500 bg-orange-500/10 border-orange-500/20' },
-  { id: 'published', label: 'منشورة', bucket: 'published', icon: Eye, color: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20' },
-  { id: 'closed', label: 'مغلقة', bucket: 'closed', icon: Archive, color: 'text-slate-500 bg-slate-500/10 border-slate-500/20' },
-]
+// TABS list is now moved inside the component to support localization
 
 export default function FiqhSupervisorInboxPage() {
+  const { t, locale, dir } = useI18n()
   const [tab, setTab] = useState<Tab>('open')
   const [questions, setQuestions] = useState<Question[]>([])
+  
+  const TABS = useMemo<{ id: Tab; label: string; bucket: string; icon: any; color: string }[]>(() => [
+    { id: 'open', label: t.fiqhSupervisor.tabs.open, bucket: 'open', icon: Clock, color: 'text-amber-500 bg-amber-500/10 border-amber-500/20' },
+    { id: 'awaiting', label: t.fiqhSupervisor.tabs.awaiting, bucket: 'awaiting_consent', icon: User, color: 'text-orange-500 bg-orange-500/10 border-orange-500/20' },
+    { id: 'published', label: t.fiqhSupervisor.tabs.published, bucket: 'published', icon: Eye, color: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20' },
+    { id: 'closed', label: t.fiqhSupervisor.tabs.closed, bucket: 'closed', icon: Archive, color: 'text-slate-500 bg-slate-500/10 border-slate-500/20' },
+  ], [t])
+
   const [counts, setCounts] = useState<Record<Tab, number>>({
     open: 0,
     awaiting: 0,
@@ -67,7 +70,7 @@ export default function FiqhSupervisorInboxPage() {
 
   const activeBucket = useMemo(
     () => TABS.find((t) => t.id === tab)?.bucket || '',
-    [tab]
+    [tab, TABS]
   )
 
   const load = useCallback(async () => {
@@ -100,7 +103,7 @@ export default function FiqhSupervisorInboxPage() {
   }, [load])
 
   return (
-    <div className="space-y-8 max-w-6xl mx-auto relative min-h-screen" dir="rtl">
+    <div className="space-y-8 max-w-6xl mx-auto relative min-h-screen" dir={dir}>
       
       {/* Decorative Background */}
       <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-primary/5 rounded-full filter blur-[120px] pointer-events-none -z-10 animate-pulse-slow" />
@@ -115,12 +118,12 @@ export default function FiqhSupervisorInboxPage() {
             <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-blue-500/20 flex items-center justify-center border border-primary/20 shadow-inner">
               <ShieldCheck className="w-7 h-7 text-primary" />
             </div>
-            صندوق الأسئلة الفقهية
+            {t.fiqhSupervisor.inboxTitle}
           </h1>
           <p className="text-muted-foreground/80 font-medium max-w-xl text-lg pr-2">
             {counts.open > 0
-              ? `لديك ${counts.open} سؤال ينتظر مراجعتك واجابتك.`
-              : 'صندوق الوارد نظيف، لا توجد أسئلة جديدة في انتظارك حالياً.'}
+              ? t.fiqhSupervisor.inboxSubAwaiting.replace('{count}', String(counts.open))
+              : t.fiqhSupervisor.inboxSubEmpty}
           </p>
         </div>
         
@@ -129,7 +132,7 @@ export default function FiqhSupervisorInboxPage() {
           className="relative z-10 shrink-0 inline-flex items-center justify-center gap-2 px-8 py-4 bg-muted/50 hover:bg-card border-2 border-border hover:border-primary/30 text-foreground font-black text-sm uppercase tracking-widest rounded-2xl transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group/btn"
         >
           <BookOpen className="w-5 h-5 text-primary group-hover/btn:scale-110 transition-transform" />
-          المكتبة العامة
+          {t.fiqhSupervisor.publicLibrary}
         </Link>
       </div>
 
@@ -175,7 +178,7 @@ export default function FiqhSupervisorInboxPage() {
           </div>
           <input
             type="text"
-            placeholder="ابحث في الأسئلة..."
+            placeholder={t.fiqhSupervisor.searchPlaceholder}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-4 pr-12 py-3.5 bg-background border-2 border-border hover:border-primary/30 focus:border-primary rounded-2xl text-sm font-bold text-foreground focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all shadow-inner"
@@ -190,7 +193,7 @@ export default function FiqhSupervisorInboxPage() {
             <div className="p-4 bg-card rounded-2xl border shadow-sm">
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
-            <p className="text-sm font-bold text-muted-foreground animate-pulse">جاري تحميل الأسئلة...</p>
+            <p className="text-sm font-bold text-muted-foreground animate-pulse">{t.fiqhSupervisor.loadingQuestions}</p>
           </div>
         ) : questions.length === 0 ? (
           <div className="bg-card/40 backdrop-blur-md border-2 border-dashed border-border rounded-[40px] p-24 text-center shadow-none flex flex-col items-center justify-center min-h-[400px] animate-in fade-in zoom-in-95 duration-500">
@@ -199,9 +202,9 @@ export default function FiqhSupervisorInboxPage() {
                 <div className="w-24 h-24 bg-emerald-500/10 rounded-full flex items-center justify-center mb-6 shadow-inner border border-emerald-500/20">
                   <CheckCircle2 className="w-10 h-10 text-emerald-500" />
                 </div>
-                <h3 className="text-2xl font-black text-foreground mb-2">لا توجد أسئلة في انتظارك</h3>
+                <h3 className="text-2xl font-black text-foreground mb-2">{t.fiqhSupervisor.emptyStateAwaitingTitle}</h3>
                 <p className="text-muted-foreground font-bold max-w-sm mx-auto">
-                  لقد أنجزت كل عملك! ستظهر هنا الأسئلة الجديدة المسندة إليك فور إضافتها.
+                  {t.fiqhSupervisor.emptyStateAwaitingDesc}
                 </p>
               </>
             ) : (
@@ -209,8 +212,8 @@ export default function FiqhSupervisorInboxPage() {
                 <div className="w-24 h-24 bg-muted/50 rounded-full flex items-center justify-center mb-6 shadow-inner border border-border">
                   <Archive className="w-10 h-10 text-muted-foreground opacity-50" />
                 </div>
-                <h3 className="text-2xl font-black text-foreground mb-2">الصندوق فارغ</h3>
-                <p className="text-muted-foreground font-bold max-w-sm mx-auto">لا توجد أسئلة تطابق التصنيف الحالي.</p>
+                <h3 className="text-2xl font-black text-foreground mb-2">{t.fiqhSupervisor.emptyStateEmptyTitle}</h3>
+                <p className="text-muted-foreground font-bold max-w-sm mx-auto">{t.fiqhSupervisor.emptyStateEmptyDesc}</p>
               </>
             )}
           </div>
@@ -247,16 +250,16 @@ export default function FiqhSupervisorInboxPage() {
                   <div className="flex flex-wrap items-center gap-4 pt-2">
                     <span className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-lg border border-border">
                       <User className="w-3.5 h-3.5" />
-                      {q.is_anonymous ? 'سائل مجهول' : q.asker_name || '—'}
+                      {q.is_anonymous ? t.fiqhSupervisor.anonymousAsker : q.asker_name || '—'}
                     </span>
                     <span className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-lg border border-border">
                       <Clock className="w-3.5 h-3.5" />
-                      {new Date(q.asked_at).toLocaleDateString('ar-EG', { month: 'long', day: 'numeric', year: 'numeric' })}
+                      {new Date(q.asked_at).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                     </span>
                     {q.is_published && (
                       <span className="flex items-center gap-1.5 text-xs font-black text-emerald-600 bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/20">
                         <Eye className="w-3.5 h-3.5" />
-                        {q.views_count || 0} مشاهدة
+                        {t.fiqhSupervisor.views.replace('{count}', String(q.views_count || 0))}
                       </span>
                     )}
                   </div>
@@ -278,25 +281,24 @@ export default function FiqhSupervisorInboxPage() {
 }
 
 function StatusPill({ status }: { status: string }) {
-  const labels: Record<string, { ar: string; tone: string }> = {
-    pending: { ar: 'في الانتظار', tone: 'bg-amber-100 text-amber-900 border-amber-200 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/30' },
-    assigned: { ar: 'مُسند إليك', tone: 'bg-sky-100 text-sky-900 border-sky-200 dark:bg-sky-500/20 dark:text-sky-300 dark:border-sky-500/30' },
+  const { t } = useI18n()
+  const labels: Record<string, { tone: string }> = {
+    pending: { tone: 'bg-amber-100 text-amber-900 border-amber-200 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/30' },
+    assigned: { tone: 'bg-sky-100 text-sky-900 border-sky-200 dark:bg-sky-500/20 dark:text-sky-300 dark:border-sky-500/30' },
     in_progress: {
-      ar: 'قيد العمل',
       tone: 'bg-indigo-100 text-indigo-900 border-indigo-200 dark:bg-indigo-500/20 dark:text-indigo-300 dark:border-indigo-500/30',
     },
     awaiting_consent: {
-      ar: 'بانتظار الموافقة',
       tone: 'bg-orange-100 text-orange-900 border-orange-200 dark:bg-orange-500/20 dark:text-orange-300 dark:border-orange-500/30',
     },
     published: {
-      ar: 'منشور',
       tone: 'bg-emerald-100 text-emerald-900 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30',
     },
-    declined: { ar: 'رفض النشر', tone: 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-500/20 dark:text-slate-300 dark:border-slate-500/30' },
-    closed: { ar: 'مغلق', tone: 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-500/20 dark:text-slate-300 dark:border-slate-500/30' },
+    declined: { tone: 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-500/20 dark:text-slate-300 dark:border-slate-500/30' },
+    closed: { tone: 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-500/20 dark:text-slate-300 dark:border-slate-500/30' },
   }
-  const l = labels[status] || { ar: status, tone: 'bg-muted text-muted-foreground border-border' }
+  const l = labels[status] || { tone: 'bg-muted text-muted-foreground border-border' }
+  const text = t.fiqhSupervisor.statuses[status] || status
   return (
     <span
       className={cn(
@@ -304,7 +306,7 @@ function StatusPill({ status }: { status: string }) {
         l.tone
       )}
     >
-      {l.ar}
+      {text}
     </span>
   )
 }

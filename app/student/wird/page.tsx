@@ -11,9 +11,16 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { SURAHS } from "@/lib/data/surahs"
+import { SURAHS as SURAHS_EN } from "@/lib/quran-surahs"
 import { PageLoadingSkeleton } from "@/components/ui/page-loading-skeleton"
 import { useI18n } from "@/lib/i18n/context"
 import Link from "next/link"
+
+function getSurahName(num: number, arName: string, locale: string): string {
+  if (locale === "ar") return arName
+  const found = SURAHS_EN.find((s) => s.number === num)
+  return found ? found.name_en : arName
+}
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 type WirdItemType = "surah" | "pages" | "juz" | "ayahs" | "custom"
@@ -59,11 +66,11 @@ function AddItemForm({ onAdd }: { onAdd: (item: WirdItem) => void }) {
   const [customLabel, setCustomLabel] = useState("")
 
   const TYPE_LABELS = useMemo(() => ({
-    surah: t.student.wirdPage.types.surah || "سورة",
-    pages: t.student.wirdPage.types.pages || "صفحات",
-    juz: t.student.wirdPage.types.juz || "جزء",
-    ayahs: t.student.wirdPage.types.ayahs || "آيات",
-    custom: t.student.wirdPage.types.custom || "مخصص",
+    surah: t.wirdPage.types.surah || t.addedTranslations_2026?.["سورة"] || "سورة",
+    pages: t.wirdPage.types.pages || t.addedTranslations_2026?.["صفحات"] || "صفحات",
+    juz: t.wirdPage.types.juz || t.addedTranslations_2026?.["جزء"] || "جزء",
+    ayahs: t.wirdPage.types.ayahs || t.addedTranslations_2026?.["آيات"] || "آيات",
+    custom: t.wirdPage.types.custom || t.addedTranslations_2026?.["مخصص"] || "مخصص",
   }), [t])
 
   const buildItem = (): WirdItem => {
@@ -96,7 +103,7 @@ function AddItemForm({ onAdd }: { onAdd: (item: WirdItem) => void }) {
   return (
     <div className="bg-muted/40 border border-border rounded-2xl p-5 space-y-4">
       <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
-        {t.student.wirdPage.addNewItemTitle || "إضافة عنصر جديد"}
+        {t.wirdPage.addNewItemTitle || t.addedTranslations_2026?.["إضافة عنصر جديد"] || "إضافة عنصر جديد"}
       </p>
 
       {/* Type selector */}
@@ -126,7 +133,7 @@ function AddItemForm({ onAdd }: { onAdd: (item: WirdItem) => void }) {
         {type === "surah" && (
           <div className="sm:col-span-2">
             <Label className="text-xs font-bold text-muted-foreground mb-1.5 block">
-              {t.student.wirdPage.selectSurahLabel || "اختر السورة"}
+              {t.wirdPage.selectSurahLabel || t.addedTranslations_2026?.["اختر السورة"] || "اختر السورة"}
             </Label>
             <select
               value={surahIdx}
@@ -134,7 +141,7 @@ function AddItemForm({ onAdd }: { onAdd: (item: WirdItem) => void }) {
               className="w-full h-10 px-3 bg-background border border-border rounded-xl text-sm font-bold appearance-none focus:outline-none focus:ring-2 focus:ring-primary/30"
             >
               {SURAHS.map((s, i) => (
-                <option key={s.number} value={i}>{s.number}. {s.name}</option>
+                <option key={s.number} value={i}>{s.number}. {getSurahName(s.number, s.name, locale)}</option>
               ))}
             </select>
           </div>
@@ -144,7 +151,7 @@ function AddItemForm({ onAdd }: { onAdd: (item: WirdItem) => void }) {
           <>
             <div>
               <Label className="text-xs font-bold text-muted-foreground mb-1.5 block">
-                {t.student.wirdPage.fromPageLabel || "من الصفحة"}
+                {t.wirdPage.fromPageLabel || t.addedTranslations_2026?.["من الصفحة"] || "من الصفحة"}
               </Label>
               <Input
                 type="number" min={1} max={604} value={pageFrom}
@@ -154,7 +161,7 @@ function AddItemForm({ onAdd }: { onAdd: (item: WirdItem) => void }) {
             </div>
             <div>
               <Label className="text-xs font-bold text-muted-foreground mb-1.5 block">
-                {t.student.wirdPage.toPageLabel || "إلى الصفحة"}
+                {t.wirdPage.toPageLabel || t.addedTranslations_2026?.["إلى الصفحة"] || "إلى الصفحة"}
               </Label>
               <Input
                 type="number" min={pageFrom} max={604} value={pageTo}
@@ -168,7 +175,7 @@ function AddItemForm({ onAdd }: { onAdd: (item: WirdItem) => void }) {
         {type === "juz" && (
           <div className="sm:col-span-2">
             <Label className="text-xs font-bold text-muted-foreground mb-1.5 block">
-              {t.student.wirdPage.juzNumberLabel || "رقم الجزء"}
+              {t.wirdPage.juzNumberLabel || t.addedTranslations_2026?.["رقم الجزء"] || "رقم الجزء"}
             </Label>
             <Input
               type="number" min={1} max={30} value={juzNum}
@@ -182,7 +189,7 @@ function AddItemForm({ onAdd }: { onAdd: (item: WirdItem) => void }) {
           <>
             <div className="sm:col-span-2">
               <Label className="text-xs font-bold text-muted-foreground mb-1.5 block">
-                {t.student.wirdPage.selectSurahLabel || "السورة"}
+                {t.wirdPage.selectSurahLabel || t.addedTranslations_2026?.["السورة"] || "السورة"}
               </Label>
               <select
                 value={surahForAyah}
@@ -190,13 +197,13 @@ function AddItemForm({ onAdd }: { onAdd: (item: WirdItem) => void }) {
                 className="w-full h-10 px-3 bg-background border border-border rounded-xl text-sm font-bold appearance-none focus:outline-none focus:ring-2 focus:ring-primary/30"
               >
                 {SURAHS.map((s, i) => (
-                  <option key={s.number} value={i}>{s.number}. {s.name}</option>
+                  <option key={s.number} value={i}>{s.number}. {getSurahName(s.number, s.name, locale)}</option>
                 ))}
               </select>
             </div>
             <div>
               <Label className="text-xs font-bold text-muted-foreground mb-1.5 block">
-                {t.student.wirdPage.fromAyahLabel || "من الآية"}
+                {t.wirdPage.fromAyahLabel || t.addedTranslations_2026?.["من الآية"] || "من الآية"}
               </Label>
               <Input
                 type="number" min={1} max={SURAHS[surahForAyah]?.verses ?? 1} value={ayahFrom}
@@ -206,7 +213,7 @@ function AddItemForm({ onAdd }: { onAdd: (item: WirdItem) => void }) {
             </div>
             <div>
               <Label className="text-xs font-bold text-muted-foreground mb-1.5 block">
-                {t.student.wirdPage.toAyahLabel || "إلى الآية"}
+                {t.wirdPage.toAyahLabel || t.addedTranslations_2026?.["إلى الآية"] || "إلى الآية"}
               </Label>
               <Input
                 type="number" min={ayahFrom} max={SURAHS[surahForAyah]?.verses ?? 1} value={ayahTo}
@@ -220,7 +227,7 @@ function AddItemForm({ onAdd }: { onAdd: (item: WirdItem) => void }) {
         {type === "custom" && (
           <div className="sm:col-span-2">
             <Label className="text-xs font-bold text-muted-foreground mb-1.5 block">
-              {t.student.wirdPage.customWirdLabel || "وصف الورد"}
+              {t.wirdPage.customWirdLabel || t.addedTranslations_2026?.["وصف الورد"] || "وصف الورد"}
             </Label>
             <Input
               value={customLabel}
@@ -234,7 +241,7 @@ function AddItemForm({ onAdd }: { onAdd: (item: WirdItem) => void }) {
 
       <Button onClick={handleAdd} className="gap-2 rounded-xl h-10 font-bold">
         <Plus className="w-4 h-4" />
-        {t.student.wirdPage.addToWirdBtn || "إضافة إلى الورد"}
+        {t.wirdPage.addToWirdBtn || t.addedTranslations_2026?.["إضافة إلى الورد"] || "إضافة إلى الورد"}
       </Button>
     </div>
   )
@@ -259,11 +266,11 @@ export default function WirdSettingsPage() {
   }
 
   const TYPE_LABELS = useMemo(() => ({
-    surah: t.student.wirdPage.types.surah || "سورة",
-    pages: t.student.wirdPage.types.pages || "صفحات",
-    juz: t.student.wirdPage.types.juz || "جزء",
-    ayahs: t.student.wirdPage.types.ayahs || "آيات",
-    custom: t.student.wirdPage.types.custom || "مخصص",
+    surah: t.wirdPage.types.surah || t.addedTranslations_2026?.["سورة"] || "سورة",
+    pages: t.wirdPage.types.pages || t.addedTranslations_2026?.["صفحات"] || "صفحات",
+    juz: t.wirdPage.types.juz || t.addedTranslations_2026?.["جزء"] || "جزء",
+    ayahs: t.wirdPage.types.ayahs || t.addedTranslations_2026?.["آيات"] || "آيات",
+    custom: t.wirdPage.types.custom || t.addedTranslations_2026?.["مخصص"] || "مخصص",
   }), [t])
 
   useEffect(() => {
@@ -319,10 +326,12 @@ export default function WirdSettingsPage() {
       const detail = locale === "ar"
         ? `${toArabicDigits(verses)} آية`
         : `${verses} verses`
-      return { label: item.label, detail }
+      const surahObj = SURAHS.find(s => s.name === item.label)
+      const label = surahObj ? getSurahName(surahObj.number, surahObj.name, locale) : item.label
+      return { label, detail }
     }
     if (item.type === "pages") {
-      const label = t.student.wirdPage.readPagesTitle || "قراءة صفحات"
+      const label = t.wirdPage.readPagesTitle || t.addedTranslations_2026?.["قراءة صفحات"] || "قراءة صفحات"
       const numbers = item.detail.match(/\d+/g)
       let detail = item.detail
       if (numbers) {
@@ -367,11 +376,13 @@ export default function WirdSettingsPage() {
             : `الآيات ${formatDigits(numbers[0])}–${formatDigits(numbers[1])}`
         }
       }
-      return { label: item.label, detail }
+      const surahObj = SURAHS.find(s => s.name === item.label)
+      const label = surahObj ? getSurahName(surahObj.number, surahObj.name, locale) : item.label
+      return { label, detail }
     }
     // custom
     const label = item.label === "ورد مخصص" || item.label === "Custom Wird"
-      ? (t.student.wirdPage.customWirdDefault || "ورد مخصص")
+      ? (t.wirdPage.customWirdDefault || t.addedTranslations_2026?.["ورد مخصص"] || "ورد مخصص")
       : item.label
     return { label, detail: item.detail }
   }
@@ -389,7 +400,7 @@ export default function WirdSettingsPage() {
       {/* Back button */}
       <Link href="/student" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-2">
         <ChevronLeft className="w-4 h-4 rotate-180" />
-        {t.student.backToDashboard || "العودة للوحة الطالب"}
+        {t.student.backToDashboard || t.addedTranslations_2026?.["العودة للوحة الطالب"] || "العودة للوحة الطالب"}
       </Link>
 
       {/* Header */}
@@ -397,11 +408,11 @@ export default function WirdSettingsPage() {
         <div className="space-y-1">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold mb-1">
             <BookOpen className="w-3 h-3" />
-            {t.student.dailyWirdTitle || "الورد اليومي"}
+            {t.student.dailyWirdTitle || t.addedTranslations_2026?.["الورد اليومي"] || "الورد اليومي"}
           </div>
-          <h1 className="text-3xl font-black text-foreground">{t.student.wirdPage.title || "إعدادات الورد"}</h1>
+          <h1 className="text-3xl font-black text-foreground">{t.wirdPage.title || t.addedTranslations_2026?.["إعدادات الورد"] || "إعدادات الورد"}</h1>
           <p className="text-muted-foreground font-medium text-sm">
-            {t.student.wirdPage.subtitle || "حدد وردك اليومي وخصص تذكيرات الفجر والمغرب."}
+            {t.wirdPage.subtitle || t.addedTranslations_2026?.["حدد وردك اليومي وخصص تذكيرات الفجر والمغرب."] || "حدد وردك اليومي وخصص تذكيرات الفجر والمغرب."}
           </p>
         </div>
 
@@ -411,14 +422,14 @@ export default function WirdSettingsPage() {
           className="gap-2 rounded-2xl h-11 px-6 font-bold shadow-lg shadow-primary/20 flex-shrink-0"
         >
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-          {t.save || "حفظ"}
+          {t.save || t.addedTranslations_2026?.["حفظ"] || "حفظ"}
         </Button>
       </div>
 
       {saved && (
         <div className="flex items-center gap-2 text-sm text-primary font-bold bg-primary/10 border border-primary/20 rounded-2xl px-4 py-3 animate-in fade-in slide-in-from-top-2">
           <CheckCircle className="w-4 h-4" />
-          {t.student.wirdPage.saveSuccess || "تم حفظ إعدادات الورد بنجاح"}
+          {t.wirdPage.saveSuccess || t.addedTranslations_2026?.["تم حفظ إعدادات الورد بنجاح"] || "تم حفظ إعدادات الورد بنجاح"}
         </div>
       )}
 
@@ -430,8 +441,8 @@ export default function WirdSettingsPage() {
               <Bell className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-base font-bold">{t.student.wirdPage.remindersTitle || "التذكيرات التلقائية"}</CardTitle>
-              <CardDescription className="text-sm">{t.student.wirdPage.remindersDesc || "سيصلك إشعار بعد أذان الفجر والمغرب مباشرة."}</CardDescription>
+              <CardTitle className="text-base font-bold">{t.wirdPage.remindersTitle || t.addedTranslations_2026?.["التذكيرات التلقائية"] || "التذكيرات التلقائية"}</CardTitle>
+              <CardDescription className="text-sm">{t.wirdPage.remindersDesc || t.addedTranslations_2026?.["سيصلك إشعار بعد أذان الفجر والمغرب مباشرة."] || "سيصلك إشعار بعد أذان الفجر والمغرب مباشرة."}</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -453,8 +464,8 @@ export default function WirdSettingsPage() {
                 <Sun className="w-5 h-5" />
               </div>
               <div className="text-right">
-                <p className="text-sm font-bold text-foreground">{t.student.wirdPage.fajrReminder || "تذكير الفجر"}</p>
-                <p className="text-xs text-muted-foreground">{t.student.wirdPage.fajrReminderDesc || "بعد أذان الفجر"}</p>
+                <p className="text-sm font-bold text-foreground">{t.wirdPage.fajrReminder || t.addedTranslations_2026?.["تذكير الفجر"] || "تذكير الفجر"}</p>
+                <p className="text-xs text-muted-foreground">{t.wirdPage.fajrReminderDesc || t.addedTranslations_2026?.["بعد أذان الفجر"] || "بعد أذان الفجر"}</p>
               </div>
             </div>
             <div className={`w-11 h-6 rounded-full transition-colors relative flex-shrink-0 ${
@@ -483,8 +494,8 @@ export default function WirdSettingsPage() {
                 <Moon className="w-5 h-5" />
               </div>
               <div className="text-right">
-                <p className="text-sm font-bold text-foreground">{t.student.wirdPage.maghribReminder || "تذكير المغرب"}</p>
-                <p className="text-xs text-muted-foreground">{t.student.wirdPage.maghribReminderDesc || "بعد أذان المغرب"}</p>
+                <p className="text-sm font-bold text-foreground">{t.wirdPage.maghribReminder || t.addedTranslations_2026?.["تذكير المغرب"] || "تذكير المغرب"}</p>
+                <p className="text-xs text-muted-foreground">{t.wirdPage.maghribReminderDesc || t.addedTranslations_2026?.["بعد أذان المغرب"] || "بعد أذان المغرب"}</p>
               </div>
             </div>
             <div className={`w-11 h-6 rounded-full transition-colors relative flex-shrink-0 ${
@@ -506,8 +517,8 @@ export default function WirdSettingsPage() {
               <BookOpen className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-base font-bold">{t.student.wirdPage.wirdItemsTitle || "عناصر الورد"}</CardTitle>
-              <CardDescription className="text-sm">{t.student.wirdPage.wirdItemsDesc || "أضف ما تريد قراءته يومياً من القرآن الكريم."}</CardDescription>
+              <CardTitle className="text-base font-bold">{t.wirdPage.wirdItemsTitle || t.addedTranslations_2026?.["عناصر الورد"] || "عناصر الورد"}</CardTitle>
+              <CardDescription className="text-sm">{t.wirdPage.wirdItemsDesc || t.addedTranslations_2026?.["أضف ما تريد قراءته يومياً من القرآن الكريم."] || "أضف ما تريد قراءته يومياً من القرآن الكريم."}</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -568,8 +579,8 @@ export default function WirdSettingsPage() {
           ) : (
             <div className="text-center py-8 text-muted-foreground">
               <BookOpen className="w-10 h-10 mx-auto mb-2 opacity-30" />
-              <p className="text-sm font-bold">{t.student.wirdPage.noItemsYet || "لم تُضِف أي عنصر بعد"}</p>
-              <p className="text-xs">{t.student.wirdPage.addWirdHint || "أضف السور أو الصفحات أو الأجزاء التي تريد قراءتها يومياً."}</p>
+              <p className="text-sm font-bold">{t.wirdPage.noItemsYet || t.addedTranslations_2026?.["لم تُضِف أي عنصر بعد"] || "لم تُضِف أي عنصر بعد"}</p>
+              <p className="text-xs">{t.wirdPage.addWirdHint || t.addedTranslations_2026?.["أضف السور أو الصفحات أو الأجزاء التي تريد قراءتها يومياً."] || "أضف السور أو الصفحات أو الأجزاء التي تريد قراءتها يومياً."}</p>
             </div>
           )}
 
@@ -582,7 +593,7 @@ export default function WirdSettingsPage() {
       <Card className="border-border rounded-3xl shadow-sm bg-card/70">
         <CardHeader className="p-6 pb-4">
           <CardTitle className="text-base font-bold">{t.student.wirdPage.personalGoalTitle || "ملاحظة / هدف شخصي"}</CardTitle>
-          <CardDescription className="text-sm">{t.student.wirdPage.personalGoalDesc || "اكتب هدفك أو تذكيراً شخصياً لنفسك."}</CardDescription>
+          <CardDescription className="text-sm">{t.wirdPage.personalGoalDesc || t.addedTranslations_2026?.["اكتب هدفك أو تذكيراً شخصياً لنفسك."] || "اكتب هدفك أو تذكيراً شخصياً لنفسك."}</CardDescription>
         </CardHeader>
         <CardContent className="p-6 pt-0">
           <textarea
@@ -600,7 +611,7 @@ export default function WirdSettingsPage() {
         {saved && (
           <span className="flex items-center gap-2 text-sm text-primary font-bold animate-in fade-in slide-in-from-right-2">
             <CheckCircle className="w-4 h-4" />
-            {t.student.logSavedSuccess || "تم الحفظ"}
+            {t.student.logSavedSuccess || t.addedTranslations_2026?.["تم الحفظ"] || "تم الحفظ"}
           </span>
         )}
         <Button
@@ -609,7 +620,7 @@ export default function WirdSettingsPage() {
           className="gap-2 rounded-2xl h-11 px-8 font-bold"
         >
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-          {t.student.wirdPage.saveSettingsBtn || "حفظ الإعدادات"}
+          {t.wirdPage.saveSettingsBtn || t.addedTranslations_2026?.["حفظ الإعدادات"] || "حفظ الإعدادات"}
         </Button>
       </div>
     </div>

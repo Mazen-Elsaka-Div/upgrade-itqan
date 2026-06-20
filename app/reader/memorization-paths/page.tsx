@@ -65,28 +65,28 @@ const PRESETS: Preset[] = [
 ]
 
 export default function ReaderMemorizationPathsPage() {
-  const { locale } = useI18n()
+  const { t, locale } = useI18n()
   const isAr = locale === "ar"
 
   const TYPE_LABELS: Record<string, string> = {
-    juz: isAr ? "بالأجزاء" : "By Juz",
-    surah: isAr ? "بالسور" : "By Surah",
-    hizb: isAr ? "بالأحزاب" : "By Hizb",
-    page: isAr ? "بالصفحات" : "By Page",
-    custom: isAr ? "مخصص" : "Custom",
+    juz: t.reader.memorizationPaths.divisionWords.juz,
+    surah: t.reader.memorizationPaths.divisionWords.surah,
+    hizb: t.reader.memorizationPaths.divisionWords.hizb,
+    page: t.reader.memorizationPaths.divisionWords.page,
+    custom: t.reader.memorizationPaths.divisionWords.custom,
   }
 
   const UNIT_WORD: Record<string, string> = {
-    juz: isAr ? "جزء" : "Juz",
-    surah: isAr ? "سورة" : "Surah",
-    hizb: isAr ? "حزب" : "Hizb",
-    page: isAr ? "صفحة" : "Page"
+    juz: t.reader.memorizationPaths.unitWords.juz,
+    surah: t.reader.memorizationPaths.unitWords.surah,
+    hizb: t.reader.memorizationPaths.unitWords.hizb,
+    page: t.reader.memorizationPaths.unitWords.page
   }
 
   const LEVEL_LABELS: Record<string, string> = {
-    beginner: isAr ? "مبتدئ" : "Beginner",
-    intermediate: isAr ? "متوسط" : "Intermediate",
-    advanced: isAr ? "متقدم" : "Advanced",
+    beginner: t.reader.memorizationPaths.levelBeginner,
+    intermediate: t.reader.memorizationPaths.levelIntermediate,
+    advanced: t.reader.memorizationPaths.levelAdvanced,
   }
 
   const [paths, setPaths] = useState<Path[]>([])
@@ -120,7 +120,7 @@ export default function ReaderMemorizationPathsPage() {
     from >= 1 && to >= 1 && from <= max && to <= max
   // Units are generated inclusively regardless of order (server clamps/sorts).
   const unitCount = rangeValid ? Math.abs(to - from) + 1 : 0
-  const unitWord = UNIT_WORD[form.unit_type] || (isAr ? "وحدة" : "Unit")
+  const unitWord = UNIT_WORD[form.unit_type] || (isAr ? t.reader.memorizationPaths.unitWords.custom : "Unit")
   const canSubmit = !!form.title.trim() && rangeValid && unitCount > 0
 
   function applyPreset(p: Preset) {
@@ -160,11 +160,11 @@ export default function ReaderMemorizationPathsPage() {
 
   async function submit() {
     if (!form.title.trim()) {
-      toast.error(isAr ? "اكتب عنوان المسار أولاً" : "Please enter the path title first")
+      toast.error(t.reader.memorizationPaths.errorTitleRequired)
       return
     }
     if (!rangeValid || unitCount === 0) {
-      toast.error(isAr ? `المدى غير صحيح — أدخل أرقاماً بين 1 و ${max}` : `Invalid range — enter numbers between 1 and ${max}`)
+      toast.error(t.reader.memorizationPaths.errorInvalidRange.replace("{max}", String(max)))
       return
     }
     setCreating(true)
@@ -187,16 +187,15 @@ export default function ReaderMemorizationPathsPage() {
       })
       const data = await res.json()
       if (!res.ok) {
-        toast.error(data.error || (isAr ? "فشل إنشاء المسار" : "Failed to create path"))
+        toast.error(data.error || t.reader.memorizationPaths.errorCreateFailed)
         return
       }
       toast.success(
-        (isAr 
-          ? `تم إنشاء المسار${data.total_units ? ` بـ ${data.total_units} وحدة` : ""}` 
-          : `Path created successfully${data.total_units ? ` with ${data.total_units} units` : ""}`) +
+        t.reader.memorizationPaths.successCreated + 
+        (data.total_units ? (isAr ? ` بـ ${data.total_units} وحدة` : ` with ${data.total_units} units`) : "") +
         (form.is_published 
-          ? (isAr ? " ونُشر للطلاب" : " and published to students") 
-          : (isAr ? " كمسودة" : " as draft")),
+          ? t.reader.memorizationPaths.successPublished 
+          : t.reader.memorizationPaths.successDraft),
       )
       setOpenCreate(false)
       setForm({
@@ -206,7 +205,7 @@ export default function ReaderMemorizationPathsPage() {
       })
       await load()
     } catch {
-      toast.error(isAr ? "تعذّر الاتصال بالخادم" : "Failed to connect to server")
+      toast.error(t.reader.memorizationPaths.errorServerConnection)
     } finally {
       setCreating(false)
     }
@@ -220,19 +219,17 @@ export default function ReaderMemorizationPathsPage() {
       body: JSON.stringify({ is_published: next }),
     })
     toast.success(next 
-      ? (isAr ? "تم نشر المسار للطلاب" : "Path published to students") 
-      : (isAr ? "تم إخفاء المسار" : "Path hidden"))
+      ? t.reader.memorizationPaths.successPublishToggle 
+      : t.reader.memorizationPaths.successHideToggle)
     await load()
   }
 
   async function remove(p: Path) {
-    const confirmMsg = isAr 
-      ? `حذف المسار "${p.title}" نهائياً؟ سيُحذف معه تقدّم الطلاب المشتركين.` 
-      : `Delete path "${p.title}" permanently? Students' progress will be deleted as well.`
+    const confirmMsg = t.reader.memorizationPaths.confirmDelete.replace("{title}", p.title)
     if (!confirm(confirmMsg)) return
     const res = await fetch(`/api/reader/memorization-paths/${p.id}`, { method: "DELETE" })
-    if (res.ok) toast.success(isAr ? "تم حذف المسار" : "Path deleted successfully")
-    else toast.error(isAr ? "تعذّر حذف المسار" : "Failed to delete path")
+    if (res.ok) toast.success(t.reader.memorizationPaths.successDeleted)
+    else toast.error(t.reader.memorizationPaths.errorDeleteFailed)
     await load()
   }
 
@@ -244,17 +241,15 @@ export default function ReaderMemorizationPathsPage() {
             <span className="inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-primary/10 text-primary">
               <BookOpen className="h-5 w-5" />
             </span>
-            {isAr ? "مسارات الحفظ" : "Memorization Paths"}
+            {t.reader.memorizationPaths.title}
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {isAr 
-              ? "خطط حفظ تنشئها لطلابك — جزء/سورة/حزب/صفحات بترتيب متتابع، الوحدة التالية تنفتح بعد إتمام السابقة."
-              : "Memorization plans you create for your students — Juz/Surah/Hizb/Pages in sequence, the next unit unlocks after completing the previous one."}
+            {t.reader.memorizationPaths.subtitle}
           </p>
         </div>
         <Button onClick={() => setOpenCreate(true)} className="gap-2">
           <Plus className="h-4 w-4" />
-          {isAr ? "إنشاء مسار جديد" : "Create New Path"}
+          {t.reader.memorizationPaths.createNewPathBtn}
         </Button>
       </div>
 
@@ -264,33 +259,17 @@ export default function ReaderMemorizationPathsPage() {
             <AlertTriangle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
             <div>
               {schemaNotice.notice === "schema_prerequisite_missing" ? (
-                isAr ? (
-                  <>
-                    <strong>اتصال قاعدة البيانات مش على schema التطبيق المطلوبة.</strong> الجدول الأساسي
-                    <code className="bg-amber-500/15 px-2 py-0.5 mx-1 rounded">{schemaNotice.missing_relation}</code>
-                    غير موجود، فتأكد من `DATABASE_URL`/`POSTGRES_URL` أو شغّل السكريبتات الأساسية قبل
-                    <code className="bg-amber-500/15 px-2 py-0.5 mx-1 rounded">scripts/022-memorization-paths.sql</code>
-                  </>
-                ) : (
-                  <>
-                    <strong>Database schema missing prerequisite table.</strong> The table 
-                    <code className="bg-amber-500/15 px-2 py-0.5 mx-1 rounded">{schemaNotice.missing_relation}</code>
-                    was not found. Please verify your connection or run 
-                    <code className="bg-amber-500/15 px-2 py-0.5 mx-1 rounded">scripts/022-memorization-paths.sql</code>
-                  </>
-                )
+                <>
+                  <strong>{isAr ? "اتصال قاعدة البيانات مش على schema التطبيق المطلوبة." : "Database schema missing prerequisite table."}</strong> {isAr ? "الجدول الأساسي" : "The table"}
+                  <code className="bg-amber-500/15 px-2 py-0.5 mx-1 rounded">{schemaNotice.missing_relation}</code>
+                  {isAr ? "غير موجود، فتأكد من DATABASE_URL/POSTGRES_URL أو شغّل السكريبتات الأساسية قبل" : "was not found. Please verify your connection or run"}
+                  <code className="bg-amber-500/15 px-2 py-0.5 mx-1 rounded">scripts/022-memorization-paths.sql</code>
+                </>
               ) : (
-                isAr ? (
-                  <>
-                    <strong>الميجريشن لسه ما اتشغّلش.</strong> راسل الإدارة لتشغيل
-                    <code className="bg-amber-500/15 px-2 py-0.5 mx-1 rounded">scripts/022-memorization-paths.sql</code>
-                  </>
-                ) : (
-                  <>
-                    <strong>Migrations not yet applied.</strong> Please run or request running
-                    <code className="bg-amber-500/15 px-2 py-0.5 mx-1 rounded">scripts/022-memorization-paths.sql</code>
-                  </>
-                )
+                <>
+                  <strong>{isAr ? "الميجريشن لسه ما اتشغّلش." : "Migrations not yet applied."}</strong> {isAr ? "راسل الإدارة لتشغيل" : "Please run or request running"}
+                  <code className="bg-amber-500/15 px-2 py-0.5 mx-1 rounded">scripts/022-memorization-paths.sql</code>
+                </>
               )}
             </div>
           </div>
@@ -304,24 +283,22 @@ export default function ReaderMemorizationPathsPage() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-primary/10 text-primary mb-4">
             <Layers className="h-8 w-8" />
           </div>
-          <h3 className="text-lg font-bold">{isAr ? "لم تنشئ أي مسار بعد" : "No paths created yet"}</h3>
+          <h3 className="text-lg font-bold">{t.reader.memorizationPaths.noPathsYet}</h3>
           <p className="text-sm text-muted-foreground mt-1 mb-5 max-w-md mx-auto">
-            {isAr 
-              ? "أنشئ خطة حفظ متتابعة لطلابك خلال ثوانٍ — اختر قالباً جاهزاً مثل «جزء عمّ» أو حدّد المدى بنفسك."
-              : "Create a sequential memorization plan for your students in seconds — choose a ready template like 'Juz Amma' or set the range yourself."}
+            {t.reader.memorizationPaths.noPathsYetDesc}
           </p>
           <Button onClick={() => setOpenCreate(true)} className="gap-2">
-            <Plus className="h-4 w-4" /> {isAr ? "إنشاء مسار جديد" : "Create New Path"}
+            <Plus className="h-4 w-4" /> {t.reader.memorizationPaths.createNewPathBtn}
           </Button>
         </Card>
       ) : (
         <>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { label: isAr ? "إجمالي المسارات" : "Total Paths", value: paths.length, icon: Layers, tone: "text-primary bg-primary/10" },
-              { label: isAr ? "المنشورة" : "Published", value: paths.filter(p => p.is_published).length, icon: Eye, tone: "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10" },
-              { label: isAr ? "إجمالي المشتركين" : "Total Enrolled", value: paths.reduce((s, p) => s + (Number(p.stats?.enrolled) || 0), 0), icon: Users, tone: "text-blue-600 dark:text-blue-400 bg-blue-500/10" },
-              { label: isAr ? "إجمالي الوحدات" : "Total Units", value: paths.reduce((s, p) => s + (Number(p.total_units) || 0), 0), icon: Hash, tone: "text-violet-600 dark:text-violet-400 bg-violet-500/10" },
+              { label: t.reader.memorizationPaths.totalPaths, value: paths.length, icon: Layers, tone: "text-primary bg-primary/10" },
+              { label: t.reader.memorizationPaths.published, value: paths.filter(p => p.is_published).length, icon: Eye, tone: "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10" },
+              { label: t.reader.memorizationPaths.totalEnrolled, value: paths.reduce((s, p) => s + (Number(p.stats?.enrolled) || 0), 0), icon: Users, tone: "text-blue-600 dark:text-blue-400 bg-blue-500/10" },
+              { label: t.reader.memorizationPaths.totalUnits, value: paths.reduce((s, p) => s + (Number(p.total_units) || 0), 0), icon: Hash, tone: "text-violet-600 dark:text-violet-400 bg-violet-500/10" },
             ].map((s, i) => (
               <Card key={i} className="p-4 flex items-center gap-3">
                 <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 ${s.tone}`}>
@@ -348,17 +325,17 @@ export default function ReaderMemorizationPathsPage() {
                   </Link>
                   <div className="flex flex-wrap gap-1 mt-2">
                     <Badge variant="outline">{TYPE_LABELS[p.unit_type] || p.unit_type}</Badge>
-                    <Badge variant="secondary">{p.total_units} {isAr ? "وحدة" : "Units"}</Badge>
+                    <Badge variant="secondary">{p.total_units} {p.total_units === 1 ? t.reader.memorizationPaths.unitCountSingular : t.reader.memorizationPaths.unitsCount}</Badge>
                     {p.level && LEVEL_LABELS[p.level] && (
                       <Badge variant="outline" className="border-primary/30 text-primary">{LEVEL_LABELS[p.level]}</Badge>
                     )}
                     {p.is_published ? (
                       <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/15">
-                        <Eye className="h-3 w-3 me-1" /> {isAr ? "منشور" : "Published"}
+                        <Eye className="h-3 w-3 me-1" /> {t.reader.memorizationPaths.publishedLabel}
                       </Badge>
                     ) : (
                       <Badge variant="outline">
-                        <EyeOff className="h-3 w-3 me-1" /> {isAr ? "مسودة" : "Draft"}
+                        <EyeOff className="h-3 w-3 me-1" /> {t.reader.memorizationPaths.draftLabel}
                       </Badge>
                     )}
                   </div>
@@ -372,18 +349,18 @@ export default function ReaderMemorizationPathsPage() {
               <div className="grid grid-cols-3 gap-2 mt-4 text-center">
                 <div className="border rounded-xl p-2">
                   <div className="text-xs text-muted-foreground flex items-center justify-center gap-1">
-                    <Users className="h-3 w-3" /> {isAr ? "مشترك" : "Enrolled"}
+                    <Users className="h-3 w-3" /> {t.reader.memorizationPaths.enrolledLabel}
                   </div>
                   <div className="text-lg font-semibold">{p.stats?.enrolled || "0"}</div>
                 </div>
                 <div className="border rounded-xl p-2">
                   <div className="text-xs text-muted-foreground flex items-center justify-center gap-1">
-                    <CheckCircle2 className="h-3 w-3" /> {isAr ? "أتموا" : "Passed"}
+                    <CheckCircle2 className="h-3 w-3" /> {t.reader.memorizationPaths.passedLabel}
                   </div>
                   <div className="text-lg font-semibold">{p.stats?.completed || "0"}</div>
                 </div>
                 <div className="border rounded-xl p-2">
-                  <div className="text-xs text-muted-foreground">{isAr ? "متوسط %" : "Avg Progress %"}</div>
+                  <div className="text-xs text-muted-foreground">{t.reader.memorizationPaths.avgProgress}</div>
                   <div className="text-lg font-semibold">{p.stats?.avg_progress || "0"}%</div>
                 </div>
               </div>
@@ -391,14 +368,14 @@ export default function ReaderMemorizationPathsPage() {
               <div className="flex gap-2 mt-4 pt-4 border-t">
                 <Button asChild variant="outline" size="sm" className="flex-1">
                   <Link href={`/reader/memorization-paths/${p.id}`}>
-                    {isAr ? "إدارة" : "Manage"} <ChevronRight className="h-4 w-4 ms-1 rtl:rotate-180" />
+                    {t.reader.memorizationPaths.manageBtn} <ChevronRight className="h-4 w-4 ms-1 rtl:rotate-180" />
                   </Link>
                 </Button>
                 <Button
                   variant={p.is_published ? "secondary" : "default"} size="sm"
                   onClick={() => togglePublish(p)}
                 >
-                  {p.is_published ? (isAr ? "إخفاء" : "Hide") : (isAr ? "نشر" : "Publish")}
+                  {p.is_published ? t.reader.memorizationPaths.hideBtn : t.reader.memorizationPaths.publishBtn}
                 </Button>
                 <Button variant="ghost" size="icon" onClick={() => remove(p)} className="text-destructive hover:text-destructive hover:bg-destructive/10">
                   <Trash2 className="h-4 w-4" />
@@ -413,18 +390,16 @@ export default function ReaderMemorizationPathsPage() {
       <Dialog open={openCreate} onOpenChange={setOpenCreate}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" dir={isAr ? "rtl" : "ltr"}>
           <DialogHeader>
-            <DialogTitle>{isAr ? "إنشاء مسار حفظ جديد" : "Create New Memorization Path"}</DialogTitle>
+            <DialogTitle>{t.reader.memorizationPaths.dialogTitle}</DialogTitle>
             <DialogDescription>
-              {isAr 
-                ? "اختر قالباً جاهزاً أو حدّد التقسيم والمدى — يولّد النظام الوحدات تلقائياً."
-                : "Choose a ready-made template or specify division and range — the system generates units automatically."}
+              {t.reader.memorizationPaths.dialogDesc}
             </DialogDescription>
           </DialogHeader>
 
           {/* Quick presets */}
           <div className="space-y-2">
             <Label className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Sparkles className="h-3.5 w-3.5 text-primary" /> {isAr ? "قوالب سريعة" : "Quick Presets"}
+              <Sparkles className="h-3.5 w-3.5 text-primary" /> {t.reader.memorizationPaths.quickPresets}
             </Label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {PRESETS.map(p => {
@@ -455,26 +430,26 @@ export default function ReaderMemorizationPathsPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-2">
             <div className="md:col-span-2 space-y-1">
-              <Label>{isAr ? "عنوان المسار" : "Path Title"}</Label>
+              <Label>{t.reader.memorizationPaths.pathTitleLabel}</Label>
               <Input
                 value={form.title}
                 onChange={e => setForm({ ...form, title: e.target.value })}
-                placeholder={isAr ? "مثلاً: حفظ جزء عم" : "e.g. Memorizing Juz Amma"}
+                placeholder={t.reader.memorizationPaths.pathTitlePlaceholder}
               />
             </div>
 
             <div className="md:col-span-2 space-y-1">
-              <Label>{isAr ? "الوصف (اختياري)" : "Description (Optional)"}</Label>
+              <Label>{t.reader.memorizationPaths.pathDescLabel}</Label>
               <Textarea
                 value={form.description}
                 onChange={e => setForm({ ...form, description: e.target.value })}
                 rows={2}
-                placeholder={isAr ? "نبذة قصيرة عن المسار" : "Short summary of the path"}
+                placeholder={t.reader.memorizationPaths.pathDescPlaceholder}
               />
             </div>
 
             <div className="space-y-1">
-              <Label>{isAr ? "نوع التقسيم" : "Division Type"}</Label>
+              <Label>{t.reader.memorizationPaths.divisionTypeLabel}</Label>
               <Select
                 value={form.unit_type}
                 onValueChange={v => {
@@ -484,17 +459,17 @@ export default function ReaderMemorizationPathsPage() {
               >
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="surah">{isAr ? "حسب السور (1-114)" : "By Surahs (1-114)"}</SelectItem>
-                  <SelectItem value="juz">{isAr ? "حسب الأجزاء (1-30)" : "By Juz (1-30)"}</SelectItem>
-                  <SelectItem value="hizb">{isAr ? "حسب الأحزاب (1-60)" : "By Hizb (1-60)"}</SelectItem>
-                  <SelectItem value="page">{isAr ? "حسب الصفحات (1-604)" : "By Pages (1-604)"}</SelectItem>
+                  <SelectItem value="surah">{t.reader.memorizationPaths.divSurah}</SelectItem>
+                  <SelectItem value="juz">{t.reader.memorizationPaths.divJuz}</SelectItem>
+                  <SelectItem value="hizb">{t.reader.memorizationPaths.divHizb}</SelectItem>
+                  <SelectItem value="page">{t.reader.memorizationPaths.divPage}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-1">
               <Label className="flex items-center gap-1.5">
-                <ArrowUpDown className="h-3.5 w-3.5" /> {isAr ? "ترتيب الحفظ" : "Memorization Order"}
+                <ArrowUpDown className="h-3.5 w-3.5" /> {t.reader.memorizationPaths.memorizationOrder}
               </Label>
               <Select
                 value={form.direction}
@@ -502,14 +477,14 @@ export default function ReaderMemorizationPathsPage() {
               >
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="desc">{isAr ? `الترتيب الطبيعي (يبدأ بـ${unitWord} ${form.range_from})` : `Natural Order (Starts with ${unitWord} ${form.range_from})`}</SelectItem>
-                  <SelectItem value="asc">{isAr ? `معكوس (يبدأ بـ${unitWord} ${form.range_to})` : `Reverse Order (Starts with ${unitWord} ${form.range_to})`}</SelectItem>
+                  <SelectItem value="desc">{t.reader.memorizationPaths.naturalOrder.replace("{unit}", unitWord).replace("{from}", form.range_from)}</SelectItem>
+                  <SelectItem value="asc">{t.reader.memorizationPaths.reverseOrder.replace("{unit}", unitWord).replace("{to}", form.range_to)}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-1">
-              <Label>{isAr ? `من ${unitWord} رقم` : `From ${unitWord} #`}</Label>
+              <Label>{t.reader.memorizationPaths.fromUnitLabel.replace("{unit}", unitWord)}</Label>
               <Input
                 type="number" min="1" max={max}
                 value={form.range_from}
@@ -519,7 +494,7 @@ export default function ReaderMemorizationPathsPage() {
             </div>
 
             <div className="space-y-1">
-              <Label>{isAr ? `إلى ${unitWord} رقم` : `To ${unitWord} #`}</Label>
+              <Label>{t.reader.memorizationPaths.toUnitLabel.replace("{unit}", unitWord)}</Label>
               <Input
                 type="number" min="1" max={max}
                 value={form.range_to}
@@ -529,27 +504,27 @@ export default function ReaderMemorizationPathsPage() {
             </div>
 
             <div className="space-y-1">
-              <Label>{isAr ? "المستوى" : "Level"}</Label>
+              <Label>{t.reader.memorizationPaths.levelLabel}</Label>
               <Select
                 value={form.level}
                 onValueChange={v => setForm({ ...form, level: v })}
               >
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="beginner">{isAr ? "مبتدئ" : "Beginner"}</SelectItem>
-                  <SelectItem value="intermediate">{isAr ? "متوسط" : "Intermediate"}</SelectItem>
-                  <SelectItem value="advanced">{isAr ? "متقدم" : "Advanced"}</SelectItem>
+                  <SelectItem value="beginner">{t.reader.memorizationPaths.levelBeginner}</SelectItem>
+                  <SelectItem value="intermediate">{t.reader.memorizationPaths.levelIntermediate}</SelectItem>
+                  <SelectItem value="advanced">{t.reader.memorizationPaths.levelAdvanced}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-1">
-              <Label>{isAr ? "المدة المتوقعة (أيام)" : "Expected Duration (Days)"}</Label>
+              <Label>{t.reader.memorizationPaths.expectedDurationLabel}</Label>
               <Input
                 type="number" min="1"
                 value={form.estimated_days}
                 onChange={e => setForm({ ...form, estimated_days: e.target.value })}
-                placeholder={isAr ? "اختياري" : "Optional"}
+                placeholder={t.reader.memorizationPaths.optionalPlaceholder}
               />
             </div>
 
@@ -561,26 +536,19 @@ export default function ReaderMemorizationPathsPage() {
                     <Layers className="h-5 w-5" />
                   </div>
                   <p className="text-sm">
-                    {isAr ? (
-                      <>
-                        سيتم توليد <strong className="text-primary">{unitCount} {unitCount === 1 ? unitWord : `${unitWord}اً`}</strong>{" "}
-                        ({TYPE_LABELS[form.unit_type]}) — تُفتح وحدة تلو الأخرى بعد إتمام السابقة.
-                      </>
-                    ) : (
-                      <>
-                        Will generate <strong className="text-primary">{unitCount} {unitCount === 1 ? unitWord : `${unitWord}s`}</strong>{" "}
-                        ({TYPE_LABELS[form.unit_type]}) — unlocked sequentially upon completion.
-                      </>
-                    )}
+                    {t.reader.memorizationPaths.willGenerateNote
+                      .replace("{count}", String(unitCount))
+                      .replace("{unit}", unitCount === 1 ? unitWord : (isAr ? `${unitWord}اً` : `${unitWord}s`))
+                      .replace("{type}", TYPE_LABELS[form.unit_type])}
                   </p>
                 </div>
               ) : (
                 <div className="flex items-center gap-3 rounded-2xl border border-destructive/30 bg-destructive/5 p-3">
                   <AlertTriangle className="h-5 w-5 text-destructive shrink-0" />
                   <p className="text-sm text-destructive">
-                    {isAr 
-                      ? `المدى غير صحيح — أدخل أرقاماً بين 1 و ${max} لنوع «${TYPE_LABELS[form.unit_type]}».` 
-                      : `Invalid range — enter numbers between 1 and ${max} for "${TYPE_LABELS[form.unit_type]}".`}
+                    {t.reader.memorizationPaths.invalidRangeError
+                      .replace("{max}", String(max))
+                      .replace("{type}", TYPE_LABELS[form.unit_type])}
                   </p>
                 </div>
               )}
@@ -594,7 +562,7 @@ export default function ReaderMemorizationPathsPage() {
               />
               <Label htmlFor="r_require_audio" className="cursor-pointer flex items-center gap-1.5">
                 <Mic className="h-4 w-4 text-muted-foreground" />
-                {isAr ? "يتطلب تسجيل صوتي قبل إتمام كل وحدة" : "Requires audio recording before completing each unit"}
+                {t.reader.memorizationPaths.requiresAudioNote}
               </Label>
             </div>
 
@@ -606,18 +574,18 @@ export default function ReaderMemorizationPathsPage() {
               />
               <Label htmlFor="r_is_published" className="cursor-pointer flex items-center gap-1.5">
                 <Eye className="h-4 w-4 text-muted-foreground" />
-                {isAr ? "نشر المسار للطلاب فوراً" : "Publish path to students immediately"}
+                {t.reader.memorizationPaths.publishImmediatelyNote}
               </Label>
             </div>
           </div>
 
           <DialogFooter className="gap-2">
-            <Button variant="ghost" onClick={() => setOpenCreate(false)}>{isAr ? "إلغاء" : "Cancel"}</Button>
+            <Button variant="ghost" onClick={() => setOpenCreate(false)}>{t.reader.memorizationPaths.cancelBtn}</Button>
             <Button onClick={submit} disabled={creating || !canSubmit} className="gap-2">
               {creating && <Loader2 className="h-4 w-4 animate-spin" />}
               {rangeValid && unitCount > 0 
-                ? (isAr ? `إنشاء المسار (${unitCount} ${unitWord})` : `Create Path (${unitCount} ${unitWord})`) 
-                : (isAr ? "إنشاء المسار" : "Create Path")}
+                ? t.reader.memorizationPaths.createPathBtnWithCount.replace("{count}", String(unitCount)).replace("{unit}", unitCount === 1 ? unitWord : (isAr ? `${unitWord}اً` : `${unitWord}s`))
+                : t.reader.memorizationPaths.createPathBtn}
             </Button>
           </DialogFooter>
         </DialogContent>

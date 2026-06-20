@@ -11,7 +11,7 @@ import { useI18n } from '@/lib/i18n/context'
 
 export default function CreateStudentPage() {
     const router = useRouter()
-    const { t } = useI18n()
+    const { t, dir } = useI18n()
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
     const [success, setSuccess] = useState('')
@@ -41,10 +41,10 @@ export default function CreateStudentPage() {
             const data = await res.json()
 
             if (!res.ok) {
-                throw new Error(data.error || 'حدث خطأ أثناء إنشاء حساب الطالب')
+                throw new Error(data.error || t.teacher.students.createError)
             }
 
-            setSuccess('تم إنشاء حساب الطالب بنجاح! تم إرسال كلمة مرور مؤقتة إلى بريده الإلكتروني.')
+            setSuccess(t.teacher.students.createSuccess)
             setFormData({ name: '', email: '', gender: 'male' })
 
             // Navigate back after a short delay
@@ -67,7 +67,7 @@ export default function CreateStudentPage() {
     }
 
     return (
-        <div className="space-y-6 max-w-2xl mx-auto">
+        <div className="space-y-6 max-w-2xl mx-auto" dir={dir}>
             <div className="flex items-center gap-4">
                 <Link href="/academy/teacher/students">
                     <Button variant="ghost" size="icon" className="rounded-full">
@@ -75,8 +75,8 @@ export default function CreateStudentPage() {
                     </Button>
                 </Link>
                 <div>
-                    <h1 className="text-3xl font-bold">إضافة طالب جديد</h1>
-                    <p className="text-muted-foreground mt-1">إنشاء حساب لطالب جديد لضمه إلى دوراتك</p>
+                    <h1 className="text-3xl font-bold">{t.teacher.students.createTitle}</h1>
+                    <p className="text-muted-foreground mt-1">{t.teacher.students.createSubtitle}</p>
                 </div>
             </div>
 
@@ -84,10 +84,10 @@ export default function CreateStudentPage() {
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <UserPlus className="w-5 h-5 text-primary" />
-                        بيانات الطالب
+                        {t.teacher.students.studentDataCard}
                     </CardTitle>
                     <CardDescription>
-                        سيتم إنشاء حساب جديد للطالب وإرسال كلمة مرور مؤقتة إلى بريده الإلكتروني
+                        {t.teacher.students.studentDataDesc}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -104,14 +104,14 @@ export default function CreateStudentPage() {
 
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium mb-1">الاسم الكامل</label>
+                            <label className="block text-sm font-medium mb-1">{t.teacher.students.fullName}</label>
                             <div className="relative">
                                 <User className="absolute right-3 top-3 w-4 h-4 text-muted-foreground" />
                                 <Input
                                     name="name"
                                     value={formData.name}
                                     onChange={handleChange}
-                                    placeholder="محمد أحمد"
+                                    placeholder={t.teacher.students.fullNamePlaceholder}
                                     className="pr-10"
                                     required
                                 />
@@ -119,7 +119,7 @@ export default function CreateStudentPage() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium mb-1">البريد الإلكتروني</label>
+                            <label className="block text-sm font-medium mb-1">{t.teacher.students.email}</label>
                             <div className="relative">
                                 <Mail className="absolute right-3 top-3 w-4 h-4 text-muted-foreground" />
                                 <Input
@@ -127,7 +127,7 @@ export default function CreateStudentPage() {
                                     type="email"
                                     value={formData.email}
                                     onChange={handleChange}
-                                    placeholder="student@example.com"
+                                    placeholder={t.teacher.students.emailPlaceholder}
                                     className="pr-10 text-left"
                                     dir="ltr"
                                     required
@@ -138,26 +138,26 @@ export default function CreateStudentPage() {
                         <div className="p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-900 flex gap-3">
                             <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
                             <div className="text-sm text-blue-800 dark:text-blue-300">
-                                <p className="font-medium">كلمة مرور مؤقتة</p>
-                                <p className="text-blue-600 dark:text-blue-400 mt-1">سيتم إنشاء كلمة مرور مؤقتة تلقائياً وإرسالها للطالب عبر البريد الإلكتروني. سيُطلب منه تغييرها عند أول تسجيل دخول.</p>
+                                <p className="font-medium">{t.teacher.students.tempPasswordTitle}</p>
+                                <p className="text-blue-600 dark:text-blue-400 mt-1">{t.teacher.students.tempPasswordDesc}</p>
                             </div>
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium mb-1">الجنس</label>
+                            <label className="block text-sm font-medium mb-1">{t.teacher.students.gender}</label>
                             <select
                                 name="gender"
                                 value={formData.gender}
                                 onChange={handleChange}
                                 className="w-full flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                             >
-                                <option value="male">ذكر</option>
-                                <option value="female">أنثى</option>
+                                <option value="male">{t.teacher.students.male}</option>
+                                <option value="female">{t.teacher.students.female}</option>
                             </select>
                         </div>
 
                         <Button type="submit" disabled={loading} className="w-full mt-6">
-                            {loading ? 'جاري الإنشاء...' : 'إنشاء حساب الطالب'}
+                            {loading ? t.teacher.students.creatingBtn : t.teacher.students.createBtn}
                         </Button>
                     </form>
                 </CardContent>

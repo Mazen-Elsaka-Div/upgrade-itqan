@@ -95,9 +95,11 @@ export default function FiqhSupervisorDashboard() {
           </div>
           <h1 className="text-4xl md:text-5xl font-black text-foreground tracking-tight leading-tight flex flex-col gap-2">
             {a.fsqWelcome} 
-
+            <span>
               {supervisorName || a.fsqWelcomeName}
-
+            </span>
+          </h1>
+          <p className="text-muted-foreground/80 font-medium max-w-2xl text-lg leading-relaxed">
             {a.fsqDashboardDesc}
           </p>
         </div>

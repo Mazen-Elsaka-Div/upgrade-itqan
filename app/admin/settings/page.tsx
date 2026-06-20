@@ -58,7 +58,7 @@ const getTabs = (a: any) => [
 ]
 
 export default function MaqraahAdminSettingsPage() {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const a = t.admin
   const tabs = getTabs(a)
   const {
@@ -204,7 +204,7 @@ export default function MaqraahAdminSettingsPage() {
 
   if (isLoading) {
     return (
-      <div className="p-6 space-y-6" dir="rtl">
+      <div className="p-6 space-y-6" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
         <div className="flex items-center justify-between">
           <Skeleton className="h-8 w-48" />
           <Skeleton className="h-10 w-32" />
@@ -225,7 +225,7 @@ export default function MaqraahAdminSettingsPage() {
   }
 
   return (
-    <div className="bg-background -mx-6 lg:-mx-8 -mt-6 lg:-mt-8" dir="rtl">
+    <div className="bg-background -mx-6 lg:-mx-8 -mt-6 lg:-mt-8" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
       {/* Sticky Header */}
       <div className="sticky -top-6 lg:-top-8 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
         <div className="flex items-center justify-between px-6 lg:px-8 py-4">
@@ -267,7 +267,7 @@ export default function MaqraahAdminSettingsPage() {
       <div className="flex">
         {/* Sidebar - Desktop */}
         {!isMobile && (
-          <aside className="w-64 border-l border-border min-h-[calc(100vh-73px)] bg-muted/30">
+          <aside className={cn("w-64 min-h-[calc(100vh-73px)] bg-muted/30", locale === 'ar' ? 'border-l border-border' : 'border-r border-border')}>
             <div className="p-4 sticky top-[73px]">
               <div className="relative mb-4">
                 <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />

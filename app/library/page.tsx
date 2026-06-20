@@ -110,52 +110,52 @@ export default function PublicLibraryPage() {
   )
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-background" dir="rtl">
+    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-background" dir={isAr ? "rtl" : "ltr"}>
       <div className="container mx-auto px-4 py-8 flex-1 flex flex-col">
         {/* Sleek Filters Section */}
         <div className="flex flex-col sm:flex-row gap-3 mb-12 bg-card/90 backdrop-blur-2xl border border-border/60 p-3 rounded-3xl shadow-xl shadow-black/5">
-          <div className="flex items-center justify-center sm:justify-start gap-2 text-foreground/80 px-5 sm:border-l border-border/60">
+          <div className={cn("flex items-center justify-center sm:justify-start gap-2 text-foreground/80 px-5", isAr ? "sm:border-l" : "sm:border-r", "border-border/60")}>
             <Filter className="w-5 h-5 text-primary" />
-            <span className="font-bold text-sm whitespace-nowrap">تصفية النتائج:</span>
+            <span className="font-bold text-sm whitespace-nowrap">{lib?.filterResults || (isAr ? "تصفية النتائج:" : "Filter results:")}</span>
           </div>
           
           <div className="relative flex-1 group">
-            <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none group-hover:text-primary transition-colors" />
+            <Search className={cn("absolute top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none group-hover:text-primary transition-colors", isAr ? "right-4" : "left-4")} />
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={lib?.searchPlaceholder || "ابحث بعنوان الكتاب، المؤلف..."}
-              className="w-full bg-muted/40 border-0 rounded-2xl pr-12 pl-4 h-14 text-base font-bold placeholder:font-normal hover:bg-muted/60 focus-visible:bg-background focus-visible:ring-2 focus-visible:ring-primary/30 transition-all outline-none shadow-none"
+              className={cn("w-full bg-muted/40 border-0 rounded-2xl h-14 text-base font-bold placeholder:font-normal hover:bg-muted/60 focus-visible:bg-background focus-visible:ring-2 focus-visible:ring-primary/30 transition-all outline-none shadow-none", isAr ? "pr-12 pl-4" : "pl-12 pr-4")}
             />
           </div>
 
           <div className="relative flex-1 group">
-            <LayoutGrid className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none group-hover:text-primary transition-colors" />
+            <LayoutGrid className={cn("absolute top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none group-hover:text-primary transition-colors", isAr ? "right-4" : "left-4")} />
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full appearance-none bg-muted/40 border-0 rounded-2xl pr-12 pl-4 h-14 text-base font-bold hover:bg-muted/60 focus:bg-background focus:ring-2 focus:ring-primary/30 transition-all cursor-pointer outline-none"
+              className={cn("w-full appearance-none bg-muted/40 border-0 rounded-2xl h-14 text-base font-bold hover:bg-muted/60 focus:bg-background focus:ring-2 focus:ring-primary/30 transition-all cursor-pointer outline-none", isAr ? "pr-12 pl-4" : "pl-12 pr-4")}
             >
               <option value="">{lib?.allCategories || "كل التصنيفات"}</option>
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>{c.name}</option>
               ))}
             </select>
-            <ChevronDown className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none transition-transform group-hover:translate-y-0.5" />
+            <ChevronDown className={cn("absolute top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none transition-transform group-hover:translate-y-0.5", isAr ? "left-4" : "right-4")} />
           </div>
 
           <div className="relative flex-1 group">
-            <Globe className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none group-hover:text-primary transition-colors" />
+            <Globe className={cn("absolute top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none group-hover:text-primary transition-colors", isAr ? "right-4" : "left-4")} />
             <select
               value={language}
               onChange={(e) => setLanguage(e.target.value)}
-              className="w-full appearance-none bg-muted/40 border-0 rounded-2xl pr-12 pl-4 h-14 text-base font-bold hover:bg-muted/60 focus:bg-background focus:ring-2 focus:ring-primary/30 transition-all cursor-pointer outline-none"
+              className={cn("w-full appearance-none bg-muted/40 border-0 rounded-2xl h-14 text-base font-bold hover:bg-muted/60 focus:bg-background focus:ring-2 focus:ring-primary/30 transition-all cursor-pointer outline-none", isAr ? "pr-12 pl-4" : "pl-12 pr-4")}
             >
               {languageOptions.map((l) => (
                 <option key={l.code || "all"} value={l.code}>{l.label}</option>
               ))}
             </select>
-            <ChevronDown className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none transition-transform group-hover:translate-y-0.5" />
+            <ChevronDown className={cn("absolute top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none transition-transform group-hover:translate-y-0.5", isAr ? "left-4" : "right-4")} />
           </div>
         </div>
 
@@ -166,7 +166,7 @@ export default function PublicLibraryPage() {
               <div className="w-16 h-16 border-4 border-primary/20 rounded-full animate-pulse" />
               <div className="absolute inset-0 w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin" />
             </div>
-            <p className="mt-4 text-lg font-bold text-primary animate-pulse">جاري تحميل المكتبة...</p>
+            <p className="mt-4 text-lg font-bold text-primary animate-pulse">{lib?.loading || (isAr ? "جاري تحميل المكتبة..." : "Loading library...")}</p>
           </div>
         ) : books.length === 0 ? (
           <div className="flex-1 flex items-center justify-center py-20">
@@ -178,13 +178,13 @@ export default function PublicLibraryPage() {
                 {lib?.noResults || "لا توجد نتائج"}
               </h3>
               <p className="text-muted-foreground text-sm">
-                لم نعثر على أي كتب تطابق معايير البحث الخاصة بك. جرب تغيير كلمات البحث أو التصنيفات.
+                {lib?.noResultsDesc || (isAr ? "لم نعثر على أي كتب تطابق معايير البحث الخاصة بك. جرب تغيير كلمات البحث أو التصنيفات." : "We did not find any books matching your search criteria. Try changing your search query or categories.")}
               </p>
               <button 
                 onClick={() => { setSearch(''); setCategory(''); setLanguage(''); }}
                 className="mt-4 px-6 py-2 bg-primary/10 hover:bg-primary/20 text-primary font-bold rounded-xl transition-colors"
               >
-                مسح الفلاتر
+                {lib?.clearFilters || (isAr ? "مسح الفلاتر" : "Clear Filters")}
               </button>
             </div>
           </div>
@@ -216,7 +216,7 @@ export default function PublicLibraryPage() {
                       ) : (
                         <div className="w-full h-full flex flex-col items-center justify-center bg-primary/5 text-primary/30 gap-3 border border-primary/10">
                           <BookOpen className="w-12 h-12" />
-                          <span className="text-[10px] font-bold uppercase tracking-widest opacity-50">بدون غلاف</span>
+                          <span className="text-[10px] font-bold uppercase tracking-widest opacity-50">{lib?.noCover || (isAr ? "بدون غلاف" : "No Cover")}</span>
                         </div>
                       )}
                     </div>
@@ -225,7 +225,7 @@ export default function PublicLibraryPage() {
                     <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center z-20">
                       <div className="translate-y-8 group-hover:translate-y-0 transition-transform duration-500 bg-primary text-primary-foreground px-6 py-2.5 rounded-full font-bold text-sm flex items-center gap-2 shadow-xl">
                         <BookOpen className="w-4 h-4" />
-                        <span>اقرأ الآن</span>
+                        <span>{lib?.readNow || (isAr ? "اقرأ الآن" : "Read Now")}</span>
                       </div>
                     </div>
 
@@ -258,8 +258,8 @@ export default function PublicLibraryPage() {
                           className="inline-flex items-center justify-center px-2 py-0.5 rounded-md bg-primary/10 text-primary text-[10px] font-bold border border-primary/10"
                         >
                           {lf.language === OTHER_LANGUAGE_CODE
-                            ? lf.language_label || "أخرى"
-                            : getLanguageDisplay(lf.language, lf.language_label, "ar")}
+                            ? lf.language_label || lib?.otherLanguage || (isAr ? "أخرى" : "Other")
+                            : getLanguageDisplay(lf.language, lf.language_label, t.locale)}
                         </span>
                       ))}
                       {book.languages.length > 2 && (
@@ -273,7 +273,7 @@ export default function PublicLibraryPage() {
                       {book.pages_count ? (
                         <div className="flex items-center gap-1.5" title="عدد الصفحات">
                           <FileText className="w-3.5 h-3.5 text-primary/60" />
-                          <span>{book.pages_count} صفحة</span>
+                          <span>{book.pages_count} {lib?.pages || (isAr ? "صفحة" : "pages")}</span>
                         </div>
                       ) : (
                         <div /> // Spacer

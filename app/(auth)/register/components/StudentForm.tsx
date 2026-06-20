@@ -97,7 +97,7 @@ export function StudentForm({ initialRole, onBack }: StudentFormProps) {
     <div className="w-full">
       <div className="flex items-center mb-6">
         <button onClick={onBack} className="p-2 hover:bg-secondary rounded-full transition-colors" aria-label="back">
-          <ArrowRight className="w-5 h-5 text-muted-foreground" />
+          <ArrowRight className="w-5 h-5 text-muted-foreground rtl:rotate-0 ltr:rotate-180" />
         </button>
         <h2 className="text-2xl font-bold text-foreground mr-2">{roleTitle}</h2>
       </div>
@@ -147,13 +147,21 @@ export function StudentForm({ initialRole, onBack }: StudentFormProps) {
 
         {initialRole !== 'parent' && (
           <div>
-            <label htmlFor="platform" className="block text-sm font-medium text-foreground/80 mb-1">المنصة المراد التسجيل بها</label>
+            <label htmlFor="platform" className="block text-sm font-medium text-foreground/80 mb-1">
+              {t.locale === 'ar' ? 'المنصة المراد التسجيل بها' : 'Platform to register in'}
+            </label>
             <div className="relative">
               <ChevronDown className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5 pointer-events-none" />
               <select id="platform" value={platform} onChange={(e) => setPlatform(e.target.value)} className="w-full pr-4 pl-10 py-3 bg-secondary/20 dark:bg-secondary/10 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-colors text-sm text-foreground appearance-none" required>
-                <option value="both" className="bg-card">الاثنان معاً (المقرأة والأكاديمية)</option>
-                <option value="quran" className="bg-card">المقرأة (تسميع القرآن فقط)</option>
-                <option value="academy" className="bg-card">الأكاديمية (الدورات التعليمية فقط)</option>
+                <option value="both" className="bg-card">
+                  {t.locale === 'ar' ? 'الاثنان معاً (المقرأة والأكاديمية)' : 'Both (Maqra\'ah & Academy)'}
+                </option>
+                <option value="quran" className="bg-card">
+                  {t.locale === 'ar' ? 'المقرأة (تسميع القرآن فقط)' : 'Maqra\'ah (Quran Recitation only)'}
+                </option>
+                <option value="academy" className="bg-card">
+                  {t.locale === 'ar' ? 'الأكاديمية (الدورات التعليمية فقط)' : 'Academy (Educational Courses only)'}
+                </option>
               </select>
             </div>
           </div>

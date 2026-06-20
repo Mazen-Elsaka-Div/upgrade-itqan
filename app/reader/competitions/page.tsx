@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Trophy, Users, Calendar, Loader2, ClipboardCheck, Clock, Star } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { PageLoadingSkeleton } from '@/components/ui/page-loading-skeleton'
+import { useI18n } from '@/lib/i18n/context'
 
 interface Competition {
   id: string
@@ -18,14 +19,19 @@ interface Competition {
   pending_count?: number
 }
 
-const TYPE_LABELS: Record<string, string> = {
-  monthly: 'شهرية', ramadan: 'رمضان', tajweed: 'تجويد',
-  memorization: 'حفظ', weekly: 'أسبوعية', special: 'خاصة',
-}
-
 export default function ReaderCompetitionsPage() {
+  const { t, locale } = useI18n()
   const [competitions, setCompetitions] = useState<Competition[]>([])
   const [loading, setLoading] = useState(true)
+
+  const TYPE_LABELS: Record<string, string> = {
+    monthly: t.reader.competitions.typeMonthly,
+    ramadan: t.reader.competitions.typeRamadan,
+    tajweed: t.reader.competitions.typeTajweed,
+    memorization: t.reader.competitions.typeMemorization,
+    weekly: t.reader.competitions.typeWeekly,
+    special: t.reader.competitions.typeSpecial,
+  }
 
   useEffect(() => {
     async function load() {
@@ -51,15 +57,15 @@ export default function ReaderCompetitionsPage() {
   }
 
   return (
-    <div className="space-y-8 max-w-5xl mx-auto pb-12">
+    <div className="space-y-8 max-w-5xl mx-auto pb-12" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6 pb-6 border-b border-border/50">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-3">
             <ClipboardCheck className="w-8 h-8 text-primary" />
-            تحكيم المسابقات
+            {t.reader.competitions.title}
           </h1>
-          <p className="text-muted-foreground mt-2">قيّم مشاركات الطلاب في المسابقات واسند الدرجات النهائية.</p>
+          <p className="text-muted-foreground mt-2">{t.reader.competitions.subtitle}</p>
         </div>
         {totalPending > 0 && (
           <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200/50 dark:border-amber-800/50 rounded-xl px-5 py-3 flex items-center gap-3 shadow-sm min-w-[200px]">
@@ -69,7 +75,7 @@ export default function ReaderCompetitionsPage() {
                 {totalPending}
               </span>
               <span className="text-xs font-medium text-amber-600 dark:text-amber-500">
-                مشاركة بانتظار التقييم
+                {t.reader.competitions.pendingCount.replace("{count}", "")}
               </span>
             </div>
           </div>
@@ -82,14 +88,14 @@ export default function ReaderCompetitionsPage() {
           <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-4">
             <Trophy className="w-6 h-6 text-muted-foreground" />
           </div>
-          <h3 className="text-lg font-semibold mb-1">لا توجد مسابقات</h3>
-          <p className="text-muted-foreground text-sm">لا توجد مسابقات مسندة إليك لتحكيمها في الوقت الحالي.</p>
+          <h3 className="text-lg font-semibold mb-1">{t.reader.competitions.noCompetitions}</h3>
+          <p className="text-muted-foreground text-sm">{t.reader.competitions.noCompetitionsDesc}</p>
         </div>
       ) : (
         <div className="grid gap-4">
           {competitions.map(comp => {
-            const startDate = new Date(comp.start_date).toLocaleDateString('ar-EG', { day: 'numeric', month: 'long' })
-            const endDate = new Date(comp.end_date).toLocaleDateString('ar-EG', { day: 'numeric', month: 'long' })
+            const startDate = new Date(comp.start_date).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'long' })
+            const endDate = new Date(comp.end_date).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'long' })
 
             return (
               <Link
@@ -109,7 +115,7 @@ export default function ReaderCompetitionsPage() {
                           ? 'bg-emerald-50 text-emerald-700 border-emerald-200/50 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800/50' 
                           : 'bg-muted text-muted-foreground border-border/50'
                       )}>
-                        {comp.status === 'active' ? 'نشطة' : 'منتهية'}
+                        {comp.status === 'active' ? t.reader.competitions.statusActive : t.reader.competitions.statusEnded}
                       </span>
                     </div>
                     
@@ -119,7 +125,7 @@ export default function ReaderCompetitionsPage() {
 
                     <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                       <span className="flex items-center gap-1.5"><Calendar className="w-4 h-4" /> {startDate} — {endDate}</span>
-                      <span className="flex items-center gap-1.5"><Users className="w-4 h-4" /> {comp.participants_count} مشارك</span>
+                      <span className="flex items-center gap-1.5"><Users className="w-4 h-4" /> {t.reader.competitions.participantsCount.replace("{count}", String(comp.participants_count))}</span>
                     </div>
                   </div>
 
@@ -127,12 +133,12 @@ export default function ReaderCompetitionsPage() {
                     {(comp.pending_count || 0) > 0 ? (
                       <div className="flex flex-col items-center justify-center">
                         <span className="text-2xl font-bold text-amber-600 dark:text-amber-500">{comp.pending_count}</span>
-                        <span className="text-xs font-medium text-amber-700/70 dark:text-amber-400/70 mt-1">بانتظار التقييم</span>
+                        <span className="text-xs font-medium text-amber-700/70 dark:text-amber-400/70 mt-1">{t.reader.competitions.awaitingEvaluation}</span>
                       </div>
                     ) : (
                       <div className="flex flex-col items-center justify-center text-emerald-600 dark:text-emerald-500">
                         <Star className="w-6 h-6 mb-1" />
-                        <span className="text-xs font-medium opacity-80">مكتملة التقييم</span>
+                        <span className="text-xs font-medium opacity-80">{t.reader.competitions.completedEvaluation}</span>
                       </div>
                     )}
                   </div>

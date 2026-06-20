@@ -122,7 +122,7 @@ export default function AcademySupervisorDashboard() {
           </div>
           <h1 className="text-4xl md:text-5xl font-black text-foreground tracking-tight leading-tight flex flex-col gap-2">
             {a.svWelcome} 
-
+            <span>
               {name || a.svWelcomeName}
             </span>
           </h1>

@@ -219,10 +219,10 @@ export default function StudentDashboard() {
   }, [recitations])
 
   const level = useMemo(() => {
-    if (stats.mastered >= 10) return { name: t.student.levelAdvanced || "متقدم", color: "from-emerald-500 to-teal-600" }
-    if (stats.mastered >= 5) return { name: t.student.levelIntermediate || "متوسط", color: "from-amber-500 to-orange-600" }
-    if (stats.mastered >= 1) return { name: t.student.levelBeginner || "مبتدئ", color: "from-sky-500 to-blue-600" }
-    return { name: t.student.levelNew || "جديد", color: "from-slate-400 to-slate-600" }
+    if (stats.mastered >= 10) return { name: t.student.levelAdvanced || t.addedTranslations_2026?.["متقدم"] || "متقدم", color: "from-emerald-500 to-teal-600" }
+    if (stats.mastered >= 5) return { name: t.student.levelIntermediate || t.addedTranslations_2026?.["متوسط"] || "متوسط", color: "from-amber-500 to-orange-600" }
+    if (stats.mastered >= 1) return { name: t.student.levelBeginner || t.addedTranslations_2026?.["مبتدئ"] || "مبتدئ", color: "from-sky-500 to-blue-600" }
+    return { name: t.student.levelNew || t.addedTranslations_2026?.["جديد"] || "جديد", color: "from-slate-400 to-slate-600" }
   }, [stats.mastered, t])
 
   const progressValue = useMemo(() => {
@@ -231,14 +231,14 @@ export default function StudentDashboard() {
   }, [stats.mastered])
 
   const lastStatusLabel = useMemo(() => {
-    if (!stats.last) return t.student.noRecitationTitle || "لا توجد تلاوات بعد"
+    if (!stats.last) return t.student.noRecitationTitle || t.addedTranslations_2026?.["لا توجد تلاوات بعد"] || "لا توجد تلاوات بعد"
     const map: Record<string, string> = {
-      pending: t.student.statusPending || "قيد المراجعة",
-      in_review: t.student.statusInReview || "قيد المراجعة",
-      mastered: t.student.statusMastered || "متقن",
-      approved: t.student.statusMastered || "متقن",
-      needs_session: t.student.statusNeedsSession || "تحتاج جلسة",
-      session_booked: t.student.statusBooked || "تم الحجز",
+      pending: t.student.statusPending || t.addedTranslations_2026?.["قيد المراجعة"] || "قيد المراجعة",
+      in_review: t.student.statusInReview || t.addedTranslations_2026?.["قيد المراجعة"] || "قيد المراجعة",
+      mastered: t.student.statusMastered || t.addedTranslations_2026?.["متقن"] || "متقن",
+      approved: t.student.statusMastered || t.addedTranslations_2026?.["متقن"] || "متقن",
+      needs_session: t.student.statusNeedsSession || t.addedTranslations_2026?.["تحتاج جلسة"] || "تحتاج جلسة",
+      session_booked: t.student.statusBooked || t.addedTranslations_2026?.["تم الحجز"] || "تم الحجز",
     }
     return map[stats.last.status] || stats.last.status
   }, [stats.last, t])
@@ -248,10 +248,10 @@ export default function StudentDashboard() {
     const m = Math.floor(diff / 60000)
     const h = Math.floor(diff / 3600000)
     const d = Math.floor(diff / 86400000)
-    if (m < 1) return t.now || "الآن"
-    if (m < 60) return `${t.minutesAgo || "منذ"} ${m} د`
-    if (h < 24) return `${t.hoursAgo || "منذ"} ${h} س`
-    return `${t.daysAgo || "منذ"} ${d} يوم`
+    if (m < 1) return locale === "ar" ? "الآن" : "Just now"
+    if (m < 60) return locale === "ar" ? `منذ ${m} د` : `${m}m ago`
+    if (h < 24) return locale === "ar" ? `منذ ${h} س` : `${h}h ago`
+    return locale === "ar" ? `منذ ${d} يوم` : `${d}d ago`
   }
 
   const completedWird = Object.values(wirdDone).filter(Boolean).length
@@ -328,13 +328,13 @@ export default function StudentDashboard() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <p className="text-xs md:text-sm font-bold uppercase tracking-widest text-muted-foreground/70 mb-1">
-            {t.student.welcome || "مرحباً"}
+            {t.student.welcome || t.addedTranslations_2026?.["مرحباً"] || "مرحباً"}
           </p>
           <h1 className="text-2xl md:text-4xl font-black text-foreground tracking-tight">
-            {userName ? `${t.student.welcome || "مرحباً"}، ${userName}` : (t.student.dashboard || "لوحة الطالب")}
+            {userName ? `${t.student.welcome || t.addedTranslations_2026?.["مرحباً"] || "مرحباً"}، ${userName}` : (t.student.dashboard || t.addedTranslations_2026?.["لوحة الطالب"] || "لوحة الطالب")}
           </h1>
           <p className="text-sm md:text-base text-muted-foreground mt-2">
-            {t.student.welcomeDesc || "تابع تقدمك في تلاوة القرآن الكريم"}
+            {t.student.welcomeDesc || t.addedTranslations_2026?.["تابع تقدمك في تلاوة القرآن الكريم"] || "تابع تقدمك في تلاوة القرآن الكريم"}
           </p>
         </div>
 
@@ -346,7 +346,7 @@ export default function StudentDashboard() {
           <span className="flex items-center justify-center w-8 h-8 rounded-xl bg-primary-foreground/10 group-hover:rotate-90 transition-transform duration-500">
             <Plus className="w-5 h-5" />
           </span>
-          <span className="text-sm md:text-base">{t.student.newRecitation || "تسميع جديد"}</span>
+          <span className="text-sm md:text-base">{t.student.newRecitation || t.addedTranslations_2026?.["تسميع جديد"] || "تسميع جديد"}</span>
         </Link>
       </div>
 
@@ -354,25 +354,25 @@ export default function StudentDashboard() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         <StatCard
           icon={FileText}
-          label={t.student.totalSubmissions || "إجمالي التسميعات"}
+          label={t.student.totalSubmissions || t.addedTranslations_2026?.["إجمالي التسميعات"] || "إجمالي التسميعات"}
           value={loadingRecitations ? "…" : stats.total.toString()}
           accent="bg-primary/10 text-primary"
         />
         <StatCard
           icon={CheckCircle}
-          label={t.student.masteredSurahs || "متقنة"}
+          label={t.student.masteredSurahs || t.addedTranslations_2026?.["متقنة"] || "متقنة"}
           value={loadingRecitations ? "…" : stats.mastered.toString()}
           accent="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
         />
         <StatCard
           icon={Clock}
-          label={t.student.underReview || "قيد المراجعة"}
+          label={t.student.underReview || t.addedTranslations_2026?.["قيد المراجعة"] || "قيد المراجعة"}
           value={loadingRecitations ? "…" : stats.inReview.toString()}
           accent="bg-amber-500/10 text-amber-600 dark:text-amber-400"
         />
         <StatCard
           icon={Award}
-          label={t.student.currentLevel || "المستوى الحالي"}
+          label={t.student.currentLevel || t.addedTranslations_2026?.["المستوى الحالي"] || "المستوى الحالي"}
           value={level.name}
           accent={`bg-gradient-to-br ${level.color} text-white`}
           gradient
@@ -389,7 +389,7 @@ export default function StudentDashboard() {
               </div>
               <div className="min-w-0">
                 <p className="text-2xl font-black text-foreground leading-none">{formatDigits(points.total_points)}</p>
-                <p className="text-xs text-muted-foreground mt-1 group-hover:text-primary transition-colors">{t.student.point || "نقطة"}</p>
+                <p className="text-xs text-muted-foreground mt-1 group-hover:text-primary transition-colors">{t.student.point || t.addedTranslations_2026?.["نقطة"] || "نقطة"}</p>
               </div>
             </Link>
 
@@ -401,7 +401,7 @@ export default function StudentDashboard() {
                 <p className="text-2xl font-black text-foreground leading-none">
                   {rank ? `#${formatDigits(rank.rank)}` : "—"}
                 </p>
-                <p className="text-xs text-muted-foreground mt-1 group-hover:text-primary transition-colors">{t.student.yourRank || "ترتيبك"}</p>
+                <p className="text-xs text-muted-foreground mt-1 group-hover:text-primary transition-colors">{t.student.yourRank || t.addedTranslations_2026?.["ترتيبك"] || "ترتيبك"}</p>
               </div>
             </Link>
 
@@ -411,7 +411,7 @@ export default function StudentDashboard() {
               </div>
               <div className="min-w-0">
                 <p className="text-2xl font-black text-foreground leading-none">{formatDigits(points.streak_days)}</p>
-                <p className="text-xs text-muted-foreground mt-1">{t.student.streakDays || "يوم متتالي"}</p>
+                <p className="text-xs text-muted-foreground mt-1">{t.student.streakDays || t.addedTranslations_2026?.["يوم متتالي"] || "يوم متتالي"}</p>
               </div>
             </div>
 
@@ -432,7 +432,7 @@ export default function StudentDashboard() {
                     ? (t.student.remainingToLevel
                         ? t.student.remainingToLevel.replace('{points}', formatDigits(points.points_to_next_level)).replace('{level}', points.next_level.label)
                         : `باقي ${formatDigits(points.points_to_next_level)} لـ${points.next_level.label}`)
-                    : (t.student.maxLevel || "أعلى مستوى")}
+                    : (t.student.maxLevel || t.addedTranslations_2026?.["أعلى مستوى"] || "أعلى مستوى")}
                 </p>
               </div>
             </div>
@@ -448,7 +448,7 @@ export default function StudentDashboard() {
               <TrendingUp className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <h3 className="text-base md:text-lg font-bold text-foreground">{t.student.progressTitle || "تقدمك"}</h3>
+              <h3 className="text-base md:text-lg font-bold text-foreground">{t.student.progressTitle || t.addedTranslations_2026?.["تقدمك"] || "تقدمك"}</h3>
               <p className="text-xs text-muted-foreground">{progressValue}% {locale === "ar" ? "من الرحلة" : "of the journey"}</p>
             </div>
           </div>
@@ -479,7 +479,7 @@ export default function StudentDashboard() {
             <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-3">
               <BookOpen className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
             </div>
-            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">{t.student.masteredVerses || "آيات محفوظة"}</p>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">{t.student.masteredVerses || t.addedTranslations_2026?.["آيات محفوظة"] || "آيات محفوظة"}</p>
             <p className="text-xl md:text-2xl font-black text-foreground">
               {formatDigits(progress.totals.masteredAyahs)}
               <span className="text-sm font-bold text-muted-foreground mr-1">/ {formatDigits(progress.totals.totalAyahs)}</span>
@@ -489,7 +489,7 @@ export default function StudentDashboard() {
             <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center mb-3">
               <Target className="w-5 h-5 text-blue-600 dark:text-blue-400" />
             </div>
-            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">{t.student.completedJparts || "أجزاء مكتملة"}</p>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">{t.student.completedJparts || t.addedTranslations_2026?.["أجزاء مكتملة"] || "أجزاء مكتملة"}</p>
             <p className="text-xl md:text-2xl font-black text-foreground">
               {formatDigits(progress.totals.completedJuz)}
               <span className="text-sm font-bold text-muted-foreground mr-1">/ {formatDigits(progress.totals.totalJuz)}</span>
@@ -499,14 +499,14 @@ export default function StudentDashboard() {
             <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center mb-3">
               <Flame className="w-5 h-5 text-orange-600 dark:text-orange-400" />
             </div>
-            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">{t.student.consistencyDays || "أيام الانتظام"}</p>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">{t.student.consistencyDays || t.addedTranslations_2026?.["أيام الانتظام"] || "أيام الانتظام"}</p>
             <p className="text-xl md:text-2xl font-black text-foreground">
               {formatDigits(progress.streak.current)}
-              <span className="text-xs font-bold text-muted-foreground mr-1">{(t.student.streakDaysLabel || "يوم متتالي")}</span>
+              <span className="text-xs font-bold text-muted-foreground mr-1">{(t.student.streakDaysLabel || t.addedTranslations_2026?.["يوم متتالي"] || "يوم متتالي")}</span>
             </p>
             {progress.streak.longest > 0 && (
               <p className="text-[10px] text-muted-foreground mt-0.5">
-                {t.student.highestStreak ? t.student.highestStreak.replace('{days}', formatDigits(progress.streak.longest)) : `أعلى: ${formatDigits(progress.streak.longest)} يوم`}
+                {t.student.highestStreak ? t.student.highestStreak.replace('{days}', formatDigits(progress.streak.longest)) : (locale === "ar" ? `أعلى: ${formatDigits(progress.streak.longest)} يوم` : `Highest: ${formatDigits(progress.streak.longest)} days`)}
               </p>
             )}
           </div>
@@ -514,7 +514,7 @@ export default function StudentDashboard() {
             <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center mb-3">
               <BarChart3 className="w-5 h-5 text-purple-600 dark:text-purple-400" />
             </div>
-            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">{t.student.completionRate || "نسبة الإنجاز"}</p>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">{t.student.completionRate || t.addedTranslations_2026?.["نسبة الإنجاز"] || "نسبة الإنجاز"}</p>
             <p className="text-xl md:text-2xl font-black text-foreground">
               {formatDigits(progress.totals.overallPercentage)}٪
             </p>
@@ -531,7 +531,7 @@ export default function StudentDashboard() {
                 <Map className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-foreground">{t.student.totalHifz || "إجمالي الحفظ"}</h3>
+                <h3 className="text-base font-bold text-foreground">{t.student.totalHifz || t.addedTranslations_2026?.["إجمالي الحفظ"] || "إجمالي الحفظ"}</h3>
                 <p className="text-xs text-muted-foreground">
                   {formatDigits(progress.totals.masteredAyahs)} {locale === "ar" ? "آية محفوظة من" : "verses memorized of"} {formatDigits(progress.totals.totalAyahs)}
                 </p>
@@ -541,7 +541,7 @@ export default function StudentDashboard() {
               href="/student/mushaf-progress"
               className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
             >
-              {t.student.mushafMap || "خريطة المصحف"}
+              {t.student.mushafMap || t.addedTranslations_2026?.["خريطة المصحف"] || "خريطة المصحف"}
               <ChevronLeft className="w-3 h-3" />
             </Link>
           </div>
@@ -558,15 +558,15 @@ export default function StudentDashboard() {
           <div className="flex items-center gap-6 mt-3">
             <div className="flex items-center gap-1.5">
               <div className="w-3 h-3 rounded-sm bg-emerald-500" />
-              <span className="text-xs text-muted-foreground font-medium">{t.student.saved || "محفوظ"}</span>
+              <span className="text-xs text-muted-foreground font-medium">{t.student.saved || t.addedTranslations_2026?.["محفوظ"] || "محفوظ"}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <div className="w-3 h-3 rounded-sm bg-amber-400" />
-              <span className="text-xs text-muted-foreground font-medium">{t.student.underReviewState || "قيد المراجعة"}</span>
+              <span className="text-xs text-muted-foreground font-medium">{t.student.underReviewState || t.addedTranslations_2026?.["قيد المراجعة"] || "قيد المراجعة"}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <div className="w-3 h-3 rounded-sm bg-muted" />
-              <span className="text-xs text-muted-foreground font-medium">{t.student.remaining || "متبقي"}</span>
+              <span className="text-xs text-muted-foreground font-medium">{t.student.remaining || t.addedTranslations_2026?.["متبقي"] || "متبقي"}</span>
             </div>
           </div>
         </div>
@@ -581,20 +581,20 @@ export default function StudentDashboard() {
               <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
                 <BarChart3 className="w-5 h-5 text-primary" />
               </div>
-              <h3 className="text-base font-bold text-foreground">{t.student.progressChart || "مخطط التقدم"}</h3>
+              <h3 className="text-base font-bold text-foreground">{t.student.progressChart || t.addedTranslations_2026?.["مخطط التقدم"] || "مخطط التقدم"}</h3>
             </div>
             <div className="flex items-center gap-1 bg-muted/50 border border-border rounded-lg p-0.5">
               <button
                 onClick={() => setChartView("week")}
                 className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${chartView === "week" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}
               >
-                {t.student.weekly || "أسبوعي"}
+                {t.student.weekly || t.addedTranslations_2026?.["أسبوعي"] || "أسبوعي"}
               </button>
               <button
                 onClick={() => setChartView("month")}
                 className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${chartView === "month" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}
               >
-                {t.student.monthly || "شهري"}
+                {t.student.monthly || t.addedTranslations_2026?.["شهري"] || "شهري"}
               </button>
             </div>
           </div>
@@ -606,7 +606,7 @@ export default function StudentDashboard() {
               ))}
             </div>
           ) : chartData.length === 0 ? (
-            <div className="text-center py-12 text-sm text-muted-foreground">{t.student.noChartData || "لا توجد بيانات بعد"}</div>
+            <div className="text-center py-12 text-sm text-muted-foreground">{t.student.noChartData || t.addedTranslations_2026?.["لا توجد بيانات بعد"] || "لا توجد بيانات بعد"}</div>
           ) : (
             <>
               <div className="flex items-end gap-[3px] h-40" dir="ltr">
@@ -618,7 +618,7 @@ export default function StudentDashboard() {
                     <div
                       key={i}
                       className="flex-1 flex flex-col justify-end group relative"
-                      title={t.student.chartTooltip ? t.student.chartTooltip.replace('{new}', formatDigits(d.newVerses)).replace('{rev}', formatDigits(d.revisedVerses)) : `${d.date}: حفظ ${d.newVerses} + مراجعة ${d.revisedVerses}`}
+                      title={t.student.chartTooltip ? t.student.chartTooltip.replace('{new}', formatDigits(d.newVerses)).replace('{rev}', formatDigits(d.revisedVerses)) : (locale === "ar" ? `${d.date}: حفظ ${d.newVerses} + مراجعة ${d.revisedVerses}` : `${d.date}: New ${d.newVerses} · Review ${d.revisedVerses}`)}
                     >
                       <div
                         className="w-full rounded-t-sm overflow-hidden transition-all hover:opacity-80 cursor-pointer min-h-[2px]"
@@ -630,7 +630,10 @@ export default function StudentDashboard() {
                       <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-card border border-border rounded-lg px-2 py-1 text-[9px] font-bold text-foreground shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-10 transition-opacity">
                         {t.student.chartTooltip
                           ? t.student.chartTooltip.replace('{new}', formatDigits(d.newVerses)).replace('{rev}', formatDigits(d.revisedVerses))
-                          : `${formatDigits(d.newVerses)} حفظ · ${formatDigits(d.revisedVerses)} مراجعة`}
+                          : (locale === "ar"
+                              ? `${formatDigits(d.newVerses)} حفظ · ${formatDigits(d.revisedVerses)} مراجعة`
+                              : `${formatDigits(d.newVerses)} New · ${formatDigits(d.revisedVerses)} Rev`
+                            )}
                       </div>
                     </div>
                   )
@@ -639,11 +642,11 @@ export default function StudentDashboard() {
               <div className="flex items-center gap-4 mt-3">
                 <div className="flex items-center gap-1.5">
                   <div className="w-2.5 h-2.5 rounded-sm bg-emerald-500" />
-                  <span className="text-[10px] text-muted-foreground">{t.student.chartNewHifz || "حفظ جديد"}</span>
+                  <span className="text-[10px] text-muted-foreground">{t.student.chartNewHifz || t.addedTranslations_2026?.["حفظ جديد"] || "حفظ جديد"}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <div className="w-2.5 h-2.5 rounded-sm bg-amber-400" />
-                  <span className="text-[10px] text-muted-foreground">{t.student.chartReview || "مراجعة"}</span>
+                  <span className="text-[10px] text-muted-foreground">{t.student.chartReview || t.addedTranslations_2026?.["مراجعة"] || "مراجعة"}</span>
                 </div>
               </div>
             </>
@@ -657,15 +660,15 @@ export default function StudentDashboard() {
               <PenLine className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-foreground">{t.student.dailyHifzLog || "سجل الحفظ اليومي"}</h3>
-              <p className="text-xs text-muted-foreground">{t.student.dailyLogDesc || "سجّل كم آية حفظت وراجعت اليوم"}</p>
+              <h3 className="text-base font-bold text-foreground">{t.student.dailyHifzLog || t.addedTranslations_2026?.["سجل الحفظ اليومي"] || "سجل الحفظ اليومي"}</h3>
+              <p className="text-xs text-muted-foreground">{t.student.dailyLogDesc || t.addedTranslations_2026?.["سجّل كم آية حفظت وراجعت اليوم"] || "سجّل كم آية حفظت وراجعت اليوم"}</p>
             </div>
           </div>
 
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs font-bold text-muted-foreground mb-1.5 block">{t.student.newHifzVerses || "آيات حفظ جديدة"}</label>
+                <label className="text-xs font-bold text-muted-foreground mb-1.5 block">{t.student.newHifzVerses || t.addedTranslations_2026?.["آيات حفظ جديدة"] || "آيات حفظ جديدة"}</label>
                 <input
                   type="number"
                   min={0}
@@ -676,7 +679,7 @@ export default function StudentDashboard() {
                 />
               </div>
               <div>
-                <label className="text-xs font-bold text-muted-foreground mb-1.5 block">{t.student.reviewVerses || "آيات مراجعة"}</label>
+                <label className="text-xs font-bold text-muted-foreground mb-1.5 block">{t.student.reviewVerses || t.addedTranslations_2026?.["آيات مراجعة"] || "آيات مراجعة"}</label>
                 <input
                   type="number"
                   min={0}
@@ -706,7 +709,7 @@ export default function StudentDashboard() {
                 type="text"
                 value={logNotes}
                 onChange={e => setLogNotes(e.target.value)}
-                placeholder={t.student.notesPlaceholderLog || "مثلاً: حفظت من سورة البقرة..."}
+                placeholder={t.student.notesPlaceholderLog || (locale === "ar" ? "مثلاً: حفظت من سورة البقرة..." : "e.g., memorized from Surah Al-Baqarah...")}
                 className="w-full px-3 py-2.5 rounded-xl bg-muted/30 border border-border text-sm text-foreground placeholder:text-muted-foreground/40 focus:ring-2 focus:ring-primary/20 focus:border-primary/50 outline-none transition-all"
               />
             </div>
@@ -720,12 +723,12 @@ export default function StudentDashboard() {
               ) : logSaved ? (
                 <>
                   <CheckCircle className="w-4 h-4" />
-                  {t.student.logSavedSuccess || "تم الحفظ"}
+                  {t.student.logSavedSuccess || t.addedTranslations_2026?.["تم الحفظ"] || "تم الحفظ"}
                 </>
               ) : (
                 <>
                   <Save className="w-4 h-4" />
-                  {t.student.saveLogBtn || "تسجيل اليوم"}
+                  {t.student.saveLogBtn || t.addedTranslations_2026?.["تسجيل اليوم"] || "تسجيل اليوم"}
                 </>
               )}
             </button>
@@ -740,7 +743,7 @@ export default function StudentDashboard() {
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
               <FileText className="w-5 h-5 text-primary" />
             </div>
-            <h3 className="text-base font-bold text-foreground">{t.student.progressReportTitle || "تقرير التقدم"}</h3>
+            <h3 className="text-base font-bold text-foreground">{t.student.progressReportTitle || t.addedTranslations_2026?.["تقرير التقدم"] || "تقرير التقدم"}</h3>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -749,28 +752,28 @@ export default function StudentDashboard() {
                 {formatDigits(progress.consistency.activeDays30)}
               </div>
               <div className="text-xs text-muted-foreground font-medium mt-1">{t.student.activeDayLast30 || "يوم نشط (آخر ٣٠)"}</div>
-              <div className="text-[10px] text-muted-foreground">{formatDigits(progress.consistency.percentage)}{t.student.consistencyRate || "٪ انتظام"}</div>
+              <div className="text-[10px] text-muted-foreground">{formatDigits(progress.consistency.percentage)}{t.student.consistencyRate || t.addedTranslations_2026?.["٪ انتظام"] || "٪ انتظام"}</div>
             </div>
             <div className="text-center p-3 rounded-xl bg-muted/30">
               <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
                 {formatDigits(progress.thisWeek.newVerses)}
               </div>
-              <div className="text-xs text-muted-foreground font-medium mt-1">{t.student.versesThisWeek || "آية حفظ هذا الأسبوع"}</div>
-              <div className="text-[10px] text-muted-foreground">{formatDigits(progress.thisWeek.activeDays)} {t.student.activeDaysUnit || "أيام نشطة"}</div>
+              <div className="text-xs text-muted-foreground font-medium mt-1">{t.student.versesThisWeek || t.addedTranslations_2026?.["آية حفظ هذا الأسبوع"] || "آية حفظ هذا الأسبوع"}</div>
+              <div className="text-[10px] text-muted-foreground">{formatDigits(progress.thisWeek.activeDays)} {t.student.activeDaysUnit || t.addedTranslations_2026?.["أيام نشطة"] || "أيام نشطة"}</div>
             </div>
             <div className="text-center p-3 rounded-xl bg-muted/30">
               <div className="text-2xl font-black text-amber-600 dark:text-amber-400">
                 {formatDigits(progress.thisWeek.revisedVerses)}
               </div>
-              <div className="text-xs text-muted-foreground font-medium mt-1">{t.student.reviewVersesThisWeek || "آية مراجعة هذا الأسبوع"}</div>
+              <div className="text-xs text-muted-foreground font-medium mt-1">{t.student.reviewVersesThisWeek || t.addedTranslations_2026?.["آية مراجعة هذا الأسبوع"] || "آية مراجعة هذا الأسبوع"}</div>
             </div>
             <div className="text-center p-3 rounded-xl bg-muted/30">
               <div className="text-2xl font-black text-purple-600 dark:text-purple-400">
                 {formatDigits(progress.totals.totalNewFromLog + progress.totals.totalRevFromLog)}
               </div>
-              <div className="text-xs text-muted-foreground font-medium mt-1">{t.student.totalLoggedVerses || "إجمالي آيات مسجلة"}</div>
+              <div className="text-xs text-muted-foreground font-medium mt-1">{t.student.totalLoggedVerses || t.addedTranslations_2026?.["إجمالي آيات مسجلة"] || "إجمالي آيات مسجلة"}</div>
               <div className="text-[10px] text-muted-foreground">
-                {formatDigits(progress.totals.totalNewFromLog)} {t.student.chartNewHifz || "حفظ"} + {formatDigits(progress.totals.totalRevFromLog)} {t.student.chartReview || "مراجعة"}
+                {formatDigits(progress.totals.totalNewFromLog)} {t.student.chartNewHifz || (locale === "ar" ? "حفظ" : "New")} + {formatDigits(progress.totals.totalRevFromLog)} {t.student.chartReview || (locale === "ar" ? "مراجعة" : "Review")}
               </div>
             </div>
           </div>
@@ -787,7 +790,7 @@ export default function StudentDashboard() {
                 <Sun className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <h3 className="text-base md:text-lg font-bold text-foreground">{t.student.prayerTimesTitle || "مواقيت الصلاة"}</h3>
+                <h3 className="text-base md:text-lg font-bold text-foreground">{t.student.prayerTimesTitle || t.addedTranslations_2026?.["مواقيت الصلاة"] || "مواقيت الصلاة"}</h3>
                 {prayerTimes?.location && (
                   <p className="text-xs text-muted-foreground">{prayerTimes.location.city}</p>
                 )}
@@ -795,7 +798,7 @@ export default function StudentDashboard() {
             </div>
             {prayerTimes?.nextPrayer && (
               <div className="text-right">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">{t.student.upcomingPrayer || "القادمة"}</p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">{t.student.upcomingPrayer || t.addedTranslations_2026?.["القادمة"] || "القادمة"}</p>
                 <p className="text-sm font-bold text-primary">
                   {t.student[PRAYER_META[prayerTimes.nextPrayer.name?.toLowerCase()]?.labelKey as keyof typeof t.student] || prayerTimes.nextPrayer.name}
                 </p>
@@ -844,7 +847,7 @@ export default function StudentDashboard() {
             </div>
           ) : (
             <div className="text-center py-8 text-sm text-muted-foreground">
-              {t.student.failedToGetPrayers || "تعذر جلب مواقيت الصلاة"}
+              {t.student.failedToGetPrayers || t.addedTranslations_2026?.["تعذر جلب مواقيت الصلاة"] || "تعذر جلب مواقيت الصلاة"}
             </div>
           )}
         </div>
@@ -857,14 +860,14 @@ export default function StudentDashboard() {
                 <BookOpen className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
               </div>
               <div>
-                <h3 className="text-base md:text-lg font-bold text-foreground">{t.student.dailyWirdTitle || "الورد اليومي"}</h3>
+                <h3 className="text-base md:text-lg font-bold text-foreground">{t.student.dailyWirdTitle || t.addedTranslations_2026?.["الورد اليومي"] || "الورد اليومي"}</h3>
                 <p className="text-xs text-muted-foreground">
-                  {loadingWird ? "…" : (t.student.wirdCompletedCount ? t.student.wirdCompletedCount.replace('{completed}', formatDigits(completedWird)).replace('{total}', formatDigits(wirdItems.length)) : `${completedWird}/${wirdItems.length} مكتمل`)}
+                  {loadingWird ? "…" : (t.student.wirdCompletedCount ? t.student.wirdCompletedCount.replace('{completed}', formatDigits(completedWird)).replace('{total}', formatDigits(wirdItems.length)) : (locale === "ar" ? `${completedWird}/${wirdItems.length} مكتمل` : `${completedWird}/${wirdItems.length} completed`))}
                 </p>
               </div>
             </div>
             <Link href="/student/wird" className="text-xs font-bold text-primary hover:underline flex items-center gap-1">
-              {t.student.editWird || "تعديل"}
+              {t.student.editWird || t.addedTranslations_2026?.["تعديل"] || "تعديل"}
               <ChevronLeft className="w-3 h-3" />
             </Link>
           </div>
@@ -890,13 +893,13 @@ export default function StudentDashboard() {
             </div>
           ) : wirdItems.length === 0 ? (
             <div className="text-center py-6">
-              <p className="text-sm text-muted-foreground mb-3">{t.student.noWirdSet || "لم تحدد ورداً يومياً بعد"}</p>
+              <p className="text-sm text-muted-foreground mb-3">{t.student.noWirdSet || t.addedTranslations_2026?.["لم تحدد ورداً يومياً بعد"] || "لم تحدد ورداً يومياً بعد"}</p>
               <Link
                 href="/student/wird"
                 className="inline-flex items-center gap-2 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 px-4 py-2 rounded-xl font-bold text-xs hover:bg-emerald-500/20 transition-colors"
               >
                 <Plus className="w-3.5 h-3.5" />
-                {t.student.addWirdBtn || "إضافة ورد يومي"}
+                {t.student.addWirdBtn || t.addedTranslations_2026?.["إضافة ورد يومي"] || "إضافة ورد يومي"}
               </Link>
             </div>
           ) : (
@@ -930,7 +933,7 @@ export default function StudentDashboard() {
           )}
 
           <p className="text-[11px] text-muted-foreground mt-4 text-center">
-            {t.student.wirdAutoResetNote || "يتم إعادة تعيين الورد كل يوم تلقائياً"}
+            {t.student.wirdAutoResetNote || t.addedTranslations_2026?.["يتم إعادة تعيين الورد كل يوم تلقائياً"] || "يتم إعادة تعيين الورد كل يوم تلقائياً"}
           </p>
         </div>
       </div>
@@ -948,27 +951,27 @@ export default function StudentDashboard() {
                 <Route className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
               </div>
               <div>
-                <h3 className="text-base md:text-lg font-bold text-foreground">{t.student.myLearningPaths || "مساراتي التعليمية"}</h3>
+                <h3 className="text-base md:text-lg font-bold text-foreground">{t.student.myLearningPaths || t.addedTranslations_2026?.["مساراتي التعليمية"] || "مساراتي التعليمية"}</h3>
                 <p className="text-xs text-muted-foreground">
                   {t.student.activePathsCount ? t.student.activePathsCount.replace('{count}', formatDigits(paths.length)) : `${formatDigits(paths.length)} مسار نشط`}
                 </p>
               </div>
             </div>
             <Link href="/student/tajweed-paths" className="text-xs font-bold text-primary hover:underline flex items-center gap-1">
-              {t.student.allPaths || t.all || "الكل"}
+              {t.student.allPaths || t.all || t.addedTranslations_2026?.["الكل"] || "الكل"}
               <ChevronLeft className="w-3 h-3" />
             </Link>
           </div>
 
           {paths.length === 0 ? (
             <div className="text-center py-6">
-              <p className="text-sm text-muted-foreground mb-3">{t.student.noPathsJoined || "لم تنضم إلى أي مسار بعد"}</p>
+              <p className="text-sm text-muted-foreground mb-3">{t.student.noPathsJoined || t.addedTranslations_2026?.["لم تنضم إلى أي مسار بعد"] || "لم تنضم إلى أي مسار بعد"}</p>
               <Link
                 href="/student/tajweed-paths"
                 className="inline-flex items-center gap-2 bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 px-4 py-2 rounded-xl font-bold text-xs hover:bg-indigo-500/20 transition-colors"
               >
                 <Plus className="w-3.5 h-3.5" />
-                {t.student.browsePathsBtn || "تصفّح المسارات"}
+                {t.student.browsePathsBtn || t.addedTranslations_2026?.["تصفّح المسارات"] || "تصفّح المسارات"}
               </Link>
             </div>
           ) : (
@@ -999,7 +1002,7 @@ export default function StudentDashboard() {
                       <p className="text-[11px] text-muted-foreground mt-1.5">
                         {t.student.fromStages
                           ? t.student.fromStages.replace('{done}', formatDigits(done)).replace('{total}', formatDigits(total))
-                          : `من ${formatDigits(done)} مرحلة`}
+                          : (locale === "ar" ? `من ${formatDigits(done)} مرحلة` : `out of ${formatDigits(done)} stage(s)`)}
                       </p>
                     )}
                   </Link>
@@ -1015,13 +1018,13 @@ export default function StudentDashboard() {
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-base md:text-lg font-bold text-foreground flex items-center gap-3">
             <Mic className="w-5 h-5 text-primary" />
-            {t.student.recentActivity || "النشاط الأخير"}
+            {t.student.recentActivity || t.addedTranslations_2026?.["النشاط الأخير"] || "النشاط الأخير"}
           </h3>
           <Link
             href="/student/recitations"
             className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
           >
-            {t.viewAll || "عرض الكل"}
+            {t.viewAll || t.addedTranslations_2026?.["عرض الكل"] || "عرض الكل"}
             <ChevronLeft className={`w-3.5 h-3.5 ${locale === "ar" ? "" : "rotate-180"}`} />
           </Link>
         </div>
@@ -1047,14 +1050,14 @@ export default function StudentDashboard() {
               <FileText className="w-6 h-6 text-muted-foreground/40" />
             </div>
             <p className="text-sm text-muted-foreground font-medium mb-3">
-              {t.student.noRecitationTitle || "لم تسجّل تلاوتك بعد"}
+              {t.student.noRecitationTitle || t.addedTranslations_2026?.["لم تسجّل تلاوتك بعد"] || "لم تسجّل تلاوتك بعد"}
             </p>
             <Link
               href="/student/submit"
               className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors"
             >
               <Mic className="w-4 h-4" />
-              {t.student.recordNowBtn || "ابدأ التسميع"}
+              {t.student.recordNowBtn || t.addedTranslations_2026?.["ابدأ التسميع"] || "ابدأ التسميع"}
             </Link>
           </div>
         ) : (

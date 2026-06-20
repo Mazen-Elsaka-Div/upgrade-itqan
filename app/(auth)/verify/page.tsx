@@ -4,8 +4,10 @@ import { useState, useRef, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Loader2 } from "lucide-react"
+import { useI18n } from "@/lib/i18n/context"
 
 function VerifyContent() {
+    const { t } = useI18n()
     const router = useRouter()
     const searchParams = useSearchParams()
     const email = searchParams.get("email")
@@ -78,7 +80,7 @@ function VerifyContent() {
         const fullCode = code.join("")
 
         if (fullCode.length < 6) {
-            setError("الرجاء إدخال الرمز المكون من 6 أرقام كاملًا")
+            setError(t.verify.enterFullCodeError || t.addedTranslations_2026?.["الرجاء إدخال الرمز المكون من 6 أرقام كاملًا"] || "الرجاء إدخال الرمز المكون من 6 أرقام كاملًا")
             return
         }
 
@@ -95,7 +97,7 @@ function VerifyContent() {
             const data = await res.json()
 
             if (!res.ok) {
-                throw new Error(data.error || "فشل التحقق")
+                throw new Error(data.error || (t.verify.verificationFailed || t.addedTranslations_2026?.["فشل التحقق"] || "فشل التحقق"))
             }
 
             // #2: Route to the correct dashboard based on role + platform access flags.
@@ -147,10 +149,10 @@ function VerifyContent() {
             const data = await res.json()
 
             if (!res.ok) {
-                throw new Error(data.error || "فشل إرسال الكود")
+                throw new Error(data.error || (t.verify.resendFailed || t.addedTranslations_2026?.["فشل إرسال الكود"] || "فشل إرسال الكود"))
             }
 
-            setSuccessMsg(data.message || "تم إرسال كود جديد!")
+            setSuccessMsg(data.message || (t.verify.newCodeSent || t.addedTranslations_2026?.["تم إرسال كود جديد!"] || "تم إرسال كود جديد!"))
             setCountdown(60) // Reset timer to 60 seconds
         } catch (err: any) {
             setError(err.message)
@@ -176,10 +178,10 @@ function VerifyContent() {
                     </div>
                 </div>
                 <h2 className="text-center text-3xl font-extrabold tracking-tight text-white mb-3">
-                    تحقق من بريدك الإلكتروني
+                    {t.verify.title || t.addedTranslations_2026?.["تحقق من بريدك الإلكتروني"] || "تحقق من بريدك الإلكتروني"}
                 </h2>
                 <p className="text-center text-emerald-100/60 text-sm max-w-xs mx-auto mb-10 leading-relaxed">
-                    أدخل الرمز المكون من 6 أرقام الذي أرسلناه للتو إلى بريدك: <br />
+                    {t.verify.enterCodeDesc || "أدخل الرمز المكون من 6 أرقام الذي أرسلناه للتو إلى بريدك:"} <br />
                     <span className="font-bold text-[#D4A843] mt-2 inline-block text-base" dir="ltr">{email}</span>
                 </p>
             </div>
@@ -227,9 +229,9 @@ function VerifyContent() {
                                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                     </svg>
-                                    جاري التأكيد...
+                                    {t.verify.confirming || t.addedTranslations_2026?.["جاري التأكيد..."] || "جاري التأكيد..."}
                                 </div>
-                            ) : "تأكيد الحساب"}
+                            ) : (t.verify.confirmAccount || t.addedTranslations_2026?.["تأكيد الحساب"] || "تأكيد الحساب")}
                         </button>
                     </form>
 
@@ -243,15 +245,15 @@ function VerifyContent() {
                             {resendLoading ? (
                                 <Loader2 className="w-4 h-4 animate-spin" />
                             ) : (
-                                <span>إعادة إرسال الكود</span>
+                                <span>{t.verify.resendCode || t.addedTranslations_2026?.["إعادة إرسال الكود"] || "إعادة إرسال الكود"}</span>
                             )}
                             {countdown > 0 && <span dir="ltr">({countdown}s)</span>}
                         </button>
 
                         <p className="text-sm text-slate-500 font-medium">
-                            هل أدخلت بريداً خاطئاً؟{" "}
+                            {t.verify.wrongEmailQuestion || t.addedTranslations_2026?.["هل أدخلت بريداً خاطئاً؟"] || "هل أدخلت بريداً خاطئاً؟"}{" "}
                             <Link href="/register" className="font-bold text-[#0B3D2E] hover:text-[#D4A843] transition-colors underline underline-offset-4">
-                                العودة للتسجيل
+                                {t.verify.backToRegister || t.addedTranslations_2026?.["العودة للتسجيل"] || "العودة للتسجيل"}
                             </Link>
                         </p>
                     </div>

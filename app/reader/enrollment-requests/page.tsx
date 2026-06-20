@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { CardListSkeleton } from '@/components/ui/skeletons'
+import { useI18n } from '@/lib/i18n/context'
 
 interface EnrollmentRequest {
   enrollment_id: string
@@ -25,6 +26,7 @@ interface EnrollmentRequest {
 }
 
 export default function ReaderEnrollmentRequestsPage() {
+  const { t, locale } = useI18n()
   const [requests, setRequests] = useState<EnrollmentRequest[]>([])
   const [loading, setLoading] = useState(true)
   const [processing, setProcessing] = useState<string | null>(null)
@@ -34,7 +36,7 @@ export default function ReaderEnrollmentRequestsPage() {
     fetch('/api/reader/enrollment-requests')
       .then((r) => r.json())
       .then((j) => setRequests(j.requests || []))
-      .catch(() => toast.error('تعذر جلب الطلبات'))
+      .catch(() => toast.error(t.reader.enrollmentRequests.fetchError))
       .finally(() => setLoading(false))
   }
 
@@ -63,11 +65,11 @@ export default function ReaderEnrollmentRequestsPage() {
         body: JSON.stringify({ path_type: req.path_type, action }),
       })
       const j = await res.json()
-      if (!res.ok) throw new Error(j.error || 'فشل تنفيذ الإجراء')
-      toast.success(action === 'approve' ? 'تم قبول الطالب في المسار' : 'تم رفض الطلب')
+      if (!res.ok) throw new Error(j.error || t.reader.enrollmentRequests.actionError)
+      toast.success(action === 'approve' ? t.reader.enrollmentRequests.actionSuccessApprove : t.reader.enrollmentRequests.actionSuccessReject)
       setRequests((prev) => prev.filter((r) => r.enrollment_id !== req.enrollment_id))
     } catch (e: any) {
-      toast.error(e.message || 'حدث خطأ')
+      toast.error(e.message || t.reader.enrollmentRequests.generalError)
     } finally {
       setProcessing(null)
     }
@@ -81,18 +83,18 @@ export default function ReaderEnrollmentRequestsPage() {
           <UserPlus className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
         </div>
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-balance">طلبات الالتحاق</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-balance">{t.reader.enrollmentRequests.title}</h1>
           <p className="text-sm text-muted-foreground font-medium">
-            راجع وقبول طلبات الطلاب للالتحاق بمساراتك التي تتطلب موافقة
+            {t.reader.enrollmentRequests.subtitle}
           </p>
         </div>
       </div>
 
       {/* Filter tabs */}
       <div className="flex gap-2 flex-wrap">
-        <FilterChip active={filter === 'all'} onClick={() => setFilter('all')} label="الكل" count={counts.all} />
-        <FilterChip active={filter === 'tajweed'} onClick={() => setFilter('tajweed')} label="مسارات التجويد" count={counts.tajweed} />
-        <FilterChip active={filter === 'memorization'} onClick={() => setFilter('memorization')} label="مسارات الحفظ" count={counts.memorization} />
+        <FilterChip active={filter === 'all'} onClick={() => setFilter('all')} label={t.reader.enrollmentRequests.filterAll} count={counts.all} />
+        <FilterChip active={filter === 'tajweed'} onClick={() => setFilter('tajweed')} label={t.reader.enrollmentRequests.filterTajweed} count={counts.tajweed} />
+        <FilterChip active={filter === 'memorization'} onClick={() => setFilter('memorization')} label={t.reader.enrollmentRequests.filterMemorization} count={counts.memorization} />
       </div>
 
       {loading ? (
@@ -128,7 +130,7 @@ export default function ReaderEnrollmentRequestsPage() {
                     {req.requested_at && (
                       <p className="text-[11px] text-muted-foreground mt-0.5 flex items-center gap-1">
                         <Clock className="w-3 h-3" />
-                        {new Date(req.requested_at).toLocaleDateString('ar-EG')}
+                        {new Date(req.requested_at).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US')}
                       </p>
                     )}
                   </div>
@@ -147,7 +149,7 @@ export default function ReaderEnrollmentRequestsPage() {
                   </div>
                   <div className="min-w-0">
                     <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-muted text-muted-foreground mb-1">
-                      {req.path_type === 'tajweed' ? 'مسار تجويد' : 'مسار حفظ'}
+                      {req.path_type === 'tajweed' ? t.reader.enrollmentRequests.pathTypeTajweed : t.reader.enrollmentRequests.pathTypeMemorization}
                     </span>
                     <h4 className="font-bold text-sm text-foreground truncate">{req.path_title}</h4>
                     {req.request_note && (
@@ -164,7 +166,7 @@ export default function ReaderEnrollmentRequestsPage() {
                     className="rounded-xl font-bold bg-emerald-600 hover:bg-emerald-700 text-white"
                   >
                     <Check className="w-4 h-4 ml-1.5" />
-                    قبول
+                    {t.reader.enrollmentRequests.approveBtn}
                   </Button>
                   <Button
                     onClick={() => handleAction(req, 'reject')}
@@ -173,7 +175,7 @@ export default function ReaderEnrollmentRequestsPage() {
                     className="rounded-xl font-bold text-rose-600 border-rose-200 hover:bg-rose-50 dark:border-rose-900/40 dark:hover:bg-rose-900/20"
                   >
                     <X className="w-4 h-4 ml-1.5" />
-                    رفض
+                    {t.reader.enrollmentRequests.rejectBtn}
                   </Button>
                 </div>
               </CardContent>
@@ -186,9 +188,9 @@ export default function ReaderEnrollmentRequestsPage() {
             <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
               <Inbox className="w-8 h-8 text-muted-foreground opacity-50" />
             </div>
-            <h3 className="font-bold text-lg mb-1">لا توجد طلبات معلقة</h3>
+            <h3 className="font-bold text-lg mb-1">{t.reader.enrollmentRequests.noPendingRequests}</h3>
             <p className="text-muted-foreground text-sm max-w-xs">
-              عندما يطلب طالب الالتحاق بأحد مساراتك التي تتطلب موافقة، سيظهر طلبه هنا.
+              {t.reader.enrollmentRequests.noPendingRequestsDesc}
             </p>
           </CardContent>
         </Card>

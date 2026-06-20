@@ -80,7 +80,7 @@ export default function AdminEmailTemplatesPage() {
                     to: testEmail,
                     subject: previewLang === 'ar' ? editForm.subject_ar : editForm.subject_en,
                     body: previewLang === 'ar' ? editForm.body_ar : editForm.body_en,
-                    variables: { userName: 'تجربة', studentName: 'تجربة', readerName: 'تجربة', certificateLink: '#' }
+                    variables: { userName: isAr ? 'تجربة' : 'Test', studentName: isAr ? 'تجربة' : 'Test', readerName: isAr ? 'تجربة' : 'Test', certificateLink: '#' }
                 }),
             })
             const data = await res.json().catch(() => null)
@@ -260,7 +260,7 @@ export default function AdminEmailTemplatesPage() {
                                     onClick={() => setPreviewLang('ar')}
                                     className={`px-5 py-2 rounded-lg text-sm font-bold transition-all ${previewLang === 'ar' ? 'bg-card shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
                                 >
-                                    النسخة العربية
+                                    {isAr ? "النسخة العربية" : "Arabic Version"}
                                 </button>
                                 <button
                                     onClick={() => setPreviewLang('en')}
@@ -274,21 +274,21 @@ export default function AdminEmailTemplatesPage() {
                         {previewLang === 'ar' ? (
                             <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
                                 <div className="space-y-1.5">
-                                    <Label className="text-foreground font-bold ml-1">موضوع الرسالة</Label>
+                                    <Label className="text-foreground font-bold ml-1">{isAr ? "موضوع الرسالة" : "Email Subject"}</Label>
                                     <Input
                                         value={editForm.subject_ar || ''}
                                         onChange={e => setEditForm((f: any) => ({ ...f, subject_ar: e.target.value }))}
                                         className="h-12 border-border bg-card text-foreground focus-visible:ring-1 focus-visible:ring-primary rounded-xl px-4"
-                                        placeholder="اكتب عنوان البريد الإلكتروني هنا..."
+                                        placeholder={isAr ? "اكتب عنوان البريد الإلكتروني هنا..." : "Type the email subject here..."}
                                     />
                                 </div>
                                 <div className="space-y-1.5">
-                                    <Label className="text-foreground font-bold ml-1">نص الرسالة</Label>
+                                    <Label className="text-foreground font-bold ml-1">{isAr ? "نص الرسالة" : "Email Body"}</Label>
                                     <textarea
                                         className="w-full rounded-2xl border border-border bg-card text-foreground px-4 py-3 text-sm min-h-[240px] resize-y focus:outline-none focus:ring-1 focus:ring-primary leading-relaxed transition-shadow"
                                         value={editForm.body_ar || ''}
                                         onChange={e => setEditForm((f: any) => ({ ...f, body_ar: e.target.value }))}
-                                        placeholder="اكتب محتوى الرسالة هنا. يمكنك استخدام المتغيرات المتاحة..."
+                                        placeholder={isAr ? "اكتب محتوى الرسالة هنا. يمكنك استخدام المتغيرات المتاحة..." : "Type the email content here. You can use available variables..."}
                                     />
                                 </div>
                             </div>
