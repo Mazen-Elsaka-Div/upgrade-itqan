@@ -7,6 +7,7 @@ import {
   BookOpen, CheckCircle, Mic, Target
 } from 'lucide-react'
 import Link from 'next/link'
+import { useI18n } from '@/lib/i18n/context'
 
 interface PointsData {
   total_points: number
@@ -57,22 +58,9 @@ const REASON_ICONS: Record<string, React.ElementType> = {
   badge_earned: Award,
 }
 
-const REASON_LABELS: Record<string, string> = {
-  recitation: 'تسجيل تلاوة',
-  mastered: 'إتقان تلاوة',
-  task: 'إنهاء مهمة',
-  lesson: 'درس',
-  streak: 'يوم Streak',
-  juz_complete: 'إنهاء جزء كامل',
-  course_complete: 'إنهاء دورة',
-  session_attend: 'حضور درس',
-  daily_login: 'تسجيل دخول يومي',
-  competition_win: 'فوز بمسابقة',
-  badge_earned: 'شارة جديدة',
-  admin_adjust: 'تعديل من الإدارة',
-}
-
 export default function StudentPointsPage() {
+  const { t, locale } = useI18n()
+  const isAr = locale === 'ar'
   const [data, setData] = useState<PointsData | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -105,8 +93,8 @@ export default function StudentPointsPage() {
     return (
       <div className="text-center py-12 text-muted-foreground">
         <Star className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-        <p>لا توجد بيانات نقاط بعد</p>
-        <p className="text-sm mt-2">ابدأ بتسجيل تلاوة أو حفظ آيات لكسب النقاط!</p>
+        <p>{t.studentPages?.points?.noPointsDataYet || 'لا توجد بيانات نقاط بعد'}</p>
+        <p className="text-sm mt-2">{t.studentPages?.points?.startEarningDesc || 'ابدأ بتسجيل تلاوة أو حفظ آيات لكسب النقاط!'}</p>
       </div>
     )
   }
@@ -121,6 +109,16 @@ export default function StudentPointsPage() {
   const progressValue = data.total_points - currentLevelMin
   const progressPct = progressRange > 0 ? Math.min(Math.round((progressValue / progressRange) * 100), 100) : 100
 
+  const levelLabels: Record<string, string> = {
+    beginner: t.studentPages?.dashboard?.levels?.beginner || 'مبتدئ',
+    intermediate: t.studentPages?.dashboard?.levels?.intermediate || 'متوسط',
+    advanced: t.studentPages?.dashboard?.levels?.advanced || 'متقدم',
+    hafiz: t.studentPages?.dashboard?.levels?.hafiz || 'حافظ',
+    master: t.studentPages?.dashboard?.levels?.master || 'متقن',
+  }
+  const levelLabel = levelLabels[data.level] || data.level_label
+  const nextLevelLabel = data.next_level ? (levelLabels[data.next_level.key] || data.next_level.label) : null
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -128,10 +126,10 @@ export default function StudentPointsPage() {
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Star className="w-7 h-7" />
-            نقاطي
+            {t.studentPages?.points?.title || 'نقاطي'}
           </h1>
           <p className="text-white/85 mt-1.5 text-sm leading-relaxed">
-            اكسب النقاط عبر إنجاز المهام والدروس وحضور الجلسات وارتقِ في المستويات
+            {t.studentPages?.points?.desc || 'اكسب النقاط عبر إنجاز المهام والدروس وحضور الجلسات وارتقِ في المستويات'}
           </p>
         </div>
         <Link
@@ -139,7 +137,7 @@ export default function StudentPointsPage() {
           className="inline-flex items-center gap-1.5 bg-white/15 hover:bg-white/25 transition-colors px-4 py-2 rounded-xl text-sm font-bold w-max"
         >
           <Trophy className="w-4 h-4" />
-          لوحة المتصدرين
+          {t.studentPages?.points?.leaderboardBtn || 'لوحة المتصدرين'}
         </Link>
       </div>
 
@@ -150,7 +148,7 @@ export default function StudentPointsPage() {
           <CardContent className="pt-6 text-center">
             <Star className="w-10 h-10 mx-auto mb-2 text-amber-500" />
             <p className="text-4xl font-bold text-amber-600">{data.total_points.toLocaleString()}</p>
-            <p className="text-sm text-muted-foreground mt-1">نقطة</p>
+            <p className="text-sm text-muted-foreground mt-1">{t.studentPages?.points?.pointSuffix || 'نقطة'}</p>
           </CardContent>
         </Card>
 
@@ -158,8 +156,8 @@ export default function StudentPointsPage() {
         <Card>
           <CardContent className="pt-6 text-center">
             <TrendingUp className="w-10 h-10 mx-auto mb-2 text-blue-500" />
-            <p className={`text-2xl font-bold ${levelColors.text}`}>{data.level_label}</p>
-            <p className="text-sm text-muted-foreground mt-1">المستوى الحالي</p>
+            <p className={`text-2xl font-bold ${levelColors.text}`}>{levelLabel}</p>
+            <p className="text-sm text-muted-foreground mt-1">{t.studentPages?.points?.currentLevel || 'المستوى الحالي'}</p>
           </CardContent>
         </Card>
 
@@ -169,10 +167,10 @@ export default function StudentPointsPage() {
             <Flame className={`w-10 h-10 mx-auto mb-2 ${data.streak_multiplier_active ? 'text-orange-500' : 'text-gray-400'}`} />
             <p className="text-4xl font-bold text-orange-600">{data.streak_days}</p>
             <p className="text-sm text-muted-foreground mt-1">
-              يوم متواصل
+              {t.studentPages?.points?.consecutiveDays || 'يوم متواصل'}
               {data.streak_multiplier_active && (
                 <span className="block text-orange-600 font-medium mt-1">
-                  نقاط مضاعفة ×1.5
+                  {t.studentPages?.points?.doublePointsActive || 'نقاط مضاعفة ×1.5'}
                 </span>
               )}
             </p>
@@ -181,12 +179,12 @@ export default function StudentPointsPage() {
       </div>
 
       {/* Level Progress */}
-      {data.next_level && (
+      {data.next_level && nextLevelLabel && (
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium">{data.level_label}</span>
-              <span className="text-sm font-medium">{data.next_level.label}</span>
+              <span className="text-sm font-medium">{levelLabel}</span>
+              <span className="text-sm font-medium">{nextLevelLabel}</span>
             </div>
             <div className="w-full h-4 bg-muted rounded-full overflow-hidden">
               <div
@@ -195,7 +193,7 @@ export default function StudentPointsPage() {
               />
             </div>
             <p className="text-sm text-muted-foreground text-center mt-2">
-              {data.points_to_next_level.toLocaleString()} نقطة للمستوى التالي
+              {(t.studentPages?.points?.pointsToNextLevel || '{points} نقطة للمستوى التالي').replace('{points}', data.points_to_next_level.toLocaleString())}
             </p>
           </CardContent>
         </Card>
@@ -207,7 +205,7 @@ export default function StudentPointsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
               <Zap className="w-5 h-5 text-amber-500" />
-              كيف تكسب النقاط
+              {t.studentPages?.points?.howToEarnTitle || 'كيف تكسب النقاط'}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -218,7 +216,9 @@ export default function StudentPointsPage() {
                   <div key={key} className="flex items-center justify-between p-2 rounded-lg bg-muted/30">
                     <div className="flex items-center gap-2">
                       <Icon className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-sm">{REASON_LABELS[key] || key}</span>
+                      <span className="text-sm font-medium">
+                        {t.studentPages?.points?.reasons?.[key] || key}
+                      </span>
                     </div>
                     <span className="font-bold text-amber-600">+{val}</span>
                   </div>
@@ -229,7 +229,7 @@ export default function StudentPointsPage() {
               <div className="mt-3 p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
                 <p className="text-sm text-orange-700 dark:text-orange-400 font-medium">
                   <Flame className="w-4 h-4 inline ml-1" />
-                  نقاطك مضاعفة ×1.5 لأن عندك Streak أكثر من 7 أيام!
+                  {t.studentPages?.points?.streakDoubleNotice || 'نقاطك مضاعفة ×1.5 لأن عندك Streak أكثر من 7 أيام!'}
                 </p>
               </div>
             )}
@@ -241,15 +241,15 @@ export default function StudentPointsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
               <Award className="w-5 h-5 text-purple-500" />
-              الشارات ({data.badges.length})
+              {(t.studentPages?.points?.badgesTitle || 'الشارات ({count})').replace('{count}', String(data.badges.length))}
             </CardTitle>
           </CardHeader>
           <CardContent>
             {data.badges.length === 0 ? (
               <div className="text-center py-4">
-                <p className="text-muted-foreground mb-2">لم تحصل على شارات بعد — اجمع نقاط أكثر!</p>
+                <p className="text-muted-foreground mb-2">{t.studentPages?.points?.noBadgesYet || 'لم تحصل على شارات بعد — اجمع نقاط أكثر!'}</p>
                 <Link href="/academy/student/badges" className="text-sm text-amber-600 dark:text-amber-400 hover:underline font-medium">
-                  تصفح كل الشارات المتاحة
+                  {t.studentPages?.points?.browseBadges || 'تصفح كل الشارات المتاحة'}
                 </Link>
               </div>
             ) : (
@@ -271,7 +271,7 @@ export default function StudentPointsPage() {
                   </div>
                 ))}
                 <Link href="/academy/student/badges" className="block text-center text-sm text-amber-600 dark:text-amber-400 hover:underline font-medium mt-3">
-                  عرض كل الشارات
+                  {t.studentPages?.points?.viewAllBadges || 'عرض كل الشارات'}
                 </Link>
               </div>
             )}
@@ -284,12 +284,12 @@ export default function StudentPointsPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <TrendingUp className="w-5 h-5" />
-            سجل النقاط الأخير
+            {t.studentPages?.points?.recentHistoryTitle || 'سجل النقاط الأخير'}
           </CardTitle>
         </CardHeader>
         <CardContent>
           {data.log.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">لا توجد نشاطات بعد</p>
+            <p className="text-center text-muted-foreground py-8">{t.studentPages?.points?.noActivitiesYet || 'لا توجد نشاطات بعد'}</p>
           ) : (
             <div className="space-y-2">
               {data.log.map((entry) => {
@@ -300,7 +300,7 @@ export default function StudentPointsPage() {
                       <Icon className="w-5 h-5 text-muted-foreground" />
                       <div>
                         <p className="text-sm font-medium">
-                          {REASON_LABELS[entry.reason] || entry.reason}
+                          {t.studentPages?.points?.reasons?.[entry.reason] || entry.reason}
                         </p>
                         {entry.description && (
                           <p className="text-xs text-muted-foreground">{entry.description}</p>
@@ -310,7 +310,7 @@ export default function StudentPointsPage() {
                     <div className="text-left">
                       <span className="font-bold text-green-600">+{entry.points}</span>
                       <p className="text-xs text-muted-foreground">
-                        {new Date(entry.created_at).toLocaleDateString('ar-SA')}
+                        {new Date(entry.created_at).toLocaleDateString(isAr ? 'ar-EG' : 'en-US')}
                       </p>
                     </div>
                   </div>
@@ -326,25 +326,25 @@ export default function StudentPointsPage() {
         <Card>
           <CardContent className="pt-4 text-center">
             <p className="text-2xl font-bold">{data.total_verses_memorized}</p>
-            <p className="text-xs text-muted-foreground">آيات محفوظة</p>
+            <p className="text-xs text-muted-foreground">{t.studentPages?.points?.memorizedVerses || 'آيات محفوظة'}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4 text-center">
             <p className="text-2xl font-bold">{data.total_verses_revised}</p>
-            <p className="text-xs text-muted-foreground">آيات مراجعة</p>
+            <p className="text-xs text-muted-foreground">{t.studentPages?.points?.revisedVerses || 'آيات مراجعة'}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4 text-center">
             <p className="text-2xl font-bold">{data.longest_streak}</p>
-            <p className="text-xs text-muted-foreground">أطول Streak</p>
+            <p className="text-xs text-muted-foreground">{t.studentPages?.points?.longestStreak || 'أطول Streak'}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4 text-center">
             <p className="text-2xl font-bold">{data.badges.length}</p>
-            <p className="text-xs text-muted-foreground">شارات</p>
+            <p className="text-xs text-muted-foreground">{t.studentPages?.points?.badgesCount || 'شارات'}</p>
           </CardContent>
         </Card>
       </div>

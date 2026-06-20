@@ -47,7 +47,7 @@ function todayLocal(): string {
 }
 
 export default function ParentCalendarPage() {
-  const { locale } = useI18n()
+  const { t, locale } = useI18n()
   const isAr = locale === 'ar'
 
   const [currentDate, setCurrentDate] = useState(new Date())
@@ -93,7 +93,7 @@ export default function ParentCalendarPage() {
         if (data.children) setChildren(data.children)
       })
       .catch(() => {
-        if (!cancelled) setError('فشل تحميل الأحداث')
+        if (!cancelled) setError(t.parentPages.calendar.loadEventsFailed)
       })
       .finally(() => {
         if (!cancelled) setLoading(false)
@@ -118,19 +118,31 @@ export default function ParentCalendarPage() {
   const daysInMonth = new Date(year, mon + 1, 0).getDate()
   const firstDayOfWeek = new Date(year, mon, 1).getDay()
 
-  const monthNamesAr = [
-    'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
-    'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر',
+  const monthNames = [
+    t.parentPages.calendar.monthNames.jan,
+    t.parentPages.calendar.monthNames.feb,
+    t.parentPages.calendar.monthNames.mar,
+    t.parentPages.calendar.monthNames.apr,
+    t.parentPages.calendar.monthNames.may,
+    t.parentPages.calendar.monthNames.jun,
+    t.parentPages.calendar.monthNames.jul,
+    t.parentPages.calendar.monthNames.aug,
+    t.parentPages.calendar.monthNames.sep,
+    t.parentPages.calendar.monthNames.oct,
+    t.parentPages.calendar.monthNames.nov,
+    t.parentPages.calendar.monthNames.dec,
   ]
-  const monthNamesEn = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December',
+  const dayNames = [
+    t.parentPages.calendar.dayNames.sun,
+    t.parentPages.calendar.dayNames.mon,
+    t.parentPages.calendar.dayNames.tue,
+    t.parentPages.calendar.dayNames.wed,
+    t.parentPages.calendar.dayNames.thu,
+    t.parentPages.calendar.dayNames.fri,
+    t.parentPages.calendar.dayNames.sat,
   ]
-  const dayNamesAr = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت']
-  const dayNamesEn = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
-  const monthName = isAr ? monthNamesAr[mon] : monthNamesEn[mon]
-  const dayNames = isAr ? dayNamesAr : dayNamesEn
+  const monthName = monthNames[mon]
 
   const prevMonth = () => setCurrentDate(new Date(year, mon - 1, 1))
   const nextMonth = () => setCurrentDate(new Date(year, mon + 1, 1))
@@ -155,10 +167,10 @@ export default function ParentCalendarPage() {
       <div className="space-y-2">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider mb-2">
           <CalendarIcon className="w-4 h-4" />
-          {isAr ? 'تقويم ولي الأمر' : 'Parent Calendar'}
+          {t.parentPages.calendar.parentCalendar}
         </div>
         <h1 className="text-3xl lg:text-4xl font-black tracking-tight text-foreground">
-          {isAr ? 'مواعيد الأبناء' : "Children's Schedule"}
+          {t.parentPages.calendar.childrenSchedule}
         </h1>
       </div>
 
@@ -174,7 +186,7 @@ export default function ParentCalendarPage() {
                 : 'bg-muted/50 text-muted-foreground hover:bg-muted'
             }`}
           >
-            {isAr ? 'جميع الأبناء' : 'All Children'}
+            {t.parentPages.calendar.allChildren}
           </button>
           {children.map((child) => (
             <button
@@ -202,7 +214,7 @@ export default function ParentCalendarPage() {
         <Card className="border border-border/50 shadow-sm rounded-2xl overflow-hidden bg-card">
           <div className="p-4 border-b border-border/50 flex items-center gap-2 bg-blue-500/5">
             <Video className="w-4 h-4 text-blue-500" />
-            <h3 className="font-bold text-sm">{isAr ? 'جلسات اليوم' : "Today's Sessions"}</h3>
+            <h3 className="font-bold text-sm">{t.parentPages.calendar.todaySessions}</h3>
             <span className="ms-auto text-[11px] font-bold bg-blue-500/10 text-blue-500 px-2 py-0.5 rounded-full">
               {todaySessions.length}
             </span>
@@ -210,7 +222,7 @@ export default function ParentCalendarPage() {
           <CardContent className="p-3">
             {todaySessions.length === 0 ? (
               <p className="text-xs text-muted-foreground py-3 text-center">
-                {isAr ? 'لا توجد جلسات اليوم' : 'No sessions today'}
+                {t.parentPages.calendar.noSessionsToday}
               </p>
             ) : (
               <ul className="space-y-2">
@@ -228,7 +240,7 @@ export default function ParentCalendarPage() {
                         rel="noreferrer"
                         className="text-[11px] font-bold text-blue-600 hover:underline shrink-0"
                       >
-                        {isAr ? 'انضمام' : 'Join'}
+                        {t.parentPages.calendar.join}
                       </a>
                     )}
                   </li>
@@ -241,7 +253,7 @@ export default function ParentCalendarPage() {
         <Card className="border border-border/50 shadow-sm rounded-2xl overflow-hidden bg-card">
           <div className="p-4 border-b border-border/50 flex items-center gap-2 bg-orange-500/5">
             <FileText className="w-4 h-4 text-orange-500" />
-            <h3 className="font-bold text-sm">{isAr ? 'مهام اليوم' : "Today's Tasks"}</h3>
+            <h3 className="font-bold text-sm">{t.parentPages.calendar.todayTasks}</h3>
             <span className="ms-auto text-[11px] font-bold bg-orange-500/10 text-orange-500 px-2 py-0.5 rounded-full">
               {todayTasks.length}
             </span>
@@ -249,7 +261,7 @@ export default function ParentCalendarPage() {
           <CardContent className="p-3">
             {todayTasks.length === 0 ? (
               <p className="text-xs text-muted-foreground py-3 text-center">
-                {isAr ? 'لا توجد مهام مستحقة اليوم' : 'No tasks due today'}
+                {t.parentPages.calendar.noTasksToday}
               </p>
             ) : (
               <ul className="space-y-2">
@@ -345,9 +357,7 @@ export default function ParentCalendarPage() {
           <div className="p-4 border-b border-border/50">
             <h3 className="text-sm font-bold text-muted-foreground">
               {selectedDate === today
-                ? isAr
-                  ? 'أحداث اليوم'
-                  : "Today's Events"
+                ? t.parentPages.calendar.todayEvents
                 : selectedDate}
             </h3>
           </div>
@@ -356,7 +366,7 @@ export default function ParentCalendarPage() {
               <p className="text-xs text-destructive py-6 text-center">{error}</p>
             ) : selectedEvents.length === 0 ? (
               <p className="text-xs text-muted-foreground py-6 text-center">
-                {isAr ? 'لا توجد أحداث' : 'No events'}
+                {t.parentPages.calendar.noEvents}
               </p>
             ) : (
               <ul className="space-y-3">
@@ -383,7 +393,7 @@ export default function ParentCalendarPage() {
                           className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:underline"
                         >
                           <Video className="w-3 h-3" />{' '}
-                          {isAr ? 'رابط الجلسة' : 'Meeting link'}
+                          {t.parentPages.calendar.meetingLink}
                         </a>
                       )}
                     </div>

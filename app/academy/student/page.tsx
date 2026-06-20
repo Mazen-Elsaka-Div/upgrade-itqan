@@ -14,13 +14,7 @@ import { PageLoadingSkeleton } from '@/components/ui/page-loading-skeleton'
 import { AdhkarWidget } from '@/components/adhkar-widget'
 import { PrayerTimesDialog } from '@/components/prayer-times-dialog'
 
-const LEVEL_LABELS: Record<string, string> = {
-  beginner: 'مبتدئ',
-  intermediate: 'متوسط',
-  advanced: 'متقدم',
-  hafiz: 'حافظ',
-  master: 'متقن',
-}
+// Level labels will be resolved dynamically within the component using translations.
 
 interface LevelProgress {
   level: string
@@ -78,22 +72,11 @@ interface ActivityEntry {
   created_at: string
 }
 
-const REASON_LABELS: Record<string, string> = {
-  recitation: 'سجّلت تلاوة',
-  mastered: 'أتقنت حفظاً',
-  task: 'أنجزت مهمة',
-  lesson: 'أكملت درساً',
-  streak: 'مكافأة المثابرة',
-  juz_complete: 'أتممت جزءاً',
-  course_complete: 'أكملت دورة',
-  session_attend: 'حضرت جلسة',
-  daily_login: 'دخول يومي',
-  competition_win: 'فزت في مسابقة',
-  badge_earned: 'حصلت على شارة',
-}
+// Reason labels will be resolved dynamically within the component using translations.
 
 export default function AcademyStudentDashboard() {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
+  const isAr = locale === 'ar'
   const [stats, setStats] = useState<StudentStats | null>(null)
   const [courses, setCourses] = useState<Course[]>([])
   const [sessions, setSessions] = useState<UpcomingSession[]>([])
@@ -141,7 +124,7 @@ export default function AcademyStudentDashboard() {
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr)
-    return new Intl.DateTimeFormat('ar-EG', {
+    return new Intl.DateTimeFormat(isAr ? 'ar-EG' : 'en-US', {
       weekday: 'short', month: 'short', day: 'numeric',
       hour: '2-digit', minute: '2-digit',
     }).format(date)
@@ -151,38 +134,42 @@ export default function AcademyStudentDashboard() {
     const date = new Date(dateStr)
     const diff = Date.now() - date.getTime()
     const mins = Math.floor(diff / 60000)
-    if (mins < 1) return 'الآن'
-    if (mins < 60) return `منذ ${mins} د`
+    if (mins < 1) return isAr ? 'الآن' : 'now'
+    if (mins < 60) return isAr ? `منذ ${mins} د` : `${mins}m ago`
     const hrs = Math.floor(mins / 60)
-    if (hrs < 24) return `منذ ${hrs} س`
+    if (hrs < 24) return isAr ? `منذ ${hrs} س` : `${hrs}h ago`
     const days = Math.floor(hrs / 24)
-    if (days < 30) return `منذ ${days} يوم`
-    return new Intl.DateTimeFormat('ar-EG', { month: 'short', day: 'numeric' }).format(date)
+    if (days < 30) return isAr ? `منذ ${days} يوم` : `${days}d ago`
+    return new Intl.DateTimeFormat(isAr ? 'ar-EG' : 'en-US', { month: 'short', day: 'numeric' }).format(date)
   }
 
   const formatDueDate = (dateStr: string) => {
     const date = new Date(dateStr)
     const days = Math.ceil((date.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
-    if (days < 0) return 'متأخر'
-    if (days === 0) return 'اليوم'
-    if (days === 1) return 'غداً'
-    return `${days} أيام`
+    if (days < 0) return t.studentPages?.dashboard?.dueLate || 'متأخر'
+    if (days === 0) return t.studentPages?.dashboard?.dueToday || 'اليوم'
+    if (days === 1) return t.studentPages?.dashboard?.dueTomorrow || 'غداً'
+    return (t.studentPages?.dashboard?.dueDays || '{days} أيام').replace('{days}', String(days))
   }
 
   // Next upcoming session highlighted separately
   const nextSession = sessions[0]
   const sessionStartsSoon = (dateStr: string) => {
-    const diff = new Date(dateStr).getTime() - Date.now()
-    return diff <= 15 * 60000 && diff > -60 * 60000
+    const d = new Date(dateStr)
+    return d.getTime() - Date.now() < 15 * 60 * 1000 && d.getTime() - Date.now() > 0
   }
 
-  if (loading) {
-    return <PageLoadingSkeleton />
+  const levelLabels: Record<string, string> = {
+    beginner: t.studentPages?.dashboard?.levels?.beginner || 'مبتدئ',
+    intermediate: t.studentPages?.dashboard?.levels?.intermediate || 'متوسط',
+    advanced: t.studentPages?.dashboard?.levels?.advanced || 'متقدم',
+    hafiz: t.studentPages?.dashboard?.levels?.hafiz || 'حافظ',
+    master: t.studentPages?.dashboard?.levels?.master || 'متقن',
   }
 
   const lp = stats?.level_progress
-  const levelLabel = LEVEL_LABELS[lp?.level || stats?.current_level || 'beginner'] || 'مبتدئ'
-  const nextLevelLabel = lp?.next ? LEVEL_LABELS[lp.next] : null
+  const levelLabel = levelLabels[lp?.level || stats?.current_level || 'beginner'] || 'مبتدئ'
+  const nextLevelLabel = lp?.next ? levelLabels[lp.next] : null
   const pointsToNext = lp?.next_floor != null ? Math.max(0, lp.next_floor - (stats?.total_points || 0)) : 0
 
   return (
@@ -191,17 +178,17 @@ export default function AcademyStudentDashboard() {
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="lg:col-span-2 bg-gradient-to-br from-violet-600 via-indigo-600 to-sky-500 rounded-2xl p-6 text-white shadow-lg shadow-indigo-500/20">
           <h1 className="text-2xl font-bold mb-1 text-balance">
-            {t.academy?.welcomeBack || 'مرحباً بعودتك!'}
+            {t.studentPages?.dashboard?.welcomeBack || 'مرحباً بعودتك!'}
           </h1>
           <p className="text-white/80 mb-5 text-sm leading-relaxed">
-            {t.academy?.continueJourney || 'واصل رحلتك التعليمية واكسب المزيد من النقاط'}
+            {t.studentPages?.dashboard?.continueJourney || 'واصل رحلتك التعليمية واكسب المزيد من النقاط'}
           </p>
           <div className="mb-5">
             <PrayerTimesDialog
               trigger={
                 <button className="inline-flex items-center gap-2 bg-white/15 hover:bg-white/25 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition-colors backdrop-blur-sm border border-white/20">
                   <Clock className="w-4 h-4" />
-                  مواقيت الصلاة
+                  {t.studentPages?.dashboard?.prayerTimesBtn}
                 </button>
               }
             />
@@ -210,17 +197,17 @@ export default function AcademyStudentDashboard() {
             <div className="flex items-center gap-2">
               <Flame className="w-5 h-5 text-orange-300" />
               <span className="font-bold text-lg">{stats?.streak_days || 0}</span>
-              <span className="text-white/70 text-sm">يوم متتالي</span>
+              <span className="text-white/70 text-sm">{t.studentPages?.dashboard?.streakDaysSuffix}</span>
             </div>
             <div className="flex items-center gap-2">
               <Star className="w-5 h-5 text-yellow-300" />
               <span className="font-bold text-lg">{stats?.total_points || 0}</span>
-              <span className="text-white/70 text-sm">نقطة</span>
+              <span className="text-white/70 text-sm">{t.studentPages?.dashboard?.pointsSuffix}</span>
             </div>
             <div className="flex items-center gap-2">
               <Medal className="w-5 h-5 text-amber-200" />
               <span className="font-bold text-lg">{stats?.badges_earned || 0}</span>
-              <span className="text-white/70 text-sm">شارة</span>
+              <span className="text-white/70 text-sm">{t.studentPages?.dashboard?.badgesSuffix}</span>
             </div>
           </div>
         </div>
@@ -233,7 +220,7 @@ export default function AcademyStudentDashboard() {
                 <Trophy className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">مستواك الحالي</p>
+                <p className="text-xs text-muted-foreground">{t.studentPages?.dashboard?.currentLevelLabel}</p>
                 <p className="font-bold text-lg">{levelLabel}</p>
               </div>
             </div>
@@ -250,8 +237,10 @@ export default function AcademyStudentDashboard() {
             </div>
             <p className="text-xs text-muted-foreground">
               {nextLevelLabel
-                ? `باقي ${pointsToNext} نقطة للوصول إلى «${nextLevelLabel}»`
-                : 'وصلت إلى أعلى مستوى!'}
+                ? (t.studentPages?.dashboard?.pointsToNextLevel || 'باقي {points} نقطة للوصول إلى «{level}»')
+                  .replace('{points}', String(pointsToNext))
+                  .replace('{level}', nextLevelLabel)
+                : t.studentPages?.dashboard?.maxLevelReached}
             </p>
           </div>
         </div>
@@ -259,14 +248,14 @@ export default function AcademyStudentDashboard() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-        <StatCard icon={BookOpen} label="دوراتي" value={stats?.enrolled_courses || 0} tone="sky" />
-        <StatCard icon={CheckCircle2} label="دورات مكتملة" value={stats?.completed_courses || 0} tone="emerald" />
-        <StatCard icon={Clock} label="مهام معلّقة" value={stats?.pending_tasks || 0} highlight={Boolean(stats?.pending_tasks)} />
-        <StatCard icon={Calendar} label="جلسات قادمة" value={stats?.upcoming_sessions || 0} tone="violet" />
-        <StatCard icon={Award} label="الشارات" value={stats?.badges_earned || 0} tone="rose" />
+        <StatCard icon={BookOpen} label={t.studentPages?.dashboard?.myCoursesLabel} value={stats?.enrolled_courses || 0} tone="sky" />
+        <StatCard icon={CheckCircle2} label={t.studentPages?.dashboard?.completedCoursesLabel} value={stats?.completed_courses || 0} tone="emerald" />
+        <StatCard icon={Clock} label={t.studentPages?.dashboard?.pendingTasksLabel} value={stats?.pending_tasks || 0} highlight={Boolean(stats?.pending_tasks)} />
+        <StatCard icon={Calendar} label={t.studentPages?.dashboard?.upcomingSessionsLabel} value={stats?.upcoming_sessions || 0} tone="violet" />
+        <StatCard icon={Award} label={t.studentPages?.dashboard?.badgesLabel} value={stats?.badges_earned || 0} tone="rose" />
         <StatCard
           icon={GraduationCap}
-          label="متوسط الدرجات"
+          label={t.studentPages?.dashboard?.avgGradeLabel}
           value={stats?.avg_grade != null ? `${stats.avg_grade}%` : '—'}
           tone="teal"
         />
@@ -284,10 +273,10 @@ export default function AcademyStudentDashboard() {
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <p className="text-xs font-medium text-violet-600 dark:text-violet-400">جلستك القادمة</p>
+                <p className="text-xs font-medium text-violet-600 dark:text-violet-400">{t.studentPages?.dashboard?.nextSessionLabel}</p>
                 {sessionStartsSoon(nextSession.scheduled_at) && (
                   <span className="text-[10px] font-bold bg-violet-600 text-white px-2 py-0.5 rounded-full animate-pulse">
-                    تبدأ قريباً
+                    {t.studentPages?.dashboard?.startsSoonLabel}
                   </span>
                 )}
               </div>
@@ -297,7 +286,7 @@ export default function AcademyStudentDashboard() {
             <div className="text-left shrink-0">
               <p className="text-sm font-medium">{formatDate(nextSession.scheduled_at)}</p>
               <span className="inline-flex items-center gap-1 mt-1 text-xs text-violet-600 dark:text-violet-400 font-bold">
-                <PlayCircle className="w-4 h-4" /> انضمام
+                <PlayCircle className="w-4 h-4" /> {t.studentPages?.dashboard?.joinBtn}
               </span>
             </div>
           </div>
@@ -311,22 +300,22 @@ export default function AcademyStudentDashboard() {
           <div className="bg-card rounded-2xl border border-border p-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-bold flex items-center gap-2">
-                <BookOpen className="w-5 h-5 text-sky-600 dark:text-sky-400" /> دوراتي
+                <BookOpen className="w-5 h-5 text-sky-600 dark:text-sky-400" /> {t.studentPages?.dashboard?.myCoursesSection}
               </h2>
               <Link href="/academy/student/courses" className="text-sm text-sky-600 dark:text-sky-400 hover:underline flex items-center gap-1">
-                عرض الكل <ChevronLeft className="w-4 h-4" />
+                {t.studentPages?.dashboard?.viewAll} <ChevronLeft className="w-4 h-4" />
               </Link>
             </div>
 
             {courses.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                <p>لم تسجل في أي دورة بعد</p>
+                <p>{t.studentPages?.dashboard?.noEnrolledCourses}</p>
                 <Link
                   href="/academy/student/courses/browse"
                   className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
                 >
-                  تصفح الدورات
+                  {t.studentPages?.dashboard?.browseCoursesBtn}
                 </Link>
               </div>
             ) : (
@@ -366,31 +355,46 @@ export default function AcademyStudentDashboard() {
           {/* Activity Feed */}
           <div className="bg-card rounded-2xl border border-border p-6">
             <h2 className="text-lg font-bold flex items-center gap-2 mb-5">
-              <ActivityIcon className="w-5 h-5 text-amber-600 dark:text-amber-400" /> آخر النشاطات
+              <ActivityIcon className="w-5 h-5 text-amber-600 dark:text-amber-400" /> {t.studentPages?.dashboard?.recentActivities}
             </h2>
             {activity.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-6">لا توجد نشاطات بعد</p>
+              <p className="text-sm text-muted-foreground text-center py-6">{t.studentPages?.dashboard?.noActivities}</p>
             ) : (
               <div className="space-y-1">
-                {activity.slice(0, 6).map((entry) => (
-                  <div key={entry.id} className="flex items-center gap-3 py-2.5 border-b border-border/50 last:border-0">
-                    <div className="w-9 h-9 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
-                      <Sparkles className="w-4 h-4" />
+                {activity.slice(0, 6).map((entry) => {
+                  const reasonLabels: Record<string, string> = {
+                    recitation: t.studentPages?.dashboard?.reasons?.recitation || 'سجّلت تلاوة',
+                    mastered: t.studentPages?.dashboard?.reasons?.mastered || 'أتقنت حفظاً',
+                    task: t.studentPages?.dashboard?.reasons?.task || 'أنجزت مهمة',
+                    lesson: t.studentPages?.dashboard?.reasons?.lesson || 'أكملت درساً',
+                    streak: t.studentPages?.dashboard?.reasons?.streak || 'مكافأة المثابرة',
+                    juz_complete: t.studentPages?.dashboard?.reasons?.juz_complete || 'أتممت جزءاً',
+                    course_complete: t.studentPages?.dashboard?.reasons?.course_complete || 'أكملت دورة',
+                    session_attend: t.studentPages?.dashboard?.reasons?.session_attend || 'حضرت جلسة',
+                    daily_login: t.studentPages?.dashboard?.reasons?.daily_login || 'دخول يومي',
+                    competition_win: t.studentPages?.dashboard?.reasons?.competition_win || 'فزت في مسابقة',
+                    badge_earned: t.studentPages?.dashboard?.reasons?.badge_earned || 'حصلت على شارة',
+                  }
+                  return (
+                    <div key={entry.id} className="flex items-center gap-3 py-2.5 border-b border-border/50 last:border-0">
+                      <div className="w-9 h-9 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                        <Sparkles className="w-4 h-4" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">
+                          {entry.description || reasonLabels[entry.reason] || entry.reason}
+                        </p>
+                        <p className="text-xs text-muted-foreground">{formatRelative(entry.created_at)}</p>
+                      </div>
+                      <span className={cn(
+                        'text-sm font-bold shrink-0',
+                        entry.points >= 0 ? 'text-emerald-600' : 'text-destructive'
+                      )}>
+                        {entry.points >= 0 ? '+' : ''}{entry.points}
+                      </span>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">
-                        {entry.description || REASON_LABELS[entry.reason] || entry.reason}
-                      </p>
-                      <p className="text-xs text-muted-foreground">{formatRelative(entry.created_at)}</p>
-                    </div>
-                    <span className={cn(
-                      'text-sm font-bold shrink-0',
-                      entry.points >= 0 ? 'text-emerald-600' : 'text-destructive'
-                    )}>
-                      {entry.points >= 0 ? '+' : ''}{entry.points}
-                    </span>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             )}
           </div>
@@ -405,11 +409,11 @@ export default function AcademyStudentDashboard() {
           <div className="bg-card rounded-2xl border border-border p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-bold flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-violet-600 dark:text-violet-400" /> الجلسات القادمة
+                <Calendar className="w-5 h-5 text-violet-600 dark:text-violet-400" /> {t.studentPages?.dashboard?.upcomingSessions}
               </h2>
             </div>
             {sessions.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-4">لا توجد جلسات قادمة</p>
+              <p className="text-sm text-muted-foreground text-center py-4">{t.studentPages?.dashboard?.noUpcomingSessions}</p>
             ) : (
               <div className="space-y-2">
                 {(showAllSessions ? sessions : sessions.slice(0, 4)).map((session) => (
@@ -428,7 +432,7 @@ export default function AcademyStudentDashboard() {
                     onClick={() => setShowAllSessions(!showAllSessions)}
                     className="w-full text-center text-sm text-violet-600 hover:text-violet-700 dark:text-violet-400 py-2 mt-2 border border-violet-500/20 rounded-lg hover:bg-violet-500/10 transition-colors"
                   >
-                    {showAllSessions ? (t.academy?.showLess || 'عرض أقل') : (t.academy?.showMore || 'المزيد')}
+                    {showAllSessions ? t.studentPages?.dashboard?.showLess : t.studentPages?.dashboard?.showMore}
                   </button>
                 )}
               </div>
@@ -439,17 +443,17 @@ export default function AcademyStudentDashboard() {
           <div className="bg-card rounded-2xl border border-border p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-bold flex items-center gap-2">
-                <Target className="w-5 h-5 text-rose-600 dark:text-rose-400" /> المهام المعلّقة
+                <Target className="w-5 h-5 text-rose-600 dark:text-rose-400" /> {t.studentPages?.dashboard?.pendingTasks}
               </h2>
-              <Link href="/academy/student/tasks" className="text-xs text-rose-600 dark:text-rose-400 hover:underline">الكل</Link>
+              <Link href="/academy/student/tasks" className="text-xs text-rose-600 dark:text-rose-400 hover:underline">{t.studentPages?.dashboard?.all}</Link>
             </div>
             {tasks.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-4">لا توجد مهام معلّقة</p>
+              <p className="text-sm text-muted-foreground text-center py-4">{t.studentPages?.dashboard?.noPendingTasks}</p>
             ) : (
               <div className="space-y-2">
                 {tasks.map((task) => {
                   const due = formatDueDate(task.due_date)
-                  const late = due === 'متأخر'
+                  const late = due === t.studentPages?.dashboard?.dueLate || due === 'متأخر'
                   return (
                     <Link
                       key={task.id}
@@ -467,7 +471,7 @@ export default function AcademyStudentDashboard() {
                       </div>
                       <p className="text-xs text-muted-foreground mt-1 truncate">{task.course_title}</p>
                       <div className="flex items-center gap-1 mt-2 text-xs text-amber-600 dark:text-amber-400">
-                        <Star className="w-3 h-3" /> <span>{task.points_value} نقطة</span>
+                        <Star className="w-3 h-3" /> <span>{task.points_value} {t.studentPages?.dashboard?.pointsSuffix}</span>
                       </div>
                     </Link>
                   )
@@ -479,19 +483,19 @@ export default function AcademyStudentDashboard() {
           {/* Streak Card */}
           <div className="bg-card rounded-2xl border border-border p-6">
             <h2 className="font-bold flex items-center gap-2 mb-4">
-              <Flame className="w-5 h-5 text-orange-500" /> سلسلة المثابرة
+              <Flame className="w-5 h-5 text-orange-500" /> {t.studentPages?.dashboard?.streakTitle}
             </h2>
             <div className="flex items-center justify-between mb-4">
               <div>
                 <p className="text-3xl font-bold">{stats?.streak_days || 0}</p>
-                <p className="text-xs text-muted-foreground">يوم متتالي</p>
+                <p className="text-xs text-muted-foreground">{t.studentPages?.dashboard?.streakDaysSuffix}</p>
               </div>
               <div className="text-left">
                 <p className="text-sm font-bold flex items-center gap-1 justify-end">
                   <TrendingUp className="w-4 h-4 text-emerald-600" />
                   {stats?.longest_streak || 0}
                 </p>
-                <p className="text-xs text-muted-foreground">أطول سلسلة</p>
+                <p className="text-xs text-muted-foreground">{t.studentPages?.dashboard?.longestStreak}</p>
               </div>
             </div>
             <div className="flex items-center justify-between gap-1.5">

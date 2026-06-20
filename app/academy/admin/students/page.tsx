@@ -15,7 +15,8 @@ interface Student {
 }
 
 export default function AcademyAdminStudentsPage() {
-  const { t, language } = useI18n()
+  const { t, locale } = useI18n()
+  const language = locale
   const a = t.academyAdmin || t.admin
   const [students, setStudents] = useState<Student[]>([])
   const [loading, setLoading] = useState(true)

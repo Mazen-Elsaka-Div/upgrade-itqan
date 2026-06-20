@@ -45,7 +45,7 @@ export default function StudentChatPage() {
 }
 
 function StudentChatPageInner() {
-  const { locale } = useI18n()
+  const { t, locale } = useI18n()
   const isAr = locale === 'ar'
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -146,7 +146,7 @@ function StudentChatPageInner() {
       })
       const data = await res.json()
       if (!res.ok) {
-        alert(data?.error || (isAr ? 'تعذر فتح المحادثة' : 'Could not start conversation'))
+        alert(data?.error || t.studentPages?.chat?.errorStartChat)
         return
       }
       setShowNew(false)
@@ -198,7 +198,7 @@ function StudentChatPageInner() {
       })
       const data = await res.json()
       if (!res.ok) {
-        alert(data?.error || (isAr ? 'تعذر فتح التذكرة' : 'Could not open ticket'))
+        alert(data?.error || t.studentPages?.chat?.errorOpenTicket)
         return
       }
       const list = await fetchConversations()
@@ -209,7 +209,7 @@ function StudentChatPageInner() {
         setActiveConv({
           id: data.conversationId,
           other_user_id: 'admin',
-          other_user_name: isAr ? 'إدارة الأكاديمية' : 'Academy Support',
+          other_user_name: t.studentPages?.chat?.academySupport,
           other_user_avatar: null,
           last_message: null,
           last_message_at: null,
@@ -225,7 +225,7 @@ function StudentChatPageInner() {
   }
 
   const handleDeleteConversation = async (convId: string) => {
-    if (!confirm(isAr ? 'هل تريد حذف هذه المحادثة نهائياً؟' : 'Delete this conversation permanently?')) return
+    if (!confirm(t.studentPages?.chat?.confirmDelete)) return
     setDeletingConvId(convId)
     try {
       const res = await fetch(`/api/academy/conversations/${convId}`, { method: 'DELETE' })
@@ -234,7 +234,7 @@ function StudentChatPageInner() {
         setActiveConv(prev => (prev?.id === convId ? null : prev))
       } else {
         const data = await res.json().catch(() => ({}))
-        alert(data?.error || (isAr ? 'تعذر حذف المحادثة' : 'Could not delete conversation'))
+        alert(data?.error || t.studentPages?.chat?.errorDeleteChat)
       }
     } catch {
       // ignore
@@ -320,10 +320,10 @@ function StudentChatPageInner() {
     <div className="max-w-6xl mx-auto space-y-6 pb-12 h-[calc(100vh-100px)] flex flex-col" dir={isAr ? "rtl" : "ltr"}>
       <div className="space-y-1 shrink-0">
         <h1 className="text-3xl font-black tracking-tight text-foreground">
-          {isAr ? "الرسائل الخاصة" : "Messages"}
+          {t.studentPages?.chat?.title}
         </h1>
         <p className="text-muted-foreground font-medium">
-          {isAr ? "تواصل مع أساتذتك بكل سهولة." : "Communicate with your teachers easily."}
+          {t.studentPages?.chat?.desc}
         </p>
       </div>
 
@@ -338,7 +338,7 @@ function StudentChatPageInner() {
                 className="flex-1 justify-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white px-2"
               >
                 <MessageSquarePlus className="w-4 h-4" />
-                <span className="truncate">{isAr ? 'محادثة' : 'Chat'}</span>
+                <span className="truncate">{t.studentPages?.chat?.chatBtn}</span>
               </Button>
               <Button
                 onClick={handleCreateTicket}
@@ -347,7 +347,7 @@ function StudentChatPageInner() {
                 className="flex-1 justify-center gap-2 rounded-xl border-blue-200 text-blue-700 hover:bg-blue-50 px-2 disabled:opacity-60"
               >
                 {openingTicket ? <Loader2 className="w-4 h-4 animate-spin" /> : <Shield className="w-4 h-4" />}
-                <span className="truncate">{isAr ? 'الدعم' : 'Support'}</span>
+                <span className="truncate">{t.studentPages?.chat?.supportBtn}</span>
               </Button>
             </div>
             <div className="relative">
@@ -355,7 +355,7 @@ function StudentChatPageInner() {
               <Input
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
-                placeholder={isAr ? "ابحث عن أستاذ..." : "Search teacher..."}
+                placeholder={t.studentPages?.chat?.searchPlaceholder}
                 className={`pl-9 pr-9 h-10 rounded-xl bg-muted/30 border-border/50 focus:bg-card`}
               />
             </div>
@@ -366,10 +366,10 @@ function StudentChatPageInner() {
               <div className="flex justify-center p-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
             ) : conversations.length === 0 ? (
               <div className="text-center p-8 text-muted-foreground text-sm font-medium space-y-3">
-                <p>{isAr ? "لا توجد أي محادثات حالياً" : "No conversations yet"}</p>
+                <p>{t.studentPages?.chat?.noConversations}</p>
                 <Button onClick={openNewChatDialog} variant="outline" className="gap-2">
                   <MessageSquarePlus className="w-4 h-4" />
-                  {isAr ? 'ابدأ محادثة مع المدرس' : 'Message a teacher'}
+                  {t.studentPages?.chat?.messageTeacher}
                 </Button>
               </div>
             ) : (
@@ -398,7 +398,7 @@ function StudentChatPageInner() {
                       <span className="text-[10px] text-muted-foreground font-medium shrink-0">{formatTime(conv.last_message_at)}</span>
                     </div>
                     <p className={`text-xs truncate ${conv.unread_count > 0 ? 'text-foreground font-bold' : 'text-muted-foreground font-medium'}`}>
-                      {conv.last_message || (isAr ? 'بدء محادثة جديدة' : 'Start a new conversation')}
+                      {conv.last_message || t.studentPages?.chat?.startNewConversation}
                     </p>
                   </div>
                 </button>
@@ -414,7 +414,7 @@ function StudentChatPageInner() {
               <div className="w-20 h-20 rounded-full bg-muted/20 flex items-center justify-center mb-4">
                 <Send className="w-8 h-8 opacity-20" />
               </div>
-              <p className="font-bold text-lg">{isAr ? "اختر محادثة للبدء" : "Select a conversation to start"}</p>
+              <p className="font-bold text-lg">{t.studentPages?.chat?.selectConversation}</p>
             </div>
           ) : (
             <>
@@ -430,11 +430,11 @@ function StudentChatPageInner() {
                   <h3 className="font-bold text-foreground">{activeConv.other_user_name}</h3>
                   {activeConv.is_ticket ? (
                     <span className="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-500/10 px-2 rounded-full hidden sm:inline-block">
-                      {isAr ? "الدعم الفني" : "Support"}
+                      {t.studentPages?.chat?.supportLabel}
                     </span>
                   ) : (
                     <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 rounded-full hidden sm:inline-block">
-                      {isAr ? "أستاذ الأكاديمية" : "Academy Teacher"}
+                      {t.studentPages?.chat?.teacherLabel}
                     </span>
                   )}
                 </div>
@@ -443,7 +443,7 @@ function StudentChatPageInner() {
                   size="icon"
                   onClick={() => handleDeleteConversation(activeConv.id)}
                   disabled={deletingConvId === activeConv.id}
-                  title={isAr ? 'حذف المحادثة' : 'Delete conversation'}
+                  title={t.studentPages?.chat?.deleteConversation}
                   className={`${isAr ? 'mr-auto' : 'ml-auto'} shrink-0 text-muted-foreground hover:text-red-600 hover:bg-red-500/10`}
                 >
                   {deletingConvId === activeConv.id ? <Loader2 className="w-5 h-5 animate-spin" /> : <Trash2 className="w-5 h-5" />}
@@ -484,7 +484,7 @@ function StudentChatPageInner() {
               <div className="p-4 border-t border-border/50 shrink-0 bg-card">
                 <form onSubmit={handleSend} className="flex gap-2">
                   <Input
-                    placeholder={isAr ? "اكتب رسالتك هنا..." : "Type your message..."}
+                    placeholder={t.studentPages?.chat?.writeMessagePlaceholder}
                     value={reply}
                     onChange={(e) => setReply(e.target.value)}
                     className="flex-1 rounded-2xl h-12 bg-muted/30 border-border/50 focus:bg-card"
@@ -515,9 +515,9 @@ function StudentChatPageInner() {
           >
             <div className="p-5 border-b border-border/50 flex items-center justify-between">
               <div>
-                <h2 className="text-lg font-bold">{isAr ? 'بدء محادثة مع المدرس' : 'Message a teacher'}</h2>
+                <h2 className="text-lg font-bold">{t.studentPages?.chat?.startChatWithTeacher}</h2>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {isAr ? 'يمكنك التواصل مع مدرسي الدورات التي التحقت بها.' : 'You can chat with the teachers of any course you are enrolled in.'}
+                  {t.studentPages?.chat?.chatDescription}
                 </p>
               </div>
               <Button variant="ghost" size="icon" onClick={() => setShowNew(false)}>
@@ -531,7 +531,7 @@ function StudentChatPageInner() {
                 <Input
                   value={newSearch}
                   onChange={e => setNewSearch(e.target.value)}
-                  placeholder={isAr ? 'ابحث عن مدرّس...' : 'Search a teacher...'}
+                  placeholder={t.studentPages?.chat?.searchTeacherPlaceholder}
                   className="pl-9 pr-9 h-10 rounded-xl bg-muted/30"
                 />
               </div>
@@ -542,9 +542,7 @@ function StudentChatPageInner() {
                 <div className="flex justify-center p-6"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
               ) : teachers.length === 0 ? (
                 <div className="text-center p-6 text-muted-foreground text-sm">
-                  {isAr
-                    ? 'لا يوجد مدرسون متاحون للمحادثة. سجّل في دورة أولاً لتظهر هنا.'
-                    : 'No teachers available yet. Enroll in a course first to message its teacher.'}
+                  {t.studentPages?.chat?.noTeachersAvailable}
                 </div>
               ) : (
                 teachers
@@ -576,7 +574,7 @@ function StudentChatPageInner() {
                       <span className="text-xs font-bold text-blue-600 shrink-0">
                         {startingChatWith === tch.id
                           ? <Loader2 className="w-4 h-4 animate-spin" />
-                          : (isAr ? 'مراسلة' : 'Message')}
+                          : t.studentPages?.chat?.message}
                       </span>
                     </button>
                   ))

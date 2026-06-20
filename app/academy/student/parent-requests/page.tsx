@@ -74,10 +74,10 @@ export default function ParentRequestsPage() {
             : r
         ))
       } else {
-        toast.error(data.error || 'حدث خطأ')
+        toast.error(data.error || t.studentPages?.parentRequests?.toastError)
       }
     } catch (error) {
-      toast.error('حدث خطأ في الاتصال')
+      toast.error(t.studentPages?.parentRequests?.toastConnectionError)
     } finally {
       setActionLoading(null)
     }
@@ -93,11 +93,9 @@ export default function ParentRequestsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">{isAr ? 'طلبات ربط أولياء الأمور' : 'Parent Link Requests'}</h1>
+        <h1 className="text-2xl font-bold">{t.studentPages?.parentRequests?.title}</h1>
         <p className="text-muted-foreground mt-1">
-          {isAr 
-            ? 'هنا يمكنك قبول أو رفض طلبات ربط حسابك من أولياء الأمور'
-            : 'Here you can approve or reject parent link requests'}
+          {t.studentPages?.parentRequests?.desc}
         </p>
       </div>
 
@@ -108,16 +106,14 @@ export default function ParentRequestsPage() {
             <div className="flex items-center gap-2">
               <Clock className="w-5 h-5 text-amber-600" />
               <CardTitle className="text-lg">
-                {isAr ? 'طلبات في الانتظار' : 'Pending Requests'}
+                {t.studentPages?.parentRequests?.pendingTitle}
               </CardTitle>
               <Badge variant="secondary" className="bg-amber-100 text-amber-700">
                 {pendingRequests.length}
               </Badge>
             </div>
             <CardDescription>
-              {isAr 
-                ? 'هذه الطلبات تحتاج إلى موافقتك أو رفضك'
-                : 'These requests need your approval or rejection'}
+              {t.studentPages?.parentRequests?.pendingDesc}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -137,7 +133,7 @@ export default function ParentRequestsPage() {
                     <p className="font-bold text-lg">{request.parent_name}</p>
                     <p className="text-sm text-muted-foreground">{request.parent_email}</p>
                     <Badge variant="outline" className="mt-2 font-semibold">
-                      {relationLabels[request.relation]?.[isAr ? 'ar' : 'en'] || request.relation}
+                      {t.studentPages?.parentRequests?.relations?.[request.relation] || request.relation}
                     </Badge>
                   </div>
                 </div>
@@ -152,7 +148,7 @@ export default function ParentRequestsPage() {
                     ) : (
                       <Check className="w-5 h-5" />
                     )}
-                    {isAr ? 'قبول الطلب' : 'Approve'}
+                    {t.studentPages?.parentRequests?.approveBtn}
                   </Button>
                   <Button
                     variant="outline"
@@ -165,7 +161,7 @@ export default function ParentRequestsPage() {
                     ) : (
                       <X className="w-5 h-5" />
                     )}
-                    {isAr ? 'رفض' : 'Reject'}
+                    {t.studentPages?.parentRequests?.rejectBtn}
                   </Button>
                 </div>
               </div>
@@ -183,12 +179,10 @@ export default function ParentRequestsPage() {
                 <UserCheck className="w-8 h-8 text-muted-foreground" />
               </div>
               <h3 className="font-medium text-lg mb-2">
-                {isAr ? 'لا توجد طلبات معلقة' : 'No Pending Requests'}
+                {t.studentPages?.parentRequests?.noPendingTitle}
               </h3>
               <p className="text-muted-foreground max-w-md">
-                {isAr 
-                  ? 'عندما يطلب ولي أمر ربط حسابه بحسابك، سيظهر الطلب هنا لتتمكن من الموافقة أو الرفض'
-                  : 'When a parent requests to link their account to yours, the request will appear here'}
+                {t.studentPages?.parentRequests?.noPendingDesc}
               </p>
             </div>
           </CardContent>
@@ -200,7 +194,7 @@ export default function ParentRequestsPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">
-              {isAr ? 'سجل الطلبات' : 'Request History'}
+              {t.studentPages?.parentRequests?.historyTitle}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -220,7 +214,7 @@ export default function ParentRequestsPage() {
                     <div>
                       <p className="font-medium text-sm">{request.parent_name}</p>
                       <p className="text-xs text-muted-foreground">
-                        {relationLabels[request.relation]?.[isAr ? 'ar' : 'en'] || request.relation}
+                        {t.studentPages?.parentRequests?.relations?.[request.relation] || request.relation}
                       </p>
                     </div>
                   </div>
@@ -232,8 +226,8 @@ export default function ParentRequestsPage() {
                     }
                   >
                     {request.status === 'active' 
-                      ? (isAr ? 'مربوط' : 'Linked')
-                      : (isAr ? 'مرفوض' : 'Rejected')
+                      ? t.studentPages?.parentRequests?.statusLinked
+                      : t.studentPages?.parentRequests?.statusRejected
                     }
                   </Badge>
                 </div>
@@ -250,12 +244,10 @@ export default function ParentRequestsPage() {
             <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
             <div className="text-sm">
               <p className="font-medium text-blue-900 dark:text-blue-100">
-                {isAr ? 'ملاحظة مهمة' : 'Important Note'}
+                {t.studentPages?.parentRequests?.noteTitle}
               </p>
               <p className="text-blue-700 dark:text-blue-300 mt-1">
-                {isAr 
-                  ? 'عند قبول طلب ولي الأمر، سيتمكن من متابعة تقدمك الدراسي ودرجاتك. يمكنك إلغاء الربط في أي وقت.'
-                  : 'When you approve a parent request, they will be able to track your academic progress and grades. You can unlink at any time.'}
+                {t.studentPages?.parentRequests?.noteDesc}
               </p>
             </div>
           </div>

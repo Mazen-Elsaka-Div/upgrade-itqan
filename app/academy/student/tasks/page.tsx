@@ -43,7 +43,8 @@ function normalizeTaskType(raw?: string | null): TaskKind {
 }
 
 export default function StudentTasksPage() {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
+  const isAr = locale === 'ar'
   const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'pending' | 'submitted' | 'graded'>('all')
@@ -104,22 +105,22 @@ export default function StudentTasksPage() {
 
   const statusConfig = {
     pending: { 
-      label: 'معلق', 
+      label: t.studentPages?.tasks?.pending || 'معلق', 
       color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800',
       icon: Clock
     },
     submitted: { 
-      label: 'مُسلَّم', 
+      label: t.studentPages?.tasks?.submitted || 'مُسلَّم', 
       color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800',
       icon: CheckCircle2
     },
     graded: { 
-      label: 'مُقيَّم', 
+      label: t.studentPages?.tasks?.graded || 'مُقيَّم', 
       color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800',
       icon: CheckCircle
     },
     late: { 
-      label: 'متأخر', 
+      label: t.studentPages?.tasks?.late || 'متأخر', 
       color: 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400 border-rose-200 dark:border-rose-800',
       icon: AlertCircle
     }
@@ -132,16 +133,16 @@ export default function StudentTasksPage() {
     const diff = date.getTime() - now.getTime()
     const days = Math.ceil(diff / (1000 * 60 * 60 * 24))
     
-    if (days < 0) return { text: 'متأخر', isLate: true, isUrgent: false }
-    if (days === 0) return { text: 'اليوم', isLate: false, isUrgent: true }
-    if (days === 1) return { text: 'غداً', isLate: false, isUrgent: true }
-    if (days <= 3) return { text: `باقي ${days} أيام`, isLate: false, isUrgent: false }
+    if (days < 0) return { text: t.studentPages?.tasks?.late || 'متأخر', isLate: true, isUrgent: false }
+    if (days === 0) return { text: t.studentPages?.tasks?.today || 'اليوم', isLate: false, isUrgent: true }
+    if (days === 1) return { text: t.studentPages?.tasks?.tomorrow || 'غداً', isLate: false, isUrgent: true }
+    if (days <= 3) return { text: (t.studentPages?.tasks?.dueInDays || 'باقي {days} أيام').replace('{days}', String(days)), isLate: false, isUrgent: false }
     return { text: formatDate(dueDate), isLate: false, isUrgent: false }
   }
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr)
-    return new Intl.DateTimeFormat('ar-SA', {
+    return new Intl.DateTimeFormat(isAr ? 'ar-EG' : 'en-US', {
       month: 'short',
       day: 'numeric'
     }).format(date)
@@ -160,14 +161,14 @@ export default function StudentTasksPage() {
   const completionPct = totalCount > 0 ? Math.round((doneCount / totalCount) * 100) : 0
 
   return (
-    <div className="space-y-8 max-w-5xl mx-auto pb-12" dir="rtl">
+    <div className="space-y-8 max-w-5xl mx-auto pb-12" dir={isAr ? "rtl" : "ltr"}>
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-2">
-          {t.academy?.tasks || 'المهام الدراسية'}
+          {t.studentPages?.tasks?.title || t.academy?.tasks || 'المهام الدراسية'}
         </h1>
         <p className="text-muted-foreground mt-2 text-base">
-          {t.academy?.tasksDesc || 'تابع واجباتك واختباراتك وأكمل مهامك في الوقت المحدد.'}
+          {t.studentPages?.tasks?.desc || t.academy?.tasksDesc || 'تابع واجباتك واختباراتك وأكمل مهامك في الوقت المحدد.'}
         </p>
       </div>
 
@@ -182,14 +183,20 @@ export default function StudentTasksPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-foreground">
-                    مؤشر الإنجاز الكلي
+                    {t.studentPages?.tasks?.overallProgressIndex || 'مؤشر الإنجاز الكلي'}
                   </h3>
                   <div className="flex items-center gap-2 mt-1 text-sm">
-                    <span className="text-muted-foreground">{doneCount} من {totalCount} مهام مكتملة</span>
+                    <span className="text-muted-foreground">
+                      {isAr 
+                        ? `${doneCount} من ${totalCount} ${t.studentPages?.tasks?.completedTasks || 'مهام مكتملة'}`
+                        : `${doneCount} of ${totalCount} ${t.studentPages?.tasks?.completedTasks || 'completed tasks'}`}
+                    </span>
                     {lateCount > 0 && (
                       <span className="inline-flex items-center gap-1 text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md text-xs font-medium dark:bg-rose-900/20 dark:text-rose-400">
                         <AlertCircle className="w-3.5 h-3.5" />
-                        {lateCount} مهام متأخرة
+                        {isAr 
+                          ? `${lateCount} ${t.studentPages?.tasks?.lateTasks || 'مهام متأخرة'}`
+                          : `${lateCount} ${t.studentPages?.tasks?.lateTasks || 'late tasks'}`}
                       </span>
                     )}
                   </div>
@@ -197,7 +204,7 @@ export default function StudentTasksPage() {
               </div>
               <div className="flex-1 w-full max-w-xs">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-muted-foreground">نسبة الإنجاز</span>
+                  <span className="text-sm font-medium text-muted-foreground">{t.studentPages?.tasks?.progressPct || 'نسبة الإنجاز'}</span>
                   <span className="text-sm font-bold">{completionPct}%</span>
                 </div>
                 <Progress value={completionPct} className="h-2" />
@@ -217,7 +224,7 @@ export default function StudentTasksPage() {
           onClick={() => setFilter('pending')}
         >
           <CardContent className="p-6">
-            <p className="text-sm font-medium text-muted-foreground mb-2">المهام المعلقة</p>
+            <p className="text-sm font-medium text-muted-foreground mb-2">{t.studentPages?.tasks?.pendingTasks || 'المهام المعلقة'}</p>
             <p className="text-3xl font-bold text-foreground">{pendingCount}</p>
           </CardContent>
         </Card>
@@ -230,7 +237,7 @@ export default function StudentTasksPage() {
           onClick={() => setFilter('submitted')}
         >
           <CardContent className="p-6">
-            <p className="text-sm font-medium text-muted-foreground mb-2">المهام المُسلَّمة</p>
+            <p className="text-sm font-medium text-muted-foreground mb-2">{t.studentPages?.tasks?.submittedTasks || 'المهام المُسلَّمة'}</p>
             <p className="text-3xl font-bold text-foreground">{submittedCount}</p>
           </CardContent>
         </Card>
@@ -243,7 +250,7 @@ export default function StudentTasksPage() {
           onClick={() => setFilter('graded')}
         >
           <CardContent className="p-6">
-            <p className="text-sm font-medium text-muted-foreground mb-2">المهام المُقيَّمة</p>
+            <p className="text-sm font-medium text-muted-foreground mb-2">{t.studentPages?.tasks?.gradedTasks || 'المهام المُقيَّمة'}</p>
             <p className="text-3xl font-bold text-foreground">{gradedCount}</p>
           </CardContent>
         </Card>
@@ -258,10 +265,10 @@ export default function StudentTasksPage() {
             className="rounded-full px-5"
             onClick={() => setFilter(f)}
           >
-            {f === 'all' && 'الكل'}
-            {f === 'pending' && 'المعلقة'}
-            {f === 'submitted' && 'المُسلَّمة'}
-            {f === 'graded' && 'المُقيَّمة'}
+            {f === 'all' && (t.studentPages?.tasks?.filterAll || 'الكل')}
+            {f === 'pending' && (t.studentPages?.tasks?.filterPending || 'المعلقة')}
+            {f === 'submitted' && (t.studentPages?.tasks?.filterSubmitted || 'المُسلَّمة')}
+            {f === 'graded' && (t.studentPages?.tasks?.filterGraded || 'المُقيَّمة')}
           </Button>
         ))}
       </div>
@@ -274,12 +281,12 @@ export default function StudentTasksPage() {
               <ClipboardList className="w-8 h-8 text-muted-foreground" />
             </div>
             <h3 className="text-xl font-semibold text-foreground mb-2">
-              لا توجد مهام
+              {t.studentPages?.tasks?.noTasks || 'لا توجد مهام'}
             </h3>
             <p className="text-muted-foreground max-w-sm">
               {filter === 'all' 
-                ? 'أنت على أتم الاستعداد! لم يتم تعيين مهام جديدة لك بعد.'
-                : 'لا توجد مهام تطابق هذا التصنيف حالياً.'
+                ? (t.studentPages?.tasks?.allSettledDesc || 'أنت على أتم الاستعداد! لم يتم تعيين مهام جديدة لك بعد.')
+                : (t.studentPages?.tasks?.noTasksFilterDesc || 'لا توجد مهام تطابق هذا التصنيف حالياً.')
               }
             </p>
           </CardContent>
@@ -330,7 +337,7 @@ export default function StudentTasksPage() {
                           isDoneOrGraded && "text-emerald-600 border-emerald-200 hover:bg-emerald-50",
                           !isDoneOrGraded && "hover:bg-primary/10 hover:text-primary"
                         )}
-                        title={isDoneOrGraded ? 'تراجع عن التسليم' : 'تأشير كمنجز'}
+                        title={isDoneOrGraded ? (t.studentPages?.tasks?.undoSubmission || 'تراجع عن التسليم') : (t.studentPages?.tasks?.markDone || 'تأشير كمنجز')}
                       >
                         {marking === task.id ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
@@ -386,7 +393,7 @@ export default function StudentTasksPage() {
                       size="sm"
                     >
                       <Link href={`/academy/student/tasks/${task.id}/submit`}>
-                        {isDoneOrGraded ? 'التفاصيل' : 'ابدأ'}
+                        {isDoneOrGraded ? (t.studentPages?.tasks?.details || 'التفاصيل') : (t.studentPages?.tasks?.start || 'ابدأ')}
                       </Link>
                     </Button>
                   </div>

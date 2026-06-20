@@ -41,7 +41,7 @@ interface ArchivedPath {
 type TabKey = 'all' | 'courses' | 'paths'
 
 export default function StudentCoursesArchivePage() {
-  const { locale } = useI18n()
+  const { t, locale } = useI18n()
   const isAr = locale === 'ar'
   const [courses, setCourses] = useState<ArchivedCourse[]>([])
   const [paths, setPaths] = useState<ArchivedPath[]>([])
@@ -65,7 +65,7 @@ export default function StudentCoursesArchivePage() {
       fetch(`/api/academy/student/courses/archive?${params}`).then(async (r) => {
         if (!r.ok) {
           const b = await r.json().catch(() => ({}))
-          throw new Error(b.error || `فشل تحميل الدورات (${r.status})`)
+          throw new Error(b.error || (isAr ? `فشل تحميل الدورات (${r.status})` : `Failed to load courses (${r.status})`))
         }
         return r.json()
       }),
@@ -78,11 +78,11 @@ export default function StudentCoursesArchivePage() {
         setCourses(coursesRes.data || [])
 
         const subjectLabels: Record<string, string> = {
-          fiqh: 'الفقه',
-          aqeedah: 'العقيدة',
-          seerah: 'السيرة النبوية',
-          tafsir: 'التفسير',
-          tajweed: 'التجويد',
+          fiqh: t.studentPages?.archive?.subjects?.fiqh || 'الفقه',
+          aqeedah: t.studentPages?.archive?.subjects?.aqeedah || 'العقيدة',
+          seerah: t.studentPages?.archive?.subjects?.seerah || 'السيرة النبوية',
+          tafsir: t.studentPages?.archive?.subjects?.tafsir || 'التفسير',
+          tajweed: t.studentPages?.archive?.subjects?.tajweed || 'التجويد',
         }
 
         // Legacy learning_paths archive entries.
@@ -118,7 +118,7 @@ export default function StudentCoursesArchivePage() {
       .catch((e) => {
         setCourses([])
         setPaths([])
-        setError(e?.message || 'تعذّر تحميل الأرشيف')
+        setError(e?.message || t.studentPages?.archive?.loadError)
       })
       .finally(() => setLoading(false))
   }
@@ -145,9 +145,9 @@ export default function StudentCoursesArchivePage() {
     d ? new Date(d).toLocaleDateString(isAr ? 'ar-EG' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : ''
 
   const tabs: { key: TabKey; label: string; count: number }[] = [
-    { key: 'all', label: isAr ? 'الكل' : 'All', count: totalCount },
-    { key: 'courses', label: isAr ? 'الدورات' : 'Courses', count: courses.length },
-    { key: 'paths', label: isAr ? 'المسارات' : 'Paths', count: filteredPaths.length },
+    { key: 'all', label: t.studentPages?.archive?.tabs?.all, count: totalCount },
+    { key: 'courses', label: t.studentPages?.archive?.tabs?.courses, count: courses.length },
+    { key: 'paths', label: t.studentPages?.archive?.tabs?.paths, count: filteredPaths.length },
   ]
 
   return (
@@ -156,28 +156,26 @@ export default function StudentCoursesArchivePage() {
       <div className="bg-gradient-to-l from-indigo-600 via-indigo-500 to-sky-500 rounded-2xl p-6 text-white shadow-lg shadow-indigo-500/20">
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <Trophy className="w-7 h-7" />
-          {isAr ? 'أرشيف إنجازاتي' : 'My Achievements Archive'}
+          {t.studentPages?.archive?.title}
         </h1>
         <p className="text-white/85 mt-1.5 text-sm leading-relaxed">
-          {isAr
-            ? 'كل ما أكملته من دورات ومسارات في مكان واحد — افتح أي عنصر لمراجعته في أي وقت'
-            : 'Everything you have completed — courses and paths — open any item to review anytime'}
+          {t.studentPages?.archive?.desc}
         </p>
         <div className="flex items-center gap-6 flex-wrap mt-5">
           <div className="flex items-center gap-2">
             <BookOpen className="w-5 h-5 text-sky-200" />
             <span className="font-bold text-lg">{courses.length}</span>
-            <span className="text-white/70 text-sm">{isAr ? 'دورة مكتملة' : 'courses'}</span>
+            <span className="text-white/70 text-sm">{t.studentPages?.archive?.completedCourses}</span>
           </div>
           <div className="flex items-center gap-2">
             <Route className="w-5 h-5 text-violet-200" />
             <span className="font-bold text-lg">{filteredPaths.length}</span>
-            <span className="text-white/70 text-sm">{isAr ? 'مسار مكتمل' : 'paths'}</span>
+            <span className="text-white/70 text-sm">{t.studentPages?.archive?.completedPaths}</span>
           </div>
           <div className="flex items-center gap-2">
             <Layers className="w-5 h-5 text-emerald-200" />
             <span className="font-bold text-lg">{totalCount}</span>
-            <span className="text-white/70 text-sm">{isAr ? 'إجمالي الإنجازات' : 'total'}</span>
+            <span className="text-white/70 text-sm">{t.studentPages?.archive?.totalAchievements}</span>
           </div>
         </div>
       </div>
@@ -205,10 +203,10 @@ export default function StudentCoursesArchivePage() {
           ))}
         </div>
         <div className="relative sm:w-72">
-          <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+          <Search className={`absolute ${isAr ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground`} />
           <input
             type="text"
-            placeholder={isAr ? 'ابحث بالعنوان أو الوصف...' : 'Search by title or description...'}
+            placeholder={t.studentPages?.archive?.searchPlaceholder}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pr-10 pl-4 py-2.5 rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -220,13 +218,13 @@ export default function StudentCoursesArchivePage() {
       {error ? (
         <div className="text-center py-16 bg-card rounded-2xl border border-red-200 dark:border-red-900/40">
           <AlertCircle className="w-14 h-14 mx-auto mb-4 text-red-500" />
-          <h3 className="text-lg font-bold mb-2 text-red-600">{isAr ? 'تعذّر تحميل الأرشيف' : 'Failed to load archive'}</h3>
+          <h3 className="text-lg font-bold mb-2 text-red-600">{t.studentPages?.archive?.loadError}</h3>
           <p className="text-muted-foreground text-sm mb-5 max-w-sm mx-auto">{error}</p>
           <button
             onClick={load}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold bg-indigo-600 hover:bg-indigo-700 text-white transition-colors"
           >
-            <RotateCcw className="w-4 h-4" /> {isAr ? 'إعادة المحاولة' : 'Retry'}
+            <RotateCcw className="w-4 h-4" /> {t.studentPages?.archive?.retry}
           </button>
         </div>
       ) : loading ? (
@@ -234,11 +232,9 @@ export default function StudentCoursesArchivePage() {
       ) : visibleCount === 0 ? (
         <div className="text-center py-16 bg-card rounded-2xl border border-border">
           <Archive className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-40" />
-          <h3 className="text-lg font-semibold mb-2">{isAr ? 'الأرشيف فاضي' : 'Archive is empty'}</h3>
+          <h3 className="text-lg font-semibold mb-2">{t.studentPages?.archive?.emptyTitle}</h3>
           <p className="text-muted-foreground text-sm max-w-sm mx-auto">
-            {isAr
-              ? 'بمجرد ما تكمّل دورة أو مسار، هتلاقيه هنا للمراجعة في أي وقت'
-              : 'Once you complete a course or path it will appear here for review'}
+            {t.studentPages?.archive?.emptyDesc}
           </p>
         </div>
       ) : (
@@ -259,7 +255,7 @@ export default function StudentCoursesArchivePage() {
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
                 <span className="absolute top-3 right-3 inline-flex items-center gap-1 bg-sky-500 text-white text-[11px] font-bold px-2 py-1 rounded-full">
-                  <BookOpen className="w-3 h-3" /> {isAr ? 'دورة' : 'Course'}
+                  <BookOpen className="w-3 h-3" /> {t.studentPages?.archive?.courseBadge}
                 </span>
                 <div className="absolute top-3 left-3 bg-emerald-500 text-white p-1.5 rounded-full">
                   <CheckCircle2 className="w-4 h-4" />
@@ -284,7 +280,7 @@ export default function StudentCoursesArchivePage() {
                 )}
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-emerald-600 dark:text-emerald-400 font-medium">
-                    {isAr ? 'مكتملة' : 'Completed'}{course.completed_at && ` · ${fmtDate(course.completed_at)}`}
+                    {t.studentPages?.archive?.completed}{course.completed_at && ` · ${fmtDate(course.completed_at)}`}
                   </span>
                   <ChevronLeft className={cn('w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity text-sky-600', !isAr && 'rotate-180')} />
                 </div>
@@ -308,7 +304,7 @@ export default function StudentCoursesArchivePage() {
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
                 <span className="absolute top-3 right-3 inline-flex items-center gap-1 bg-violet-500 text-white text-[11px] font-bold px-2 py-1 rounded-full">
-                  <Route className="w-3 h-3" /> {isAr ? 'مسار' : 'Path'}
+                  <Route className="w-3 h-3" /> {t.studentPages?.archive?.pathBadge}
                 </span>
                 <div className="absolute top-3 left-3 bg-emerald-500 text-white p-1.5 rounded-full">
                   <CheckCircle2 className="w-4 h-4" />
@@ -325,13 +321,13 @@ export default function StudentCoursesArchivePage() {
                 )}
                 <p className="text-sm text-muted-foreground mb-2 flex items-center gap-2">
                   <Layers className="w-4 h-4" />
-                  {path.total_courses} {isAr ? 'دورة في المسار' : 'courses in path'}
+                  {path.total_courses} {t.studentPages?.archive?.coursesInPath}
                 </p>
                 {path.description && (
                   <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{path.description}</p>
                 )}
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-emerald-600 dark:text-emerald-400 font-medium">{isAr ? 'مسار مكتمل' : 'Path completed'}</span>
+                  <span className="text-emerald-600 dark:text-emerald-400 font-medium">{t.studentPages?.archive?.pathCompleted}</span>
                   <ChevronLeft className={cn('w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity text-violet-600', !isAr && 'rotate-180')} />
                 </div>
               </div>

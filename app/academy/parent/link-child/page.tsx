@@ -29,13 +29,13 @@ interface FoundStudent {
 }
 
 const relationOptions = [
-  { value: 'father', ar: 'أب', en: 'Father' },
-  { value: 'mother', ar: 'أم', en: 'Mother' },
-  { value: 'guardian', ar: 'ولي أمر', en: 'Guardian' },
+  { value: 'father' },
+  { value: 'mother' },
+  { value: 'guardian' },
 ]
 
 export default function LinkChildPage() {
-  const { locale } = useI18n()
+  const { t, locale } = useI18n()
   const isAr = locale === 'ar'
 
   const [email, setEmail] = useState('')
@@ -64,12 +64,12 @@ export default function LinkChildPage() {
       const data = await res.json()
 
       if (!res.ok) {
-        setError(data.error || (isAr ? 'حدث خطأ' : 'An error occurred'))
+        setError(data.error || t.parentPages.linkChild.errorOccurred)
       } else {
         setStudent(data.student)
       }
     } catch {
-      setError(isAr ? 'فشل الاتصال بالسيرفر' : 'Connection failed')
+      setError(t.parentPages.linkChild.connectionFailed)
     } finally {
       setLoading(false)
     }
@@ -89,14 +89,14 @@ export default function LinkChildPage() {
       const data = await res.json()
 
       if (!res.ok) {
-        setError(data.error || (isAr ? 'فشل الربط' : 'Linking failed'))
+        setError(data.error || t.parentPages.linkChild.linkingFailed)
       } else {
         setSuccess(true)
         setStudent(null)
         setEmail('')
       }
     } catch {
-      setError(isAr ? 'فشل الاتصال بالسيرفر' : 'Connection failed')
+      setError(t.parentPages.linkChild.connectionFailed)
     } finally {
       setLinking(false)
     }
@@ -108,15 +108,13 @@ export default function LinkChildPage() {
       <div className="space-y-2">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider">
           <UserPlus className="w-4 h-4" />
-          {isAr ? 'إضافة ابن جديد' : 'Link New Child'}
+          {t.parentPages.linkChild.linkNewChild}
         </div>
         <h1 className="text-3xl lg:text-4xl font-black tracking-tight text-foreground">
-          {isAr ? 'ربط حساب طالب' : 'Link Student Account'}
+          {t.parentPages.linkChild.linkStudentAccount}
         </h1>
         <p className="text-muted-foreground font-medium max-w-2xl">
-          {isAr
-            ? 'ابحث عن حساب ابنك باستخدام بريده الإلكتروني المسجل في المنصة.'
-            : "Search for your child's account using their registered email."}
+          {t.parentPages.linkChild.linkStudentDesc}
         </p>
       </div>
 
@@ -128,17 +126,15 @@ export default function LinkChildPage() {
               <CheckCircle2 className="w-10 h-10 text-emerald-500" />
             </div>
             <h3 className="text-2xl font-black text-foreground mb-3">
-              {isAr ? 'تم إرسال طلب الربط!' : 'Link Request Sent!'}
+              {t.parentPages.linkChild.linkRequestSent}
             </h3>
             <p className="text-muted-foreground max-w-md mx-auto mb-2">
-              {isAr
-                ? 'تم إرسال طلب الربط بنجاح. في انتظار موافقة الطالب من لوحة تحكمه.'
-                : 'Link request sent successfully. Waiting for the student to approve it from their dashboard.'}
+              {t.parentPages.linkChild.linkSuccessDesc}
             </p>
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500/10 border border-amber-500/20 mt-4">
               <Clock className="w-4 h-4 text-amber-500" />
               <span className="text-sm font-bold text-amber-700 dark:text-amber-400">
-                {isAr ? 'قيد الانتظار' : 'Pending Approval'}
+                {t.parentPages.linkChild.pendingApproval}
               </span>
             </div>
             <div className="flex items-center justify-center gap-3 mt-8">
@@ -150,11 +146,11 @@ export default function LinkChildPage() {
                 variant="outline"
                 className="rounded-xl font-bold"
               >
-                {isAr ? 'ربط ابن آخر' : 'Link Another Child'}
+                {t.parentPages.linkChild.linkAnotherChild}
               </Button>
               <Button asChild className="rounded-xl font-bold">
                 <Link href="/academy/parent/children">
-                  {isAr ? 'عرض الأبناء' : 'View Children'}
+                  {t.parentPages.linkChild.viewChildren}
                   <ArrowRight className={`w-4 h-4 ${isAr ? 'me-2 rotate-180' : 'ms-2'}`} />
                 </Link>
               </Button>
@@ -173,9 +169,7 @@ export default function LinkChildPage() {
                   />
                   <Input
                     type="email"
-                    placeholder={
-                      isAr ? 'أدخل البريد الإلكتروني للطالب...' : 'Enter student email...'
-                    }
+                    placeholder={t.parentPages.linkChild.enterStudentEmail}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className={`h-12 rounded-xl ${isAr ? 'pr-12' : 'pl-12'}`}
@@ -193,7 +187,7 @@ export default function LinkChildPage() {
                   ) : (
                     <>
                       <Search className="w-4 h-4 me-2" />
-                      {isAr ? 'بحث' : 'Search'}
+                      {t.parentPages.linkChild.searchButton}
                     </>
                   )}
                 </Button>
@@ -217,7 +211,7 @@ export default function LinkChildPage() {
                 <div className="p-6 border-b border-border/50">
                   <div className="flex items-center gap-2 mb-4">
                     <Badge variant="secondary" className="text-xs">
-                      {isAr ? 'تم العثور على الطالب' : 'Student Found'}
+                      {t.parentPages.linkChild.studentFound}
                     </Badge>
                   </div>
                   <div className="flex items-center gap-4">
@@ -239,7 +233,7 @@ export default function LinkChildPage() {
                 {/* Relation Selection */}
                 <div className="p-6">
                   <p className="text-sm font-bold text-foreground mb-3">
-                    {isAr ? 'علاقتك بالطالب' : 'Your relationship'}
+                    {t.parentPages.linkChild.yourRelationship}
                   </p>
                   <div className="grid grid-cols-3 gap-3 mb-6">
                     {relationOptions.map((opt) => (
@@ -254,7 +248,7 @@ export default function LinkChildPage() {
                         }`}
                       >
                         <span className="text-sm font-bold">
-                          {isAr ? opt.ar : opt.en}
+                          {(t.parentPages.linkChild.relationOptions as any)[opt.value]}
                         </span>
                       </button>
                     ))}
@@ -270,7 +264,7 @@ export default function LinkChildPage() {
                     ) : (
                       <LinkIcon className="w-4 h-4 me-2" />
                     )}
-                    {isAr ? 'إرسال طلب الربط' : 'Send Link Request'}
+                    {t.parentPages.linkChild.sendLinkRequest}
                   </Button>
                 </div>
               </CardContent>

@@ -70,16 +70,23 @@ export default function StudentSessionsPage() {
     load()
   }, [])
 
+  function formatDigits(n: number | string): string {
+    if (locale === 'ar') {
+      return String(n).replace(/\d/g, d => '\u0660\u0661\u0662\u0663\u0664\u0665\u0666\u0667\u0668\u0669'[Number(d)])
+    }
+    return String(n)
+  }
+
   const STATUS = useMemo(() => ({
     confirmed: { label: t.student.statusBooked, color: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 ring-emerald-500/10" },
     completed: { label: t.student.statusCompleted, color: "bg-muted text-muted-foreground border-border ring-muted/50" },
     cancelled: { label: t.student.statusCancelled, color: "bg-destructive/10 text-destructive border-destructive/20 ring-destructive/10" },
     pending: { label: t.student.statusPending, color: "bg-accent/10 text-accent border-accent/20 ring-accent/10" },
-    rescheduled: { label: isAr ? "مُعاد جدولته" : "Rescheduled", color: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20 ring-blue-500/10" },
-  }), [t, isAr])
+    rescheduled: { label: t.sessionsPage.rescheduledStatus, color: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20 ring-blue-500/10" },
+  }), [t])
 
   const handleCancel = async (id: string) => {
-    if (!confirm(isAr ? "هل أنت متأكد من إلغاء الجلسة؟" : "Are you sure you want to cancel this session?")) return
+    if (!confirm(t.sessionsPage.cancelConfirmation)) return
     setCancellingId(id)
     try {
       const res = await fetch(`/api/bookings/${id}`, {
@@ -108,7 +115,7 @@ export default function StudentSessionsPage() {
         body: JSON.stringify({ proposedSlotStart, proposedSlotEnd }),
       })
       if (res.ok) {
-        alert(isAr ? "تم إرسال طلب التعديل. سيتم إشعارك بعد رد المقرئ." : "Reschedule request sent. You'll be notified when the reader responds.")
+        alert(t.sessionsPage.rescheduleRequestSentToast)
         setRescheduleBooking(null)
         setProposedDate("")
         setProposedTime("")
@@ -133,11 +140,9 @@ export default function StudentSessionsPage() {
             const data = await refreshed.json()
             setBookings(data.bookings || [])
           }
-          alert(isAr ? "تم قبول التعديل وتحديث الموعد." : "Reschedule accepted.")
+          alert(t.sessionsPage.rescheduleAcceptedToast)
         } else {
-          alert(isAr
-            ? "تم رفض الطلب. يمكنك التواصل مع الدعم لطلب تغيير المقرئ."
-            : "Request rejected. You can contact support to request a different reader.")
+          alert(t.sessionsPage.rescheduleRejectedToast)
         }
         setPendingRequests(prev => {
           const next = { ...prev }
@@ -149,7 +154,7 @@ export default function StudentSessionsPage() {
   }
 
   return (
-    <div className="max-w-4xl max-auto space-y-8">
+    <div className="max-w-4xl mx-auto space-y-8">
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-bold text-foreground">{t.student.mySessions}</h1>
         <p className="text-muted-foreground">{t.student.mySessionsDesc}</p>
@@ -164,11 +169,11 @@ export default function StudentSessionsPage() {
           </div>
           <h3 className="text-xl font-bold text-foreground mb-2">{t.student.noSessionsYet}</h3>
           <p className="text-muted-foreground mb-8 max-w-sm mx-auto">
-            {isAr ? "لم تقم بحجز أي جلسات تصحيح بعد. ابدأ بحجز جلستك الأولى الآن لتصحيح تلاوتك." : "You haven't booked any correction sessions yet. Book your first session now to perfect your recitation."}
+            {t.sessionsPage.noSessionsDesc}
           </p>
           <Link href="/student/booking" className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-primary-foreground rounded-2xl font-bold hover:bg-primary/90 transition-colors shadow-lg shadow-black/10">
             <CalendarClock className="w-5 h-5" />
-            {isAr ? "احجز جلسة جديدة" : "Book New Session"}
+            {t.sessionsPage.bookNewSessionBtn}
           </Link>
         </div>
       ) : (
@@ -204,20 +209,20 @@ export default function StudentSessionsPage() {
                         {!b.reader_name && (
                           <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-accent/10 text-accent">
                             <ShieldCheck className="w-3 h-3" />
-                            {isAr ? "معتمد" : "Certified"}
+                            {t.sessionsPage.certifiedReaderBadge}
                           </span>
                         )}
                       </div>
                       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-2 text-sm text-muted-foreground font-medium">
                         <span className="flex items-center gap-1.5 px-3 py-1 bg-muted/50 rounded-lg">
                           <CalendarDays className="w-4 h-4 text-accent" />
-                          {new Date(b.slot_start).toLocaleDateString(isAr ? "ar-SA" : "en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+                          {new Date(b.slot_start).toLocaleDateString(locale === "ar" ? "ar-SA" : "en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
                         </span>
                         <span className="flex items-center gap-1.5 px-3 py-1 bg-muted/50 rounded-lg">
                           <Clock className="w-4 h-4 text-primary/60" />
-                          {new Date(b.slot_start).toLocaleTimeString(isAr ? "ar-SA" : "en-US", { hour: "2-digit", minute: "2-digit" })}
+                          {new Date(b.slot_start).toLocaleTimeString(locale === "ar" ? "ar-SA" : "en-US", { hour: "2-digit", minute: "2-digit" })}
                           {" - "}
-                          {new Date(b.slot_end).toLocaleTimeString(isAr ? "ar-SA" : "en-US", { hour: "2-digit", minute: "2-digit" })}
+                          {new Date(b.slot_end).toLocaleTimeString(locale === "ar" ? "ar-SA" : "en-US", { hour: "2-digit", minute: "2-digit" })}
                         </span>
                       </div>
                     </div>
@@ -232,28 +237,28 @@ export default function StudentSessionsPage() {
                   <div className="mx-6 md:mx-8 mb-4 bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-2xl p-5 shadow-inner">
                     <div className="flex items-center gap-2 mb-3">
                       <CalendarClock className="w-5 h-5 text-amber-600 dark:text-amber-500" />
-                      <p className="text-sm font-bold text-amber-900 dark:text-amber-100">{isAr ? "طلب تعديل موعد من المقرئ:" : "Reschedule request from reader:"}</p>
+                      <p className="text-sm font-bold text-amber-900 dark:text-amber-100">{t.sessionsPage.rescheduleRequestFromReader}</p>
                     </div>
                     {pendingReqs.map(req => (
                       <div key={req.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card/60 p-4 rounded-xl border border-amber-500/20">
                         <p className="text-sm font-medium text-amber-800 dark:text-amber-200 flex items-center gap-2">
                           <CalendarDays className="w-4 h-4 opacity-70" />
-                          {new Date(req.proposed_slot_start).toLocaleDateString(isAr ? "ar-SA" : "en-US", { weekday: "long", month: "long", day: "numeric" })}
+                          {new Date(req.proposed_slot_start).toLocaleDateString(locale === "ar" ? "ar-SA" : "en-US", { weekday: "long", month: "long", day: "numeric" })}
                           <span className="mx-1 opacity-50">•</span>
-                          {new Date(req.proposed_slot_start).toLocaleTimeString(isAr ? "ar-SA" : "en-US", { hour: "2-digit", minute: "2-digit" })}
+                          {new Date(req.proposed_slot_start).toLocaleTimeString(locale === "ar" ? "ar-SA" : "en-US", { hour: "2-digit", minute: "2-digit" })}
                         </p>
                         <div className="flex gap-2 w-full sm:w-auto">
                           <button
                             onClick={() => handleRespondToReaderRequest(b.id, req.id, "accept")}
                             className="flex-1 sm:flex-none px-6 py-2.5 bg-primary text-primary-foreground rounded-xl text-xs font-bold hover:bg-primary/90 transition-colors shadow-sm"
                           >
-                            {isAr ? "قبول وتأكيد" : "Accept"}
+                            {t.sessionsPage.acceptAndConfirmBtn}
                           </button>
                           <button
                             onClick={() => handleRespondToReaderRequest(b.id, req.id, "reject")}
                             className="flex-1 sm:flex-none px-6 py-2.5 bg-card text-muted-foreground border border-border rounded-xl text-xs font-bold hover:bg-muted transition-colors"
                           >
-                            {isAr ? "رفض الطلب" : "Reject"}
+                            {t.sessionsPage.rejectRequestBtn}
                           </button>
                         </div>
                       </div>
@@ -277,13 +282,13 @@ export default function StudentSessionsPage() {
                             className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white px-6 py-3.5 rounded-xl text-sm font-bold transition-all shadow-md shadow-emerald-900/20"
                           >
                             <Video className="w-5 h-5" />
-                            انضم للجلسة المباشرة (داخل المنصة)
+                            {t.sessionsPage.joinLiveSessionInApp}
                           </a>
                         )}
                         {b.meeting_link ? (
                           <div className="space-y-3">
                             <p className="text-sm font-medium text-muted-foreground">
-                              {isAr ? "رابط الجلسة جاهز. الرجاء الانضمام في الموعد المحدد." : "The session link is ready. Please join at the scheduled time."}
+                              {t.sessionsPage.sessionLinkReadyMsg}
                             </p>
                             <a
                               href={b.meeting_link.startsWith('http') ? b.meeting_link : `https://${b.meeting_link}`}
@@ -300,7 +305,7 @@ export default function StudentSessionsPage() {
                           <div className="flex gap-3 items-start bg-accent/10 rounded-xl p-4 border border-accent/20">
                             <Info className="w-5 h-5 text-accent shrink-0 mt-0.5" />
                             <p className="text-sm font-medium text-accent leading-relaxed">
-                              {isActive ? t.student.linkPendingMsg : (isAr ? 'الجلسة غير نشطة ولن يتم إنشاء رابط لها.' : 'Session is inactive. No link will be generated.')}
+                              {isActive ? t.student.linkPendingMsg : t.sessionsPage.sessionInactiveMsg}
                             </p>
                           </div>
                         )}
@@ -309,14 +314,14 @@ export default function StudentSessionsPage() {
                       {/* Controls Section */}
                       {isActive && (
                         <div className="bg-card p-5 rounded-2xl border border-border shadow-sm space-y-3 flex flex-col justify-center">
-                          <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{isAr ? "التحكم في الجلسة" : "Session Controls"}</h4>
+                          <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{t.sessionsPage.sessionControlsTitle}</h4>
                           <div className="flex flex-col gap-3">
                             <Link
                               href={`/student/chat?with=${b.reader_id}`}
                               className="w-full flex items-center justify-center gap-2 rounded-xl border-2 border-accent/20 bg-card text-foreground px-6 py-3 text-sm font-bold hover:border-accent hover:bg-accent/10 transition-all"
                             >
                               <MessageSquare className="w-5 h-5 text-accent" />
-                              {isAr ? "تواصل مع المقرئ في شات خاص" : "Chat privately with Reader"}
+                              {t.sessionsPage.chatPrivatelyWithReader}
                             </Link>
 
                             <div className="flex gap-3">
@@ -325,7 +330,7 @@ export default function StudentSessionsPage() {
                                 className="flex-1 flex items-center justify-center gap-2 rounded-xl border border-border bg-card text-muted-foreground px-4 py-3 text-sm font-bold hover:bg-muted transition-all font-medium"
                               >
                                 <CalendarClock className="w-4 h-4 opacity-70" />
-                                {isAr ? "تعديل الموعد" : "Reschedule"}
+                                {t.sessionsPage.rescheduleBtn}
                               </button>
                               <button
                                 onClick={() => handleCancel(b.id)}
@@ -333,7 +338,7 @@ export default function StudentSessionsPage() {
                                 className="flex-1 flex items-center justify-center gap-2 rounded-xl border border-destructive/10 bg-destructive/5 text-destructive px-4 py-3 text-sm font-bold hover:bg-destructive/10 hover:border-destructive/20 transition-all disabled:opacity-50"
                               >
                                 {cancellingId === b.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <X className="w-4 h-4" />}
-                                {isAr ? "إلغاء الجلسة" : "Cancel"}
+                                {t.sessionsPage.cancelSessionBtn}
                               </button>
                             </div>
                           </div>
@@ -367,18 +372,16 @@ export default function StudentSessionsPage() {
             <div className="w-12 h-12 rounded-2xl bg-accent/10 flex items-center justify-center mb-4">
               <CalendarClock className="w-6 h-6 text-accent" />
             </div>
-            <DialogTitle className="text-xl font-bold">{isAr ? "اقتراح تعديل الموعد" : "Request Reschedule"}</DialogTitle>
+            <DialogTitle className="text-xl font-bold">{t.sessionsPage.requestRescheduleTitle}</DialogTitle>
             <DialogDescription className="text-muted-foreground mt-2">
-              {isAr
-                ? `سيتم إرسال اقتراحك للمقرئ (${rescheduleBooking?.reader_name}) للموافقة عليه.`
-                : `Your proposal will be sent to the reader (${rescheduleBooking?.reader_name}) for approval.`}
+              {t.sessionsPage.requestRescheduleDesc.replace('{name}', rescheduleBooking?.reader_name || "")}
             </DialogDescription>
           </DialogHeader>
 
           {rescheduleBooking && (
             <div className="space-y-5 py-4">
               <div className="space-y-2.5">
-                <label className="text-sm font-bold text-foreground block">{isAr ? "التاريخ الجديد" : "New Date"}</label>
+                <label className="text-sm font-bold text-foreground block">{t.sessionsPage.newDateLabel}</label>
                 <input
                   type="date"
                   value={proposedDate}
@@ -388,7 +391,7 @@ export default function StudentSessionsPage() {
                 />
               </div>
               <div className="space-y-2.5">
-                <label className="text-sm font-bold text-foreground block">{isAr ? "الوقت الجديد" : "New Time"}</label>
+                <label className="text-sm font-bold text-foreground block">{t.sessionsPage.newTimeLabel}</label>
                 <input
                   type="time"
                   value={proposedTime}
@@ -399,21 +402,19 @@ export default function StudentSessionsPage() {
               <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 flex gap-3">
                 <Info className="w-5 h-5 text-blue-500 shrink-0" />
                 <p className="text-xs text-blue-600 dark:text-blue-400 leading-relaxed font-medium">
-                  {isAr
-                    ? "لن يتم تأكيد الموعد الجديد إلا بعد موافقة المقرئ عليه. في حال الرفض، سيبقى الموعد القديم فعالاً."
-                    : "The new time won't be confirmed until the reader approves it. If rejected, the old time remains active."}
+                  {t.sessionsPage.rescheduleWarningMsg}
                 </p>
               </div>
             </div>
           )}
           <DialogFooter className="gap-3 sm:gap-0">
-            <Button variant="outline" className="h-12 rounded-xl font-bold border-border" onClick={() => setRescheduleBooking(null)}>{isAr ? "إلغاء التعديل" : "Cancel"}</Button>
+            <Button variant="outline" className="h-12 rounded-xl font-bold border-border" onClick={() => setRescheduleBooking(null)}>{t.sessionsPage.cancelRescheduleBtn}</Button>
             <Button
               onClick={handleRescheduleSubmit}
               disabled={!proposedDate || !proposedTime || submittingReschedule}
               className="h-12 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold"
             >
-              {submittingReschedule ? <Loader2 className="w-5 h-5 animate-spin mx-2" /> : (isAr ? "إرسال الاقتراح للمقرئ" : "Send Proposal")}
+              {submittingReschedule ? <Loader2 className="w-5 h-5 animate-spin mx-2" /> : t.sessionsPage.sendProposalBtn}
             </Button>
           </DialogFooter>
         </DialogContent>

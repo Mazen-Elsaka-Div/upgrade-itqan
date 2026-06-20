@@ -103,7 +103,7 @@ export default function ParentDashboard() {
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-10 h-10 animate-spin text-primary" />
           <p className="text-sm text-muted-foreground font-medium">
-            {isAr ? 'جاري التحميل...' : 'Loading...'}
+            {t.parentPages.dashboard.loading}
           </p>
         </div>
       </div>
@@ -113,7 +113,7 @@ export default function ParentDashboard() {
   if (!overview) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <p className="text-muted-foreground">{isAr ? 'حدث خطأ' : 'Error loading data'}</p>
+        <p className="text-muted-foreground">{t.parentPages.dashboard.error}</p>
       </div>
     )
   }
@@ -131,16 +131,14 @@ export default function ParentDashboard() {
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-primary" />
               <span className="text-xs font-bold text-primary uppercase tracking-widest">
-                {isAr ? 'لوحة التحكم' : 'Dashboard'}
+                {t.parentPages.dashboard.title}
               </span>
             </div>
             <h1 className="text-3xl lg:text-4xl font-black tracking-tight text-foreground">
-              {isAr ? `مرحباً، ${firstName}` : `Welcome, ${firstName}`}
+              {t.parentPages.dashboard.welcome.replace('{name}', firstName)}
             </h1>
             <p className="text-muted-foreground font-medium max-w-lg">
-              {isAr
-                ? 'تابع تقدم أبنائك الأكاديمي من مكان واحد.'
-                : 'Track your children\'s academic progress from one place.'}
+              {t.parentPages.dashboard.welcomeDesc}
             </p>
           </div>
           <Button
@@ -149,7 +147,7 @@ export default function ParentDashboard() {
           >
             <Link href="/academy/parent/link-child">
               <LinkIcon className="w-4 h-4 me-2" />
-              {isAr ? 'ربط ابن جديد' : 'Link New Child'}
+              {t.parentPages.dashboard.linkNewChild}
             </Link>
           </Button>
         </div>
@@ -165,7 +163,7 @@ export default function ParentDashboard() {
               </div>
               <div>
                 <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                  {isAr ? 'الأبناء' : 'Children'}
+                  {t.parentPages.dashboard.children}
                 </p>
                 <h3 className="text-2xl font-black text-foreground">{summary.active_count}</h3>
               </div>
@@ -181,7 +179,7 @@ export default function ParentDashboard() {
               </div>
               <div>
                 <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                  {isAr ? 'المقررات' : 'Courses'}
+                  {t.parentPages.dashboard.courses}
                 </p>
                 <h3 className="text-2xl font-black text-foreground">
                   {children.reduce((sum, c) => sum + c.enrollments.total, 0)}
@@ -199,7 +197,7 @@ export default function ParentDashboard() {
               </div>
               <div>
                 <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                  {isAr ? 'التقدم' : 'Progress'}
+                  {t.parentPages.dashboard.progress}
                 </p>
                 <h3 className="text-2xl font-black text-foreground">
                   {children.length > 0
@@ -223,7 +221,7 @@ export default function ParentDashboard() {
               </div>
               <div>
                 <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                  {isAr ? 'الشارات' : 'Badges'}
+                  {t.parentPages.dashboard.badges}
                 </p>
                 <h3 className="text-2xl font-black text-foreground">
                   {children.reduce((sum, c) => sum + c.badges.total, 0)}
@@ -239,14 +237,14 @@ export default function ParentDashboard() {
         <div className="lg:col-span-2 space-y-6">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold text-foreground">
-              {isAr ? 'أبناؤك' : 'Your Children'}
+              {t.parentPages.dashboard.yourChildren}
             </h2>
             {children.length > 0 && (
               <Link
                 href="/academy/parent/children"
                 className="text-sm font-bold text-primary hover:underline flex items-center gap-1"
               >
-                {isAr ? 'إدارة' : 'Manage'}
+                {t.parentPages.dashboard.manage}
                 <ChevronRight className={`w-4 h-4 ${isAr ? 'rotate-180' : ''}`} />
               </Link>
             )}
@@ -259,16 +257,14 @@ export default function ParentDashboard() {
                   <Users className="w-7 h-7 text-muted-foreground/40" />
                 </div>
                 <h4 className="text-lg font-bold text-foreground mb-2">
-                  {isAr ? 'لا يوجد أبناء مربوطين' : 'No linked children'}
+                  {t.parentPages.dashboard.noLinkedChildren}
                 </h4>
                 <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto">
-                  {isAr
-                    ? 'ابدأ بربط حساب ابنك لتتبع تقدمه الأكاديمي.'
-                    : "Start by linking your child's account to track their progress."}
+                  {t.parentPages.dashboard.noLinkedChildrenDesc}
                 </p>
                 <Button asChild className="rounded-xl font-bold">
                   <Link href="/academy/parent/link-child">
-                    {isAr ? 'ربط ابن جديد' : 'Link New Child'}
+                    {t.parentPages.dashboard.linkNewChild}
                   </Link>
                 </Button>
               </CardContent>
@@ -299,7 +295,7 @@ export default function ParentDashboard() {
                               {child.child_name}
                             </h3>
                             <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
-                              {relationLabels[child.relation]?.[locale] || child.relation}
+                              {t.parentPages.dashboard.relationLabels[child.relation] || child.relation}
                             </Badge>
                           </div>
 
@@ -307,7 +303,7 @@ export default function ParentDashboard() {
                           <div className="mt-3 space-y-1.5">
                             <div className="flex items-center justify-between text-xs">
                               <span className="text-muted-foreground font-medium">
-                                {isAr ? 'التقدم' : 'Progress'}
+                                {t.parentPages.dashboard.progress}
                               </span>
                               <span className="font-bold text-foreground">
                                 {child.enrollments.avg_progress}%
@@ -324,19 +320,19 @@ export default function ParentDashboard() {
                             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                               <BookOpen className="w-3.5 h-3.5" />
                               <span className="font-medium">
-                                {child.enrollments.total} {isAr ? 'مقرر' : 'courses'}
+                                {child.enrollments.total} {isAr ? t.parentPages.dashboard.courseUnit : t.parentPages.dashboard.courseUnitPlural}
                               </span>
                             </div>
                             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                               <Calendar className="w-3.5 h-3.5" />
                               <span className="font-medium">
-                                {child.bookings.upcoming} {isAr ? 'حجز' : 'bookings'}
+                                {child.bookings.upcoming} {isAr ? t.parentPages.dashboard.bookingUnit : t.parentPages.dashboard.bookingUnitPlural}
                               </span>
                             </div>
                             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                               <Clock className="w-3.5 h-3.5" />
                               <span className="font-medium">
-                                {child.recitations.total_30d} {isAr ? 'تلاوة' : 'recitations'}
+                                {child.recitations.total_30d} {isAr ? t.parentPages.dashboard.recitationUnit : t.parentPages.dashboard.recitationUnitPlural}
                               </span>
                             </div>
                             {child.badges.total > 0 && (
@@ -368,7 +364,7 @@ export default function ParentDashboard() {
         {/* Quick Actions Sidebar */}
         <div className="space-y-6">
           <h2 className="text-xl font-bold text-foreground">
-            {isAr ? 'إجراءات سريعة' : 'Quick Actions'}
+            {t.parentPages.dashboard.quickActions}
           </h2>
           <Card className="border-border/50 shadow-sm rounded-2xl bg-card overflow-hidden">
             <div className="divide-y divide-border/50">
@@ -381,10 +377,10 @@ export default function ParentDashboard() {
                 </div>
                 <div className="flex-1">
                   <h5 className="font-bold text-sm text-foreground">
-                    {isAr ? 'ربط ابن جديد' : 'Link New Child'}
+                    {t.parentPages.dashboard.linkNewChild}
                   </h5>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    {isAr ? 'بحث وربط حساب طالب' : 'Search and link a student'}
+                    {t.parentPages.dashboard.linkChildDesc}
                   </p>
                 </div>
                 <ArrowUpRight className="w-4 h-4 text-muted-foreground/30 group-hover:text-primary transition-colors" />
@@ -399,10 +395,10 @@ export default function ParentDashboard() {
                 </div>
                 <div className="flex-1">
                   <h5 className="font-bold text-sm text-foreground">
-                    {isAr ? 'إدارة الأبناء' : 'Manage Children'}
+                    {t.parentPages.dashboard.manageChildren}
                   </h5>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    {isAr ? 'عرض وإدارة حسابات أبنائك' : 'View and manage children'}
+                    {t.parentPages.dashboard.manageChildrenDesc}
                   </p>
                 </div>
                 <ArrowUpRight className="w-4 h-4 text-muted-foreground/30 group-hover:text-blue-500 transition-colors" />
@@ -417,10 +413,10 @@ export default function ParentDashboard() {
                 </div>
                 <div className="flex-1">
                   <h5 className="font-bold text-sm text-foreground">
-                    {isAr ? 'التقويم' : 'Calendar'}
+                    {t.parentPages.dashboard.calendar}
                   </h5>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    {isAr ? 'مواعيد الحصص والواجبات' : 'Sessions and assignments'}
+                    {t.parentPages.dashboard.calendarDesc}
                   </p>
                 </div>
                 <ArrowUpRight className="w-4 h-4 text-muted-foreground/30 group-hover:text-emerald-500 transition-colors" />
@@ -435,10 +431,10 @@ export default function ParentDashboard() {
                 </div>
                 <div className="flex-1">
                   <h5 className="font-bold text-sm text-foreground">
-                    {isAr ? 'الإشعارات' : 'Notifications'}
+                    {t.parentPages.dashboard.notifications}
                   </h5>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    {isAr ? 'عرض كل الإشعارات' : 'View all notifications'}
+                    {t.parentPages.dashboard.notificationsDesc}
                   </p>
                 </div>
                 <ArrowUpRight className="w-4 h-4 text-muted-foreground/30 group-hover:text-amber-500 transition-colors" />
@@ -455,13 +451,11 @@ export default function ParentDashboard() {
                     <Users className="w-4 h-4 text-amber-500" />
                   </div>
                   <h4 className="font-bold text-sm text-foreground">
-                    {isAr ? 'طلبات معلقة' : 'Pending Requests'}
+                    {t.parentPages.dashboard.pendingRequests}
                   </h4>
                 </div>
                 <p className="text-xs text-muted-foreground mb-3">
-                  {isAr
-                    ? `لديك ${summary.pending_requests} طلب ربط معلق`
-                    : `You have ${summary.pending_requests} pending link requests`}
+                  {t.parentPages.dashboard.pendingRequestsDesc.replace('{count}', String(summary.pending_requests))}
                 </p>
                 <Button
                   asChild
@@ -470,7 +464,7 @@ export default function ParentDashboard() {
                   className="w-full rounded-xl font-bold border-amber-300/50 hover:bg-amber-100/50"
                 >
                   <Link href="/academy/parent/children?status=pending">
-                    {isAr ? 'مراجعة الطلبات' : 'Review Requests'}
+                    {t.parentPages.dashboard.reviewRequests}
                   </Link>
                 </Button>
               </CardContent>

@@ -7,9 +7,9 @@ import {
   BarChart3, Star, Target, Award, ArrowLeft, Layers, Grid3x3,
   Clock, Trophy, Crown, Sparkles, CheckCircle,
 } from 'lucide-react'
-import { SURAHS, JUZ_BOUNDS, juzName } from '@/lib/quran-data'
+import { SURAHS, juzName } from '@/lib/quran-data'
 import { PageLoadingSkeleton } from "@/components/ui/page-loading-skeleton"
-
+import { useI18n } from '@/lib/i18n/context'
 
 type PageStatus = 'mastered' | 'reviewing' | 'none'
 
@@ -80,11 +80,40 @@ function toArabicDigits(n: number | string): string {
 }
 
 export default function MushafProgressPage() {
+  const { t, locale } = useI18n()
   const [data, setData] = useState<ProgressData | null>(null)
   const [loading, setLoading] = useState(true)
   const [view, setView] = useState<'pages' | 'surahs'>('pages')
   const [expandedJuz, setExpandedJuz] = useState<Set<number>>(new Set())
   const [hoveredPage, setHoveredPage] = useState<number | null>(null)
+
+  const formatDigits = (n: number | string) => {
+    if (locale === 'en') return String(n)
+    return toArabicDigits(n)
+  }
+
+  const formatRelativeDate = (dateStr: string): string => {
+    const date = new Date(dateStr)
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+
+    if (diffDays === 0) return t.student.mushafProgressPage.relativeToday || 'اليوم'
+    if (diffDays === 1) return t.student.mushafProgressPage.relativeYesterday || 'أمس'
+    if (diffDays < 7) {
+      return t.student.mushafProgressPage.relativeDaysAgo
+        ? t.student.mushafProgressPage.relativeDaysAgo.replace('{days}', formatDigits(diffDays))
+        : `منذ ${formatDigits(diffDays)} أيام`
+    }
+    if (diffDays < 30) {
+      const weeks = Math.floor(diffDays / 7)
+      return t.student.mushafProgressPage.relativeWeeksAgo
+        ? t.student.mushafProgressPage.relativeWeeksAgo.replace('{weeks}', formatDigits(weeks))
+        : `منذ ${formatDigits(weeks)} أسابيع`
+    }
+    const dateLocale = locale === 'ar' ? 'ar-EG' : 'en-US'
+    return date.toLocaleDateString(dateLocale, { day: 'numeric', month: 'short' })
+  }
 
   useEffect(() => {
     fetch('/api/student/mushaf-progress')
@@ -133,7 +162,7 @@ export default function MushafProgressPage() {
   if (!data) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <p className="text-muted-foreground">تعذر تحميل البيانات</p>
+        <p className="text-muted-foreground">{t.student.mushafError || "تعذر تحميل البيانات"}</p>
       </div>
     )
   }
@@ -141,17 +170,23 @@ export default function MushafProgressPage() {
   const { stats, juzProgress, surahProgress } = data
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
+    <div className="space-y-6 max-w-6xl mx-auto pb-8">
+      {/* Back button */}
+      <Link href="/student" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-2">
+        <ChevronDown className="w-4 h-4 rotate-90" />
+        {t.student.backToDashboard || "العودة للوحة الطالب"}
+      </Link>
+
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
             <BookOpen className="w-6 h-6" />
           </div>
-          <div>
-            <h1 className="text-2xl font-black text-foreground">خريطة مصحفي</h1>
+          <div className="text-right">
+            <h1 className="text-2xl font-black text-foreground">{t.student.mushafProgressPage.title || "خريطة مصحفي"}</h1>
             <p className="text-sm text-muted-foreground font-medium">
-              تتبع تقدمك في حفظ ومراجعة القرآن الكريم
+              {t.student.mushafProgressPage.subtitle || "تتبع تقدمك في حفظ ومراجعة القرآن الكريم"}
             </p>
           </div>
         </div>
@@ -160,8 +195,8 @@ export default function MushafProgressPage() {
           className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl text-sm font-bold transition-colors"
         >
           <BookOpen className="w-4 h-4" />
-          فتح المصحف
-          <ArrowLeft className="w-4 h-4" />
+          {t.student.mushafProgressPage.openMushaf || "فتح المصحف"}
+          <ArrowLeft className={`w-4 h-4 ${locale === 'ar' ? '' : 'rotate-180'}`} />
         </Link>
       </div>
 
@@ -169,32 +204,32 @@ export default function MushafProgressPage() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <StatCard
           icon={<BarChart3 className="w-5 h-5" />}
-          label="نسبة الإنجاز"
-          value={`${toArabicDigits(stats.overallPercentage)}٪`}
+          label={t.student.completionRate || "نسبة الإنجاز"}
+          value={`${formatDigits(stats.overallPercentage)}٪`}
           color="text-primary"
           bgColor="bg-primary/10"
         />
         <StatCard
           icon={<Star className="w-5 h-5" />}
-          label="صفحات محفوظة"
-          value={toArabicDigits(stats.masteredPages)}
-          sub={`من ${toArabicDigits(stats.totalPages)}`}
+          label={t.student.mushafProgressPage.legendMastered || "صفحات محفوظة"}
+          value={formatDigits(stats.masteredPages)}
+          sub={t.student.fromStages ? t.student.fromStages.replace('{done}', '').replace('{total}', formatDigits(stats.totalPages)) : `من ${formatDigits(stats.totalPages)}`}
           color="text-emerald-600 dark:text-emerald-400"
           bgColor="bg-emerald-500/10"
         />
         <StatCard
           icon={<Target className="w-5 h-5" />}
-          label="أجزاء مكتملة"
-          value={toArabicDigits(stats.completedJuz)}
-          sub={`من ${toArabicDigits(stats.totalJuz)}`}
+          label={t.student.completedJparts || "أجزاء مكتملة"}
+          value={formatDigits(stats.completedJuz)}
+          sub={t.student.fromStages ? t.student.fromStages.replace('{done}', '').replace('{total}', formatDigits(stats.totalJuz)) : `من ${formatDigits(stats.totalJuz)}`}
           color="text-blue-600 dark:text-blue-400"
           bgColor="bg-blue-500/10"
         />
         <StatCard
           icon={<Award className="w-5 h-5" />}
-          label="سور مكتملة"
-          value={toArabicDigits(stats.completedSurahs)}
-          sub={`من ${toArabicDigits(stats.totalSurahs)}`}
+          label={t.student.masteredSurahs || "سور مكتملة"}
+          value={formatDigits(stats.completedSurahs)}
+          sub={t.student.fromStages ? t.student.fromStages.replace('{done}', '').replace('{total}', formatDigits(stats.totalSurahs)) : `من ${formatDigits(stats.totalSurahs)}`}
           color="text-amber-600 dark:text-amber-400"
           bgColor="bg-amber-500/10"
         />
@@ -203,9 +238,11 @@ export default function MushafProgressPage() {
       {/* Overall Progress Bar */}
       <div className="bg-card border border-border rounded-2xl p-5">
         <div className="flex items-center justify-between mb-3">
-          <span className="text-sm font-bold text-foreground">التقدم الإجمالي</span>
+          <span className="text-sm font-bold text-foreground">{t.student.mushafProgressPage.totalProgress || "التقدم الإجمالي"}</span>
           <span className="text-xs font-bold text-muted-foreground">
-            {toArabicDigits(stats.totalMasteredAyahs)} آية محفوظة من {toArabicDigits(stats.totalAyahs)}
+            {t.student.mushafProgressPage.masteredAyahsCount
+              ? t.student.mushafProgressPage.masteredAyahsCount.replace('{count}', formatDigits(stats.totalMasteredAyahs)).replace('{total}', formatDigits(stats.totalAyahs))
+              : `${formatDigits(stats.totalMasteredAyahs)} آية محفوظة من ${formatDigits(stats.totalAyahs)}`}
           </span>
         </div>
         <div className="w-full h-4 bg-muted rounded-full overflow-hidden flex" dir="ltr">
@@ -219,9 +256,9 @@ export default function MushafProgressPage() {
           />
         </div>
         <div className="flex items-center gap-6 mt-3 flex-wrap">
-          <LegendItem color="bg-emerald-500" label="محفوظ" />
-          <LegendItem color="bg-amber-400" label="قيد المراجعة" />
-          <LegendItem color="bg-muted" label="لم يُحفظ بعد" />
+          <LegendItem color="bg-emerald-500" label={t.student.mushafProgressPage.legendMastered || "محفوظ"} />
+          <LegendItem color="bg-amber-400" label={t.student.mushafProgressPage.legendReviewing || "قيد المراجعة"} />
+          <LegendItem color="bg-muted" label={t.student.mushafProgressPage.legendNone || "لم يُحفظ بعد"} />
         </div>
       </div>
 
@@ -236,7 +273,7 @@ export default function MushafProgressPage() {
           }`}
         >
           <Grid3x3 className="w-4 h-4" />
-          عرض الصفحات
+          {t.student.mushafProgressPage.viewPages || "عرض الصفحات"}
         </button>
         <button
           onClick={() => setView('surahs')}
@@ -247,7 +284,7 @@ export default function MushafProgressPage() {
           }`}
         >
           <Layers className="w-4 h-4" />
-          عرض السور
+          {t.student.mushafProgressPage.viewSurahs || "عرض السور"}
         </button>
       </div>
 
@@ -261,7 +298,7 @@ export default function MushafProgressPage() {
             return (
               <div
                 key={juz.juz}
-                className="bg-card border border-border rounded-2xl overflow-hidden"
+                className="bg-card border border-border rounded-2xl overflow-hidden text-right"
               >
                 {/* Juz Header */}
                 <button
@@ -276,15 +313,17 @@ export default function MushafProgressPage() {
                         ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
                         : 'bg-muted text-muted-foreground'
                     }`}>
-                      {toArabicDigits(juz.juz)}
+                      {formatDigits(juz.juz)}
                     </div>
                     <div className="text-right">
                       <div className="text-sm font-bold text-foreground">{juzName(juz.juz)}</div>
                       <div className="text-xs text-muted-foreground">
-                        صفحة {toArabicDigits(juz.fromPage)} - {toArabicDigits(juz.toPage)}
+                        {t.student.mushafProgressPage.pageRange
+                          ? t.student.mushafProgressPage.pageRange.replace('{from}', formatDigits(juz.fromPage)).replace('{to}', formatDigits(juz.toPage))
+                          : `صفحة ${formatDigits(juz.fromPage)} - ${formatDigits(juz.toPage)}`}
                         {hasProgress && (
                           <span className="mr-2">
-                            · {toArabicDigits(juz.percentage)}٪
+                            · {formatDigits(juz.percentage)}٪
                           </span>
                         )}
                       </div>
@@ -312,11 +351,14 @@ export default function MushafProgressPage() {
                 {/* Page Grid */}
                 {isExpanded && (
                   <div className="px-4 pb-4 border-t border-border/50">
-                    <div className="grid grid-cols-10 sm:grid-cols-12 md:grid-cols-[repeat(20,minmax(0,1fr))] gap-1.5 mt-3">
+                    <div className="grid grid-cols-10 sm:grid-cols-12 md:grid-cols-[repeat(20,minmax(0,1fr))] gap-1.5 mt-3" dir="rtl">
                       {Array.from({ length: juz.toPage - juz.fromPage + 1 }, (_, i) => {
                         const page = juz.fromPage + i
                         const status = pageMap.get(page) || 'none'
                         const isHovered = hoveredPage === page
+                        const tooltip = t.student.mushafProgressPage.pageTooltip
+                          ? t.student.mushafProgressPage.pageTooltip.replace('{page}', formatDigits(page)).replace('{surah}', getSurahForPage(page))
+                          : `صفحة ${formatDigits(page)} - ${getSurahForPage(page)}`
                         return (
                           <Link
                             key={page}
@@ -334,16 +376,18 @@ export default function MushafProgressPage() {
                               }
                               ${isHovered ? 'scale-110 z-10' : ''}
                             `}
-                            title={`صفحة ${page} - ${getSurahForPage(page)}`}
+                            title={tooltip}
                           >
-                            {toArabicDigits(page)}
+                            {formatDigits(page)}
                           </Link>
                         )
                       })}
                     </div>
                     {hoveredPage !== null && hoveredPage >= juz.fromPage && hoveredPage <= juz.toPage && (
                       <div className="mt-2 text-center text-xs text-muted-foreground font-medium">
-                        صفحة {toArabicDigits(hoveredPage)} — {getSurahForPage(hoveredPage)}
+                        {t.student.mushafProgressPage.pageTooltip
+                          ? t.student.mushafProgressPage.pageTooltip.replace('{page}', formatDigits(hoveredPage)).replace('{surah}', getSurahForPage(hoveredPage))
+                          : `صفحة ${formatDigits(hoveredPage)} — ${getSurahForPage(hoveredPage)}`}
                       </div>
                     )}
                   </div>
@@ -371,7 +415,7 @@ export default function MushafProgressPage() {
                 key={surah.number}
                 href={`/student/mushaf?page=${surah.startPage}`}
                 className={`
-                  bg-card border rounded-xl p-4 hover:shadow-sm transition-all group
+                  bg-card border rounded-xl p-4 hover:shadow-sm transition-all group text-right
                   ${isComplete
                     ? 'border-emerald-500/30 hover:border-emerald-500/50'
                     : percentage > 0 || reviewPercentage > 0
@@ -389,7 +433,7 @@ export default function MushafProgressPage() {
                         ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
                         : 'bg-muted text-muted-foreground'
                     }`}>
-                      {toArabicDigits(surah.number)}
+                      {formatDigits(surah.number)}
                     </span>
                     <span className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">
                       {surah.name}
@@ -400,15 +444,17 @@ export default function MushafProgressPage() {
                   )}
                 </div>
                 <div className="text-xs text-muted-foreground mb-2">
-                  {toArabicDigits(surah.totalAyahs)} آية
+                  {t.student.mushafProgressPage.versesCount
+                    ? t.student.mushafProgressPage.versesCount.replace('{count}', formatDigits(surah.totalAyahs))
+                    : `${formatDigits(surah.totalAyahs)} آية`}
                   {surah.masteredAyahs > 0 && (
                     <span className="text-emerald-600 dark:text-emerald-400 mr-1">
-                      · {toArabicDigits(surah.masteredAyahs)} محفوظة
+                      · {formatDigits(surah.masteredAyahs)} {t.student.mushafProgressPage.legendMastered || "محفوظة"}
                     </span>
                   )}
                   {surah.reviewingAyahs > 0 && (
                     <span className="text-amber-600 dark:text-amber-400 mr-1">
-                      · {toArabicDigits(surah.reviewingAyahs)} قيد المراجعة
+                      · {formatDigits(surah.reviewingAyahs)} {t.student.mushafProgressPage.legendReviewing || "قيد المراجعة"}
                     </span>
                   )}
                 </div>
@@ -433,10 +479,10 @@ export default function MushafProgressPage() {
       {/* Milestones & Recent Activity Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Milestones */}
-        <div className="bg-card border border-border rounded-2xl p-5">
+        <div className="bg-card border border-border rounded-2xl p-5 text-right">
           <h3 className="text-sm font-bold text-foreground mb-4 flex items-center gap-2">
             <Trophy className="w-4 h-4 text-amber-500" />
-            الإنجازات
+            {t.student.mushafProgressPage.milestonesTitle || "الإنجازات"}
           </h3>
           <div className="space-y-3">
             {data.milestones.map((m, i) => {
@@ -472,16 +518,16 @@ export default function MushafProgressPage() {
         </div>
 
         {/* Recent Activity */}
-        <div className="bg-card border border-border rounded-2xl p-5">
+        <div className="bg-card border border-border rounded-2xl p-5 text-right">
           <h3 className="text-sm font-bold text-foreground mb-4 flex items-center gap-2">
             <Clock className="w-4 h-4 text-primary" />
-            آخر النشاطات
+            {t.student.mushafProgressPage.recentActivitiesTitle || "آخر النشاطات"}
           </h3>
           {data.recentActivity.length === 0 ? (
             <div className="text-center py-8">
               <BookOpen className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
-              <p className="text-sm text-muted-foreground">لا توجد نشاطات بعد</p>
-              <p className="text-xs text-muted-foreground mt-1">ابدأ بتسميع تلاوتك لرؤية تقدمك هنا</p>
+              <p className="text-sm text-muted-foreground">{t.student.mushafProgressPage.noActivitiesYet || "لا توجد نشاطات بعد"}</p>
+              <p className="text-xs text-muted-foreground mt-1">{t.student.mushafProgressPage.startRecitationHint || "ابدأ بتسميع تلاوتك لرؤية تقدمك هنا"}</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -494,10 +540,12 @@ export default function MushafProgressPage() {
                   }`} />
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-bold text-foreground truncate">
-                      {a.surah_name || `سورة ${toArabicDigits(a.surah_number)}`}
+                      {a.surah_name || `سورة ${formatDigits(a.surah_number)}`}
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      الآيات {toArabicDigits(a.ayah_from)} - {toArabicDigits(a.ayah_to)}
+                      {locale === 'ar'
+                        ? `الآيات ${formatDigits(a.ayah_from)} - ${formatDigits(a.ayah_to)}`
+                        : `Verses ${formatDigits(a.ayah_from)} - ${formatDigits(a.ayah_to)}`}
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-1 flex-shrink-0">
@@ -508,11 +556,11 @@ export default function MushafProgressPage() {
                         ? 'bg-red-500/10 text-red-600 dark:text-red-400'
                         : 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
                     }`}>
-                      {a.status === 'mastered' ? 'متقن'
-                        : a.status === 'in_review' ? 'قيد المراجعة'
-                        : a.status === 'pending' ? 'معلق'
-                        : a.status === 'rejected' ? 'مرفوض'
-                        : a.status === 'needs_session' ? 'يحتاج جلسة'
+                      {a.status === 'mastered' ? (t.student.statusMastered || 'متقن')
+                        : a.status === 'in_review' ? (t.student.statusInReview || 'قيد المراجعة')
+                        : a.status === 'pending' ? (t.student.statusPending || 'معلق')
+                        : a.status === 'rejected' ? (t.rejected || 'مرفوض')
+                        : a.status === 'needs_session' ? (t.student.statusNeedsSession || 'يحتاج جلسة')
                         : a.status}
                     </span>
                     <span className="text-[10px] text-muted-foreground">
@@ -527,44 +575,31 @@ export default function MushafProgressPage() {
       </div>
 
       {/* Ayahs stats footer */}
-      <div className="bg-card border border-border rounded-2xl p-5">
-        <h3 className="text-sm font-bold text-foreground mb-3">ملخص الآيات</h3>
+      <div className="bg-card border border-border rounded-2xl p-5 text-right">
+        <h3 className="text-sm font-bold text-foreground mb-3">{t.student.mushafProgressPage.ayahsSummaryTitle || "ملخص الآيات"}</h3>
         <div className="grid grid-cols-3 gap-4 text-center">
           <div>
             <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
-              {toArabicDigits(stats.totalMasteredAyahs)}
+              {formatDigits(stats.totalMasteredAyahs)}
             </div>
-            <div className="text-xs text-muted-foreground font-medium mt-1">آية محفوظة</div>
+            <div className="text-xs text-muted-foreground font-medium mt-1">{t.student.mushafProgressPage.ayahsMastered || "آية محفوظة"}</div>
           </div>
           <div>
             <div className="text-2xl font-black text-amber-600 dark:text-amber-400">
-              {toArabicDigits(stats.totalReviewingAyahs)}
+              {formatDigits(stats.totalReviewingAyahs)}
             </div>
-            <div className="text-xs text-muted-foreground font-medium mt-1">آية قيد المراجعة</div>
+            <div className="text-xs text-muted-foreground font-medium mt-1">{t.student.mushafProgressPage.ayahsReviewing || "آية قيد المراجعة"}</div>
           </div>
           <div>
             <div className="text-2xl font-black text-muted-foreground">
-              {toArabicDigits(stats.totalAyahs - stats.totalMasteredAyahs - stats.totalReviewingAyahs)}
+              {formatDigits(stats.totalAyahs - stats.totalMasteredAyahs - stats.totalReviewingAyahs)}
             </div>
-            <div className="text-xs text-muted-foreground font-medium mt-1">آية متبقية</div>
+            <div className="text-xs text-muted-foreground font-medium mt-1">{t.student.mushafProgressPage.ayahsRemaining || "آية متبقية"}</div>
           </div>
         </div>
       </div>
     </div>
   )
-}
-
-function formatRelativeDate(dateStr: string): string {
-  const date = new Date(dateStr)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
-
-  if (diffDays === 0) return 'اليوم'
-  if (diffDays === 1) return 'أمس'
-  if (diffDays < 7) return `منذ ${diffDays} أيام`
-  if (diffDays < 30) return `منذ ${Math.floor(diffDays / 7)} أسابيع`
-  return date.toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' })
 }
 
 function StatCard({
@@ -583,7 +618,7 @@ function StatCard({
   bgColor: string
 }) {
   return (
-    <div className="bg-card border border-border rounded-2xl p-4">
+    <div className="bg-card border border-border rounded-2xl p-4 text-right">
       <div className={`w-10 h-10 ${bgColor} rounded-xl flex items-center justify-center ${color} mb-3`}>
         {icon}
       </div>

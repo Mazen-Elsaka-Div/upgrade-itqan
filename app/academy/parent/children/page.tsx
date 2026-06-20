@@ -107,11 +107,11 @@ const containerVariants = {
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } },
+  show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } },
 }
 
 export default function ParentChildrenPage() {
-  const { locale } = useI18n()
+  const { t, locale } = useI18n()
   const isAr = locale === 'ar'
   const [overview, setOverview] = useState<DashboardOverview | null>(null)
   const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([])
@@ -163,13 +163,13 @@ export default function ParentChildrenPage() {
               }
             : prev
         )
-        toast.success(isAr ? 'تم إلغاء الطلب' : 'Request cancelled')
+        toast.success(t.parentPages.children.requestCancelled)
       } else {
         const d = await res.json()
-        toast.error(d.error || (isAr ? 'حدث خطأ' : 'Error'))
+        toast.error(d.error || t.parentPages.children.connectionError)
       }
     } catch {
-      toast.error(isAr ? 'حدث خطأ في الاتصال' : 'Connection error')
+      toast.error(t.parentPages.children.connectionError)
     } finally {
       setCancellingPending(null)
     }
@@ -189,7 +189,7 @@ export default function ParentChildrenPage() {
       const data = await res.json()
 
       if (res.ok) {
-        toast.success(data.message || (isAr ? 'تم إلغاء الربط بنجاح' : 'Successfully unlinked'))
+        toast.success(data.message || t.parentPages.children.successfullyUnlinked)
         const removedId = unlinkingChild.child_id
         setOverview((prev) => {
           if (!prev) return prev
@@ -203,10 +203,10 @@ export default function ParentChildrenPage() {
           }
         })
       } else {
-        toast.error(data.error || (isAr ? 'حدث خطأ' : 'Error occurred'))
+        toast.error(data.error || t.parentPages.children.connectionError)
       }
     } catch {
-      toast.error(isAr ? 'حدث خطأ في الاتصال' : 'Connection error')
+      toast.error(t.parentPages.children.connectionError)
     } finally {
       setUnlinkLoading(false)
       setUnlinkingChild(null)
@@ -224,7 +224,7 @@ export default function ParentChildrenPage() {
             </div>
           </div>
           <p className="text-sm text-muted-foreground font-medium animate-pulse">
-            {isAr ? 'جاري تحميل بيانات الأبناء...' : 'Loading children data...'}
+            {t.parentPages.children.loadingChildren}
           </p>
         </div>
       </div>
@@ -255,16 +255,14 @@ export default function ParentChildrenPage() {
           <div className="space-y-4 max-w-2xl">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-md shadow-sm border border-border/50 text-primary text-sm font-bold">
               <Users className="w-4 h-4" />
-              {isAr ? 'إدارة الأبناء' : 'Manage Children'}
+              {t.parentPages.children.manageChildren}
             </div>
             <h1 className="text-4xl lg:text-5xl font-black tracking-tight text-foreground flex items-center gap-3">
-              {isAr ? 'قائمة الأبناء' : 'My Children'}
+              {t.parentPages.children.myChildren}
               <Sparkles className="w-8 h-8 text-amber-500 animate-pulse hidden md:block" />
             </h1>
             <p className="text-lg text-muted-foreground font-medium leading-relaxed">
-              {isAr
-                ? 'استعرض أبنائك المربوطين وتابع تقدمهم الأكاديمي، سجلات الحضور، والإنجازات من مكان واحد.'
-                : 'View your linked children and track their academic progress, attendance records, and achievements from one place.'}
+              {t.parentPages.children.childrenDesc}
             </p>
           </div>
           <Button
@@ -273,7 +271,7 @@ export default function ParentChildrenPage() {
           >
             <Link href="/academy/parent/link-child">
               <LinkIcon className="w-5 h-5 me-2 group-hover:rotate-12 transition-transform" />
-              {isAr ? 'ربط ابن جديد' : 'Link New Child'}
+              {t.parentPages.children.linkNewChild}
             </Link>
           </Button>
         </div>
@@ -293,7 +291,7 @@ export default function ParentChildrenPage() {
                 <Clock className="w-4 h-4 text-amber-500" />
               </div>
               <h2 className="text-lg font-bold text-foreground">
-                {isAr ? 'طلبات الربط المعلقة' : 'Pending Link Requests'}
+                {t.parentPages.children.pendingLinkRequests}
               </h2>
               <Badge className="bg-amber-500 text-white border-0 text-xs font-bold shadow-sm ms-2">
                 {pendingRequests.length}
@@ -322,7 +320,7 @@ export default function ParentChildrenPage() {
                         <div className="flex items-center gap-2">
                           <p className="font-bold text-base text-foreground truncate">{req.child_name}</p>
                           <Badge variant="outline" className="text-[10px] bg-background/50 border-amber-200 dark:border-amber-800">
-                            {relationLabels[req.relation]?.[locale] || req.relation}
+                            {t.parentPages.dashboard.relationLabels[req.relation] || req.relation}
                           </Badge>
                         </div>
                         <p className="text-xs text-muted-foreground mt-0.5 truncate" dir="ltr">{req.child_email}</p>
@@ -331,7 +329,7 @@ export default function ParentChildrenPage() {
                       <div className="flex flex-col items-end gap-2 shrink-0">
                         <Badge className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-0 text-[10px] gap-1 shadow-none">
                           <Clock className="w-3 h-3" />
-                          {isAr ? 'في الانتظار' : 'Waiting'}
+                          {t.parentPages.children.waiting}
                         </Badge>
                         <Button
                           variant="ghost"
@@ -342,10 +340,8 @@ export default function ParentChildrenPage() {
                         >
                           {cancellingPending === req.child_id ? (
                             <Loader2 className="w-3 h-3 animate-spin" />
-                          ) : isAr ? (
-                            'إلغاء الطلب'
                           ) : (
-                            'Cancel'
+                            t.parentPages.children.cancelRequest
                           )}
                         </Button>
                       </div>
@@ -375,17 +371,15 @@ export default function ParentChildrenPage() {
                 </div>
               </div>
               <h4 className="text-2xl font-black text-foreground mb-3">
-                {isAr ? 'لم تقم بربط أي أبناء بعد' : 'No children linked yet'}
+                {t.parentPages.children.noChildrenLinkedYet}
               </h4>
               <p className="text-base text-muted-foreground mb-8 max-w-md mx-auto leading-relaxed">
-                {isAr
-                  ? 'ابدأ بربط حساب ابنك لتتمكن من متابعة تقدمه الأكاديمي، جدول الحصص، والمزيد بكل سهولة.'
-                  : "Start by linking your child's account to easily track their academic progress, schedule, and more."}
+                {t.parentPages.children.noChildrenLinkedYetDesc}
               </p>
               <Button asChild className="rounded-2xl font-bold h-14 px-10 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all">
                 <Link href="/academy/parent/link-child">
                   <LinkIcon className="w-5 h-5 me-2" />
-                  {isAr ? 'ربط حساب ابنك الآن' : 'Link Child Account Now'}
+                  {t.parentPages.children.linkChildNow}
                 </Link>
               </Button>
             </CardContent>
@@ -407,7 +401,7 @@ export default function ParentChildrenPage() {
                 <Users className="w-5 h-5 text-primary" />
               </div>
               <h2 className="text-2xl font-bold text-foreground">
-                {isAr ? 'الأبناء المربوطين' : 'Linked Children'}
+                {t.parentPages.children.linkedChildren}
               </h2>
               <Badge variant="secondary" className="rounded-full px-2.5 py-0.5 text-sm font-bold bg-muted/50">
                 {children.length}
@@ -442,12 +436,12 @@ export default function ParentChildrenPage() {
                             {child.child_name}
                           </Link>
                           <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-0 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider shrink-0">
-                            {relationLabels[child.relation]?.[locale] || child.relation}
+                            {t.parentPages.dashboard.relationLabels[child.relation] || child.relation}
                           </Badge>
                         </div>
                         <div className="flex items-center text-sm text-muted-foreground gap-1.5 font-medium">
                           <LinkIcon className="w-3.5 h-3.5 shrink-0" />
-                          <span className="truncate">{isAr ? 'مربوط منذ' : 'Linked since'} {fmtDate(child.linked_at, isAr)}</span>
+                          <span className="truncate">{t.parentPages.children.linkedSince} {fmtDate(child.linked_at, isAr)}</span>
                         </div>
                       </div>
                       
@@ -457,7 +451,7 @@ export default function ParentChildrenPage() {
                           size="icon"
                           className="w-10 h-10 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                           onClick={() => setUnlinkingChild(child)}
-                          title={isAr ? 'إلغاء الربط' : 'Unlink'}
+                          title={t.parentPages.children.unlink}
                         >
                           <UserMinus className="w-4 h-4" />
                         </Button>
@@ -471,7 +465,7 @@ export default function ParentChildrenPage() {
                           <div className="flex items-center gap-2">
                             <Activity className="w-4 h-4 text-primary" />
                             <span className="text-sm font-bold text-foreground">
-                              {isAr ? 'التقدم الأكاديمي' : 'Academic Progress'}
+                              {t.parentPages.children.academicProgress}
                             </span>
                           </div>
                           <span className="text-xl font-black text-primary">
@@ -498,7 +492,7 @@ export default function ParentChildrenPage() {
                         </div>
                         <div>
                           <p className="text-xl sm:text-2xl font-black text-foreground leading-none mb-1">{child.enrollments.total}</p>
-                          <p className="text-[11px] sm:text-xs font-medium text-muted-foreground">{isAr ? 'مقررات مسجلة' : 'Enrolled Courses'}</p>
+                          <p className="text-[11px] sm:text-xs font-medium text-muted-foreground">{t.parentPages.children.enrolledCourses}</p>
                         </div>
                       </div>
                       
@@ -508,7 +502,7 @@ export default function ParentChildrenPage() {
                         </div>
                         <div>
                           <p className="text-xl sm:text-2xl font-black text-foreground leading-none mb-1">{child.bookings.upcoming}</p>
-                          <p className="text-[11px] sm:text-xs font-medium text-muted-foreground">{isAr ? 'حجوزات قادمة' : 'Upcoming Bookings'}</p>
+                          <p className="text-[11px] sm:text-xs font-medium text-muted-foreground">{t.parentPages.children.upcomingBookings}</p>
                         </div>
                       </div>
                       
@@ -528,7 +522,7 @@ export default function ParentChildrenPage() {
                         </div>
                         <div>
                           <p className="text-xl sm:text-2xl font-black text-foreground leading-none mb-1">{child.badges.total}</p>
-                          <p className="text-[11px] sm:text-xs font-medium text-muted-foreground">{isAr ? 'شارات محصلة' : 'Earned Badges'}</p>
+                          <p className="text-[11px] sm:text-xs font-medium text-muted-foreground">{t.parentPages.children.earnedBadges}</p>
                         </div>
                       </div>
                     </div>
@@ -540,7 +534,7 @@ export default function ParentChildrenPage() {
                         className="flex-1 rounded-xl h-12 font-bold shadow-sm"
                       >
                         <Link href={`/academy/parent/children/${child.child_id}`}>
-                          {isAr ? 'عرض التفاصيل' : 'View Details'}
+                          {t.parentPages.children.viewDetails}
                           <ChevronRight className={`w-4 h-4 ms-2 ${isAr ? 'rotate-180' : ''}`} />
                         </Link>
                       </Button>
@@ -551,7 +545,7 @@ export default function ParentChildrenPage() {
                       >
                         <Link href={`/academy/parent/children/${child.child_id}/restrictions`}>
                           <Shield className="w-4 h-4 sm:me-2 text-primary" />
-                          <span className="hidden sm:inline">{isAr ? 'القيود' : 'Restrictions'}</span>
+                          <span className="hidden sm:inline">{t.parentPages.children.restrictions}</span>
                         </Link>
                       </Button>
                     </div>
@@ -573,12 +567,10 @@ export default function ParentChildrenPage() {
               </div>
               <div>
                 <h4 className="text-base font-bold text-red-900 dark:text-red-300 mb-1">
-                  {isAr ? 'طلبات مرفوضة' : 'Rejected Requests'}
+                  {t.parentPages.children.rejectedRequests}
                 </h4>
                 <p className="text-sm text-red-700 dark:text-red-400">
-                  {isAr
-                    ? `لديك ${summary?.rejected_links} طلب ربط تم رفضه من قبل الأبناء.`
-                    : `You have ${summary?.rejected_links} link requests that were rejected.`}
+                  {t.parentPages.children.rejectedRequestsDesc.replace('{count}', String(summary?.rejected_links))}
                 </p>
               </div>
             </CardContent>
@@ -596,27 +588,15 @@ export default function ParentChildrenPage() {
                 <UserMinus className="w-8 h-8 text-destructive" />
               </div>
               <AlertDialogTitle className="text-2xl font-black text-center">
-                {isAr ? 'تأكيد إلغاء الربط' : 'Confirm Unlink'}
+                {t.parentPages.children.confirmUnlinkTitle}
               </AlertDialogTitle>
               <AlertDialogDescription className="text-center text-base">
-                {isAr
-                  ? (
-                    <>
-                      هل أنت متأكد من إلغاء ربط حساب <strong className="text-foreground">{unlinkingChild?.child_name}</strong>؟<br/><br/>
-                      لن تتمكن من متابعة تقدمه الدراسي أو استعراض جدوله بعد ذلك. هذا الإجراء لا يمكن التراجع عنه.
-                    </>
-                  )
-                  : (
-                    <>
-                      Are you sure you want to unlink <strong className="text-foreground">{unlinkingChild?.child_name}</strong>?<br/><br/>
-                      You will no longer be able to track their progress or view their schedule. This action cannot be undone.
-                    </>
-                  )}
+                {t.parentPages.children.confirmUnlinkDesc.replace('{name}', unlinkingChild?.child_name || '')}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter className="gap-3 sm:gap-0">
               <AlertDialogCancel disabled={unlinkLoading} className="rounded-xl h-12 font-bold w-full sm:w-auto mt-0">
-                {isAr ? 'تراجع' : 'Cancel'}
+                {t.parentPages.children.cancel}
               </AlertDialogCancel>
               <AlertDialogAction
                 onClick={handleUnlink}
@@ -625,10 +605,8 @@ export default function ParentChildrenPage() {
               >
                 {unlinkLoading ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
-                ) : isAr ? (
-                  'نعم، قم بإلغاء الربط'
                 ) : (
-                  'Yes, Unlink'
+                  t.parentPages.children.unlinkButton
                 )}
               </AlertDialogAction>
             </AlertDialogFooter>

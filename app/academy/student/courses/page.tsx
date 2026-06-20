@@ -26,7 +26,8 @@ interface Course {
 }
 
 export default function StudentCoursesPage() {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
+  const isAr = locale === 'ar'
   const [courses, setCourses] = useState<Course[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all')
@@ -86,7 +87,7 @@ export default function StudentCoursesPage() {
           <div className="absolute inset-0 rounded-full border-4 border-blue-500/20" />
           <div className="absolute inset-0 rounded-full border-4 border-blue-600 border-t-transparent animate-spin" />
         </div>
-        <p className="text-muted-foreground font-medium animate-pulse">جاري تحميل الدورات...</p>
+        <p className="text-muted-foreground font-medium animate-pulse">{t.studentPages?.courses?.loading || 'جاري تحميل الدورات...'}</p>
       </div>
     )
   }
@@ -103,7 +104,7 @@ export default function StudentCoursesPage() {
           <div className="space-y-4 max-w-2xl">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-blue-100 text-sm font-medium">
               <Sparkles className="w-4 h-4" />
-              <span>مرحباً بك في رحلتك التعليمية</span>
+              <span>{t.studentPages?.courses?.welcome || 'مرحباً بك في رحلتك التعليمية'}</span>
             </div>
             <h1 className="text-4xl sm:text-5xl font-black tracking-tight leading-tight">
               {t.academy?.myCourses || 'دوراتي التعليمية'}
@@ -140,7 +141,7 @@ export default function StudentCoursesPage() {
             </div>
           </div>
         </div>
-
+ 
         <div className="bg-card border border-border/50 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-bl-full -z-10 group-hover:scale-110 transition-transform duration-500" />
           <div className="flex items-center gap-4 mb-4">
@@ -174,7 +175,7 @@ export default function StudentCoursesPage() {
               <Star className="w-6 h-6" />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-bold text-muted-foreground uppercase tracking-wider">متوسط الإنجاز</p>
+              <p className="text-sm font-bold text-muted-foreground uppercase tracking-wider">{t.studentPages?.courses?.averageProgress || 'متوسط الإنجاز'}</p>
               <div className="flex items-center justify-between gap-3">
                 <h3 className="text-2xl font-black text-foreground">{stats.overallProgress}%</h3>
               </div>
@@ -233,12 +234,12 @@ export default function StudentCoursesPage() {
           <h3 className="text-xl font-bold text-foreground mb-2">
             {searchQuery 
               ? (t.academy?.noSearchResults || 'لا توجد نتائج مطابقة لبحثك')
-              : (t.academy?.noCoursesYet || 'لم تسجل في أي دورة بعد')
+              : (t.academy?.noCoursesYet || 'لم تسجل in أي دورة بعد')
             }
           </h3>
           <p className="text-muted-foreground max-w-sm mb-8">
             {searchQuery 
-              ? 'حاول استخدام كلمات مفتاحية مختلفة للبحث.'
+              ? (t.studentPages?.courses?.trySearchKeywords || 'حاول استخدام كلمات مفتاحية مختلفة للبحث.')
               : (t.academy?.exploreAndEnroll || 'استكشف مكتبتنا الغنية بالدورات وابدأ رحلة التعلم الآن.')}
           </p>
           {!searchQuery && (
@@ -247,7 +248,7 @@ export default function StudentCoursesPage() {
               className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl font-bold shadow-lg hover:shadow-xl hover:bg-blue-700 hover:-translate-y-0.5 transition-all"
             >
               <Compass className="w-5 h-5" />
-              تصفح الدورات المتاحة
+              {t.studentPages?.courses?.browseAvailableCourses || 'تصفح الدورات المتاحة'}
             </Link>
           )}
         </div>
@@ -319,7 +320,9 @@ export default function StudentCoursesPage() {
                   <div className="mb-4 bg-muted/30 rounded-2xl p-4 border border-border/50">
                     <div className="flex items-center justify-between text-sm mb-2">
                       <span className="font-bold text-foreground">
-                        {course.status === 'completed' ? 'مكتملة بنجاح' : 'نسبة الإنجاز'}
+                        {course.status === 'completed' 
+                          ? (t.studentPages?.courses?.completedSuccessfully || 'مكتملة بنجاح') 
+                          : (t.studentPages?.courses?.progressLabel || 'نسبة الإنجاز')}
                       </span>
                       <span className={cn(
                         "font-black",
@@ -350,7 +353,9 @@ export default function StudentCoursesPage() {
                       <div className="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center">
                         <PlayCircle className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                       </div>
-                      {course.completed_lessons} <span className="font-medium text-muted-foreground/60">من</span> {course.total_lessons} دروس
+                      {(t.studentPages?.courses?.lessonsCount || '{completed} من {total} دروس')
+                        .replace('{completed}', String(course.completed_lessons))
+                        .replace('{total}', String(course.total_lessons))}
                     </span>
                     <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors">
                       <svg className="w-4 h-4 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">

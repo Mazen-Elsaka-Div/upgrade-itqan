@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Award, Crown, Flame, Loader2, Medal, Sparkles, Star, Target, Trophy, Users } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useI18n } from '@/lib/i18n/context'
 
 interface LeaderboardEntry {
   rank: number
@@ -17,17 +18,19 @@ interface LeaderboardEntry {
 }
 
 const PERIODS = [
-  { value: 'weekly', label: 'الأسبوع', hint: 'آخر 7 أيام' },
-  { value: 'monthly', label: 'الشهر', hint: 'آخر 30 يوم' },
-  { value: 'all_time', label: 'كل الوقت', hint: 'إجمالي النقاط' },
+  { value: 'weekly', labelKey: 'periodWeekly', hintKey: 'periodWeeklyHint' },
+  { value: 'monthly', labelKey: 'periodMonthly', hintKey: 'periodMonthlyHint' },
+  { value: 'all_time', labelKey: 'periodAllTime', hintKey: 'periodAllTimeHint' },
 ] as const
 
 const SCOPES = [
-  { value: 'platform', label: 'المنصة كاملة', icon: Trophy },
-  { value: 'halaqa', label: 'حلقتي', icon: Users },
+  { value: 'platform', labelKey: 'scopePlatform', icon: Trophy },
+  { value: 'halaqa', labelKey: 'scopeHalaqa', icon: Users },
 ] as const
 
 export default function LeaderboardPage() {
+  const { t, locale } = useI18n()
+  const isAr = locale === 'ar'
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
   const [currentUserRank, setCurrentUserRank] = useState<LeaderboardEntry | null>(null)
   const [loading, setLoading] = useState(true)
@@ -69,25 +72,25 @@ export default function LeaderboardPage() {
         <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl space-y-3">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm font-bold backdrop-blur">
-              <Sparkles className="h-4 w-4" /> تنافس شريف وإنجاز مستمر
+              <Sparkles className="h-4 w-4" /> {t.studentPages?.leaderboard?.heroBadge || 'تنافس شريف وإنجاز مستمر'}
             </div>
-            <h1 className="text-3xl font-black lg:text-4xl">لوحة المتصدرين</h1>
-            <p className="text-sm leading-7 text-white/80 lg:text-base">تابع ترتيبك حسب النقاط على مستوى الحلقة أو المنصة كاملة، وغيّر الفترة بسهولة.</p>
+            <h1 className="text-3xl font-black lg:text-4xl">{t.studentPages?.leaderboard?.title || 'لوحة المتصدرين'}</h1>
+            <p className="text-sm leading-7 text-white/80 lg:text-base">{t.studentPages?.leaderboard?.heroDesc || 'تابع ترتيبك حسب النقاط على مستوى الحلقة أو المنصة كاملة، وغيّر الفترة بسهولة.'}</p>
           </div>
           {currentUserRank && (
             <div className="rounded-2xl border border-white/20 bg-white/10 p-5 text-center backdrop-blur">
-              <p className="text-sm text-white/75">ترتيبك الحالي</p>
+              <p className="text-sm text-white/75">{t.studentPages?.leaderboard?.yourRank || 'ترتيبك الحالي'}</p>
               <p className="mt-1 text-4xl font-black">#{currentUserRank.rank}</p>
-              <p className="mt-1 text-sm text-white/80">{currentUserRank.total_points} نقطة</p>
+              <p className="mt-1 text-sm text-white/80">{currentUserRank.total_points.toLocaleString(isAr ? 'ar-EG' : 'en-US')} {t.studentPages?.leaderboard?.pointSuffix || 'نقطة'}</p>
             </div>
           )}
         </div>
       </section>
 
       <section className="grid gap-4 md:grid-cols-3">
-        <SummaryCard icon={Users} label="المشاركون" value={stats.participants} />
-        <SummaryCard icon={Star} label="إجمالي النقاط" value={stats.points} />
-        <SummaryCard icon={Flame} label="أفضل سلسلة" value={stats.bestStreak} suffix="يوم" />
+        <SummaryCard icon={Users} label={t.studentPages?.leaderboard?.participants || 'المشاركون'} value={stats.participants} isAr={isAr} />
+        <SummaryCard icon={Star} label={t.studentPages?.leaderboard?.totalPoints || 'إجمالي النقاط'} value={stats.points} isAr={isAr} />
+        <SummaryCard icon={Flame} label={t.studentPages?.leaderboard?.bestStreak || 'أفضل سلسلة'} value={stats.bestStreak} suffix={t.studentPages?.leaderboard?.daySuffix || 'يوم'} isAr={isAr} />
       </section>
 
       <section className="flex flex-col gap-3 rounded-3xl border border-border bg-card p-4 shadow-sm lg:flex-row lg:items-center lg:justify-between">
@@ -103,7 +106,7 @@ export default function LeaderboardPage() {
                   scope === item.value ? 'bg-emerald-600 text-white shadow-md' : 'bg-muted text-muted-foreground hover:text-foreground'
                 )}
               >
-                <Icon className="h-4 w-4" /> {item.label}
+                <Icon className="h-4 w-4" /> {t.studentPages?.leaderboard?.[item.labelKey] || item.value}
               </button>
             )
           })}
@@ -118,8 +121,8 @@ export default function LeaderboardPage() {
                 period === item.value ? 'bg-amber-500 text-white shadow-md' : 'bg-muted text-muted-foreground hover:text-foreground'
               )}
             >
-              <p className="text-sm font-black">{item.label}</p>
-              <p className="text-[11px] opacity-80">{item.hint}</p>
+              <p className="text-sm font-black">{t.studentPages?.leaderboard?.[item.labelKey] || item.value}</p>
+              <p className="text-[11px] opacity-80">{t.studentPages?.leaderboard?.[item.hintKey] || ''}</p>
             </button>
           ))}
         </div>
@@ -127,7 +130,6 @@ export default function LeaderboardPage() {
 
       {loading ? (
         <div className="space-y-6">
-          {/* Podium Skeleton */}
           <div className="grid gap-4 lg:grid-cols-3">
             {[1, 2, 3].map((i) => (
               <div key={i} className="rounded-3xl border border-border/50 bg-card p-5 text-center shadow-sm animate-pulse space-y-4">
@@ -139,7 +141,6 @@ export default function LeaderboardPage() {
             ))}
           </div>
 
-          {/* Table List Skeleton */}
           <div className="rounded-3xl border border-border bg-card p-5 shadow-sm space-y-3">
             <div className="h-6 w-32 bg-muted rounded mb-4 animate-pulse" />
             {[1, 2, 3, 4, 5].map((i) => (
@@ -158,22 +159,22 @@ export default function LeaderboardPage() {
       ) : leaderboard.length === 0 ? (
         <div className="rounded-3xl border border-dashed border-border bg-card p-16 text-center">
           <Trophy className="mx-auto mb-4 h-14 w-14 text-muted-foreground/40" />
-          <p className="font-black">لا توجد نقاط بعد</p>
-          <p className="mt-1 text-sm text-muted-foreground">ابدأ بإنجاز المهام والتلاوات لتظهر في الترتيب.</p>
+          <p className="font-black">{t.studentPages?.leaderboard?.noPointsYet || 'لا توجد نقاط بعد'}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{t.studentPages?.leaderboard?.noPointsDesc || 'ابدأ بإنجاز المهام والتلاوات لتظهر في الترتيب.'}</p>
         </div>
       ) : (
         <>
           <section className="grid gap-4 lg:grid-cols-3">
-            {topThree.map((entry) => <PodiumCard key={entry.user_id} entry={entry} />)}
+            {topThree.map((entry) => <PodiumCard key={entry.user_id} entry={entry} t={t} isAr={isAr} />)}
           </section>
 
           <section className="rounded-3xl border border-border bg-card p-4 shadow-sm">
             <div className="mb-4 flex items-center justify-between px-2">
-              <h2 className="text-xl font-black">الترتيب التفصيلي</h2>
-              <span className="text-sm text-muted-foreground">{scope === 'halaqa' ? 'مستوى الحلقة' : 'مستوى المنصة'}</span>
+              <h2 className="text-xl font-black">{t.studentPages?.leaderboard?.detailedRank || 'الترتيب التفصيلي'}</h2>
+              <span className="text-sm text-muted-foreground">{scope === 'halaqa' ? (t.studentPages?.leaderboard?.halaqaLevel || 'مستوى الحلقة') : (t.studentPages?.leaderboard?.platformLevel || 'مستوى المنصة')}</span>
             </div>
             <div className="space-y-3">
-              {leaderboard.map((entry) => <LeaderboardRow key={entry.user_id} entry={entry} />)}
+              {leaderboard.map((entry) => <LeaderboardRow key={entry.user_id} entry={entry} t={t} isAr={isAr} />)}
             </div>
           </section>
         </>
@@ -182,13 +183,13 @@ export default function LeaderboardPage() {
   )
 }
 
-function SummaryCard({ icon: Icon, label, value, suffix }: { icon: typeof Trophy; label: string; value: number; suffix?: string }) {
+function SummaryCard({ icon: Icon, label, value, suffix, isAr }: { icon: typeof Trophy; label: string; value: number; suffix?: string; isAr: boolean }) {
   return (
     <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm text-muted-foreground">{label}</p>
-          <p className="mt-2 text-3xl font-black">{value.toLocaleString('ar-EG')} {suffix || ''}</p>
+          <p className="mt-2 text-3xl font-black">{value.toLocaleString(isAr ? 'ar-EG' : 'en-US')} {suffix || ''}</p>
         </div>
         <div className="rounded-2xl bg-amber-50 p-3 text-amber-700"><Icon className="h-6 w-6" /></div>
       </div>
@@ -204,7 +205,7 @@ function Avatar({ entry, className }: { entry: LeaderboardEntry; className?: str
   )
 }
 
-function PodiumCard({ entry }: { entry: LeaderboardEntry }) {
+function PodiumCard({ entry, t, isAr }: { entry: LeaderboardEntry; t: any; isAr: boolean }) {
   const colors = entry.rank === 1 ? 'border-amber-300 bg-amber-50/70' : entry.rank === 2 ? 'border-slate-300 bg-slate-50/70' : 'border-orange-300 bg-orange-50/70'
   return (
     <div className={cn('rounded-3xl border p-5 text-center shadow-sm', colors, entry.is_current_user && 'ring-2 ring-emerald-500')}>
@@ -213,14 +214,14 @@ function PodiumCard({ entry }: { entry: LeaderboardEntry }) {
       </div>
       <Avatar entry={entry} className="mx-auto h-20 w-20 text-2xl" />
       <h3 className="mt-3 truncate font-black">{entry.user_name}</h3>
-      <p className="text-sm text-muted-foreground">#{entry.rank} • مستوى {entry.current_level}</p>
-      <p className="mt-3 text-2xl font-black text-amber-600">{entry.total_points.toLocaleString('ar-EG')}</p>
-      <p className="text-xs text-muted-foreground">نقطة</p>
+      <p className="text-sm text-muted-foreground">#{entry.rank} • {(t.studentPages?.leaderboard?.levelLabel || 'مستوى {level}').replace('{level}', String(entry.current_level))}</p>
+      <p className="mt-3 text-2xl font-black text-amber-600">{entry.total_points.toLocaleString(isAr ? 'ar-EG' : 'en-US')}</p>
+      <p className="text-xs text-muted-foreground">{t.studentPages?.leaderboard?.pointSuffix || 'نقطة'}</p>
     </div>
   )
 }
 
-function LeaderboardRow({ entry }: { entry: LeaderboardEntry }) {
+function LeaderboardRow({ entry, t, isAr }: { entry: LeaderboardEntry; t: any; isAr: boolean }) {
   return (
     <div className={cn('flex items-center gap-4 rounded-2xl border border-border bg-background p-4 transition hover:shadow-sm', entry.is_current_user && 'border-emerald-400 bg-emerald-50/60')}>
       <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-muted text-lg font-black">
@@ -230,14 +231,14 @@ function LeaderboardRow({ entry }: { entry: LeaderboardEntry }) {
       <div className="min-w-0 flex-1">
         <p className="truncate font-black">{entry.user_name}</p>
         <div className="mt-1 flex flex-wrap gap-2 text-xs text-muted-foreground">
-          <span className="inline-flex items-center gap-1"><Award className="h-3.5 w-3.5" /> مستوى {entry.current_level}</span>
-          <span className="inline-flex items-center gap-1"><Flame className="h-3.5 w-3.5 text-orange-500" /> {entry.streak_days} يوم</span>
+          <span className="inline-flex items-center gap-1"><Award className="h-3.5 w-3.5" /> {(t.studentPages?.leaderboard?.levelLabel || 'مستوى {level}').replace('{level}', String(entry.current_level))}</span>
+          <span className="inline-flex items-center gap-1"><Flame className="h-3.5 w-3.5 text-orange-500" /> {entry.streak_days} {t.studentPages?.leaderboard?.daySuffix || 'يوم'}</span>
           {entry.halaqa_name && <span className="inline-flex items-center gap-1"><Target className="h-3.5 w-3.5" /> {entry.halaqa_name}</span>}
         </div>
       </div>
       <div className="text-left">
-        <p className="text-xl font-black text-amber-600">{entry.total_points.toLocaleString('ar-EG')}</p>
-        <p className="text-xs text-muted-foreground">نقطة</p>
+        <p className="text-xl font-black text-amber-600">{entry.total_points.toLocaleString(isAr ? 'ar-EG' : 'en-US')}</p>
+        <p className="text-xs text-muted-foreground">{t.studentPages?.leaderboard?.pointSuffix || 'نقطة'}</p>
       </div>
     </div>
   )

@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { PageLoadingSkeleton } from "@/components/ui/page-loading-skeleton"
+import { useI18n } from '@/lib/i18n/context'
 
 
 interface Competition {
@@ -26,22 +27,23 @@ interface Competition {
   min_verses?: number | null
 }
 
-const TYPE_CONFIG: Record<string, { label: string; icon: string; gradient: string }> = {
-  monthly:     { label: 'شهرية',    icon: '📅', gradient: 'from-blue-500 to-indigo-600' },
-  ramadan:     { label: 'رمضان',    icon: '🌙', gradient: 'from-violet-500 to-purple-600' },
-  tajweed:     { label: 'تجويد',    icon: '⭐', gradient: 'from-amber-500 to-orange-600' },
-  memorization:{ label: 'حفظ',      icon: '📖', gradient: 'from-emerald-500 to-teal-600' },
-  weekly:      { label: 'أسبوعية', icon: '🗓️', gradient: 'from-sky-500 to-cyan-600' },
-  special:     { label: 'خاصة',     icon: '🏆', gradient: 'from-rose-500 to-pink-600' },
+const TYPE_CONFIG: Record<string, { labelKey: string; icon: string; gradient: string }> = {
+  monthly:     { labelKey: 'monthly',    icon: '📅', gradient: 'from-blue-500 to-indigo-600' },
+  ramadan:     { labelKey: 'ramadan',    icon: '🌙', gradient: 'from-violet-500 to-purple-600' },
+  tajweed:     { labelKey: 'tajweed',    icon: '⭐', gradient: 'from-amber-500 to-orange-600' },
+  memorization:{ labelKey: 'memorization', icon: '📖', gradient: 'from-emerald-500 to-teal-600' },
+  weekly:      { labelKey: 'weekly',    icon: '🗓️', gradient: 'from-sky-500 to-cyan-600' },
+  special:     { labelKey: 'special',    icon: '🏆', gradient: 'from-rose-500 to-pink-600' },
 }
 
-const STATUS_CONFIG: Record<string, { label: string; cls: string; dot: string }> = {
-  upcoming: { label: 'قادمة',  cls: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',  dot: 'bg-blue-400' },
-  active:   { label: 'نشطة',   cls: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300', dot: 'bg-emerald-400 animate-pulse' },
-  ended:    { label: 'انتهت', cls: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', dot: 'bg-gray-400' },
+const STATUS_CONFIG: Record<string, { labelKey: string; cls: string; dot: string }> = {
+  upcoming: { labelKey: 'upcoming',  cls: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',  dot: 'bg-blue-400' },
+  active:   { labelKey: 'active',   cls: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300', dot: 'bg-emerald-400 animate-pulse' },
+  ended:    { labelKey: 'ended', cls: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', dot: 'bg-gray-400' },
 }
 
 export default function StudentLibraryCompetitionsPage() {
+  const { t, locale } = useI18n()
   const [competitions, setCompetitions] = useState<Competition[]>([])
   const [loading, setLoading]   = useState(true)
   const [filter, setFilter]     = useState<'all' | 'active' | 'upcoming' | 'ended'>('all')
@@ -75,10 +77,10 @@ export default function StudentLibraryCompetitionsPage() {
       const res = await fetch(`/api/student/competitions/${compId}/join`, { method: 'POST' })
       const data = await res.json()
       if (res.ok) {
-        showToast('تم التسجيل في المسابقة بنجاح! 🎉')
+        showToast(t.student.competitionsPage.toastSuccess || 'تم التسجيل في المسابقة بنجاح! 🎉')
         load()
       } else {
-        showToast(data.error || 'حدث خطأ', 'err')
+        showToast(data.error || t.student.competitionsPage.toastError || 'حدث خطأ', 'err')
       }
     } finally {
       setJoiningId(null)
@@ -120,19 +122,19 @@ export default function StudentLibraryCompetitionsPage() {
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur rounded-full px-4 py-1.5 text-sm font-bold">
               <Trophy className="w-4 h-4" />
-              مسابقات المقرأة
+              {t.student.competitionsPage.title || "مسابقات المقرأة"}
             </div>
-            <h1 className="text-3xl font-black">شارك واكسب التميّز!</h1>
-            <p className="text-sm text-white/80 max-w-md">سجّل في المسابقات وقدّم تلاوتك وانتظر التحكيم. الفائز يحصل على شهادة ونقاط مضاعفة.</p>
+            <h1 className="text-3xl font-black">{t.student.competitionsPage.subtitle || "شارك واكسب التميّز!"}</h1>
+            <p className="text-sm text-white/80 max-w-md">{t.student.competitionsPage.desc || "سجّل في المسابقات وقدّم تلاوتك وانتظر التحكيم. الفائز يحصل على شهادة ونقاط مضاعفة."}</p>
           </div>
           <div className="flex gap-3">
             <div className="bg-white/20 backdrop-blur rounded-2xl px-5 py-3 text-center min-w-[80px]">
               <p className="text-2xl font-black">{activeCount}</p>
-              <p className="text-xs text-white/80 mt-1">مسابقة نشطة</p>
+              <p className="text-xs text-white/80 mt-1">{t.student.competitionsPage.activeCompetitions || "مسابقة نشطة"}</p>
             </div>
             <div className="bg-white/20 backdrop-blur rounded-2xl px-5 py-3 text-center min-w-[80px]">
               <p className="text-2xl font-black">{joinedCount}</p>
-              <p className="text-xs text-white/80 mt-1">مشاركاتي</p>
+              <p className="text-xs text-white/80 mt-1">{t.student.competitionsPage.myParticipations || "مشاركاتي"}</p>
             </div>
           </div>
         </div>
@@ -151,10 +153,10 @@ export default function StudentLibraryCompetitionsPage() {
                 : 'bg-muted text-muted-foreground hover:bg-muted/70'
             )}
           >
-            {f === 'all' ? `الكل (${competitions.length})` :
-             f === 'active' ? `نشطة (${competitions.filter(c => c.status === 'active').length})` :
-             f === 'upcoming' ? `قادمة (${competitions.filter(c => c.status === 'upcoming').length})` :
-             `منتهية (${competitions.filter(c => c.status === 'ended').length})`}
+            {f === 'all' ? `${t.student.competitionsPage.filterAll || t.all || "الكل"} (${competitions.length})` :
+             f === 'active' ? `${t.student.competitionsPage.filterActive || "نشطة"} (${competitions.filter(c => c.status === 'active').length})` :
+             f === 'upcoming' ? `${t.student.competitionsPage.filterUpcoming || "قادمة"} (${competitions.filter(c => c.status === 'upcoming').length})` :
+             `${t.student.competitionsPage.filterEnded || "منتهية"} (${competitions.filter(c => c.status === 'ended').length})`}
           </button>
         ))}
       </div>
@@ -163,16 +165,19 @@ export default function StudentLibraryCompetitionsPage() {
       {filtered.length === 0 ? (
         <div className="border-2 border-dashed border-border rounded-3xl p-16 text-center">
           <Trophy className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-20" />
-          <p className="text-lg font-bold text-muted-foreground">لا توجد مسابقات {filter !== 'all' ? 'بهذا الفلتر' : ''}</p>
-          <p className="text-sm text-muted-foreground mt-1">ترقّب المسابقات القادمة من الإدارة!</p>
+          <p className="text-lg font-bold text-muted-foreground">
+            {t.student.competitionsPage.noCompetitions || "لا توجد مسابقات"} {filter !== 'all' ? (t.student.competitionsPage.noCompetitionsFilter || "بهذا الفلتر") : ''}
+          </p>
+          <p className="text-sm text-muted-foreground mt-1">{t.student.competitionsPage.stayTuned || "ترقّب المسابقات القادمة من الإدارة!"}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {filtered.map(comp => {
             const typeConf = TYPE_CONFIG[comp.type] || TYPE_CONFIG.special
             const statusConf = STATUS_CONFIG[comp.status] || STATUS_CONFIG.upcoming
-            const startDate = new Date(comp.start_date).toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' })
-            const endDate = new Date(comp.end_date).toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' })
+            const dateLocale = locale === 'ar' ? 'ar-EG' : 'en-US'
+            const startDate = new Date(comp.start_date).toLocaleDateString(dateLocale, { day: 'numeric', month: 'long', year: 'numeric' })
+            const endDate = new Date(comp.end_date).toLocaleDateString(dateLocale, { day: 'numeric', month: 'long', year: 'numeric' })
 
             return (
               <div key={comp.id} className={cn(
@@ -188,7 +193,7 @@ export default function StudentLibraryCompetitionsPage() {
                   {comp.is_featured && (
                     <div className="flex items-center gap-1.5 text-primary text-xs font-black">
                       <Star className="w-3.5 h-3.5 fill-primary" />
-                      مسابقة مميزة
+                      {t.student.competitionsPage.featuredCompetition || "مسابقة مميزة"}
                     </div>
                   )}
 
@@ -198,10 +203,10 @@ export default function StudentLibraryCompetitionsPage() {
                       <div className="flex flex-wrap items-center gap-2 mb-2">
                         <span className={cn('inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold', statusConf.cls)}>
                           <span className={cn('w-1.5 h-1.5 rounded-full', statusConf.dot)} />
-                          {statusConf.label}
+                          {t.student.competitionsPage.statuses[statusConf.labelKey as keyof typeof t.student.competitionsPage.statuses] || statusConf.labelKey}
                         </span>
                         <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-muted text-muted-foreground">
-                          {typeConf.icon} {typeConf.label}
+                          {typeConf.icon} {t.student.competitionsPage.types[typeConf.labelKey as keyof typeof t.student.competitionsPage.types] || typeConf.labelKey}
                         </span>
                       </div>
                       <h2 className="text-lg font-black text-foreground">{comp.title}</h2>
@@ -209,7 +214,7 @@ export default function StudentLibraryCompetitionsPage() {
                     {comp.has_joined && (
                       <div className="shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 text-xs font-bold">
                         <CheckCircle2 className="w-4 h-4" />
-                        مشترك
+                        {t.student.competitionsPage.registered || "مشترك"}
                       </div>
                     )}
                   </div>
@@ -227,18 +232,18 @@ export default function StudentLibraryCompetitionsPage() {
                     </span>
                     <span className="flex items-center gap-1 bg-muted px-3 py-1.5 rounded-full">
                       <Clock className="w-3.5 h-3.5" />
-                      حتى {endDate}
+                      {t.student.competitionsPage.until ? t.student.competitionsPage.until.replace('{date}', endDate) : `حتى ${endDate}`}
                     </span>
                     {comp.max_participants && (
                       <span className="flex items-center gap-1 bg-muted px-3 py-1.5 rounded-full">
                         <Users className="w-3.5 h-3.5" />
-                        الحد: {comp.max_participants}
+                        {t.student.competitionsPage.limitParticipants ? t.student.competitionsPage.limitParticipants.replace('{count}', String(comp.max_participants)) : `الحد: ${comp.max_participants}`}
                       </span>
                     )}
                     {comp.min_verses ? (
                       <span className="flex items-center gap-1 bg-muted px-3 py-1.5 rounded-full">
                         <BookOpen className="w-3.5 h-3.5" />
-                        {comp.min_verses} آية على الأقل
+                        {t.student.competitionsPage.minVersesRequired ? t.student.competitionsPage.minVersesRequired.replace('{count}', String(comp.min_verses)) : `${comp.min_verses} آية على الأقل`}
                       </span>
                     ) : null}
                   </div>
@@ -247,7 +252,7 @@ export default function StudentLibraryCompetitionsPage() {
                   {comp.prizes_description && (
                     <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/50 rounded-xl p-3">
                       <p className="text-sm font-bold text-amber-800 dark:text-amber-300">
-                        🏅 الجائزة: {comp.prizes_description}
+                        🏅 {t.student.competitionsPage.prize ? t.student.competitionsPage.prize.replace('{prize}', comp.prizes_description) : `الجائزة: ${comp.prizes_description}`}
                       </p>
                     </div>
                   )}
@@ -260,7 +265,7 @@ export default function StudentLibraryCompetitionsPage() {
                         className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm transition-colors"
                       >
                         <Mic className="w-4 h-4" />
-                        عرض وتقديم مشاركتي
+                        {t.student.competitionsPage.viewSubmitParticipation || "عرض وتقديم مشاركتي"}
                       </Link>
                     ) : comp.status === 'active' ? (
                       <button
@@ -271,15 +276,15 @@ export default function StudentLibraryCompetitionsPage() {
                         {joiningId === comp.id
                           ? <Loader2 className="w-4 h-4 animate-spin" />
                           : <Trophy className="w-4 h-4" />}
-                        سجّل في المسابقة
+                        {t.student.competitionsPage.registerBtn || "سجّل في المسابقة"}
                       </button>
                     ) : (
                       <Link
                         href={`/student/competitions/${comp.id}`}
                         className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-muted hover:bg-muted/70 text-foreground rounded-xl font-bold text-sm transition-colors"
                       >
-                        عرض التفاصيل
-                        <ChevronLeft className="w-4 h-4" />
+                        {t.student.competitionsPage.viewDetailsBtn || "عرض التفاصيل"}
+                        <ChevronLeft className={cn("w-4 h-4", locale === "ar" ? "" : "rotate-180")} />
                       </Link>
                     )}
                   </div>

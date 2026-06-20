@@ -4,13 +4,12 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
 import {
-  ArrowRight, BookOpen, CheckCircle2, ChevronDown, ChevronUp, Loader2,
-  Lock, Mic, Play, Target, Trophy, Unlock,
+  ArrowRight, BookOpen, CheckCircle2, ChevronDown, Loader2,
+  Lock, Mic, Play, Target, Trophy,
 } from "lucide-react"
 import { PathDetailSkeleton } from "@/components/ui/skeletons"
 import { Card } from "@/components/ui/card"
 
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import {
@@ -22,6 +21,7 @@ import {
 } from "@/components/ui/select"
 import AudioRecorder from "@/components/applicant/audio-recorder"
 import { cn } from "@/lib/utils"
+import { useI18n } from "@/lib/i18n/context"
 
 type ProgressRow = {
   id: string
@@ -59,11 +59,9 @@ type Recitation = {
   created_at: string
 }
 
-const TYPE_LABELS: Record<string, string> = {
-  juz: "جزء", surah: "سورة", hizb: "حزب", page: "صفحة", custom: "مخصصة",
-}
-
 export default function StudentMemorizationPathDetail() {
+  const { t, locale } = useI18n()
+  const isAr = locale === 'ar'
   const params = useParams<{ id: string }>()
   const router = useRouter()
   const pathId = params.id
@@ -169,7 +167,7 @@ export default function StudentMemorizationPathDetail() {
       )
       const data = await res.json()
       if (!res.ok) {
-        alert(data.error || "تعذّر إتمام الوحدة")
+        alert(data.error || t.memorizationPathsPage.unitCompleteError)
         return
       }
       setCompleteDialog(null)
@@ -181,6 +179,13 @@ export default function StudentMemorizationPathDetail() {
     }
   }
 
+  function formatDigits(n: number | string): string {
+    if (locale === 'ar') {
+      return String(n).replace(/\d/g, d => '\u0660\u0661\u0662\u0663\u0664\u0665\u0666\u0667\u0668\u0669'[Number(d)])
+    }
+    return String(n)
+  }
+
   if (loading) {
     return (
       <div className="max-w-3xl mx-auto space-y-8 pb-12">
@@ -190,7 +195,7 @@ export default function StudentMemorizationPathDetail() {
   }
   if (!path) {
     return (
-      <div className="p-6 text-center text-muted-foreground">المسار غير موجود.</div>
+      <div className="p-6 text-center text-muted-foreground">{t.memorizationPathsPage.pathNotFound}</div>
     )
   }
 
@@ -204,7 +209,7 @@ export default function StudentMemorizationPathDetail() {
         href="/student/memorization-paths"
         className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold text-muted-foreground hover:text-emerald-600 bg-muted/50 hover:bg-emerald-50 rounded-xl transition-colors w-fit border border-transparent hover:border-emerald-200"
       >
-        <ArrowRight className="h-4 w-4 rtl:rotate-180" /> رجوع للمسارات
+        <ArrowRight className="h-4 w-4 rtl:rotate-180" /> {t.memorizationPathsPage.backToPaths}
       </Link>
 
       {/* Hero Card */}
@@ -221,12 +226,12 @@ export default function StudentMemorizationPathDetail() {
                 </div>
                 {path.level && (
                   <span className="px-3 py-1 bg-muted rounded-lg text-xs font-bold text-muted-foreground border border-border/50">
-                    {path.level}
+                    {t.memorizationPathsPage.levels[path.level] || path.level}
                   </span>
                 )}
                 {path.require_audio && (
                   <span className="px-3 py-1 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 rounded-lg text-xs font-bold flex items-center gap-1.5 border border-amber-200 dark:border-amber-500/20">
-                    <Mic className="h-3.5 w-3.5" /> يتطلب تسجيل صوتي
+                    <Mic className="h-3.5 w-3.5" /> {t.memorizationPathsPage.requireAudioBadge}
                   </span>
                 )}
               </div>
@@ -244,12 +249,12 @@ export default function StudentMemorizationPathDetail() {
               <div className="flex flex-wrap gap-3">
                 <div className="flex items-center gap-2 bg-muted/50 px-4 py-2 rounded-xl border border-border/50">
                   <BookOpen className="w-4 h-4 text-emerald-600" />
-                  <span className="text-sm font-bold">{path.total_units} وحدة</span>
+                  <span className="text-sm font-bold">{t.memorizationPathsPage.unitsCount.replace('{count}', formatDigits(path.total_units))}</span>
                 </div>
                 {path.estimated_days && (
                   <div className="flex items-center gap-2 bg-muted/50 px-4 py-2 rounded-xl border border-border/50">
                     <Target className="w-4 h-4 text-emerald-600" />
-                    <span className="text-sm font-bold">{path.estimated_days} يوماً متوقع</span>
+                    <span className="text-sm font-bold">{t.memorizationPathsPage.estimatedDaysExpected.replace('{days}', formatDigits(path.estimated_days))}</span>
                   </div>
                 )}
               </div>
@@ -263,9 +268,9 @@ export default function StudentMemorizationPathDetail() {
                     <Lock className="w-8 h-8 text-muted-foreground/50" />
                   </div>
                   <div>
-                    <h3 className="font-black text-lg mb-1">جاهز للبدء؟</h3>
+                    <h3 className="font-black text-lg mb-1">{t.memorizationPathsPage.readyToStartTitle}</h3>
                     <p className="text-sm text-muted-foreground">
-                      اشترك في المسار لتبدأ الحفظ، وستفتح الوحدة الأولى مباشرة.
+                      {t.memorizationPathsPage.readyToStartDesc}
                     </p>
                   </div>
                   <Button 
@@ -274,17 +279,17 @@ export default function StudentMemorizationPathDetail() {
                     className="w-full gap-2 bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/20 hover:shadow-xl hover:shadow-emerald-600/30 transition-all rounded-xl h-12 text-base font-bold"
                   >
                     {enrolling ? <Loader2 className="h-5 w-5 animate-spin" /> : <Play className="h-5 w-5" />}
-                    ابدأ المسار الآن
+                    {t.memorizationPathsPage.enrollBtn}
                   </Button>
                 </div>
               ) : (
                 <div className="space-y-6">
                   <div>
                     <div className="flex justify-between items-end mb-3">
-                      <span className="text-sm font-bold text-muted-foreground">التقدم الإجمالي</span>
+                      <span className="text-sm font-bold text-muted-foreground">{t.memorizationPathsPage.progressLabel}</span>
                       <div className="text-end">
-                        <span className="text-2xl font-black text-foreground">{completed}</span>
-                        <span className="text-sm font-bold text-muted-foreground">/{total} وحدة</span>
+                        <span className="text-2xl font-black text-foreground">{formatDigits(completed)}</span>
+                        <span className="text-sm font-bold text-muted-foreground">/{formatDigits(total)} {t.memorizationPathsPage.unitsCount.replace('{count}', '')}</span>
                       </div>
                     </div>
                     <div className="w-full h-3 bg-muted rounded-full overflow-hidden">
@@ -296,7 +301,7 @@ export default function StudentMemorizationPathDetail() {
                       </div>
                     </div>
                     <div className="mt-2 text-end text-sm font-black text-emerald-600 dark:text-emerald-400">
-                      {pct}% مكتمل
+                      {formatDigits(pct)}% {t.memorizationPathsPage.enrolledStatusCompleted}
                     </div>
                   </div>
 
@@ -306,8 +311,8 @@ export default function StudentMemorizationPathDetail() {
                         <Trophy className="h-5 w-5 text-emerald-50" />
                       </div>
                       <div>
-                        <div className="font-black">مبارك الإتمام!</div>
-                        <div className="text-xs text-emerald-100 font-medium mt-0.5">لقد أتممت هذا المسار بنجاح.</div>
+                        <div className="font-black">{t.memorizationPathsPage.pathCompletedTitle}</div>
+                        <div className="text-xs text-emerald-100 font-medium mt-0.5">{t.memorizationPathsPage.pathCompletedDesc}</div>
                       </div>
                     </div>
                   )}
@@ -321,7 +326,7 @@ export default function StudentMemorizationPathDetail() {
       <div className="space-y-4">
         <h2 className="text-xl font-black flex items-center gap-2 mb-4">
           <BookOpen className="w-5 h-5 text-emerald-600" />
-          محتوى المسار
+          {t.memorizationPathsPage.pathContentTitle}
         </h2>
         
         {units.map(unit => {
@@ -366,25 +371,25 @@ export default function StudentMemorizationPathDetail() {
                 >
                   {isCompleted ? <CheckCircle2 className="h-6 w-6" />
                     : isLocked ? <Lock className="h-5 w-5" />
-                    : <span className="font-black text-lg">{unit.position}</span>}
+                    : <span className="font-black text-lg">{formatDigits(unit.position)}</span>}
                 </div>
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1.5">
                     <span className="text-xs font-black text-muted-foreground bg-muted px-2 py-0.5 rounded-md">
-                      الوحدة {unit.position}
+                      {t.memorizationPathsPage.unitLabel.replace('{pos}', formatDigits(unit.position))}
                     </span>
                     <span className="text-xs font-bold text-muted-foreground border border-border/50 px-2 py-0.5 rounded-md">
-                      {TYPE_LABELS[unit.unit_type] || unit.unit_type}
+                      {t.memorizationPathsPage.unitTypes[unit.unit_type] || unit.unit_type}
                     </span>
                     {isCompleted && (
                       <span className="bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-md text-xs font-bold flex items-center gap-1 border border-emerald-200 dark:border-emerald-500/20">
-                        <CheckCircle2 className="w-3 h-3" /> مكتمل
+                        <CheckCircle2 className="w-3 h-3" /> {t.memorizationPathsPage.unitCompleted}
                       </span>
                     )}
                     {status === "in_progress" && (
                       <span className="bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-md text-xs font-bold flex items-center gap-1 border border-amber-200 dark:border-amber-500/20">
-                        <Target className="w-3 h-3" /> قيد العمل
+                        <Target className="w-3 h-3" /> {t.memorizationPathsPage.unitInProgress}
                       </span>
                     )}
                   </div>
@@ -423,8 +428,8 @@ export default function StudentMemorizationPathDetail() {
                           <Target className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                         </div>
                         <div>
-                          <div className="text-xs text-muted-foreground font-bold">المدة المتوقعة</div>
-                          <div className="font-black">{unit.estimated_minutes} دقيقة</div>
+                          <div className="text-xs text-muted-foreground font-bold">{t.memorizationPathsPage.unitEstimatedTime}</div>
+                          <div className="font-black">{t.memorizationPathsPage.unitEstimatedTimeVal.replace('{mins}', formatDigits(unit.estimated_minutes))}</div>
                         </div>
                       </div>
                       
@@ -434,8 +439,8 @@ export default function StudentMemorizationPathDetail() {
                             <Trophy className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                           </div>
                           <div>
-                            <div className="text-xs text-muted-foreground font-bold">المحاولات السابقة</div>
-                            <div className="font-black">{unit.progress.attempts} محاولات</div>
+                            <div className="text-xs text-muted-foreground font-bold">{t.memorizationPathsPage.unitPreviousAttempts}</div>
+                            <div className="font-black">{t.memorizationPathsPage.unitPreviousAttemptsVal.replace('{attempts}', formatDigits(unit.progress.attempts))}</div>
                           </div>
                         </div>
                       ) : null}
@@ -445,7 +450,7 @@ export default function StudentMemorizationPathDetail() {
                       <div className="bg-background border border-border p-4 rounded-xl">
                         <div className="flex items-center gap-2 mb-3">
                           <Mic className="w-4 h-4 text-emerald-600" />
-                          <span className="font-bold text-sm">تسجيلك المعتمد لهذه الوحدة</span>
+                          <span className="font-bold text-sm">{t.memorizationPathsPage.unitApprovedAudio}</span>
                         </div>
                         <audio src={unit.progress.audio_url} controls className="w-full h-10" />
                       </div>
@@ -458,7 +463,7 @@ export default function StudentMemorizationPathDetail() {
                           className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-lg shadow-emerald-600/20"
                         >
                           <CheckCircle2 className="h-5 w-5" />
-                          إتمام الوحدة
+                          {t.memorizationPathsPage.completeUnitBtn}
                         </Button>
                       )}
                       {isCompleted && (
@@ -468,7 +473,7 @@ export default function StudentMemorizationPathDetail() {
                           className="gap-2 rounded-xl bg-background"
                         >
                           <Mic className="h-4 w-4" />
-                          تحديث التسجيل
+                          {t.memorizationPathsPage.updateRecordingBtn}
                         </Button>
                       )}
                     </div>
@@ -484,12 +489,12 @@ export default function StudentMemorizationPathDetail() {
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>
-              إتمام الوحدة: {completeDialog?.title}
+              {t.memorizationPathsPage.completeUnitDialogTitle.replace('{title}', completeDialog?.title || "")}
             </DialogTitle>
             <DialogDescription>
               {path.require_audio
-                ? "يلزم تسجيل صوتي قبل إتمام الوحدة — سجّل تسجيلاً جديداً أو اربط تسجيلاً سابقاً."
-                : "يمكنك تسجيل صوت لإثبات الحفظ أو ربط تسجيل سابق (اختياري)، ثم اضغط إتمام."}
+                ? t.memorizationPathsPage.completeUnitDialogDesc
+                : t.memorizationPathsPage.completeUnitDialogDescOptional}
             </DialogDescription>
           </DialogHeader>
 
@@ -503,7 +508,7 @@ export default function StudentMemorizationPathDetail() {
                   (tab === "record" ? "bg-background shadow font-semibold" : "text-muted-foreground")
                 }
               >
-                <Mic className="h-3.5 w-3.5 inline-block ms-1" /> تسجيل جديد
+                <Mic className="h-3.5 w-3.5 inline-block ms-1" /> {t.memorizationPathsPage.newRecordTab}
               </button>
               <button
                 type="button"
@@ -513,7 +518,7 @@ export default function StudentMemorizationPathDetail() {
                   (tab === "link" ? "bg-background shadow font-semibold" : "text-muted-foreground")
                 }
               >
-                <Target className="h-3.5 w-3.5 inline-block ms-1" /> ربط تلاوة سابقة
+                <Target className="h-3.5 w-3.5 inline-block ms-1" /> {t.memorizationPathsPage.linkRecitationTab}
               </button>
             </div>
 
@@ -522,25 +527,25 @@ export default function StudentMemorizationPathDetail() {
                 value={audioUrl}
                 onChange={setAudioUrl}
                 maxSeconds={600}
-                label="سجّل تلاوة الوحدة"
+                label={t.memorizationPathsPage.recordNewAudioLabel}
               />
             ) : (
               <div className="space-y-2">
                 <p className="text-xs text-muted-foreground">
-                  اختر إحدى تسجيلاتك السابقة لربطها بهذه الوحدة:
+                  {t.memorizationPathsPage.linkPreviousRecitationDesc}
                 </p>
                 {recitationsLoading ? (
                   <div className="flex items-center gap-2 text-muted-foreground text-sm py-3">
-                    <Loader2 className="h-4 w-4 animate-spin" /> جاري التحميل...
+                    <Loader2 className="h-4 w-4 animate-spin" /> {t.common?.loading || t.loading || "Loading..."}
                   </div>
                 ) : recitations.length === 0 ? (
                   <p className="text-sm text-muted-foreground">
-                    لا توجد تسجيلات سابقة لربطها — استخدم التسجيل المباشر بدلاً من ذلك.
+                    {t.memorizationPathsPage.noPreviousRecitations}
                   </p>
                 ) : (
                   <Select value={linkRecitationId} onValueChange={setLinkRecitationId}>
                     <SelectTrigger>
-                      <SelectValue placeholder="اختر تسجيلاً..." />
+                      <SelectValue placeholder={t.memorizationPathsPage.selectRecitationPlaceholder} />
                     </SelectTrigger>
                     <SelectContent>
                       {recitations.slice(0, 50).map(r => (
@@ -548,7 +553,7 @@ export default function StudentMemorizationPathDetail() {
                           {r.surah_name || `سورة ${r.surah_number || ""}`}
                           {r.ayah_from ? ` — آية ${r.ayah_from}${r.ayah_to ? `-${r.ayah_to}` : ""}` : ""}
                           {" — "}
-                          {new Date(r.created_at).toLocaleDateString("ar-EG")}
+                          {new Date(r.created_at).toLocaleDateString(locale === 'ar' ? 'ar-SA' : 'en-US')}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -565,7 +570,7 @@ export default function StudentMemorizationPathDetail() {
           </div>
 
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setCompleteDialog(null)}>إلغاء</Button>
+            <Button variant="ghost" onClick={() => setCompleteDialog(null)}>{t.memorizationPathsPage.cancelBtn}</Button>
             <Button
               onClick={submitComplete}
               disabled={
@@ -576,7 +581,7 @@ export default function StudentMemorizationPathDetail() {
               className="gap-2"
             >
               {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
-              تأكيد الإتمام
+              {t.memorizationPathsPage.confirmCompleteBtn}
             </Button>
           </DialogFooter>
         </DialogContent>

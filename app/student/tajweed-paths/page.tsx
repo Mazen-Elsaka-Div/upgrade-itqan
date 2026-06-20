@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import {
-  GraduationCap, ChevronRight, CheckCircle2, Loader2, Pause, Search, Lock, Target, Play,
+  GraduationCap, ChevronRight, CheckCircle2, Pause, Search, Lock,
 } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -63,6 +63,13 @@ export default function StudentTajweedPathsPage() {
   }
   useEffect(() => { load() }, [])
 
+  function formatDigits(n: number | string): string {
+    if (locale === 'ar') {
+      return String(n).replace(/\d/g, d => '\u0660\u0661\u0662\u0663\u0664\u0665\u0666\u0667\u0668\u0669'[Number(d)])
+    }
+    return String(n)
+  }
+
   const filteredAll = paths.filter(p => {
     const matchesSearch =
       !search.trim() ||
@@ -83,13 +90,21 @@ export default function StudentTajweedPathsPage() {
         <div className="relative z-10 space-y-4 max-w-2xl text-center md:text-start mx-auto md:mx-0">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 text-xs font-bold rounded-full bg-white/10 backdrop-blur-md border border-white/20 shadow-sm mx-auto md:mx-0">
             <GraduationCap className="w-4 h-4 text-emerald-200" />
-            <span className="text-emerald-50">إتقان التلاوة والأحكام</span>
+            <span className="text-emerald-50">{isAr ? "إتقان التلاوة والأحكام" : "Mastery of Recitation & Rules"}</span>
           </div>
           <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
-            مسارات <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-200 to-emerald-50">التجويد</span>
+            {isAr ? (
+              <>
+                مسارات <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-200 to-emerald-50">التجويد</span>
+              </>
+            ) : (
+              <>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-200 to-emerald-50">Tajweed</span> Paths
+              </>
+            )}
           </h1>
           <p className="text-emerald-100/90 text-base sm:text-lg font-medium leading-relaxed max-w-xl mx-auto md:mx-0">
-            {tp.studentSubtitleTajweed || "تدرج في تعلم أحكام التجويد من التأسيس حتى الإتقان"}
+            {tp.studentSubtitleTajweed || (isAr ? "تدرج في تعلم أحكام التجويد من التأسيس حتى الإتقان" : "Gradually learn tajweed rules from foundation to mastery")}
           </p>
         </div>
       </div>
@@ -112,24 +127,24 @@ export default function StudentTajweedPathsPage() {
               value="enrolled" 
               className="data-[state=active]:bg-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-md rounded-xl px-6 py-2.5 font-bold transition-all"
             >
-              {tp.tabs.myPaths} ({enrolled.length})
+              {tp.tabs?.myPaths} ({formatDigits(enrolled.length)})
             </TabsTrigger>
             <TabsTrigger 
               value="browse"
               className="data-[state=active]:bg-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-md rounded-xl px-6 py-2.5 font-bold transition-all"
             >
-              {tp.tabs.browse} ({paths.length})
+              {tp.tabs?.browse} ({formatDigits(paths.length)})
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="browse" className="m-0 sm:w-72 mt-2 sm:mt-0">
             <div className="relative group">
-              <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-emerald-500 transition-colors" />
+              <Search className={cn("absolute top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-emerald-500 transition-colors", isAr ? "right-3" : "left-3")} />
               <Input
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 placeholder={tp.searchPlaceholder}
-                className="pe-10 bg-muted/50 border-transparent focus:bg-background focus:border-emerald-500 rounded-xl h-10 transition-all"
+                className={cn("bg-muted/50 border-transparent focus:bg-background focus:border-emerald-500 rounded-xl h-10 transition-all", isAr ? "pe-10" : "ps-10")}
               />
             </div>
           </TabsContent>
@@ -143,26 +158,26 @@ export default function StudentTajweedPathsPage() {
               <div className="w-20 h-20 bg-emerald-50 dark:bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-5">
                 <GraduationCap className="w-10 h-10 text-emerald-600/50 dark:text-emerald-400/50" />
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-2">لم تشترك في أي مسار بعد</h3>
+              <h3 className="text-xl font-bold text-foreground mb-2">{isAr ? "لم تشترك في أي مسار بعد" : "You haven't joined any paths yet"}</h3>
               <p className="text-muted-foreground max-w-sm mx-auto">
                 {tp.emptyEnrolled}
               </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-start *:w-full">
-              {enrolled.map(p => <EnrolledCard key={p.id} path={p} />)}
+              {enrolled.map(p => <EnrolledCard key={p.id} path={p} formatDigits={formatDigits} tp={tp} />)}
             </div>
           )}
         </TabsContent>
 
         <TabsContent value="browse" className="mt-0 outline-none space-y-6">
           <div className="sm:hidden relative group">
-            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-emerald-500 transition-colors" />
+            <Search className={cn("absolute top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-emerald-500 transition-colors", isAr ? "right-3" : "left-3")} />
             <Input
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder={tp.searchPlaceholder}
-              className="pe-10 bg-card border-border focus:border-emerald-500 rounded-xl h-11 transition-all shadow-sm"
+              className={cn("pe-10 bg-card border-border focus:border-emerald-500 rounded-xl h-11 transition-all shadow-sm", isAr ? "pe-10" : "ps-10")}
             />
           </div>
 
@@ -177,7 +192,7 @@ export default function StudentTajweedPathsPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-start *:w-full">
-              {filteredAll.map(p => <BrowseCard key={p.id} path={p} />)}
+              {filteredAll.map(p => <BrowseCard key={p.id} path={p} formatDigits={formatDigits} tp={tp} />)}
             </div>
           )}
         </TabsContent>
@@ -208,9 +223,7 @@ function Loading() {
   )
 }
 
-function EnrolledCard({ path }: { path: Path }) {
-  const { t } = useI18n()
-  const tp = (t as any).tajweedPaths
+function EnrolledCard({ path, formatDigits, tp }: { path: Path, formatDigits: (n: number | string) => string, tp: any }) {
   const completed = path.stages_completed || 0
   const total = path.total_stages || 1
   const pct = Math.round((completed / total) * 100)
@@ -225,11 +238,11 @@ function EnrolledCard({ path }: { path: Path }) {
         </div>
         {path.enrollment_status === "completed" ? (
           <div className="bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-sm border border-emerald-200 dark:border-emerald-500/20">
-            <CheckCircle2 className="w-3.5 h-3.5" /> {tp.statuses.completed}
+            <CheckCircle2 className="w-3.5 h-3.5" /> {tp.statuses?.completed}
           </div>
         ) : path.enrollment_status === "paused" ? (
           <div className="bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-sm border border-amber-200 dark:border-amber-500/20">
-            <Pause className="w-3.5 h-3.5" /> {tp.statuses.paused}
+            <Pause className="w-3.5 h-3.5" /> {tp.statuses?.paused}
           </div>
         ) : null}
       </div>
@@ -243,20 +256,20 @@ function EnrolledCard({ path }: { path: Path }) {
 
       <div className="flex flex-wrap gap-2 mb-6">
         <span className="px-3 py-1 bg-muted rounded-lg text-xs font-bold text-muted-foreground border border-border/50">
-          {tp.levels[path.level] || path.level}
+          {tp.levels?.[path.level] || path.level}
         </span>
         <span className="px-3 py-1 bg-emerald-50 dark:bg-emerald-500/10 rounded-lg text-xs font-bold text-emerald-700 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-500/20">
-          {path.total_stages} {tp.metadata.stagesUnit}
+          {formatDigits(path.total_stages)} {tp.metadata?.stagesUnit}
         </span>
       </div>
 
       <div className="mt-auto pt-4 border-t border-border/50 space-y-3">
         <div className="flex justify-between items-end">
           <div>
-            <span className="block text-xs font-bold text-muted-foreground mb-1">{tp.metadata.progress}</span>
-            <span className="text-2xl font-black text-foreground leading-none">{completed}<span className="text-base text-muted-foreground font-bold">/{total}</span></span>
+            <span className="block text-xs font-bold text-muted-foreground mb-1">{tp.metadata?.progress}</span>
+            <span className="text-2xl font-black text-foreground leading-none">{formatDigits(completed)}<span className="text-base text-muted-foreground font-bold">/{formatDigits(total)}</span></span>
           </div>
-          <span className="text-emerald-600 dark:text-emerald-400 font-black bg-emerald-50 dark:bg-emerald-500/10 px-2 py-1 rounded-md text-sm">{pct}%</span>
+          <span className="text-emerald-600 dark:text-emerald-400 font-black bg-emerald-50 dark:bg-emerald-500/10 px-2 py-1 rounded-md text-sm">{formatDigits(pct)}%</span>
         </div>
         <div className="w-full h-2.5 bg-muted rounded-full overflow-hidden">
           <div 
@@ -278,19 +291,17 @@ function EnrolledCard({ path }: { path: Path }) {
         )}
       >
         {pct === 100
-          ? tp.actions.review
+          ? tp.actions?.review
           : pct > 0
-            ? tp.actions.continueLearning
-            : tp.actions.start}
+            ? tp.actions?.continueLearning
+            : tp.actions?.start}
         <ChevronRight className="w-5 h-5 rtl:rotate-180" />
       </Link>
     </div>
   )
 }
 
-function BrowseCard({ path }: { path: Path }) {
-  const { t } = useI18n()
-  const tp = (t as any).tajweedPaths
+function BrowseCard({ path, formatDigits, tp }: { path: Path, formatDigits: (n: number | string) => string, tp: any }) {
   return (
     <div className="group bg-card rounded-3xl border border-border/60 p-6 flex flex-col hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300">
       <div className="flex items-start gap-4 mb-4">
@@ -308,10 +319,10 @@ function BrowseCard({ path }: { path: Path }) {
 
       <div className="flex flex-wrap gap-2 mb-4">
         <span className="px-2.5 py-1 bg-muted rounded-md text-xs font-bold text-muted-foreground">
-          {tp.levels[path.level] || path.level}
+          {tp.levels?.[path.level] || path.level}
         </span>
         <span className="px-2.5 py-1 bg-emerald-50 dark:bg-emerald-500/10 rounded-md text-xs font-bold text-emerald-700 dark:text-emerald-400">
-          {path.total_stages} {tp.metadata.stagesUnit}
+          {formatDigits(path.total_stages)} {tp.metadata?.stagesUnit}
         </span>
       </div>
 
@@ -324,7 +335,7 @@ function BrowseCard({ path }: { path: Path }) {
       {path.estimated_days && (
         <div className="mt-auto mb-5 flex items-center gap-2 text-sm font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 px-3 py-2 rounded-lg border border-amber-100 dark:border-amber-500/20 w-fit">
           <div className="w-2 h-2 rounded-full bg-amber-500" />
-          {tp.metadata.estimatedDaysLabel}: {path.estimated_days} {tp.metadata.daysSuffix}
+          {tp.metadata?.estimatedDaysLabel}: {formatDigits(path.estimated_days)} {tp.metadata?.daysSuffix}
         </div>
       )}
 
@@ -332,7 +343,7 @@ function BrowseCard({ path }: { path: Path }) {
         href={`/student/tajweed-paths/${path.id}`}
         className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold bg-muted/50 hover:bg-emerald-600 text-foreground hover:text-white transition-all duration-300 border border-border hover:border-transparent mt-auto"
       >
-        {path.enrollment_id ? tp.actions.continueLearning : tp.actions.start}
+        {path.enrollment_id ? tp.actions?.continueLearning : tp.actions?.start}
         <ChevronRight className="w-5 h-5 rtl:rotate-180" />
       </Link>
     </div>

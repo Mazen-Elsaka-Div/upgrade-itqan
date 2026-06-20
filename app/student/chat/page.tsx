@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
-import { Loader2, Send, MessageSquare, BookOpen, Link2, Trash2, Edit2, MoreVertical } from "lucide-react"
+import { Loader2, Send, MessageSquare, Trash2, Edit2 } from "lucide-react"
 import { useI18n } from "@/lib/i18n/context"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -249,7 +249,6 @@ function StudentChatInner() {
             })
         })
 
-        const previousText = messageText;
         scrollToBottom()
 
         try {
@@ -304,7 +303,7 @@ function StudentChatInner() {
     }
 
     const handleDeleteMessage = async (msgId: string) => {
-        if (!activeConv || !confirm(isAr ? "هل أنت متأكد من حذف هذه الرسالة؟" : "Are you sure you want to delete this message?")) return
+        if (!activeConv || !confirm(t.sessionsPage.messageDeleteConfirmation)) return
         setMessages(p => p.filter(m => m.id !== msgId))
         try {
             await fetch(`/api/conversations/${activeConv.id}/messages/${msgId}`, { method: "DELETE" })
@@ -312,7 +311,7 @@ function StudentChatInner() {
     }
 
     const handleDeleteConversation = async () => {
-        if (!activeConv || !confirm(isAr ? "هل أنت متأكد من حذف هذه المحادثة نهائياً لكلا الطرفين؟" : "Are you sure you want to permanently delete this conversation for both parties?")) return
+        if (!activeConv || !confirm(t.sessionsPage.conversationDeleteConfirmation)) return
         setDeletingConvId(activeConv.id)
         try {
             await fetch(`/api/conversations/${activeConv.id}`, { method: "DELETE" })
@@ -371,7 +370,7 @@ function StudentChatInner() {
                             // Show success message
                             toast({
                                 title: isAr ? "نجاح" : "Success",
-                                description: isAr ? "تم إرسال التذكرة بنجاح." : "Ticket sent successfully."
+                                description: t.sessionsPage.ticketSuccessToast
                             });
                         }
                     }
@@ -413,7 +412,7 @@ function StudentChatInner() {
                         {t.student.messagesTitle}
                     </h1>
                     <p className="text-sm text-muted-foreground mt-1">
-                        {t.student.chatDescription || "يمكنك هنا قراءة الرسائل والملاحظات التي يرسلها لك المقرئ بخصوص تلاوتك."}
+                        {t.student.chatDescription || (isAr ? "يمكنك هنا قراءة الرسائل والملاحظات التي يرسلها لك المقرئ بخصوص تلاوتك." : "Here you can read messages and notes sent by the reciter regarding your recitation.")}
                     </p>
                 </div>
                 <Button
@@ -421,7 +420,7 @@ function StudentChatInner() {
                     className="bg-primary hover:bg-primary/90 text-primary-foreground"
                 >
                     <MessageSquare className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
-                    {isAr ? "إنشاء تذكرة" : "Create Ticket"}
+                    {t.sessionsPage.ticketCreateBtn}
                 </Button>
             </div>
 
@@ -434,7 +433,7 @@ function StudentChatInner() {
                             className="rounded-full font-bold gap-2 px-6 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all text-sm h-full flex items-center"
                         >
                             <span className="text-xl font-light opacity-50 mb-0.5">⋮</span>
-                            {isAr ? "تذاكر الدعم" : "Support Tickets"}
+                            {t.sessionsPage.ticketListTitle}
                         </TabsTrigger>
                         <TabsTrigger 
                             value="messages" 
@@ -451,7 +450,7 @@ function StudentChatInner() {
                     <Card className="border-border w-full lg:w-1/3 flex flex-col h-full overflow-hidden shadow-sm">
                         <CardHeader className="pb-3 border-b border-border bg-muted/30">
                         <CardTitle className="text-base font-bold text-foreground/80">
-                                {activeTab === "messages" ? t.student.conversationsHeader : (isAr ? "قائمة التذاكر" : "Tickets List")}
+                                {activeTab === "messages" ? t.student.conversationsHeader : t.sessionsPage.ticketListTitle}
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="p-0 flex-1 overflow-y-auto">
@@ -471,7 +470,7 @@ function StudentChatInner() {
                                 <div className="p-8 text-center text-muted-foreground flex flex-col items-center">
                                     <MessageSquare className="w-10 h-10 text-muted-foreground/30 mb-2" />
                                     <p className="font-medium text-muted-foreground">
-                                        {activeTab === "messages" ? (t.student.noConversationsYet || (isAr ? "لا توجد رسائل حالياً." : "No messages currently.")) : (isAr ? "لا توجد تذاكر حالياً" : "No tickets yet")}
+                                        {activeTab === "messages" ? (t.student.noConversationsYet || (isAr ? "لا توجد رسائل حالياً." : "No messages currently.")) : t.sessionsPage.noTicketsYet}
                                     </p>
                                     <p className="text-xs text-muted-foreground/60 mt-1 text-center">
                                         {activeTab === "messages" ? (t.student.noMessagesDesc || (isAr ? "ستظهر هنا ملاحظات المقرئ أو أي رسائل متعلقة بتلاوتك." : "The reciter's notes or any messages related to your recitation will appear here.")) : ""}
@@ -483,7 +482,7 @@ function StudentChatInner() {
                                         const colorClass = avatarColors[idx % avatarColors.length]
                                         const isSelected = activeConv?.id === c.id
                                         const hasUnread = c.unread_count_student > 0
-                                        const name = c.is_ticket ? (isAr ? "فريق الدعم الفني" : "Technical Support") : (c.admin_id ? t.admin?.administration || "الإدارة" : (c.reader_name || t.student.certifiedReaderFallback))
+                                        const name = c.is_ticket ? t.sessionsPage.supportTeamName : (c.admin_id ? t.admin?.administration || "الإدارة" : (c.reader_name || t.student.certifiedReaderFallback))
 
                                         return (
                                             <button
@@ -507,7 +506,7 @@ function StudentChatInner() {
                                                             </p>
                                                             {c.is_ticket && (
                                                                 <span className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-700 dark:text-blue-400">
-                                                                    {isAr ? "تذكرة" : "Ticket"}
+                                                                    {t.sessionsPage.ticketBadge}
                                                                 </span>
                                                             )}
                                                         </div>
@@ -547,16 +546,16 @@ function StudentChatInner() {
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2 flex-wrap">
                                             <CardTitle className="text-base text-foreground truncate max-w-full">
-                                                {currentConv.is_ticket ? (isAr ? "فريق الدعم الفني" : "Technical Support") : (currentConv.admin_id ? (t.admin?.administration || "الإدارة") : (currentConv.reader_name || t.student.certifiedReaderFallback))}
+                                                {currentConv.is_ticket ? t.sessionsPage.supportTeamName : (currentConv.admin_id ? (t.admin?.administration || "الإدارة") : (currentConv.reader_name || t.student.certifiedReaderFallback))}
                                             </CardTitle>
                                             {currentConv.is_ticket && (
                                                 <span className="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded bg-blue-500/10 text-blue-700 dark:text-blue-400">
-                                                    {isAr ? "تذكرة دعم" : "Support Ticket"}
+                                                    {t.sessionsPage.ticketBadge}
                                                 </span>
                                             )}
                                         </div>
                                         <p className="text-xs text-muted-foreground">
-                                            {currentConv.is_ticket ? (isAr ? "دعم المستفيدين والمساعدة" : "Help and Support") : (currentConv.admin_id ? "إدارة المنصة" : t.student.certifiedReaderFallback)}
+                                            {currentConv.is_ticket ? t.sessionsPage.supportTeamDesc : (currentConv.admin_id ? (isAr ? "إدارة المنصة" : "Platform Admin") : t.student.certifiedReaderFallback)}
                                         </p>
                                     </div>
                                     {!currentConv.is_ticket && (
@@ -595,7 +594,7 @@ function StudentChatInner() {
                                         </div>
                                     ) : (
                                         <>
-                                            {messages.map((msg, idx) => {
+                                            {messages.map((msg) => {
                                                 const isMe = msg.sender_id === currentUserId
                                                 return (
                                                     <div
@@ -648,7 +647,6 @@ function StudentChatInner() {
                                                                     <span>{new Date(msg.created_at).toLocaleTimeString(isAr ? "ar-SA" : "en-US", { hour: "2-digit", minute: "2-digit" })}</span>
                                                                     {isMe && (
                                                                         <span className="flex items-center">
-                                                                            {/* Simulating read status since the schema doesn't explicitly have it per message */}
                                                                             <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                                                 <path d="M4 12.89L9.11 18L20 7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
                                                                                 <path d="M4 7.89L9.11 13" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-40" />
@@ -672,7 +670,7 @@ function StudentChatInner() {
                                 <div className="p-4 border-t border-border bg-card">
                                     {currentConv.is_ticket && (currentConv.ticket_status === 'closed' || currentConv.ticket_status === 'resolved') ? (
                                         <div className="text-center p-3 bg-muted text-muted-foreground rounded-xl text-sm border border-border">
-                                            {isAr ? "تم إغلاق هذه التذكرة. يمكنك إنشاء تذكرة جديدة إذا كان لديك استفسار آخر." : "This ticket is closed. You can create a new ticket if you have another inquiry."}
+                                            {t.sessionsPage.ticketClosedMsg}
                                         </div>
                                     ) : (
                                         <>
@@ -680,10 +678,10 @@ function StudentChatInner() {
                                                 <div className="flex items-center justify-between bg-accent/10 text-accent p-2 rounded-lg text-xs mb-2 border border-accent/20">
                                                     <div className="flex items-center gap-2">
                                                         <Edit2 className="w-3.5 h-3.5" />
-                                                        <span>{isAr ? "تعديل الرسالة..." : "Editing message..."}</span>
+                                                        <span>{t.sessionsPage.editingMessageLabel}</span>
                                                     </div>
                                                     <button onClick={() => { setEditingMessage(null); setMessageText("") }} className="hover:underline font-bold">
-                                                        {isAr ? "إلغاء" : "Cancel"}
+                                                        {t.sessionsPage.cancelEditBtn}
                                                     </button>
                                                 </div>
                                             )}
@@ -707,7 +705,7 @@ function StudentChatInner() {
                                                     className="h-11 w-11 shrink-0 bg-accent hover:bg-accent/90 text-accent-foreground rounded-xl shadow-sm"
                                                     onClick={handleSend}
                                                     disabled={!messageText.trim() || sending}
-                                                    aria-label="إرسال"
+                                                    aria-label={isAr ? "إرسال" : "Send"}
                                                 >
                                                     {sending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5 rtl:-scale-x-100" />}
                                                 </Button>
@@ -719,7 +717,9 @@ function StudentChatInner() {
                         ) : (
                             <div className="h-full flex flex-col items-center justify-center text-muted-foreground bg-muted/10">
                                 <MessageSquare className="w-16 h-16 text-muted-foreground/20 mb-4" />
-                                <p className="font-medium text-muted-foreground">اختر محادثة للبدء في التواصل</p>
+                                <p className="font-medium text-muted-foreground">
+                                    {isAr ? "اختر محادثة للبدء في التواصل" : "Select a conversation to start chatting"}
+                                </p>
                             </div>
                         )}
                     </Card>
@@ -731,7 +731,7 @@ function StudentChatInner() {
                     <DialogHeader className="p-6 bg-muted/30 border-b border-border">
                         <DialogTitle className="text-xl font-bold text-foreground flex items-center gap-2">
                             <MessageSquare className="w-5 h-5 text-primary" />
-                            {isAr ? "إنشاء تذكرة دعم فني" : "Create Support Ticket"}
+                            {t.sessionsPage.ticketCreateBtn}
                         </DialogTitle>
                         <DialogDescription className="text-muted-foreground text-sm mt-1.5">
                             {isAr ? "يرجى كتابة تفاصيل مشكلتك او استفسارك وسيتم الرد عليك في أقرب وقت متاح." : "Please describe your issue or inquiry, and we will get back to you as soon as possible."}
@@ -767,7 +767,7 @@ function StudentChatInner() {
                             onClick={() => setIsTicketDialogOpen(false)}
                             className="text-muted-foreground hover:bg-muted sm:mr-2"
                         >
-                            {isAr ? "إلغاء" : "Cancel"}
+                            {t.sessionsPage.cancelEditBtn}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

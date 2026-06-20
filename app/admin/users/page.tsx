@@ -187,7 +187,9 @@ export default function AdminUsersPage() {
       email: user.email, 
       password: "", 
       role: user.role, 
-      gender: user.gender || ""
+      gender: user.gender || "",
+      has_academy_access: user.has_academy_access || false,
+      has_quran_access: user.has_quran_access !== false
     })
     setIsEditUserOpen(true)
   }
@@ -221,7 +223,9 @@ export default function AdminUsersPage() {
               email: "", 
               password: "", 
               role: defaultRole, 
-              gender: ""
+              gender: "",
+              has_academy_access: false,
+              has_quran_access: true
             })
             setIsAddUserOpen(true)
           }}

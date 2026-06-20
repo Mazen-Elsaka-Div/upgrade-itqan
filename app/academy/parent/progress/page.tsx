@@ -59,7 +59,7 @@ export default function ParentProgressPage() {
   }, [])
 
   if (loading) {
-    return <div className="p-8 text-center">{isAr ? 'جاري التحميل...' : 'Loading...'}</div>
+    return <div className="p-8 text-center">{t.parentPages.progress.loading}</div>
   }
 
 
@@ -68,15 +68,13 @@ export default function ParentProgressPage() {
       <div className="space-y-2 pb-4 border-b border-border/50">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider mb-2">
           <Target className="w-4 h-4" />
-          {isAr ? "متابعة التقدم" : "Progress Tracking"}
+          {t.parentPages.progress.progressTracking}
         </div>
         <h1 className="text-3xl lg:text-4xl font-black tracking-tight text-foreground">
-          {isAr ? "التقدم والمستويات" : "Progress & Levels"}
+          {t.parentPages.progress.progressAndLevels}
         </h1>
         <p className="text-muted-foreground font-medium max-w-2xl">
-          {isAr
-            ? "نظرة شاملة ومقارنة على نسب إنجاز أبنائك في الدورات المختلفة ومعدلات نشاطهم الأسبوعية."
-            : "Comprehensive overview and comparison of your children's completion rates across courses and weekly activity rates."}
+          {t.parentPages.progress.progressDesc}
         </p>
       </div>
 
@@ -89,9 +87,9 @@ export default function ParentProgressPage() {
                 <BarChart3 className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <CardTitle className="text-xl font-bold">{isAr ? "مقارنة أداء الأبناء" : "Children Performance Comparison"}</CardTitle>
+                <CardTitle className="text-xl font-bold">{t.parentPages.progress.performanceComparison}</CardTitle>
                 <CardDescription className="font-medium mt-1">
-                  {isAr ? "مقارنة شاملة بين تقدم ونشاط أبنائك" : "Comprehensive comparison of your children's progress and activity"}
+                  {t.parentPages.progress.comparisonDesc}
                 </CardDescription>
               </div>
             </div>
@@ -101,7 +99,7 @@ export default function ParentProgressPage() {
             <div className="mb-8">
               <h4 className="text-sm font-bold text-muted-foreground uppercase mb-4 flex items-center gap-2">
                 <Trophy className="w-4 h-4 text-amber-500" />
-                {isAr ? "التقدم الإجمالي" : "Overall Progress"}
+                {t.parentPages.progress.overallProgress}
               </h4>
               <div className="space-y-4">
                 {progressData
@@ -157,7 +155,7 @@ export default function ParentProgressPage() {
             <div className="mb-8">
               <h4 className="text-sm font-bold text-muted-foreground uppercase mb-4 flex items-center gap-2">
                 <BookOpen className="w-4 h-4 text-blue-500" />
-                {isAr ? "عدد الدورات المكتملة" : "Completed Courses"}
+                {t.parentPages.progress.completedCourses}
               </h4>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                 {progressData.map((student) => {
@@ -172,7 +170,7 @@ export default function ParentProgressPage() {
                       <p className="text-2xl font-black text-blue-600 mt-1">
                         {completedCourses}<span className="text-sm text-muted-foreground font-medium">/{totalCourses}</span>
                       </p>
-                      <p className="text-xs text-muted-foreground">{isAr ? "دورة مكتملة" : "completed"}</p>
+                      <p className="text-xs text-muted-foreground">{t.parentPages.progress.completed}</p>
                     </div>
                   )
                 })}
@@ -183,7 +181,7 @@ export default function ParentProgressPage() {
             <div>
               <h4 className="text-sm font-bold text-muted-foreground uppercase mb-4 flex items-center gap-2">
                 <Activity className="w-4 h-4 text-emerald-500" />
-                {isAr ? "النشاط الأسبوعي (ساعات)" : "Weekly Activity (hours)"}
+                {t.parentPages.progress.weeklyActivityHours}
               </h4>
               <div className="flex items-end justify-center gap-8 h-32">
                 {progressData.map((student, idx) => {
@@ -205,7 +203,7 @@ export default function ParentProgressPage() {
                           style={{ height: `${height}px` }}
                         />
                         <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-sm font-bold">
-                          {totalHours}h
+                          {totalHours}{t.parentPages.progress.hoursSuffix}
                         </span>
                       </div>
                       <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
@@ -228,28 +226,28 @@ export default function ParentProgressPage() {
                   <p className="text-2xl font-black text-emerald-600">{
                     progressData.reduce((acc, s) => acc + (s.overallProgress >= 80 ? 1 : 0), 0)
                   }</p>
-                  <p className="text-xs text-muted-foreground">{isAr ? "متفوقين (80%+)" : "High Achievers"}</p>
+                  <p className="text-xs text-muted-foreground">{t.parentPages.progress.highAchievers}</p>
                 </div>
                 <div className="text-center p-4 rounded-xl bg-blue-50 dark:bg-blue-950/20">
                   <BookOpen className="w-6 h-6 text-blue-500 mx-auto mb-2" />
                   <p className="text-2xl font-black text-blue-600">{
                     progressData.reduce((acc, s) => acc + s.courses.length, 0)
                   }</p>
-                  <p className="text-xs text-muted-foreground">{isAr ? "إجمالي الدورات" : "Total Courses"}</p>
+                  <p className="text-xs text-muted-foreground">{t.parentPages.progress.totalCourses}</p>
                 </div>
                 <div className="text-center p-4 rounded-xl bg-amber-50 dark:bg-amber-950/20">
                   <Award className="w-6 h-6 text-amber-500 mx-auto mb-2" />
                   <p className="text-2xl font-black text-amber-600">{
                     progressData.reduce((acc, s) => acc + s.courses.filter((c: any) => c.progress === 100).length, 0)
                   }</p>
-                  <p className="text-xs text-muted-foreground">{isAr ? "دورات مكتملة" : "Completed"}</p>
+                  <p className="text-xs text-muted-foreground">{t.parentPages.progress.completed}</p>
                 </div>
                 <div className="text-center p-4 rounded-xl bg-purple-50 dark:bg-purple-950/20">
                   <Clock className="w-6 h-6 text-purple-500 mx-auto mb-2" />
                   <p className="text-2xl font-black text-purple-600">{
                     progressData.reduce((acc, s) => acc + s.weeklyActivity.reduce((a: number, c: number) => a + c, 0), 0)
-                  }h</p>
-                  <p className="text-xs text-muted-foreground">{isAr ? "ساعات هذا الأسبوع" : "Hours This Week"}</p>
+                  }{t.parentPages.progress.hoursSuffix}</p>
+                  <p className="text-xs text-muted-foreground">{t.parentPages.progress.hoursThisWeek}</p>
                 </div>
               </div>
             </div>
@@ -259,7 +257,7 @@ export default function ParentProgressPage() {
 
       <div className="space-y-12">
         {progressData.length === 0 && (
-          <div className="text-center text-muted-foreground p-8">{isAr ? "لا يوجد بيانات متاحة." : "No data available."}</div>
+          <div className="text-center text-muted-foreground p-8">{t.parentPages.progress.noDataAvailable}</div>
         )}
         {progressData.map(student => (
           <div key={student.id} className="space-y-6">
@@ -277,14 +275,14 @@ export default function ParentProgressPage() {
                   <div className="flex items-center gap-3">
                     <BookOpen className="w-5 h-5 text-primary" />
                     <div>
-                      <CardTitle className="text-lg font-bold">{isAr ? "التقدم في الدورات" : "Course Progress"}</CardTitle>
-                      <CardDescription className="font-medium text-xs mt-1">{isAr ? "نسب الإنجاز لكل دورة مسجلة" : "Completion rates for each enrolled course"}</CardDescription>
+                      <CardTitle className="text-lg font-bold">{t.parentPages.progress.courseProgress}</CardTitle>
+                      <CardDescription className="font-medium text-xs mt-1">{t.parentPages.progress.courseProgressDesc}</CardDescription>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent className="p-6 space-y-6">
                   {student.courses.length === 0 ? (
-                    <div className="text-center text-muted-foreground text-sm">التلميذ غير مسجل في أي دورة.</div>
+                    <div className="text-center text-muted-foreground text-sm">{t.parentPages.progress.notEnrolled}</div>
                   ) : student.courses.map((course: any, idx: number) => (
                     <div key={idx} className="space-y-2">
                       <div className="flex justify-between items-center text-sm">
@@ -310,8 +308,8 @@ export default function ParentProgressPage() {
                   <div className="flex items-center gap-3">
                     <TrendingUp className="w-5 h-5 text-amber-500" />
                     <div>
-                      <CardTitle className="text-lg font-bold">{isAr ? "النشاط الأسبوعي" : "Weekly Activity"}</CardTitle>
-                      <CardDescription className="font-medium text-xs mt-1">{isAr ? "بالساعات" : "In hours"}</CardDescription>
+                      <CardTitle className="text-lg font-bold">{t.parentPages.progress.weeklyActivity}</CardTitle>
+                      <CardDescription className="font-medium text-xs mt-1">{t.parentPages.progress.weeklyActivityDesc}</CardDescription>
                     </div>
                   </div>
                 </CardHeader>
@@ -320,8 +318,7 @@ export default function ParentProgressPage() {
                     {student.weeklyActivity.map((hours: number, i: number) => {
                       const max = Math.max(...student.weeklyActivity);
                       const height = max === 0 ? 0 : (hours / max) * 100;
-                      const daysAr = ['ح', 'ن', 'ث', 'ر', 'خ', 'ج', 'س'];
-                      const daysEn = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+                      const days = isAr ? ['ح', 'ن', 'ث', 'ر', 'خ', 'ج', 'س'] : ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
                       return (
                         <div key={i} className="flex flex-col items-center gap-2 flex-1 group">
                           <div className="w-full flex-1 flex items-end relative rounded-md overflow-hidden bg-muted/30">
@@ -330,19 +327,19 @@ export default function ParentProgressPage() {
                               style={{ height: `${height}%` }}
                             >
                               <span className="opacity-0 group-hover:opacity-100 absolute -top-8 left-1/2 -translate-x-1/2 bg-popover text-popover-foreground text-xs font-bold px-2 py-1 rounded shadow-lg transition-opacity pointer-events-none z-10 whitespace-nowrap">
-                                {hours} {isAr ? "س" : "h"}
+                                {hours} {t.parentPages.progress.hoursSuffix}
                               </span>
                             </div>
                           </div>
-                          <span className="text-[10px] font-bold text-muted-foreground uppercase">{isAr ? daysAr[i] : daysEn[i]}</span>
+                          <span className="text-[10px] font-bold text-muted-foreground uppercase">{days[i]}</span>
                         </div>
                       )
                     })}
                   </div>
                   <div className="mt-4 pt-4 border-t border-border/50 flex flex-col items-center">
-                    <p className="text-sm font-bold text-muted-foreground uppercase mb-1">{isAr ? "إجمالي الساعات" : "Total Hours"}</p>
+                    <p className="text-sm font-bold text-muted-foreground uppercase mb-1">{t.parentPages.progress.totalHours}</p>
                     <h4 className="text-3xl font-black text-foreground">
-                      {student.weeklyActivity.reduce((acc: number, curr: number) => acc + curr, 0)} <span className="text-base text-muted-foreground font-medium">{isAr ? "ساعة" : "hrs"}</span>
+                      {student.weeklyActivity.reduce((acc: number, curr: number) => acc + curr, 0)} <span className="text-base text-muted-foreground font-medium">{t.parentPages.progress.hoursShort}</span>
                     </h4>
                   </div>
                 </CardContent>

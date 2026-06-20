@@ -48,9 +48,9 @@ export default function StudentLearningPathPage() {
   }, [])
 
   const levelLabels = {
-    beginner: 'مبتدئ',
-    intermediate: 'متوسط',
-    advanced: 'متقدم'
+    beginner: t.studentPages?.path?.levels?.beginner || 'مبتدئ',
+    intermediate: t.studentPages?.path?.levels?.intermediate || 'متوسط',
+    advanced: t.studentPages?.path?.levels?.advanced || 'متقدم'
   }
 
   const levelColors = {
@@ -60,26 +60,26 @@ export default function StudentLearningPathPage() {
   }
 
   const subjectLabels: { [key: string]: string } = {
-    fiqh: 'الفقه',
-    aqeedah: 'العقيدة',
-    seerah: 'السيرة النبوية',
-    tafsir: 'التفسير',
-    tajweed: 'التجويد'
+    fiqh: t.studentPages?.path?.subjects?.fiqh || 'الفقه',
+    aqeedah: t.studentPages?.path?.subjects?.aqeedah || 'العقيدة',
+    seerah: t.studentPages?.path?.subjects?.seerah || 'السيرة النبوية',
+    tafsir: t.studentPages?.path?.subjects?.tafsir || 'التفسير',
+    tajweed: t.studentPages?.path?.subjects?.tajweed || 'التجويد'
   }
 
   const tabs = [
-    { id: 'all', label: 'الكل' },
-    { id: 'fiqh', label: 'الفقه' },
-    { id: 'aqeedah', label: 'العقيدة' },
-    { id: 'seerah', label: 'السيرة النبوية' },
-    { id: 'tafsir', label: 'التفسير' }
+    { id: 'all', label: t.studentPages?.path?.subjects?.all || 'الكل' },
+    { id: 'fiqh', label: t.studentPages?.path?.subjects?.fiqh || 'الفقه' },
+    { id: 'aqeedah', label: t.studentPages?.path?.subjects?.aqeedah || 'العقيدة' },
+    { id: 'seerah', label: t.studentPages?.path?.subjects?.seerah || 'السيرة النبوية' },
+    { id: 'tafsir', label: t.studentPages?.path?.subjects?.tafsir || 'التفسير' }
   ]
 
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[450px] space-y-4">
         <div className="w-12 h-12 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin" />
-        <p className="text-muted-foreground animate-pulse text-sm">جاري تحميل المسارات الأكاديمية...</p>
+        <p className="text-muted-foreground animate-pulse text-sm">{t.studentPages?.path?.loading}</p>
       </div>
     )
   }
@@ -105,13 +105,13 @@ export default function StudentLearningPathPage() {
         <div className="relative z-10 max-w-3xl">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-emerald-100 text-xs font-bold uppercase tracking-wider backdrop-blur-md mb-6">
             <Sparkles className="w-4 h-4 text-emerald-300" />
-            المسارات الأكاديمية المتكاملة
+            {t.studentPages?.path?.title}
           </div>
           <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-[1.15]">
-            ارتقِ بمعرفتك الشرعية في مسار منهجي متدرج
+            {t.studentPages?.path?.heroTitle}
           </h1>
           <p className="text-emerald-100/90 mt-5 text-lg leading-relaxed font-light max-w-2xl">
-            تعلم الفقه، العقيدة، السيرة والتفسير عبر مسارات دراسية منظمة، مرتبطة مباشرة بالدورات لتحصل على أفضل تجربة تعليمية.
+            {t.studentPages?.path?.heroDesc}
           </p>
         </div>
       </div>
@@ -138,9 +138,9 @@ export default function StudentLearningPathPage() {
       {myPaths.length > 0 && (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="flex items-center gap-3 border-r-4 border-emerald-600 pr-4">
-            <h2 className="text-2xl font-bold text-foreground">مساراتي قيد التعلم</h2>
+            <h2 className="text-2xl font-bold text-foreground">{t.studentPages?.path?.myPathsTitle}</h2>
             <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">
-              {myPaths.length} مسار
+              {myPaths.length} {t.studentPages?.path?.pathCountSuffix}
             </span>
           </div>
 
@@ -185,7 +185,7 @@ export default function StudentLearningPathPage() {
                     {/* Progress Info */}
                     <div className="space-y-2.5 bg-slate-50 dark:bg-slate-800/40 p-4 rounded-2xl border border-border/40">
                       <div className="flex justify-between text-xs font-bold">
-                        <span className="text-muted-foreground">نسبة الإنجاز</span>
+                        <span className="text-muted-foreground">{t.studentPages?.path?.progressLabel}</span>
                         <span className="text-emerald-600">{progressPercent}%</span>
                       </div>
                       <div className="h-2 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
@@ -195,7 +195,9 @@ export default function StudentLearningPathPage() {
                         />
                       </div>
                       <p className="text-[10px] text-muted-foreground/80 font-medium">
-                        أكملت {path.stages_completed || 0} من أصل {path.total_stages} مرحلة
+                        {(t.studentPages?.path?.completedStagesDetail || 'أكملت {completed} من أصل {total} مرحلة')
+                          .replace('{completed}', String(path.stages_completed || 0))
+                          .replace('{total}', String(path.total_stages))}
                       </p>
                     </div>
                   </div>
@@ -203,7 +205,7 @@ export default function StudentLearningPathPage() {
                   {/* Footer Action */}
                   <div className="bg-emerald-600/5 px-6 sm:px-8 py-4 flex justify-between items-center border-t border-emerald-600/10 group-hover:bg-emerald-600 group-hover:text-white transition-colors duration-300">
                     <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400 group-hover:text-white flex items-center gap-1 transition-colors">
-                      واصل التعلم الآن
+                      {t.studentPages?.path?.continueLearning}
                     </span>
                     <div className="w-8 h-8 rounded-full bg-emerald-600/10 group-hover:bg-white/20 flex items-center justify-center transition-colors">
                       <ChevronLeft className="w-4 h-4 text-emerald-700 dark:text-emerald-400 group-hover:text-white group-hover:-translate-x-0.5 transition-all" />
@@ -220,9 +222,9 @@ export default function StudentLearningPathPage() {
       {completedPaths.length > 0 && (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="flex items-center gap-3 border-r-4 border-emerald-600 pr-4">
-            <h2 className="text-2xl font-bold text-foreground">مسارات أكملتها</h2>
+            <h2 className="text-2xl font-bold text-foreground">{t.studentPages?.path?.completedPathsTitle}</h2>
             <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">
-              {completedPaths.length} مسار
+              {completedPaths.length} {t.studentPages?.path?.pathCountSuffix}
             </span>
           </div>
 
@@ -243,7 +245,7 @@ export default function StudentLearningPathPage() {
                     </div>
                     <span className="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-bold rounded-md bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
                       <Award className="w-3 h-3" />
-                      مكتمل
+                      {t.studentPages?.path?.statusCompleted}
                     </span>
                   </div>
 
@@ -261,14 +263,14 @@ export default function StudentLearningPathPage() {
                   <div className="flex items-center gap-2 bg-emerald-500/5 p-4 rounded-2xl border border-emerald-500/10">
                     <Award className="w-5 h-5 text-emerald-600 shrink-0" />
                     <p className="text-xs text-emerald-700 dark:text-emerald-400 font-semibold leading-relaxed">
-                      أكملت جميع المراحل · الشهادة متاحة في مركز الشهادات
+                      {t.studentPages?.path?.completedCertificateNotice}
                     </p>
                   </div>
                 </div>
 
                 <div className="bg-emerald-600/5 px-6 sm:px-8 py-4 flex justify-between items-center border-t border-emerald-600/10 group-hover:bg-emerald-600 group-hover:text-white transition-colors duration-300">
                   <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400 group-hover:text-white transition-colors">
-                    مراجعة المسار
+                    {t.studentPages?.path?.reviewPath}
                   </span>
                   <div className="w-8 h-8 rounded-full bg-emerald-600/10 group-hover:bg-white/20 flex items-center justify-center transition-colors">
                     <ChevronLeft className="w-4 h-4 text-emerald-700 dark:text-emerald-400 group-hover:text-white group-hover:-translate-x-0.5 transition-all" />
@@ -284,10 +286,12 @@ export default function StudentLearningPathPage() {
       <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100 fill-mode-both">
         <div className="flex items-center gap-3 border-r-4 border-emerald-600 pr-4">
           <h2 className="text-2xl font-bold text-foreground">
-            {activeTab === 'all' ? 'المسارات الأكاديمية المتاحة' : `مسارات ${subjectLabels[activeTab]} المتاحة`}
+            {activeTab === 'all' 
+              ? t.studentPages?.path?.availablePathsTitle 
+              : (t.studentPages?.path?.availablePathsSubjectTitle || 'مسارات {subject} المتاحة').replace('{subject}', subjectLabels[activeTab])}
           </h2>
           <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">
-            {availablePaths.length} مسار
+            {availablePaths.length} {t.studentPages?.path?.pathCountSuffix}
           </span>
         </div>
 
@@ -341,11 +345,11 @@ export default function StudentLearningPathPage() {
                     <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-xs text-muted-foreground font-semibold pt-2">
                       <span className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800/50 px-3 py-1.5 rounded-lg border border-border/50">
                         <BookOpen className="w-4 h-4 text-emerald-600" />
-                        {path.total_stages} مرحلة
+                        {path.total_stages} {t.studentPages?.path?.stageLabel}
                       </span>
                       <span className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800/50 px-3 py-1.5 rounded-lg border border-border/50">
                         <Clock className="w-4 h-4 text-emerald-600" />
-                        {path.estimated_days} ساعة
+                        {path.estimated_days} {t.studentPages?.path?.hourLabel}
                       </span>
                     </div>
                   </div>
@@ -354,13 +358,15 @@ export default function StudentLearningPathPage() {
                 {/* Footer Action */}
                 <div className="bg-slate-50 dark:bg-slate-900/50 px-6 sm:px-8 py-5 flex justify-between items-center border-t border-border/60">
                   <div className="flex flex-col">
-                    <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">التسجيل</span>
+                    <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">{t.studentPages?.path?.enrollmentLabel}</span>
                     <span className="text-sm font-extrabold text-emerald-600 dark:text-emerald-400">
-                      {path.enrollment_type === 'paid' ? `${path.price} ر.س` : 'مجاني بالكامل'}
+                      {path.enrollment_type === 'paid' 
+                        ? (t.studentPages?.path?.paidCurrency || '{price} ر.س').replace('{price}', String(path.price))
+                        : t.studentPages?.path?.freeBadge}
                     </span>
                   </div>
                   <div className="px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold group-hover:bg-emerald-500 group-hover:shadow-lg group-hover:shadow-emerald-600/20 transition-all flex items-center gap-1.5">
-                    استكشف المسار
+                    {t.studentPages?.path?.explorePath}
                     <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
                   </div>
                 </div>
@@ -372,9 +378,9 @@ export default function StudentLearningPathPage() {
             <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4">
               <BookOpen className="w-8 h-8 text-slate-400" />
             </div>
-            <h3 className="text-lg font-bold text-foreground">لا توجد مسارات متاحة</h3>
+            <h3 className="text-lg font-bold text-foreground">{t.studentPages?.path?.noPathsTitle}</h3>
             <p className="text-sm text-muted-foreground mt-2 max-w-md leading-relaxed">
-              عذراً، لا توجد حالياً مسارات أكاديمية متاحة ف�� هذا التخصص، أو أنك قد سجلت مسبقاً في كافة المسارات.
+              {t.studentPages?.path?.noPathsDesc}
             </p>
           </div>
         )}

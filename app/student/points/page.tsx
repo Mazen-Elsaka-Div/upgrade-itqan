@@ -7,6 +7,7 @@ import {
   BookOpen, CheckCircle, Mic, Target
 } from 'lucide-react'
 import Link from 'next/link'
+import { useI18n } from '@/lib/i18n/context'
 
 interface PointsData {
   total_points: number
@@ -57,22 +58,8 @@ const REASON_ICONS: Record<string, React.ElementType> = {
   badge_earned: Award,
 }
 
-const REASON_LABELS: Record<string, string> = {
-  recitation: 'تسجيل تلاوة',
-  mastered: 'إتقان تلاوة',
-  task: 'إنهاء مهمة',
-  lesson: 'درس',
-  streak: 'يوم Streak',
-  juz_complete: 'إنهاء جزء كامل',
-  course_complete: 'إنهاء دورة',
-  session_attend: 'حضور درس',
-  daily_login: 'تسجيل دخول يومي',
-  competition_win: 'فوز بمسابقة',
-  badge_earned: 'شارة جديدة',
-  admin_adjust: 'تعديل من الإدارة',
-}
-
 export default function StudentPointsPage() {
+  const { t, locale } = useI18n()
   const [data, setData] = useState<PointsData | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -93,6 +80,13 @@ export default function StudentPointsPage() {
     fetchPoints()
   }, [])
 
+  function formatDigits(n: number | string): string {
+    if (locale === 'ar') {
+      return String(n).replace(/\d/g, d => '\u0660\u0661\u0662\u0663\u0664\u0665\u0666\u0667\u0668\u0669'[Number(d)])
+    }
+    return String(n)
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -105,8 +99,8 @@ export default function StudentPointsPage() {
     return (
       <div className="text-center py-12 text-muted-foreground">
         <Star className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-        <p>لا توجد بيانات نقاط بعد</p>
-        <p className="text-sm mt-2">ابدأ بتسجيل تلاوة أو حفظ آيات لكسب النقاط!</p>
+        <p>{t.pointsPage.noDataYet}</p>
+        <p className="text-sm mt-2">{t.pointsPage.noDataDesc}</p>
       </div>
     )
   }
@@ -127,14 +121,14 @@ export default function StudentPointsPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <Star className="w-7 h-7 text-amber-500" />
-          نقاطي
+          {t.pointsPage.title}
         </h1>
         <Link
           href="/student/recitations"
           className="text-sm text-blue-600 hover:underline flex items-center gap-1"
         >
           <Trophy className="w-4 h-4" />
-          لوحة المتصدرين
+          {t.pointsPage.leaderboardLink}
         </Link>
       </div>
 
@@ -144,8 +138,8 @@ export default function StudentPointsPage() {
         <Card className={`${levelColors.bg} ${levelColors.border} border-2`}>
           <CardContent className="pt-6 text-center">
             <Star className="w-10 h-10 mx-auto mb-2 text-amber-500" />
-            <p className="text-4xl font-bold text-amber-600">{data.total_points.toLocaleString()}</p>
-            <p className="text-sm text-muted-foreground mt-1">نقطة</p>
+            <p className="text-4xl font-bold text-amber-600">{formatDigits(data.total_points)}</p>
+            <p className="text-sm text-muted-foreground mt-1">{t.pointsPage.pointLabel}</p>
           </CardContent>
         </Card>
 
@@ -154,7 +148,7 @@ export default function StudentPointsPage() {
           <CardContent className="pt-6 text-center">
             <TrendingUp className="w-10 h-10 mx-auto mb-2 text-blue-500" />
             <p className={`text-2xl font-bold ${levelColors.text}`}>{data.level_label}</p>
-            <p className="text-sm text-muted-foreground mt-1">المستوى الحالي</p>
+            <p className="text-sm text-muted-foreground mt-1">{t.pointsPage.currentLevelLabel}</p>
           </CardContent>
         </Card>
 
@@ -162,12 +156,12 @@ export default function StudentPointsPage() {
         <Card className={data.streak_multiplier_active ? 'ring-2 ring-orange-400' : ''}>
           <CardContent className="pt-6 text-center">
             <Flame className={`w-10 h-10 mx-auto mb-2 ${data.streak_multiplier_active ? 'text-orange-500' : 'text-gray-400'}`} />
-            <p className="text-4xl font-bold text-orange-600">{data.streak_days}</p>
+            <p className="text-4xl font-bold text-orange-600">{formatDigits(data.streak_days)}</p>
             <p className="text-sm text-muted-foreground mt-1">
-              يوم متواصل
+              {t.pointsPage.streakDaysLabel}
               {data.streak_multiplier_active && (
                 <span className="block text-orange-600 font-medium mt-1">
-                  نقاط مضاعفة ×1.5
+                  {t.pointsPage.doublePointsLabel}
                 </span>
               )}
             </p>
@@ -190,7 +184,7 @@ export default function StudentPointsPage() {
               />
             </div>
             <p className="text-sm text-muted-foreground text-center mt-2">
-              {data.points_to_next_level.toLocaleString()} نقطة للمستوى التالي
+              {t.pointsPage.pointsToNextLevel.replace('{points}', formatDigits(data.points_to_next_level))}
             </p>
           </CardContent>
         </Card>
@@ -202,7 +196,7 @@ export default function StudentPointsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
               <Zap className="w-5 h-5 text-amber-500" />
-              كيف تكسب النقاط
+              {t.pointsPage.howToEarnPoints}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -213,9 +207,9 @@ export default function StudentPointsPage() {
                   <div key={key} className="flex items-center justify-between p-2 rounded-lg bg-muted/30">
                     <div className="flex items-center gap-2">
                       <Icon className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-sm">{REASON_LABELS[key] || key}</span>
+                      <span className="text-sm">{t.pointsPage.reasons[key] || key}</span>
                     </div>
-                    <span className="font-bold text-amber-600">+{val}</span>
+                    <span className="font-bold text-amber-600">+{formatDigits(val)}</span>
                   </div>
                 )
               })}
@@ -224,7 +218,7 @@ export default function StudentPointsPage() {
               <div className="mt-3 p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
                 <p className="text-sm text-orange-700 dark:text-orange-400 font-medium">
                   <Flame className="w-4 h-4 inline ml-1" />
-                  نقاطك مضاعفة ×1.5 لأن عندك Streak أكثر من 7 أيام!
+                  {t.pointsPage.doublePointsActiveMsg}
                 </p>
               </div>
             )}
@@ -236,15 +230,15 @@ export default function StudentPointsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
               <Award className="w-5 h-5 text-purple-500" />
-              الشارات ({data.badges.length})
+              {t.pointsPage.badgesCount.replace('{count}', formatDigits(data.badges.length))}
             </CardTitle>
           </CardHeader>
           <CardContent>
             {data.badges.length === 0 ? (
               <div className="text-center py-4">
-                <p className="text-muted-foreground mb-2">لم تحصل على شارات بعد — اجمع نقاط أكثر!</p>
+                <p className="text-muted-foreground mb-2">{t.pointsPage.noBadgesYet}</p>
                 <Link href="/student/badges" className="text-sm text-blue-600 hover:underline">
-                  تصفح كل الشارات المتاحة
+                  {t.pointsPage.browseAllBadges}
                 </Link>
               </div>
             ) : (
@@ -262,11 +256,11 @@ export default function StudentPointsPage() {
                       <p className="font-medium text-sm">{b.badge_name}</p>
                       <p className="text-xs text-muted-foreground">{b.badge_description}</p>
                     </div>
-                    <span className="text-xs font-bold text-amber-600">+{b.points_awarded}</span>
+                    <span className="text-xs font-bold text-amber-600">+{formatDigits(b.points_awarded)}</span>
                   </div>
                 ))}
                 <Link href="/student/badges" className="block text-center text-sm text-blue-600 hover:underline mt-3">
-                  عرض كل الشارات
+                  {t.pointsPage.viewAllBadges}
                 </Link>
               </div>
             )}
@@ -279,12 +273,12 @@ export default function StudentPointsPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <TrendingUp className="w-5 h-5" />
-            سجل النقاط الأخير
+            {t.pointsPage.recentPointsLog}
           </CardTitle>
         </CardHeader>
         <CardContent>
           {data.log.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">لا توجد نشاطات بعد</p>
+            <p className="text-center text-muted-foreground py-8">{t.pointsPage.noActivitiesYet}</p>
           ) : (
             <div className="space-y-2">
               {data.log.map((entry) => {
@@ -295,7 +289,7 @@ export default function StudentPointsPage() {
                       <Icon className="w-5 h-5 text-muted-foreground" />
                       <div>
                         <p className="text-sm font-medium">
-                          {REASON_LABELS[entry.reason] || entry.reason}
+                          {t.pointsPage.reasons[entry.reason] || entry.reason}
                         </p>
                         {entry.description && (
                           <p className="text-xs text-muted-foreground">{entry.description}</p>
@@ -303,9 +297,9 @@ export default function StudentPointsPage() {
                       </div>
                     </div>
                     <div className="text-left">
-                      <span className="font-bold text-green-600">+{entry.points}</span>
+                      <span className="font-bold text-green-600">+{formatDigits(entry.points)}</span>
                       <p className="text-xs text-muted-foreground">
-                        {new Date(entry.created_at).toLocaleDateString('ar-SA')}
+                        {new Date(entry.created_at).toLocaleDateString(locale === 'ar' ? 'ar-SA' : 'en-US')}
                       </p>
                     </div>
                   </div>
@@ -320,26 +314,26 @@ export default function StudentPointsPage() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <Card>
           <CardContent className="pt-4 text-center">
-            <p className="text-2xl font-bold">{data.total_verses_memorized}</p>
-            <p className="text-xs text-muted-foreground">آيات محفوظة</p>
+            <p className="text-2xl font-bold">{formatDigits(data.total_verses_memorized)}</p>
+            <p className="text-xs text-muted-foreground">{t.pointsPage.statsMemorizedVerses}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4 text-center">
-            <p className="text-2xl font-bold">{data.total_verses_revised}</p>
-            <p className="text-xs text-muted-foreground">آيات مراجعة</p>
+            <p className="text-2xl font-bold">{formatDigits(data.total_verses_revised)}</p>
+            <p className="text-xs text-muted-foreground">{t.pointsPage.statsRevisedVerses}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4 text-center">
-            <p className="text-2xl font-bold">{data.longest_streak}</p>
-            <p className="text-xs text-muted-foreground">أطول Streak</p>
+            <p className="text-2xl font-bold">{formatDigits(data.longest_streak)}</p>
+            <p className="text-xs text-muted-foreground">{t.pointsPage.statsLongestStreak}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4 text-center">
-            <p className="text-2xl font-bold">{data.badges.length}</p>
-            <p className="text-xs text-muted-foreground">شارات</p>
+            <p className="text-2xl font-bold">{formatDigits(data.badges.length)}</p>
+            <p className="text-xs text-muted-foreground">{t.pointsPage.statsBadgesCount}</p>
           </CardContent>
         </Card>
       </div>

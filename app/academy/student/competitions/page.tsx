@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { PageLoadingSkeleton } from '@/components/ui/page-loading-skeleton'
 import { Trophy, Calendar, Users, Star, Clock, ChevronLeft, Loader2, Filter, Mic } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useI18n } from '@/lib/i18n/context'
 
 interface Competition {
   id: string
@@ -21,23 +22,25 @@ interface Competition {
   has_joined: boolean
 }
 
-const TYPE_CONFIG: Record<string, { label: string; icon: string; color: string }> = {
-  monthly: { label: 'مسابقة شهرية', icon: '📅', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
-  ramadan: { label: 'مسابقة رمضان', icon: '🌙', color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
-  tajweed: { label: 'مسابقة التجويد', icon: '⭐', color: 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400' },
-  memorization: { label: 'مسابقة الحفظ', icon: '📖', color: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
-  weekly: { label: 'مسابقة أسبوعية', icon: '🗓️', color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' },
-  special: { label: 'مسابقة خاصة', icon: '🏆', color: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' },
+const TYPE_CONFIG: Record<string, { labelKey: string; icon: string; color: string }> = {
+  monthly: { labelKey: 'monthly', icon: '📅', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
+  ramadan: { labelKey: 'ramadan', icon: '🌙', color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
+  tajweed: { labelKey: 'tajweed', icon: '⭐', color: 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400' },
+  memorization: { labelKey: 'memorization', icon: '📖', color: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
+  weekly: { labelKey: 'weekly', icon: '🗓️', color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' },
+  special: { labelKey: 'special', icon: '🏆', color: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' },
 }
 
-const STATUS_CONFIG: Record<string, { label: string; cls: string }> = {
-  upcoming: { label: 'قادمة', cls: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
-  active: { label: 'نشطة', cls: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
-  ended: { label: 'انتهت', cls: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' },
-  cancelled: { label: 'ملغاة', cls: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' },
+const STATUS_CONFIG: Record<string, { labelKey: string; cls: string }> = {
+  upcoming: { labelKey: 'upcoming', cls: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
+  active: { labelKey: 'active', cls: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
+  ended: { labelKey: 'ended', cls: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' },
+  cancelled: { labelKey: 'cancelled', cls: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' },
 }
 
 export default function StudentCompetitionsPage() {
+  const { t, locale } = useI18n()
+  const isAr = locale === 'ar'
   const [competitions, setCompetitions] = useState<Competition[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'active' | 'upcoming' | 'ended'>('all')
@@ -72,7 +75,7 @@ export default function StudentCompetitionsPage() {
         fetchCompetitions()
       } else {
         const data = await res.json()
-        alert(data.error || 'حدث خطأ')
+        alert(data.error || (t.student?.competitionsPage?.toastError || 'حدث خطأ'))
       }
     } finally {
       setJoiningId(null)
@@ -103,14 +106,17 @@ export default function StudentCompetitionsPage() {
           <div className="space-y-4 max-w-xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 text-xs font-bold rounded-full bg-white/20 backdrop-blur-md border border-white/20">
               <Trophy className="w-4 h-4 text-amber-200" />
-              <span>منصة المنافسات والتحديات</span>
+              <span>{t.student?.competitionsPage?.title || 'مسابقات المقرأة'}</span>
             </div>
             <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
-              تحدَّ نفسك، <br />
-              <span className="text-amber-200">وارتقِ بمستواك</span>
+              {isAr ? (
+                <>تحدَّ نفسك، <br /><span className="text-amber-200">وارتقِ بمستواك</span></>
+              ) : (
+                <>Challenge Yourself, <br /><span className="text-amber-200">Elevate Your Level</span></>
+              )}
             </h1>
             <p className="text-white/80 text-base sm:text-lg font-medium leading-relaxed">
-              شارك في المسابقات القرآنية والعلمية، واختبر حفظك وإتقانك، وتنافس مع زملائك للفوز بالجوائز القيمة والشارات المميزة.
+              {t.student?.competitionsPage?.desc || 'شارك في المسابقات القرآنية والعلمية، واختبر حفظك وإتقانك، وتنافس مع زملائك للفوز بالجوائز القيمة والشارات المميزة.'}
             </p>
           </div>
 
@@ -118,12 +124,12 @@ export default function StudentCompetitionsPage() {
             <div className="bg-white/10 backdrop-blur-md border border-white/20 p-5 rounded-2xl flex-1 md:w-36 flex flex-col items-center justify-center text-center">
               <Star className="w-8 h-8 text-amber-300 mb-2" />
               <span className="text-3xl font-black text-white mb-1">{activeCount}</span>
-              <span className="text-xs font-bold text-white/70">مسابقة نشطة</span>
+              <span className="text-xs font-bold text-white/70">{t.student?.competitionsPage?.activeCompetitions || 'مسابقة نشطة'}</span>
             </div>
             <div className="bg-white/10 backdrop-blur-md border border-white/20 p-5 rounded-2xl flex-1 md:w-36 flex flex-col items-center justify-center text-center">
               <Users className="w-8 h-8 text-amber-300 mb-2" />
               <span className="text-3xl font-black text-white mb-1">{myJoinedCount}</span>
-              <span className="text-xs font-bold text-white/70">مشاركاتي</span>
+              <span className="text-xs font-bold text-white/70">{t.student?.competitionsPage?.myParticipations || 'مشاركاتي'}</span>
             </div>
           </div>
         </div>
@@ -143,7 +149,13 @@ export default function StudentCompetitionsPage() {
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )}
             >
-              {f === 'all' ? 'جميع المسابقات' : f === 'active' ? 'نشطة الآن' : f === 'upcoming' ? 'قادمة' : 'منتهية'}
+              {f === 'all' 
+                ? (t.student?.competitionsPage?.filterAll || 'جميع المسابقات') 
+                : f === 'active' 
+                  ? (t.student?.competitionsPage?.filterActive || 'نشطة الآن') 
+                  : f === 'upcoming' 
+                    ? (t.student?.competitionsPage?.filterUpcoming || 'قادمة') 
+                    : (t.student?.competitionsPage?.filterEnded || 'منتهية')}
             </button>
           ))}
         </div>
@@ -155,13 +167,12 @@ export default function StudentCompetitionsPage() {
             onChange={e => setTypeFilter(e.target.value)}
             className="w-full sm:w-48 pl-4 pr-10 py-2.5 rounded-xl text-sm bg-muted/50 border border-transparent hover:border-border focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all font-medium appearance-none cursor-pointer"
           >
-            <option value="all">كل التصنيفات</option>
-            <option value="monthly">مسابقات شهرية</option>
-            <option value="ramadan">مسابقات رمضان</option>
-            <option value="tajweed">مسابقات التجويد</option>
-            <option value="memorization">مسابقات الحفظ</option>
-            <option value="weekly">مسابقات أسبوعية</option>
-            <option value="special">مسابقات خاصة</option>
+            <option value="all">{isAr ? 'كل التصنيفات' : 'All Categories'}</option>
+            {Object.entries(TYPE_CONFIG).map(([key, config]) => (
+              <option key={key} value={key}>
+                {t.student?.competitionsPage?.types?.[config.labelKey] || config.labelKey}
+              </option>
+            ))}
           </select>
           <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
             <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
@@ -175,15 +186,19 @@ export default function StudentCompetitionsPage() {
           <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-6">
             <Trophy className="w-10 h-10 text-muted-foreground opacity-50" />
           </div>
-          <h3 className="text-xl font-bold text-foreground mb-2">لا توجد مسابقات حالياً</h3>
+          <h3 className="text-xl font-bold text-foreground mb-2">
+            {t.student?.competitionsPage?.noCompetitions || 'لا توجد مسابقات حالياً'}
+          </h3>
           <p className="text-muted-foreground max-w-md mx-auto">
-            لم نعثر على أي مسابقات تطابق معايير البحث الحالية. يمكنك تغيير الفلاتر أو العودة لاحقاً.
+            {isAr 
+              ? 'لم نعثر على أي مسابقات تطابق معايير البحث الحالية. يمكنك تغيير الفلاتر أو العودة لاحقاً.' 
+              : 'No competitions found matching the current search criteria. You can change filters or return later.'}
           </p>
           <button 
             onClick={() => { setFilter('all'); setTypeFilter('all'); }}
             className="mt-6 px-6 py-2.5 bg-primary/10 text-primary hover:bg-primary/20 rounded-xl font-bold transition-colors"
           >
-            عرض الكل
+            {t.student?.competitionsPage?.filterAll || 'عرض الكل'}
           </button>
         </div>
       ) : (
@@ -191,8 +206,8 @@ export default function StudentCompetitionsPage() {
           {filtered.map(comp => {
             const typeConf = TYPE_CONFIG[comp.type] || TYPE_CONFIG.special
             const statusConf = STATUS_CONFIG[comp.status] || STATUS_CONFIG.upcoming
-            const startDate = new Date(comp.start_date).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' })
-            const endDate = new Date(comp.end_date).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' })
+            const startDate = new Date(comp.start_date).toLocaleDateString(isAr ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'short' })
+            const endDate = new Date(comp.end_date).toLocaleDateString(isAr ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'short', year: 'numeric' })
 
             // Generate a subtle gradient background based on type
             const gradientMap: Record<string, string> = {
@@ -217,7 +232,7 @@ export default function StudentCompetitionsPage() {
                 {comp.is_featured && (
                   <div className="absolute top-4 left-4 z-10">
                     <span className="flex items-center gap-1.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow-lg shadow-amber-500/20">
-                      <Star className="w-3 h-3 fill-white" /> مميزة
+                      <Star className="w-3 h-3 fill-white" /> {t.student?.competitionsPage?.featuredCompetition || 'مميزة'}
                     </span>
                   </div>
                 )}
@@ -225,10 +240,10 @@ export default function StudentCompetitionsPage() {
                 <div className="p-6 relative z-10 flex flex-col flex-1">
                   <div className="flex items-center gap-2 mb-4">
                     <span className={cn("px-3 py-1 rounded-lg text-xs font-bold border", typeConf.color, "border-current/10 bg-current/5")}>
-                      <span className="mr-1">{typeConf.icon}</span> {typeConf.label}
+                      <span className="mr-1">{typeConf.icon}</span> {t.student?.competitionsPage?.types?.[typeConf.labelKey] || typeConf.labelKey}
                     </span>
                     <span className={cn("px-3 py-1 rounded-lg text-xs font-bold", statusConf.cls)}>
-                      {statusConf.label}
+                      {t.student?.competitionsPage?.statuses?.[statusConf.labelKey] || statusConf.labelKey}
                     </span>
                   </div>
 
@@ -248,14 +263,14 @@ export default function StudentCompetitionsPage() {
                       <div className="flex items-center gap-2 text-muted-foreground bg-muted/50 p-2.5 rounded-xl">
                         <Calendar className="w-4 h-4 text-primary" />
                         <div className="flex flex-col">
-                          <span className="text-[10px] font-bold uppercase">المدة</span>
+                          <span className="text-[10px] font-bold uppercase">{isAr ? 'المدة' : 'Duration'}</span>
                           <span className="font-medium text-foreground">{startDate} - {endDate}</span>
                         </div>
                       </div>
                       <div className="flex items-center gap-2 text-muted-foreground bg-muted/50 p-2.5 rounded-xl">
                         <Users className="w-4 h-4 text-primary" />
                         <div className="flex flex-col">
-                          <span className="text-[10px] font-bold uppercase">المشاركين</span>
+                          <span className="text-[10px] font-bold uppercase">{isAr ? 'المشاركين' : 'Participants'}</span>
                           <span className="font-medium text-foreground">
                             {comp.participants_count} {comp.max_participants && <span className="opacity-50">/ {comp.max_participants}</span>}
                           </span>
@@ -270,7 +285,7 @@ export default function StudentCompetitionsPage() {
                           <Trophy className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                         </div>
                         <div>
-                          <span className="block text-xs font-bold text-amber-700 dark:text-amber-400 mb-0.5">الجوائز والمكافآت</span>
+                          <span className="block text-xs font-bold text-amber-700 dark:text-amber-400 mb-0.5">{isAr ? 'الجوائز والمكافآت' : 'Prizes & Rewards'}</span>
                           <p className="text-sm font-medium text-foreground">{comp.prizes_description}</p>
                         </div>
                       </div>
@@ -284,7 +299,7 @@ export default function StudentCompetitionsPage() {
                           className="flex items-center justify-center w-full px-4 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition-all shadow-lg shadow-emerald-600/20 hover:shadow-emerald-600/40 text-sm gap-2"
                         >
                           <Mic className="w-4 h-4" />
-                          عرض وتقديم المشاركة
+                          {t.student?.competitionsPage?.viewSubmitParticipation || 'عرض وتقديم المشاركة'}
                         </Link>
                       ) : comp.status === 'active' ? (
                         <button
@@ -297,14 +312,14 @@ export default function StudentCompetitionsPage() {
                           ) : (
                             <Trophy className="w-5 h-5" />
                           )}
-                          سجل وانضم للمنافسة
+                          {t.student?.competitionsPage?.registerBtn || 'سجل وانضم للمنافسة'}
                         </button>
                       ) : (
                         <Link
                           href={`/academy/student/competitions/${comp.id}`}
                           className="flex items-center justify-center w-full px-4 py-3.5 bg-muted hover:bg-muted/80 text-foreground rounded-xl font-bold transition-colors text-sm"
                         >
-                          عرض تفاصيل المسابقة
+                          {t.student?.competitionsPage?.viewDetailsBtn || 'عرض التفاصيل'}
                         </Link>
                       )}
                     </div>

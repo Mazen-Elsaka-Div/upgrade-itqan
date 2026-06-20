@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { BookOpen, Clock, CheckCircle, XCircle, GraduationCap, LayoutDashboard, CalendarDays } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useI18n } from '@/lib/i18n/context'
 
 interface EnrollmentRequest {
   id: string
@@ -17,31 +18,9 @@ interface EnrollmentRequest {
   teacher_name: string
 }
 
-const statusConfig = {
-  pending: {
-    label: 'في انتظار الموافقة',
-    icon: Clock,
-    className: 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/20'
-  },
-  active: {
-    label: 'مُقبول',
-    icon: CheckCircle,
-    className: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
-  },
-  rejected: {
-    label: 'مرفوض',
-    icon: XCircle,
-    className: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
-  }
-}
-
-const levelLabels: Record<string, string> = {
-  beginner: 'مبتدئ',
-  intermediate: 'متوسط',
-  advanced: 'متقدم'
-}
-
 export default function EnrollmentRequestsPage() {
+  const { t, locale } = useI18n()
+  const isAr = locale === 'ar'
   const [requests, setRequests] = useState<EnrollmentRequest[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'pending' | 'active' | 'rejected'>('all')
@@ -63,10 +42,34 @@ export default function EnrollmentRequestsPage() {
     fetchRequests()
   }, [])
 
+  const statusConfig = {
+    pending: {
+      label: t.studentPages?.enrollmentRequests?.statuses?.pending || 'في انتظار الموافقة',
+      icon: Clock,
+      className: 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/20'
+    },
+    active: {
+      label: t.studentPages?.enrollmentRequests?.statuses?.active || 'مُقبول',
+      icon: CheckCircle,
+      className: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+    },
+    rejected: {
+      label: t.studentPages?.enrollmentRequests?.statuses?.rejected || 'مرفوض',
+      icon: XCircle,
+      className: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
+    }
+  }
+
+  const levelLabels: Record<string, string> = {
+    beginner: t.studentPages?.enrollmentRequests?.levels?.beginner || 'مبتدئ',
+    intermediate: t.studentPages?.enrollmentRequests?.levels?.intermediate || 'متوسط',
+    advanced: t.studentPages?.enrollmentRequests?.levels?.advanced || 'متقدم'
+  }
+
   const filtered = filter === 'all' ? requests : requests.filter(r => r.status === filter)
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 pb-12 relative" dir="rtl">
+    <div className="max-w-6xl mx-auto space-y-8 pb-12 relative" dir={isAr ? "rtl" : "ltr"}>
       {/* Background Ornaments */}
       <div className="absolute top-0 right-0 w-72 h-72 bg-blue-500/10 blur-[100px] rounded-full -z-10 pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-72 h-72 bg-emerald-500/10 blur-[100px] rounded-full -z-10 pointer-events-none" />
@@ -80,13 +83,13 @@ export default function EnrollmentRequestsPage() {
       >
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-blue-500/10 to-indigo-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase backdrop-blur-sm w-fit">
           <LayoutDashboard className="w-4 h-4" />
-          متابعة الطلبات
+          {t.studentPages?.enrollmentRequests?.heroBadge || 'متابعة الطلبات'}
         </div>
         <h1 className="text-3xl lg:text-4xl font-black bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-400 py-1">
-          طلبات الانضمام للدورات
+          {t.studentPages?.enrollmentRequests?.title || 'طلبات الانضمام للدورات'}
         </h1>
         <p className="text-muted-foreground font-medium max-w-xl">
-          تتبع حالة طلباتك للالتحاق بالدورات الأكاديمية وتابع مسيرتك التعليمية بسهولة.
+          {t.studentPages?.enrollmentRequests?.desc || 'تتبع حالة طلباتك للالتحاق بالدورات الأكاديمية وتابع مسيرتك التعليمية بسهولة.'}
         </p>
       </motion.div>
 
@@ -120,7 +123,7 @@ export default function EnrollmentRequestsPage() {
               )}
               <span className="relative z-10 flex items-center gap-2">
                 {Icon && <Icon className="w-4 h-4" />}
-                {f === 'all' ? 'الكل' : statusConfig[f].label}
+                {f === 'all' ? (t.studentPages?.enrollmentRequests?.filterAll || 'الكل') : statusConfig[f].label}
                 <span className={cn(
                   "flex items-center justify-center min-w-[20px] h-5 rounded-full text-[10px] px-1.5 transition-colors",
                   isSelected ? "bg-white/20 text-white" : "bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400"
@@ -155,18 +158,20 @@ export default function EnrollmentRequestsPage() {
             <div className="w-24 h-24 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-800/50 rounded-full flex items-center justify-center mb-6 shadow-inner">
               <BookOpen className="w-10 h-10 text-blue-400 dark:text-blue-500/50" />
             </div>
-            <h3 className="text-2xl font-black text-foreground mb-3">لا توجد طلبات هنا</h3>
+            <h3 className="text-2xl font-black text-foreground mb-3">
+              {t.studentPages?.enrollmentRequests?.noRequests || 'لا توجد طلبات هنا'}
+            </h3>
             <p className="text-muted-foreground font-medium max-w-sm mb-8 leading-relaxed">
               {filter === 'all'
-                ? 'لم تقم بتقديم أي طلب انضمام لأي دورة حتى الآن. استكشف الدورات المتاحة وابدأ رحلتك.'
-                : 'لا توجد طلبات تتطابق مع هذه الحالة حالياً.'}
+                ? (t.studentPages?.enrollmentRequests?.allEmptyDesc || 'لم تقم بتقديم أي طلب انضمام لأي دورة حتى الآن. استكشف الدورات المتاحة وابدأ رحلتك.')
+                : (t.studentPages?.enrollmentRequests?.filterEmptyDesc || 'لا توجد طلبات تتطابق مع هذه الحالة حالياً.')}
             </p>
             <Link
               href="/academy/student/courses/browse"
               className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-blue-500/25"
             >
               <BookOpen className="w-5 h-5" />
-              تصفح الدورات الآن
+              {t.studentPages?.enrollmentRequests?.browseCourses || 'تصفح الدورات الآن'}
             </Link>
           </motion.div>
         ) : (
@@ -222,7 +227,7 @@ export default function EnrollmentRequestsPage() {
                     <div className="flex flex-wrap items-center justify-between gap-4 pt-3 border-t border-border/50">
                       <div className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground">
                         <CalendarDays className="w-4 h-4 opacity-70" />
-                        تاريخ الطلب: <span dir="ltr">{new Date(req.enrolled_at).toLocaleDateString('ar-EG')}</span>
+                        {t.studentPages?.enrollmentRequests?.requestDate || 'تاريخ الطلب:'} <span dir="ltr">{new Date(req.enrolled_at).toLocaleDateString(isAr ? 'ar-EG' : 'en-US')}</span>
                       </div>
                       
                       {/* Action Button */}
@@ -231,7 +236,7 @@ export default function EnrollmentRequestsPage() {
                           href={`/academy/student/courses/${req.course_id}`}
                           className="inline-flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:shadow-lg hover:shadow-emerald-500/25 text-sm font-bold rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all shrink-0"
                         >
-                          الدخول للدورة
+                          {t.studentPages?.enrollmentRequests?.enterCourse || 'الدخول للدورة'}
                           <CheckCircle className="w-4 h-4" />
                         </Link>
                       )}

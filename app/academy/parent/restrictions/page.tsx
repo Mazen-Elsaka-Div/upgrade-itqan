@@ -48,7 +48,7 @@ const emptyOptions: RestrictionOptions = {
 }
 
 export default function ParentRestrictionsPage() {
-  const { locale } = useI18n()
+  const { t, locale } = useI18n()
   const isAr = locale === 'ar'
   const [children, setChildren] = useState<LinkedChild[]>([])
   const [selectedChildId, setSelectedChildId] = useState('')
@@ -113,9 +113,9 @@ export default function ParentRestrictionsPage() {
       const data = await res.json()
       if (res.ok) {
         setRestrictions(data.restrictions || restrictions)
-        toast.success(isAr ? 'تم حفظ القيود' : 'Restrictions saved')
+        toast.success(t.parentPages.restrictions.restrictionsSaved)
       } else {
-        toast.error(data.error || (isAr ? 'تعذر الحفظ' : 'Could not save'))
+        toast.error(data.error || t.parentPages.restrictions.couldNotSave)
       }
     } finally {
       setSaving(false)
@@ -134,7 +134,7 @@ export default function ParentRestrictionsPage() {
             </div>
           </div>
           {rows.length === 0 ? (
-            <p className="text-sm text-muted-foreground">{isAr ? 'لا توجد خيارات متاحة.' : 'No options available.'}</p>
+            <p className="text-sm text-muted-foreground">{t.parentPages.restrictions.noOptionsAvailable}</p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[360px] overflow-y-auto pr-1">
               {rows.map(row => (
@@ -160,25 +160,25 @@ export default function ParentRestrictionsPage() {
         <div className="space-y-2">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider mb-2">
             <Shield className="w-4 h-4" />
-            {isAr ? 'تقييد المحتوى' : 'Content Restrictions'}
+            {t.parentPages.restrictions.contentRestrictions}
           </div>
           <h1 className="text-3xl lg:text-4xl font-black tracking-tight text-foreground">
-            {isAr ? 'المحتوى المسموح للأبناء' : 'Allowed Child Content'}
+            {t.parentPages.restrictions.allowedChildContent}
           </h1>
           <p className="text-muted-foreground font-medium max-w-2xl">
-            {isAr ? 'اختر السور والمسارات والدورات التي يمكن للابن الوصول إليها. ترك القائمة فارغة يعني السماح بكل المحتوى من هذا النوع.' : 'Choose the surahs, paths, and courses your child can access. An empty list means all content of that type is allowed.'}
+            {t.parentPages.restrictions.restrictionsDesc}
           </p>
         </div>
         <Button onClick={save} disabled={!selectedChildId || saving} className="h-12 rounded-2xl font-bold">
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className={`w-4 h-4 ${isAr ? 'ml-2' : 'mr-2'}`} />}
-          {isAr ? 'حفظ القيود' : 'Save Restrictions'}
+          {t.parentPages.restrictions.saveRestrictions}
         </Button>
       </div>
 
       {children.length === 0 ? (
         <Card className="rounded-3xl border-border/50">
           <CardContent className="p-12 text-center text-muted-foreground font-medium">
-            {isAr ? 'اربط ابنًا أولًا لإدارة قيود المحتوى.' : 'Link a child first to manage content restrictions.'}
+            {t.parentPages.restrictions.noChildrenToManage}
           </CardContent>
         </Card>
       ) : (
@@ -197,10 +197,10 @@ export default function ParentRestrictionsPage() {
             <div className="flex justify-center py-12"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
           ) : (
             <div className="space-y-6">
-              {renderOptions(isAr ? 'السور المسموحة' : 'Allowed Surahs', isAr ? 'اختر السور المتاحة للتلاوة والحفظ.' : 'Select accessible surahs for recitation and memorization.', <BookOpen className="w-5 h-5" />, 'surah', options.surahs)}
-              {renderOptions(isAr ? 'الدورات المسموحة' : 'Allowed Courses', isAr ? 'اختر الدورات التي يمكن للابن تصفحها والانضمام لها.' : 'Select courses your child can browse and join.', <BookOpen className="w-5 h-5" />, 'course', options.courses)}
-              {renderOptions(isAr ? 'مسارات التجويد المسموحة' : 'Allowed Tajweed Paths', isAr ? 'اختر مسارات التجويد المتاحة.' : 'Select accessible tajweed paths.', <Route className="w-5 h-5" />, 'tajweed_path', options.tajweed_paths)}
-              {renderOptions(isAr ? 'مسارات الحفظ المسموحة' : 'Allowed Memorization Paths', isAr ? 'اختر مسارات الحفظ المتاحة.' : 'Select accessible memorization paths.', <Route className="w-5 h-5" />, 'memorization_path', options.memorization_paths)}
+              {renderOptions(t.parentPages.restrictions.allowedSurahs, t.parentPages.restrictions.surahsDesc, <BookOpen className="w-5 h-5" />, 'surah', options.surahs)}
+              {renderOptions(t.parentPages.restrictions.allowedCourses, t.parentPages.restrictions.coursesDesc, <BookOpen className="w-5 h-5" />, 'course', options.courses)}
+              {renderOptions(t.parentPages.restrictions.allowedTajweedPaths, t.parentPages.restrictions.tajweedPathsDesc, <Route className="w-5 h-5" />, 'tajweed_path', options.tajweed_paths)}
+              {renderOptions(t.parentPages.restrictions.allowedMemorizationPaths, t.parentPages.restrictions.memorizationPathsDesc, <Route className="w-5 h-5" />, 'memorization_path', options.memorization_paths)}
             </div>
           )}
         </>

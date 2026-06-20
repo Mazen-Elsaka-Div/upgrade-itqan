@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Award, Lock, CheckCircle2, Trophy, Star, Zap } from 'lucide-react'
+import { Award, Lock, CheckCircle2, Trophy, Zap } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useI18n } from '@/lib/i18n/context'
 
 interface Badge {
   id: string
@@ -24,20 +25,8 @@ interface BadgeCategory {
   badges: Badge[]
 }
 
-const CRITERIA_LABELS: Record<string, string> = {
-  recitation_count: 'عدد التلاوات',
-  recitation_total: 'إجمالي التلاوات',
-  streak_days: 'أيام Streak',
-  juz_memorized: 'حفظ جزء',
-  tajweed_path: 'مسار التجويد',
-  ramadan: 'أيام رمضان',
-  quran_complete: 'ختم القرآن',
-  top_student: 'الأعلى نقاطاً',
-  points_threshold: 'حد نقاط',
-  manual: 'يُمنح يدوياً',
-}
-
 export default function BadgesPage() {
+  const { t, locale } = useI18n()
   const [categories, setCategories] = useState<BadgeCategory[]>([])
   const [total, setTotal] = useState(0)
   const [earnedCount, setEarnedCount] = useState(0)
@@ -63,6 +52,13 @@ export default function BadgesPage() {
     fetchBadges()
   }, [])
 
+  function formatDigits(n: number | string): string {
+    if (locale === 'ar') {
+      return String(n).replace(/\d/g, d => '\u0660\u0661\u0662\u0663\u0664\u0665\u0666\u0667\u0668\u0669'[Number(d)])
+    }
+    return String(n)
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -79,17 +75,17 @@ export default function BadgesPage() {
       <div>
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <Award className="w-7 h-7 text-yellow-500" />
-          الشارات والإنجازات
+          {t.badgesPage.title}
         </h1>
-        <p className="text-muted-foreground mt-1">اجمع الشارات وأظهر إنجازاتك</p>
+        <p className="text-muted-foreground mt-1">{t.badgesPage.subtitle}</p>
       </div>
 
       {/* Progress Banner */}
       <div className="bg-gradient-to-l from-yellow-500 to-amber-600 rounded-2xl p-6 text-white">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <p className="text-yellow-100 text-sm">الشارات المكتسبة</p>
-            <p className="text-4xl font-bold">{earnedCount} / {total}</p>
+            <p className="text-yellow-100 text-sm">{t.badgesPage.earnedBadges}</p>
+            <p className="text-4xl font-bold">{formatDigits(earnedCount)} / {formatDigits(total)}</p>
           </div>
           <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center">
             <Trophy className="w-10 h-10 text-yellow-200" />
@@ -101,7 +97,9 @@ export default function BadgesPage() {
             style={{ width: `${progressPct}%` }}
           />
         </div>
-        <p className="text-sm text-yellow-100 mt-2">{progressPct}% مكتمل</p>
+        <p className="text-sm text-yellow-100 mt-2">
+          {t.badgesPage.completedPct.replace('{pct}', formatDigits(progressPct))}
+        </p>
       </div>
 
       {/* Badge Categories */}
@@ -144,11 +142,13 @@ export default function BadgesPage() {
                     )}
                   </div>
                   <p className="font-medium text-sm truncate">{badge.name}</p>
-                  <p className="text-xs text-amber-600 font-bold mt-1">+{badge.points_awarded} نقطة</p>
+                  <p className="text-xs text-amber-600 font-bold mt-1">
+                    {t.badgesPage.points.replace('{points}', formatDigits(badge.points_awarded))}
+                  </p>
                   {badge.is_earned && (
                     <p className="text-xs text-green-600 mt-1 flex items-center justify-center gap-1">
                       <CheckCircle2 className="w-3 h-3" />
-                      مكتسبة
+                      {t.badgesPage.earnedLabel}
                     </p>
                   )}
                 </button>
@@ -161,7 +161,7 @@ export default function BadgesPage() {
       {categories.length === 0 && (
         <Card className="text-center py-12">
           <Award className="w-14 h-14 mx-auto mb-4 text-gray-300" />
-          <p className="text-muted-foreground">لا توجد شارات متاحة حالياً</p>
+          <p className="text-muted-foreground">{t.badgesPage.noBadgesYet}</p>
         </Card>
       )}
 
@@ -197,7 +197,9 @@ export default function BadgesPage() {
             {/* Points */}
             <div className="flex items-center justify-center gap-2 mb-4">
               <Zap className="w-4 h-4 text-amber-500" />
-              <span className="font-bold text-amber-600">+{selectedBadge.points_awarded} نقطة</span>
+              <span className="font-bold text-amber-600">
+                {t.badgesPage.points.replace('{points}', formatDigits(selectedBadge.points_awarded))}
+              </span>
             </div>
 
             {/* Status */}
@@ -205,17 +207,17 @@ export default function BadgesPage() {
               <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 mb-4">
                 <p className="text-green-600 text-sm flex items-center justify-center gap-2">
                   <CheckCircle2 className="w-4 h-4" />
-                  تم الحصول عليها في {new Date(selectedBadge.earned_at!).toLocaleDateString('ar-SA', {
+                  {t.badgesPage.badgeEarnedAt.replace('{date}', new Date(selectedBadge.earned_at!).toLocaleDateString(locale === 'ar' ? 'ar-SA' : 'en-US', {
                     year: 'numeric', month: 'long', day: 'numeric',
-                  })}
+                  }))}
                 </p>
               </div>
             ) : (
               <div className="bg-muted rounded-lg p-3 mb-4">
                 <p className="text-sm text-muted-foreground">
                   <Lock className="w-3 h-3 inline ml-1" />
-                  {CRITERIA_LABELS[selectedBadge.criteria_type] || selectedBadge.criteria_type}
-                  {selectedBadge.criteria_value > 0 && `: ${selectedBadge.criteria_value}`}
+                  {t.badgesPage.criteria[selectedBadge.criteria_type] || selectedBadge.criteria_type}
+                  {selectedBadge.criteria_value > 0 && `: ${formatDigits(selectedBadge.criteria_value)}`}
                 </p>
               </div>
             )}
@@ -224,7 +226,7 @@ export default function BadgesPage() {
               onClick={() => setSelectedBadge(null)}
               className="px-6 py-2 bg-muted hover:bg-muted/80 rounded-lg transition-colors"
             >
-              إغلاق
+              {t.badgesPage.closeBtn}
             </button>
           </div>
         </div>

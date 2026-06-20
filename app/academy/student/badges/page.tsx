@@ -24,7 +24,7 @@ interface BadgeCategory {
 }
 
 export default function BadgesPage() {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const [categories, setCategories] = useState<BadgeCategory[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedBadge, setSelectedBadge] = useState<Badge | null>(null)
@@ -59,7 +59,7 @@ export default function BadgesPage() {
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr)
-    return new Intl.DateTimeFormat('ar-SA', {
+    return new Intl.DateTimeFormat(locale === 'ar' ? 'ar-EG' : 'en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric'
@@ -78,7 +78,7 @@ export default function BadgesPage() {
   }
 
   return (
-    <div className="space-y-10 pb-12">
+    <div className="space-y-10 pb-12" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
       {/* Hero / Progress Section */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-900 via-purple-900 to-indigo-950 text-white p-8 sm:p-12 shadow-2xl border border-indigo-500/20">
         {/* Abstract Background Elements */}
@@ -90,13 +90,17 @@ export default function BadgesPage() {
           <div className="space-y-4 max-w-xl text-center md:text-start">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 text-xs font-bold rounded-full bg-white/10 backdrop-blur-md border border-white/10">
               <Award className="w-4 h-4 text-yellow-400" />
-              <span className="text-indigo-100">لوحة الشرف والإنجازات</span>
+              <span className="text-indigo-100">{t.studentPages?.badges?.title || 'لوحة الشرف والإنجازات'}</span>
             </div>
             <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
-              أوسمة <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-500">التميز</span>
+              {locale === 'ar' ? (
+                <>أوسمة <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-500">التميز</span></>
+              ) : (
+                <><span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-500">Badges</span> of Excellence</>
+              )}
             </h1>
             <p className="text-indigo-200/80 text-base sm:text-lg font-medium leading-relaxed">
-              اجمع الشارات، وتجاوز التحديات، وارتقِ في مسيرتك القرآنية والعلمية. كل شارة تروي قصة نجاحك.
+              {t.studentPages?.badges?.desc || 'اجمع الشارات، وتجاوز التحديات، وارتقِ في مسيرتك القرآنية والعلمية. كل شارة تروي قصة نجاحك.'}
             </p>
           </div>
 
@@ -111,7 +115,7 @@ export default function BadgesPage() {
                 <span className="text-5xl font-black text-white">{earnedBadges}</span>
                 <span className="text-xl font-bold text-indigo-300">/ {totalBadges}</span>
               </div>
-              <span className="text-sm font-bold text-indigo-200">شارة مكتسبة</span>
+              <span className="text-sm font-bold text-indigo-200">{t.studentPages?.badges?.earnedBadges || 'شارة مكتسبة'}</span>
               
               {/* Progress Bar inside card */}
               <div className="w-full h-2 bg-black/40 rounded-full overflow-hidden mt-6">
@@ -199,7 +203,7 @@ export default function BadgesPage() {
                     
                     {!badge.is_earned && (
                       <p className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wider">
-                        {t.academy?.locked || 'مقفلة'}
+                        {t.studentPages?.badges?.locked || t.academy?.locked || 'مقفلة'}
                       </p>
                     )}
                   </button>
@@ -214,9 +218,9 @@ export default function BadgesPage() {
             <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-6">
               <Award className="w-10 h-10 text-muted-foreground opacity-50" />
             </div>
-            <h3 className="text-xl font-bold text-foreground mb-2">لا توجد شارات حالياً</h3>
+            <h3 className="text-xl font-bold text-foreground mb-2">{t.studentPages?.badges?.noBadgesYet || 'لا توجد شارات حالياً'}</h3>
             <p className="text-muted-foreground max-w-md mx-auto">
-              سيتم إضافة شارات وإنجازات جديدة قريباً لتتمكن من المنافسة عليها.
+              {t.studentPages?.badges?.noBadgesYetDesc || 'سيتم إضافة شارات وإنجازات جديدة قريباً لتتمكن من المنافسة عليها.'}
             </p>
           </div>
         )}
@@ -267,7 +271,7 @@ export default function BadgesPage() {
               <div className="bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-2xl p-4 mb-8">
                 <p className="text-green-700 dark:text-green-400 font-bold flex items-center justify-center gap-2">
                   <CheckCircle2 className="w-5 h-5" />
-                  {t.academy?.earnedOn || 'تم الحصول عليها في'} {formatDate(selectedBadge.earned_at!)}
+                  {(t.studentPages?.badges?.earnedOn || 'تم الحصول عليها في {date}').replace('{date}', formatDate(selectedBadge.earned_at!))}
                 </p>
               </div>
             ) : (
@@ -275,11 +279,11 @@ export default function BadgesPage() {
                 <p className="text-sm font-bold text-muted-foreground flex items-center justify-center gap-2">
                   <Lock className="w-4 h-4" />
                   {selectedBadge.points_required ? (
-                    <>يتطلب {selectedBadge.points_required} نقطة لفتح هذه الشارة</>
+                    <>{(t.studentPages?.badges?.pointsRequired || 'يتطلب {points} نقطة لفتح هذه الشارة').replace('{points}', String(selectedBadge.points_required))}</>
                   ) : selectedBadge.criteria_value ? (
-                    <>يتطلب إكمال {selectedBadge.criteria_value} من {selectedBadge.criteria_type}</>
+                    <>{(t.studentPages?.badges?.criteriaRequired || 'يتطلب إكمال {value} من {type}').replace('{value}', String(selectedBadge.criteria_value)).replace('{type}', selectedBadge.criteria_type)}</>
                   ) : (
-                    <>هذه الشارة مقفلة حالياً</>
+                    <>{t.studentPages?.badges?.lockedBadge || 'هذه الشارة مقفلة حالياً'}</>
                   )}
                 </p>
               </div>
@@ -289,7 +293,7 @@ export default function BadgesPage() {
               onClick={() => setSelectedBadge(null)}
               className="w-full py-4 bg-muted hover:bg-foreground hover:text-background rounded-xl font-bold transition-all duration-300"
             >
-              {t.close || 'إغلاق'}
+              {t.studentPages?.badges?.close || t.close || 'إغلاق'}
             </button>
           </div>
         </div>

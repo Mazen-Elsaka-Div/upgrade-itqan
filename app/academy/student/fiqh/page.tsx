@@ -47,7 +47,7 @@ const CATEGORIES = [
 ]
 
 export default function StudentFiqhPage() {
-  const { locale } = useI18n()
+  const { t, locale } = useI18n()
   const isAr = locale === 'ar'
 
   const [questions, setQuestions] = useState<FiqhQuestion[]>([])
@@ -100,7 +100,7 @@ export default function StudentFiqhPage() {
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
         setSubmitError(
-          data?.error || (isAr ? 'تعذّر إرسال السؤال' : 'Failed to submit question'),
+          data?.error || t.studentPages?.fiqh?.errorSubmit,
         )
         return
       }
@@ -110,7 +110,7 @@ export default function StudentFiqhPage() {
       fetchQuestions()
     } catch (err) {
       console.error('[fiqh] submit failed:', err)
-      setSubmitError(isAr ? 'حدث خطأ غير متوقع' : 'Unexpected error')
+      setSubmitError(t.studentPages?.fiqh?.errorUnexpected)
     } finally {
       setCreating(false)
     }
@@ -126,9 +126,7 @@ export default function StudentFiqhPage() {
     })
 
   const categoryLabel = (id: string) => {
-    const c = CATEGORIES.find((x) => x.id === id)
-    if (!c) return id
-    return isAr ? c.ar : c.en
+    return t.studentPages?.fiqh?.categories?.[id] || id
   }
 
   const filtered = questions.filter((q) => {
@@ -148,17 +146,15 @@ export default function StudentFiqhPage() {
         <div className="space-y-1">
           <h1 className="text-3xl font-black tracking-tight text-foreground flex items-center gap-2">
             <HelpCircle className="w-8 h-8 text-primary" />
-            {isAr ? 'الأسئلة الفقهية' : 'Fiqh Questions'}
+            {t.studentPages?.fiqh?.title}
           </h1>
           <p className="text-muted-foreground font-medium">
-            {isAr
-              ? 'اطرح أسئلتك في الفقه وأحكام التجويد، وستجد إجاباتها هنا.'
-              : 'Ask your questions on fiqh and tajweed rulings — answers will appear here.'}
+            {t.studentPages?.fiqh?.desc}
           </p>
         </div>
         <Button onClick={() => setIsCreateOpen(true)} className="gap-2 shrink-0">
           <Plus className="w-4 h-4" />
-          {isAr ? 'سؤال جديد' : 'New Question'}
+          {t.studentPages?.fiqh?.newQuestionBtn}
         </Button>
       </div>
 
@@ -175,7 +171,7 @@ export default function StudentFiqhPage() {
         >
           <p className="text-2xl font-bold text-foreground">{questions.length}</p>
           <p className="text-xs sm:text-sm text-muted-foreground">
-            {isAr ? 'كل الأسئلة' : 'All'}
+            {t.studentPages?.fiqh?.allQuestions}
           </p>
         </button>
         <button
@@ -189,7 +185,7 @@ export default function StudentFiqhPage() {
         >
           <p className="text-2xl font-bold text-yellow-600">{pendingCount}</p>
           <p className="text-xs sm:text-sm text-muted-foreground">
-            {isAr ? 'بانتظار الإجابة' : 'Pending'}
+            {t.studentPages?.fiqh?.pendingResponse}
           </p>
         </button>
         <button
@@ -203,7 +199,7 @@ export default function StudentFiqhPage() {
         >
           <p className="text-2xl font-bold text-green-600">{answeredCount}</p>
           <p className="text-xs sm:text-sm text-muted-foreground">
-            {isAr ? 'مُجاب عنها' : 'Answered'}
+            {t.studentPages?.fiqh?.answered}
           </p>
         </button>
       </div>
@@ -216,7 +212,7 @@ export default function StudentFiqhPage() {
               <HelpCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
               <div className="flex-1">
                 <p className="font-bold text-red-700 dark:text-red-400">
-                  {isAr ? 'تعذّر تحميل الأسئلة' : 'Failed to load questions'}
+                  {t.studentPages?.fiqh?.loadError}
                 </p>
                 <p className="text-sm text-red-600 dark:text-red-300 mt-1">{loadError}</p>
               </div>
@@ -226,7 +222,7 @@ export default function StudentFiqhPage() {
                 onClick={fetchQuestions}
                 className="flex-shrink-0"
               >
-                {isAr ? 'إعادة محاولة' : 'Retry'}
+                {t.studentPages?.fiqh?.retry}
               </Button>
             </CardContent>
           </Card>
@@ -255,21 +251,13 @@ export default function StudentFiqhPage() {
               <BookOpen className="w-12 h-12 text-muted-foreground/30 mb-4" />
               <p className="font-bold text-foreground mb-1">
                 {filter === 'all'
-                  ? isAr
-                    ? 'لم تطرح أي سؤال بعد'
-                    : 'No questions yet'
+                  ? t.studentPages?.fiqh?.noQuestionsYet
                   : filter === 'pending'
-                    ? isAr
-                      ? 'لا توجد أسئلة بانتظار الإجابة'
-                      : 'No pending questions'
-                    : isAr
-                      ? 'لا توجد أسئلة مُجاب عنها'
-                      : 'No answered questions'}
+                    ? t.studentPages?.fiqh?.noPendingQuestions
+                    : t.studentPages?.fiqh?.noAnsweredQuestions}
               </p>
               <p className="text-sm text-muted-foreground">
-                {isAr
-                  ? 'ابدأ بطرح سؤالك الأول لتتلقى إجابة من المختصين.'
-                  : 'Start by asking your first question to receive an answer.'}
+                {t.studentPages?.fiqh?.startAskingFirst}
               </p>
             </CardContent>
           </Card>
@@ -294,12 +282,12 @@ export default function StudentFiqhPage() {
                     {q.answer ? (
                       <span className="flex items-center gap-1 text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-2 py-0.5 rounded-md font-bold">
                         <CheckCircle2 className="w-3 h-3" />
-                        {isAr ? 'مُجاب' : 'Answered'}
+                        {t.studentPages?.fiqh?.statusAnswered}
                       </span>
                     ) : (
                       <span className="flex items-center gap-1 text-xs bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 px-2 py-0.5 rounded-md font-bold">
                         <Clock className="w-3 h-3" />
-                        {isAr ? 'بانتظار الإجابة' : 'Pending'}
+                        {t.studentPages?.fiqh?.statusPending}
                       </span>
                     )}
                   </div>
@@ -311,7 +299,7 @@ export default function StudentFiqhPage() {
                 {/* Question */}
                 <div>
                   <p className="text-sm text-muted-foreground mb-1 font-bold">
-                    {isAr ? 'السؤال:' : 'Question:'}
+                    {t.studentPages?.fiqh?.questionLabel}
                   </p>
                   <p className="text-foreground whitespace-pre-wrap leading-relaxed">
                     {q.question}
@@ -323,7 +311,7 @@ export default function StudentFiqhPage() {
                   <div className="border-t border-border pt-3 mt-2">
                     <p className="text-sm text-muted-foreground mb-1 font-bold flex items-center gap-1 flex-wrap">
                       <CheckCircle2 className="w-4 h-4 text-green-600" />
-                      {isAr ? 'الإجابة:' : 'Answer:'}
+                      {t.studentPages?.fiqh?.answerLabel}
                       {q.answered_by_name && (
                         <span className="text-xs font-medium text-foreground/70">
                           ({q.answered_by_name})
@@ -351,13 +339,13 @@ export default function StudentFiqhPage() {
         <DialogContent className="sm:max-w-[600px] border-border bg-card">
           <DialogHeader>
             <DialogTitle>
-              {isAr ? 'طرح سؤال فقهي' : 'Ask a Fiqh Question'}
+              {t.studentPages?.fiqh?.dialogTitle}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2" dir={isAr ? 'rtl' : 'ltr'}>
             <div className="space-y-1">
               <label className="text-sm font-bold text-foreground">
-                {isAr ? 'التصنيف' : 'Category'}
+                {t.studentPages?.fiqh?.categoryLabel}
               </label>
               <select
                 value={newCategory}
@@ -366,24 +354,20 @@ export default function StudentFiqhPage() {
               >
                 {CATEGORIES.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {isAr ? c.ar : c.en}
+                    {categoryLabel(c.id)}
                   </option>
                 ))}
               </select>
             </div>
             <div className="space-y-1">
               <label className="text-sm font-bold text-foreground">
-                {isAr ? 'سؤالك' : 'Your Question'}
+                {t.studentPages?.fiqh?.yourQuestionLabel}
               </label>
               <Textarea
                 value={newQuestion}
                 onChange={(e) => setNewQuestion(e.target.value)}
                 rows={6}
-                placeholder={
-                  isAr
-                    ? 'اكتب سؤالك بوضوح وذكر السياق إن لزم...'
-                    : 'Write your question clearly and add context if needed...'
-                }
+                placeholder={t.studentPages?.fiqh?.textareaPlaceholder}
                 className="resize-none"
               />
             </div>
@@ -400,14 +384,12 @@ export default function StudentFiqhPage() {
             >
               {creating ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
-              ) : isAr ? (
-                'إرسال السؤال'
               ) : (
-                'Submit Question'
+                t.studentPages?.fiqh?.submitBtn
               )}
             </Button>
             <Button variant="ghost" onClick={() => setIsCreateOpen(false)}>
-              {isAr ? 'إلغاء' : 'Cancel'}
+              {t.studentPages?.fiqh?.cancelBtn}
             </Button>
           </DialogFooter>
         </DialogContent>

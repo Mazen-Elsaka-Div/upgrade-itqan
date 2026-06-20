@@ -48,15 +48,15 @@ interface SessionUser {
 
 type Section = 'account' | 'security' | 'notifications' | 'language'
 
-const sections: { id: Section; icon: React.ElementType; ar: string; en: string }[] = [
-  { id: 'account',       icon: User,   ar: 'معلومات الحساب',    en: 'Account Info' },
-  { id: 'security',      icon: Lock,   ar: 'الأمان وكلمة المرور', en: 'Security' },
-  { id: 'notifications', icon: Bell,   ar: 'الإشعارات',          en: 'Notifications' },
-  { id: 'language',      icon: Globe,  ar: 'اللغة والمنطقة',     en: 'Language' },
+const sections: { id: Section; icon: React.ElementType; key: 'accountInfo' | 'security' | 'notifications' | 'language' }[] = [
+  { id: 'account',       icon: User,   key: 'accountInfo' },
+  { id: 'security',      icon: Lock,   key: 'security' },
+  { id: 'notifications', icon: Bell,   key: 'notifications' },
+  { id: 'language',      icon: Globe,  key: 'language' },
 ]
 
 export default function ParentProfilePage() {
-  const { locale } = useI18n()
+  const { t, locale } = useI18n()
   const isAr = locale === 'ar'
   const ChevronIcon = isAr ? ChevronLeft : ChevronRight
 
@@ -124,23 +124,23 @@ export default function ParentProfilePage() {
       })
       if (res.ok) {
         flash()
-        toast.success(isAr ? 'تم حفظ البيانات' : 'Saved')
+        toast.success(t.parentPages.profile.saved)
         setUser((u) => u ? { ...u, name, phone, city } : u)
       } else {
         const d = await res.json().catch(() => null)
-        toast.error(d?.error || (isAr ? 'حدث خطأ' : 'Error'))
+        toast.error(d?.error || t.parentPages.linkChild.errorOccurred)
       }
-    } catch { toast.error(isAr ? 'حدث خطأ' : 'Error') }
+    } catch { toast.error(t.parentPages.linkChild.errorOccurred) }
     finally { setSaving(false) }
   }
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault()
     if (newPassword !== confirmPassword) {
-      toast.error(isAr ? 'كلمتا المرور غير متطابقتين' : 'Passwords do not match'); return
+      toast.error(t.parentPages.profile.passwordMismatch); return
     }
     if (newPassword.length < 6) {
-      toast.error(isAr ? 'كلمة المرور يجب أن تكون 6 أحرف على الأقل' : 'At least 6 characters'); return
+      toast.error(t.parentPages.profile.atLeast6Chars); return
     }
     setSaving(true)
     try {
@@ -151,13 +151,13 @@ export default function ParentProfilePage() {
       })
       if (res.ok) {
         flash()
-        toast.success(isAr ? 'تم تغيير كلمة المرور' : 'Password changed')
+        toast.success(t.parentPages.profile.changePasswordSuccess)
         setCurrentPassword(''); setNewPassword(''); setConfirmPassword('')
       } else {
         const d = await res.json()
-        toast.error(d.error || (isAr ? 'حدث خطأ' : 'Error'))
+        toast.error(d.error || t.parentPages.linkChild.errorOccurred)
       }
-    } catch { toast.error(isAr ? 'حدث خطأ' : 'Error') }
+    } catch { toast.error(t.parentPages.linkChild.errorOccurred) }
     finally { setSaving(false) }
   }
 
@@ -171,9 +171,9 @@ export default function ParentProfilePage() {
           notification_preferences: { email: emailNotifications, push: pushNotifications, weeklyReport },
         }),
       })
-      if (res.ok) { flash(); toast.success(isAr ? 'تم الحفظ' : 'Saved') }
-      else { const d = await res.json().catch(() => null); toast.error(d?.error || (isAr ? 'حدث خطأ' : 'Error')) }
-    } catch { toast.error(isAr ? 'حدث خطأ' : 'Error') }
+      if (res.ok) { flash(); toast.success(t.parentPages.profile.saved) }
+      else { const d = await res.json().catch(() => null); toast.error(d?.error || t.parentPages.linkChild.errorOccurred) }
+    } catch { toast.error(t.parentPages.linkChild.errorOccurred) }
     finally { setSaving(false) }
   }
 
@@ -185,9 +185,9 @@ export default function ParentProfilePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ preferred_language: language }),
       })
-      if (res.ok) { flash(); toast.success(isAr ? 'تم الحفظ' : 'Saved') }
-      else { const d = await res.json().catch(() => null); toast.error(d?.error || (isAr ? 'حدث خطأ' : 'Error')) }
-    } catch { toast.error(isAr ? 'حدث خطأ' : 'Error') }
+      if (res.ok) { flash(); toast.success(t.parentPages.profile.saved) }
+      else { const d = await res.json().catch(() => null); toast.error(d?.error || t.parentPages.linkChild.errorOccurred) }
+    } catch { toast.error(t.parentPages.linkChild.errorOccurred) }
     finally { setSaving(false) }
   }
 
@@ -201,7 +201,7 @@ export default function ParentProfilePage() {
     <div className="max-w-3xl mx-auto p-6">
       <Card className="rounded-2xl">
         <CardContent className="p-12 text-center text-muted-foreground">
-          {isAr ? 'حدث خطأ في تحميل البيانات' : 'Error loading data'}
+          {t.parentPages.profile.errorLoading}
         </CardContent>
       </Card>
     </div>
@@ -232,7 +232,7 @@ export default function ParentProfilePage() {
             <div className="flex flex-wrap items-center gap-2 mt-3">
               <Badge variant="secondary" className="gap-1 text-xs font-bold">
                 <Shield className="w-3 h-3" />
-                {isAr ? 'ولي أمر' : 'Parent'}
+                {t.parentPages.profile.parent}
               </Badge>
               {user.city && (
                 <Badge variant="outline" className="gap-1 text-xs text-muted-foreground">
@@ -267,7 +267,7 @@ export default function ParentProfilePage() {
                   >
                     <span className="flex items-center gap-2.5">
                       <Icon className="w-4 h-4 shrink-0" />
-                      {isAr ? s.ar : s.en}
+                      {t.parentPages.profile[s.key]}
                     </span>
                     <ChevronIcon className={cn('w-3.5 h-3.5 opacity-50', active && 'opacity-100')} />
                   </button>
@@ -286,41 +286,41 @@ export default function ParentProfilePage() {
               <CardContent className="p-6 space-y-6">
                 <SectionHeader
                   icon={<User className="w-5 h-5 text-primary" />}
-                  title={isAr ? 'معلومات الحساب' : 'Account Information'}
-                  desc={isAr ? 'تحديث اسمك ورقم هاتفك ومدينتك' : 'Update your name, phone, and city'}
+                  title={t.parentPages.profile.accountInfo}
+                  desc={t.parentPages.profile.updateAccountDesc}
                 />
                 <Separator />
 
                 <div className="space-y-5">
                   <FieldRow
-                    label={isAr ? 'الاسم الكامل' : 'Full Name'}
+                    label={t.parentPages.profile.fullName}
                     icon={<User className="w-4 h-4 text-muted-foreground" />}
                   >
                     <Input value={name} onChange={(e) => setName(e.target.value)} className="rounded-xl" />
                   </FieldRow>
 
                   <FieldRow
-                    label={isAr ? 'البريد الإلكتروني' : 'Email'}
+                    label={t.parentPages.profile.email}
                     icon={<Mail className="w-4 h-4 text-muted-foreground" />}
                   >
                     <Input value={user.email} disabled className="rounded-xl opacity-60" dir="ltr" />
                     <p className="text-[11px] text-muted-foreground mt-1">
-                      {isAr ? 'لا يمكن تغيير البريد الإلكتروني' : 'Email cannot be changed'}
+                      {t.parentPages.profile.emailHint}
                     </p>
                   </FieldRow>
 
                   <FieldRow
-                    label={isAr ? 'رقم الهاتف' : 'Phone'}
+                    label={t.parentPages.profile.phone}
                     icon={<Phone className="w-4 h-4 text-muted-foreground" />}
                   >
-                    <Input value={phone} onChange={(e) => setPhone(e.target.value)} className="rounded-xl" dir="ltr" placeholder="+966 5X XXX XXXX" />
+                    <Input value={phone} onChange={(e) => setPhone(e.target.value)} className="rounded-xl" dir="ltr" placeholder={t.parentPages.profile.phonePlaceholder} />
                   </FieldRow>
 
                   <FieldRow
-                    label={isAr ? 'المدينة' : 'City'}
+                    label={t.parentPages.profile.city}
                     icon={<MapPin className="w-4 h-4 text-muted-foreground" />}
                   >
-                    <Input value={city} onChange={(e) => setCity(e.target.value)} className="rounded-xl" placeholder={isAr ? 'مثال: الرياض' : 'e.g. Riyadh'} />
+                    <Input value={city} onChange={(e) => setCity(e.target.value)} className="rounded-xl" placeholder={t.parentPages.profile.cityPlaceholder} />
                   </FieldRow>
                 </div>
 
@@ -335,13 +335,13 @@ export default function ParentProfilePage() {
               <CardContent className="p-6 space-y-6">
                 <SectionHeader
                   icon={<Lock className="w-5 h-5 text-amber-500" />}
-                  title={isAr ? 'كلمة المرور' : 'Password'}
-                  desc={isAr ? 'غيّر كلمة المرور بانتظام للحفاظ على أمان حسابك' : 'Change your password regularly to keep your account secure'}
+                  title={t.parentPages.profile.security}
+                  desc={t.parentPages.profile.changePasswordDesc}
                 />
                 <Separator />
 
                 <form onSubmit={handlePasswordChange} className="space-y-5">
-                  <FieldRow label={isAr ? 'كلمة المرور الحالية' : 'Current Password'} icon={<Lock className="w-4 h-4 text-muted-foreground" />}>
+                  <FieldRow label={t.parentPages.profile.currentPassword} icon={<Lock className="w-4 h-4 text-muted-foreground" />}>
                     <div className="relative">
                       <Input
                         type={showCurrent ? 'text' : 'password'}
@@ -360,7 +360,7 @@ export default function ParentProfilePage() {
                     </div>
                   </FieldRow>
 
-                  <FieldRow label={isAr ? 'كلمة المرور الجديدة' : 'New Password'} icon={<Lock className="w-4 h-4 text-muted-foreground" />}>
+                  <FieldRow label={t.parentPages.profile.newPassword} icon={<Lock className="w-4 h-4 text-muted-foreground" />}>
                     <div className="relative">
                       <Input
                         type={showNew ? 'text' : 'password'}
@@ -379,7 +379,7 @@ export default function ParentProfilePage() {
                     </div>
                   </FieldRow>
 
-                  <FieldRow label={isAr ? 'تأكيد كلمة المرور' : 'Confirm Password'} icon={<Lock className="w-4 h-4 text-muted-foreground" />}>
+                  <FieldRow label={t.parentPages.profile.confirmPassword} icon={<Lock className="w-4 h-4 text-muted-foreground" />}>
                     <Input
                       type="password"
                       value={confirmPassword}
@@ -388,7 +388,7 @@ export default function ParentProfilePage() {
                       required
                     />
                     {confirmPassword && newPassword !== confirmPassword && (
-                      <p className="text-[11px] text-red-500 mt-1">{isAr ? 'كلمتا المرور غير متطابقتين' : 'Passwords do not match'}</p>
+                      <p className="text-[11px] text-red-500 mt-1">{t.parentPages.profile.passwordMismatch}</p>
                     )}
                   </FieldRow>
 
@@ -409,16 +409,20 @@ export default function ParentProfilePage() {
                         ))}
                       </div>
                       <p className="text-[11px] text-muted-foreground">
-                        {isAr
-                          ? newPassword.length < 6 ? 'ضعيفة جداً' : newPassword.length < 9 ? 'متوسطة' : newPassword.length < 12 ? 'جيدة' : 'قوية'
-                          : newPassword.length < 6 ? 'Too weak' : newPassword.length < 9 ? 'Fair' : newPassword.length < 12 ? 'Good' : 'Strong'}
+                        {newPassword.length < 6
+                          ? t.parentPages.profile.tooWeak
+                          : newPassword.length < 9
+                            ? t.parentPages.profile.fair
+                            : newPassword.length < 12
+                              ? t.parentPages.profile.good
+                              : t.parentPages.profile.strong}
                       </p>
                     </div>
                   )}
 
                   <SaveButton type="submit" saving={saving} saved={saved} isAr={isAr}
-                    label={isAr ? 'تغيير كلمة المرور' : 'Update Password'}
-                    savedLabel={isAr ? 'تم التغيير' : 'Changed'}
+                    label={t.parentPages.profile.updatePassword}
+                    savedLabel={t.parentPages.profile.changed}
                     disabled={!currentPassword || !newPassword || newPassword !== confirmPassword}
                   />
                 </form>
@@ -432,29 +436,29 @@ export default function ParentProfilePage() {
               <CardContent className="p-6 space-y-6">
                 <SectionHeader
                   icon={<Bell className="w-5 h-5 text-blue-500" />}
-                  title={isAr ? 'إعدادات الإشعارات' : 'Notification Settings'}
-                  desc={isAr ? 'تحكّم في أنواع الإشعارات التي تستقبلها' : 'Control which notifications you receive'}
+                  title={t.parentPages.profile.notifSettings}
+                  desc={t.parentPages.profile.notifSettingsDesc}
                 />
                 <Separator />
 
                 <div className="space-y-1">
                   <NotifRow
-                    title={isAr ? 'إشعارات البريد الإلكتروني' : 'Email Notifications'}
-                    desc={isAr ? 'تلقّي تنبيهات وتحديثات عبر البريد' : 'Receive alerts and updates via email'}
+                    title={t.parentPages.profile.emailNotifications}
+                    desc={t.parentPages.profile.emailNotificationsDesc}
                     checked={emailNotifications}
                     onChange={setEmailNotifications}
                   />
                   <Separator className="my-1" />
                   <NotifRow
-                    title={isAr ? 'إشعارات الدفع الفوري' : 'Push Notifications'}
-                    desc={isAr ? 'إشعارات فورية في المتصفح' : 'Real-time browser notifications'}
+                    title={t.parentPages.profile.pushNotifications}
+                    desc={t.parentPages.profile.pushNotificationsDesc}
                     checked={pushNotifications}
                     onChange={setPushNotifications}
                   />
                   <Separator className="my-1" />
                   <NotifRow
-                    title={isAr ? 'التقرير الأسبوعي' : 'Weekly Report'}
-                    desc={isAr ? 'ملخص أسبوعي لتقدّم أبنائك' : 'Weekly summary of your children\'s progress'}
+                    title={t.parentPages.profile.weeklyReport}
+                    desc={t.parentPages.profile.weeklyReportDesc}
                     checked={weeklyReport}
                     onChange={setWeeklyReport}
                   />
@@ -471,15 +475,15 @@ export default function ParentProfilePage() {
               <CardContent className="p-6 space-y-6">
                 <SectionHeader
                   icon={<Globe className="w-5 h-5 text-emerald-500" />}
-                  title={isAr ? 'اللغة' : 'Language'}
-                  desc={isAr ? 'اختر لغة الواجهة المفضّلة لديك' : 'Choose your preferred interface language'}
+                  title={t.parentPages.profile.interfaceLanguage}
+                  desc={t.parentPages.profile.interfaceLanguageDesc}
                 />
                 <Separator />
 
                 <div className="grid grid-cols-2 gap-3 max-w-xs">
                   {[
-                    { value: 'ar', label: 'العربية', sublabel: 'Arabic' },
-                    { value: 'en', label: 'English', sublabel: 'الإنجليزية' },
+                    { value: 'ar', label: t.parentPages.profile.arabic, sublabel: t.parentPages.profile.arabicSub },
+                    { value: 'en', label: t.parentPages.profile.english, sublabel: t.parentPages.profile.englishSub },
                   ].map((opt) => (
                     <button
                       key={opt.value}

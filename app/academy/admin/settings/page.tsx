@@ -105,7 +105,7 @@ export default function AcademyAdminSettingsPage() {
   const filteredTabs = tabs.filter(
     (tab) =>
       tab.label.includes(searchQuery) ||
-      tab.keywords.some((kw) => kw.includes(searchQuery))
+      (Array.isArray(tab.keywords) && tab.keywords.some((kw: string) => kw.includes(searchQuery)))
   )
 
   // Reset section handler

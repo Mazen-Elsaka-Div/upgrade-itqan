@@ -21,7 +21,8 @@ interface Course {
 }
 
 export default function BrowseCoursesPage() {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
+  const isAr = locale === 'ar'
   const [courses, setCourses] = useState<Course[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
@@ -58,9 +59,9 @@ export default function BrowseCoursesPage() {
   })
 
   const levelLabels = {
-    beginner: t.academy?.beginner || 'مبتدئ',
-    intermediate: t.academy?.intermediate || 'متوسط',
-    advanced: t.academy?.advanced || 'متقدم'
+    beginner: t.studentPages?.courses?.levels?.beginner || t.academy?.beginner || 'مبتدئ',
+    intermediate: t.studentPages?.courses?.levels?.intermediate || t.academy?.intermediate || 'متوسط',
+    advanced: t.studentPages?.courses?.levels?.advanced || t.academy?.advanced || 'متقدم'
   }
 
   const levelColors = {
@@ -70,25 +71,28 @@ export default function BrowseCoursesPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir={isAr ? 'rtl' : 'ltr'}>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">{t.academy?.browseCourses || 'تصفح الدورات'}</h1>
+          <h1 className="text-2xl font-bold">{t.studentPages?.courses?.browseCourses || t.academy?.browseCourses || 'تصفح الدورات'}</h1>
           <p className="text-muted-foreground mt-1">
-            {t.academy?.browseDesc || 'استكشف الدورات المتاحة وانضم إلى رحلة التعلم'}
+            {t.studentPages?.courses?.browseDesc || t.academy?.browseDesc || 'استكشف الدورات المتاحة وانضم إلى رحلة التعلم'}
           </p>
         </div>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
-          <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+          <Search className={cn("absolute top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground", isAr ? "right-3" : "left-3")} />
           <input
             type="text"
-            placeholder={t.academy?.searchCourses || 'ابحث عن دورة أو أستاذ...'}
+            placeholder={t.studentPages?.courses?.searchCourses || t.academy?.searchCourses || 'ابحث عن دورة أو أستاذ...'}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pr-10 pl-4 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className={cn(
+              "w-full py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-blue-500",
+              isAr ? "pr-10 pl-4" : "pl-10 pr-4"
+            )}
           />
         </div>
         <div className="flex gap-2 flex-wrap">
@@ -103,7 +107,7 @@ export default function BrowseCoursesPage() {
                   : "bg-card border border-border text-foreground hover:bg-muted"
               )}
             >
-              {level === 'all' ? (t.academy?.all || 'الكل') : levelLabels[level]}
+              {level === 'all' ? (t.studentPages?.courses?.subjects?.all || t.academy?.all || 'الكل') : levelLabels[level]}
             </button>
           ))}
         </div>
@@ -118,8 +122,8 @@ export default function BrowseCoursesPage() {
           <GraduationCap className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
           <h3 className="text-lg font-semibold mb-2">
             {searchQuery 
-              ? (t.academy?.noSearchResults || 'لا توجد نتائج بحث')
-              : (t.academy?.noPublishedCourses || 'لا توجد دورات متاحة حالياً')
+              ? (t.studentPages?.courses?.noSearchResults || t.academy?.noSearchResults || 'لا توجد نتائج بحث')
+              : (t.studentPages?.courses?.noPublishedCourses || t.academy?.noPublishedCourses || 'لا توجد دورات متاحة حالياً')
             }
           </h3>
         </div>
@@ -160,11 +164,11 @@ export default function BrowseCoursesPage() {
                 <div className="flex items-center gap-4 text-sm text-muted-foreground mb-6">
                   <span className="flex items-center gap-1">
                     <PlayCircle className="w-4 h-4" />
-                    {course.total_lessons} {t.academy?.lessons || 'درس'}
+                    {course.total_lessons} {t.studentPages?.courses?.lessons || t.academy?.lessons || 'درس'}
                   </span>
                   <span className="flex items-center gap-1">
                     <Users className="w-4 h-4" />
-                    {course.total_enrolled} {t.academy?.students || 'طالب'}
+                    {course.total_enrolled} {t.studentPages?.courses?.students || t.academy?.students || 'طالب'}
                   </span>
                 </div>
 
@@ -173,7 +177,7 @@ export default function BrowseCoursesPage() {
                     href={`/academy/student/courses/${course.id}`}
                     className="flex w-full items-center justify-center py-2.5 bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400 font-bold rounded-lg hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors"
                   >
-                    {t.academy?.viewCourse || 'عرض الدورة'}
+                    {t.studentPages?.courses?.viewCourse || t.academy?.viewCourse || 'عرض الدورة'}
                   </Link>
                 </div>
               </div>

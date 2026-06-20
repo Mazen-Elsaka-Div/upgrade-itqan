@@ -42,7 +42,7 @@ interface Achievement {
 }
 
 export default function StudentProgressPage() {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const [stats, setStats] = useState<ProgressStats | null>(null)
   const [weeklyActivity, setWeeklyActivity] = useState<WeeklyActivity[]>([])
   const [recentAchievements, setRecentAchievements] = useState<Achievement[]>([])
@@ -95,12 +95,12 @@ export default function StudentProgressPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold">{t.academy?.myProgress || 'تقدمي'}</h1>
+        <h1 className="text-2xl font-bold">{t.studentPages?.progress?.myProgress || t.academy?.myProgress || 'تقدمي'}</h1>
         <p className="text-muted-foreground mt-1">
-          {t.academy?.progressDesc || 'تتبع إنجازاتك وتطورك في الأكاديمية'}
+          {t.studentPages?.progress?.progressDesc || t.academy?.progressDesc || 'تتبع إنجازاتك وتطورك في الأكاديمية'}
         </p>
       </div>
 
@@ -108,8 +108,8 @@ export default function StudentProgressPage() {
       <div className="bg-gradient-to-l from-blue-600 to-blue-700 rounded-2xl p-6 text-white">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <p className="text-blue-200 text-sm">{t.academy?.currentLevel || 'المستوى الحالي'}</p>
-            <p className="text-4xl font-bold">{t.academy?.level || 'المستوى'} {stats?.current_level || 1}</p>
+            <p className="text-blue-200 text-sm">{t.studentPages?.progress?.currentLevel || t.academy?.currentLevel || 'المستوى الحالي'}</p>
+            <p className="text-4xl font-bold">{t.studentPages?.progress?.level || t.academy?.level || 'المستوى'} {stats?.current_level || 1}</p>
           </div>
           <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center">
             <Trophy className="w-10 h-10 text-yellow-300" />
@@ -118,8 +118,8 @@ export default function StudentProgressPage() {
         
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
-            <span>{stats?.total_points || 0} {t.academy?.points || 'نقطة'}</span>
-            <span>{stats?.points_to_next_level || 1000} {t.academy?.toNextLevel || 'للمستوى التالي'}</span>
+            <span>{stats?.total_points || 0} {t.studentPages?.progress?.points || t.academy?.points || 'نقطة'}</span>
+            <span>{stats?.points_to_next_level || 1000} {t.studentPages?.progress?.toNextLevel || t.academy?.toNextLevel || 'للمستوى التالي'}</span>
           </div>
           <div className="h-3 bg-white/20 rounded-full overflow-hidden">
             <div 
@@ -133,12 +133,12 @@ export default function StudentProgressPage() {
           <div className="flex items-center gap-2">
             <Flame className="w-5 h-5 text-orange-300" />
             <span className="font-bold">{stats?.streak_days || 0}</span>
-            <span className="text-blue-200 text-sm">{t.academy?.currentStreak || 'سلسلة حالية'}</span>
+            <span className="text-blue-200 text-sm">{t.studentPages?.progress?.currentStreak || t.academy?.currentStreak || 'سلسلة حالية'}</span>
           </div>
           <div className="flex items-center gap-2">
             <Star className="w-5 h-5 text-yellow-300" />
             <span className="font-bold">{stats?.longest_streak || 0}</span>
-            <span className="text-blue-200 text-sm">{t.academy?.longestStreak || 'أطول سلسلة'}</span>
+            <span className="text-blue-200 text-sm">{t.studentPages?.progress?.longestStreak || t.academy?.longestStreak || 'أطول سلسلة'}</span>
           </div>
         </div>
       </div>
@@ -147,25 +147,25 @@ export default function StudentProgressPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard 
           icon={BookOpen}
-          label={t.academy?.coursesProgress || 'الدورات'}
+          label={t.studentPages?.progress?.coursesProgress || t.academy?.coursesProgress || 'الدورات'}
           value={`${stats?.courses_completed || 0}/${stats?.courses_enrolled || 0}`}
           color="blue"
         />
         <StatCard 
           icon={CheckCircle2}
-          label={t.academy?.tasksProgress || 'المهام'}
+          label={t.studentPages?.progress?.tasksProgress || t.academy?.tasksProgress || 'المهام'}
           value={`${stats?.tasks_completed || 0}/${stats?.total_tasks || 0}`}
           color="green"
         />
         <StatCard 
           icon={Target}
-          label={t.academy?.lessonsProgress || 'الدروس'}
+          label={t.studentPages?.progress?.lessonsProgress || t.academy?.lessonsProgress || 'الدروس'}
           value={`${stats?.lessons_completed || 0}/${stats?.total_lessons || 0}`}
           color="purple"
         />
         <StatCard 
           icon={Award}
-          label={t.academy?.badgesProgress || 'الشارات'}
+          label={t.studentPages?.progress?.badgesProgress || t.academy?.badgesProgress || 'الشارات'}
           value={`${stats?.badges_earned || 0}/${stats?.total_badges || 0}`}
           color="yellow"
         />
@@ -177,7 +177,7 @@ export default function StudentProgressPage() {
         <div className="lg:col-span-2 bg-card rounded-xl border border-border p-6">
           <h2 className="font-bold mb-6 flex items-center gap-2">
             <BarChart3 className="w-5 h-5 text-blue-600" />
-            {t.academy?.weeklyActivity || 'النشاط الأسبوعي'}
+            {t.studentPages?.progress?.weeklyActivity || t.academy?.weeklyActivity || 'النشاط الأسبوعي'}
           </h2>
           
           {weeklyActivity.length > 0 ? (
@@ -193,7 +193,7 @@ export default function StudentProgressPage() {
                       <div 
                         className="w-full bg-blue-500 rounded-t-lg transition-all hover:bg-blue-600"
                         style={{ height: `${Math.max(height, 5)}%` }}
-                        title={`${day.points} ${t.academy?.points || 'نقطة'}`}
+                        title={`${day.points} ${t.studentPages?.progress?.points || t.academy?.points || 'نقطة'}`}
                       />
                       <span className="text-xs text-muted-foreground">{day.day}</span>
                     </div>
@@ -205,14 +205,14 @@ export default function StudentProgressPage() {
               <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
                 <span className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded bg-blue-500" />
-                  {t.academy?.points || 'النقاط'}
+                  {t.studentPages?.progress?.points || t.academy?.points || 'النقاط'}
                 </span>
               </div>
             </div>
           ) : (
             <div className="text-center py-8 text-muted-foreground">
               <BarChart3 className="w-12 h-12 mx-auto mb-3 opacity-50" />
-              <p>{t.academy?.noActivityYet || 'لا يوجد نشاط هذا الأسبوع'}</p>
+              <p>{t.studentPages?.progress?.noActivityYet || t.academy?.noActivityYet || 'لا يوجد نشاط هذا الأسبوع'}</p>
             </div>
           )}
         </div>
@@ -221,7 +221,7 @@ export default function StudentProgressPage() {
         <div className="bg-card rounded-xl border border-border p-6">
           <h2 className="font-bold mb-4 flex items-center gap-2">
             <Award className="w-5 h-5 text-yellow-600" />
-            {t.academy?.recentAchievements || 'الإنجازات الأخيرة'}
+            {t.studentPages?.progress?.recentAchievements || t.academy?.recentAchievements || 'الإنجازات الأخيرة'}
           </h2>
 
           {recentAchievements.length > 0 ? (
@@ -244,7 +244,7 @@ export default function StudentProgressPage() {
           ) : (
             <div className="text-center py-8 text-muted-foreground">
               <Award className="w-12 h-12 mx-auto mb-3 opacity-50" />
-              <p className="text-sm">{t.academy?.noAchievementsYet || 'لم تحصل على إنجازات بعد'}</p>
+              <p className="text-sm">{t.studentPages?.progress?.noAchievementsYet || t.academy?.noAchievementsYet || 'لم تحصل على إنجازات بعد'}</p>
             </div>
           )}
         </div>
@@ -258,7 +258,7 @@ export default function StudentProgressPage() {
               <Target className="w-5 h-5 text-green-600" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">{t.academy?.memorizedAyahs || 'الآيات المحفوظة'}</p>
+              <p className="text-sm text-muted-foreground">{t.studentPages?.progress?.memorizedAyahs || t.academy?.memorizedAyahs || 'الآيات المحفوظة'}</p>
               <p className="text-2xl font-bold">{stats?.memorized_ayahs || 0}</p>
             </div>
           </div>
@@ -269,7 +269,7 @@ export default function StudentProgressPage() {
             />
           </div>
           <p className="text-xs text-muted-foreground mt-2">
-            {((stats?.memorized_ayahs || 0) / 6236 * 100).toFixed(1)}% {t.academy?.ofQuran || 'من القرآن'}
+            {((stats?.memorized_ayahs || 0) / 6236 * 100).toFixed(1)}% {t.studentPages?.progress?.ofQuran || t.academy?.ofQuran || 'من القرآن'}
           </p>
         </div>
 
@@ -279,7 +279,7 @@ export default function StudentProgressPage() {
               <Calendar className="w-5 h-5 text-blue-600" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">{t.academy?.attendanceRate || 'نسبة الحضور'}</p>
+              <p className="text-sm text-muted-foreground">{t.studentPages?.progress?.attendanceRate || t.academy?.attendanceRate || 'نسبة الحضور'}</p>
               <p className="text-2xl font-bold">{stats?.attendance_rate || 0}%</p>
             </div>
           </div>
@@ -297,7 +297,7 @@ export default function StudentProgressPage() {
               <TrendingUp className="w-5 h-5 text-purple-600" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">{t.academy?.completionRate || 'معدل الإنجاز'}</p>
+              <p className="text-sm text-muted-foreground">{t.studentPages?.progress?.completionRate || t.academy?.completionRate || 'معدل الإنجاز'}</p>
               <p className="text-2xl font-bold">
                 {stats?.total_tasks ? Math.round((stats.tasks_completed / stats.total_tasks) * 100) : 0}%
               </p>

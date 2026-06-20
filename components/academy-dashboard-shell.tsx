@@ -249,16 +249,30 @@ const getAcademyRoleConfig = (t: any, role: AcademyRole): { sections: NavSection
     content_supervisor: {
       sections: [
         {
+          title: t.main || 'الرئيسية',
           items: [
             { href: '/academy/content-supervisor', label: t.academyAdmin?.sidebarDashboard || 'لوحة التحكم', icon: LayoutDashboard },
+          ]
+        },
+        {
+          title: t.academyAdmin?.sidebarEducationalProcess || 'العملية التعليمية',
+          items: [
             { href: '/academy/content-supervisor/lessons', label: t.academyAdmin?.sidebarContentLessons || 'الدروس', icon: BookOpen },
             { href: '/academy/content-supervisor/courses', label: t.academy?.courses || 'الدورات', icon: GraduationCap },
             { href: '/academy/content-supervisor/series', label: t.academy?.series || 'السلاسل', icon: Library },
             { href: '/academy/content-supervisor/paths', label: t.academy?.readerPaths || 'مسارات المقرئ', icon: Route },
             { href: '/academy/content-supervisor/academy-paths', label: t.academy?.academyPaths || 'مسارات الأكاديمية', icon: GraduationCap },
             { href: '/academy/content-supervisor/archive', label: t.academyAdmin?.sidebarContentArchive || 'أرشيف الدورات', icon: Archive },
+          ]
+        },
+        {
+          title: t.academyAdmin?.sidebarCommunity || 'المجتمع',
+          items: [
             { href: '/academy/content-supervisor/messages', label: t.academyAdmin?.sidebarContentMessages || 'الرسائل', icon: MessageSquare },
             { href: '/community/academy/forum', label: t.academy?.forum || 'المنتدى', icon: MessageSquare },
+            { href: '/community/academy/moderation', label: t.academy?.forumModeration || 'إشراف المنتدى', icon: ShieldCheck },
+            { href: '/academy/fiqh', label: t.academy?.fiqhLibrary || 'المكتبة الفقهية', icon: Library },
+            { href: '/academy/library', label: t.academy?.booksLibrary || 'مكتبة الكتب', icon: BookOpen },
           ]
         },
         {

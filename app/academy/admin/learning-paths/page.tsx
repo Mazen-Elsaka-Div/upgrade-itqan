@@ -183,11 +183,17 @@ function emptyForm(): CreateForm {
 }
 
 function isSubjectTab(value: string): value is SubjectTab {
-  return value === "all" || SUBJECTS.some(subject => subject.value === value)
+  return value === "all" || ["fiqh", "aqeedah", "seerah", "tafsir"].includes(value)
 }
 
 function subjectTone(subject: Subject) {
-  return SUBJECTS.find(item => item.value === subject)?.tone || "bg-slate-50 text-slate-800 border-slate-200"
+  switch (subject) {
+    case "fiqh": return "bg-blue-50 text-blue-800 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-700"
+    case "aqeedah": return "bg-violet-50 text-violet-800 border-violet-200 dark:bg-violet-900/20 dark:text-violet-300 dark:border-violet-700"
+    case "seerah": return "bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-700"
+    case "tafsir": return "bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-700"
+    default: return "bg-slate-50 text-slate-800 border-slate-200"
+  }
 }
 
 async function readJson<T>(response: Response): Promise<T> {

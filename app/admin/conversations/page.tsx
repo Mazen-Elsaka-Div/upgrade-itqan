@@ -51,6 +51,7 @@ type Message = {
 // --- COMPONENTS ---
 
 function SupervisionTab({ isAr, t }: { isAr: boolean, t: any }) {
+    const a = t.admin
     const [conversations, setConversations] = useState<Conversation[]>([])
     const [loading, setLoading] = useState(true)
     const [total, setTotal] = useState(0)
@@ -244,6 +245,7 @@ function SupervisionTab({ isAr, t }: { isAr: boolean, t: any }) {
 }
 
 function ContactMessagesTab({ isAr, t }: { isAr: boolean, t: any }) {
+    const a = t.admin
     const [messages, setMessages] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
 
@@ -363,6 +365,7 @@ function ContactMessagesTab({ isAr, t }: { isAr: boolean, t: any }) {
 }
 
 function DirectChatTab({ isAr, t }: { isAr: boolean, t: any }) {
+    const a = t.admin
     const searchParams = useSearchParams()
     const initialUserId = searchParams.get("userId")
     const initialUserRole = searchParams.get("userRole")
@@ -624,6 +627,7 @@ function DirectChatTab({ isAr, t }: { isAr: boolean, t: any }) {
 }
 
 function TicketsTab({ isAr, t }: { isAr: boolean, t: any }) {
+    const a = t.admin
     const [conversations, setConversations] = useState<Conversation[]>([])
     const [activeConv, setActiveConv] = useState<Conversation | null>(null)
     const [messages, setMessages] = useState<Message[]>([])
