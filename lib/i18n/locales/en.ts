@@ -1035,7 +1035,9 @@ export const en = {
       conversationDeleteConfirmation: 'Are you sure you want to permanently delete this conversation for both parties?',
       editedLabel: '(edited)'
     },
-    studentPages: {
+  },
+
+  studentPages: {
       sessions: {
         title: 'Sessions & Recordings',
         desc: 'Attend your live class sessions and review recordings.',
@@ -1738,8 +1740,7 @@ export const en = {
         arabicSub: 'Arabic',
         englishSub: 'English'
       }
-    }
-  },
+    },
 
   // Notifications
   notifications: {
