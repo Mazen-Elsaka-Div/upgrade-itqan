@@ -1481,7 +1481,13 @@ export const en = {
         memorizedAyahs: 'Memorized Verses',
         ofQuran: 'of the Quran',
         attendanceRate: 'Attendance Rate',
-        completionRate: 'Completion Rate'
+        completionRate: 'Completion Rate',
+        monthlyTrend: 'Monthly Activity',
+        monthlyTotal: '{points} points total',
+        monthlyPoints: 'Monthly points',
+        activeDays: 'active days',
+        weekVsMonth: 'This week: {week} • This month: {month}',
+        noMonthlyActivity: 'No activity in recent months'
       },
       series: {
         title: 'Educational Series',
