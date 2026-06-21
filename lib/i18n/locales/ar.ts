@@ -1035,7 +1035,9 @@ export const ar = {
       conversationDeleteConfirmation: 'هل أنت متأكد من حذف هذه المحادثة نهائياً لكلا الطرفين؟',
       editedLabel: '(مُعدلة)'
     },
-    studentPages: {
+  },
+
+  studentPages: {
       sessions: {
         title: 'الجلسات والتسجيلات',
         desc: 'احضر جلسات دوراتك المباشرة وراجع التسجيلات السابقة بكل سهولة.',
@@ -1738,8 +1740,7 @@ export const ar = {
         arabicSub: 'Arabic',
         englishSub: 'الإنجليزية'
       }
-    }
-  },
+    },
 
   // Notifications
   notifications: {
