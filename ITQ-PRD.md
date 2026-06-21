@@ -1340,5 +1340,484 @@ halaqat ──< halaqah_enrollments >── users
 
 ---
 
+## 18. Test Scenarios
+
+### 18.1 Authentication & Access Control
+
+| # | Scenario | Steps | Expected Result |
+|---|----------|-------|-----------------|
+| AC-01 | Student login | Enter valid credentials → Submit | Redirect to `/academy/student` |
+| AC-02 | Teacher login | Enter valid credentials → Submit | Redirect to `/academy/teacher` |
+| AC-03 | Admin login | Enter valid credentials → Submit | Redirect to `/academy/admin` |
+| AC-04 | Parent login | Enter valid credentials → Submit | Redirect to `/academy/parent` |
+| AC-05 | Invalid credentials | Enter wrong password → Submit | Show error message, no redirect |
+| AC-06 | Registration - Academy only | Select "Academy Only" → Complete | `has_academy_access=true`, no mode switcher |
+| AC-07 | Registration - Academy + Reader | Select "Academy + Reader" → Complete | `has_academy_access=true`, mode switcher visible |
+| AC-08 | Unauthenticated access | Navigate to `/academy/student` without login | Redirect to `/login` |
+| AC-09 | No academy access | Student without `has_academy_access` tries `/academy/student` | Blocked, redirect or 403 |
+| AC-10 | Student tries admin | Student navigates to `/academy/admin` | Blocked, 403 or redirect |
+| AC-11 | Teacher tries admin | Teacher navigates to `/academy/admin` | Blocked, 403 or redirect |
+| AC-12 | Parent accesses unrelated child | Parent tries to view unlinked child's data | Blocked, no data returned |
+| AC-13 | JWT expiry | Wait for token expiry → Make request | Redirect to `/login` |
+| AC-14 | Mode Switcher toggle | Click mode switcher → Switch to Reader | Smooth transition, correct platform loads |
+| AC-15 | Session persistence | Login → Close browser → Reopen | Session maintained, no re-login |
+
+### 18.2 Academy Student Learning
+
+| # | Scenario | Steps | Expected Result |
+|---|----------|-------|-----------------|
+| SL-01 | View dashboard | Login as student → Open dashboard | Stats display: courses, points, level, streak |
+| SL-02 | Browse courses | Navigate to browse → Filter by category | Courses filtered correctly |
+| SL-03 | Browse courses by level | Filter by "Beginner" | Only beginner courses shown |
+| SL-04 | Search courses | Type course name in search | Matching courses displayed |
+| SL-05 | View course detail | Click course → View detail page | Description, lessons list, teacher info shown |
+| SL-06 | Request enrollment | Click "Request Enrollment" | Request sent, status shown as pending |
+| SL-07 | View my courses | Navigate to "My Courses" | Enrolled courses with progress % shown |
+| SL-08 | Open lesson | Click lesson → Lesson page loads | Video/audio, materials, description, PDF attachments |
+| SL-09 | Lesson progress auto-update | Complete watching lesson | Progress percentage updates automatically |
+| SL-10 | Submit task | Navigate to tasks → Open task → Upload file | Submission recorded, status changes to "submitted" |
+| SL-11 | Submit task - audio | Record audio → Submit | Audio uploaded, submission recorded |
+| SL-12 | View memorization record | Navigate to memorization | Record shows total verses (6236) and juz (30) |
+| SL-13 | Quran map colors | View visual Quran map | Green=memo, Yellow=reviewed, Gray=not memo |
+| SL-14 | Quran map auto-update | Teacher accepts recitation | Map updates automatically |
+| SL-15 | View learning path | Navigate to path page | Path stages displayed, locked ones show `locked` |
+| SL-16 | View progress charts | Navigate to progress | Weekly/monthly charts render correctly |
+| SL-17 | View leaderboard | Navigate to leaderboard | Rankings displayed, filter works |
+| SL-18 | View badges | Navigate to badges | Earned + remaining badges shown with progress |
+| SL-19 | Calendar - view events | Open calendar | Sessions, lessons, tasks, deadlines displayed |
+| SL-20 | Calendar - mobile view | Open calendar on mobile | Switches to list view |
+| SL-21 | Calendar - join session | Click "Join Session" on today's session | Redirects to session/video |
+| SL-22 | Download certificate | Navigate to certificates → Download PDF | PDF downloads with correct data |
+| SL-23 | View points history | Navigate to points | Full history with reasons displayed |
+| SL-24 | View halaqat | Navigate to halaqat | Enrolled halaqat listed |
+| SL-25 | Join via invitation code | Enter valid code at `/invite/[code]` | Enrolled in course |
+| SL-26 | Join via invalid code | Enter invalid/expired code | Error message shown |
+| SL-27 | View series | Navigate to series | Series listed with episodes |
+| SL-28 | Quick actions | Click quick action on dashboard | Correct page/action triggered |
+
+### 18.3 Academy Student Communication & Community
+
+| # | Scenario | Steps | Expected Result |
+|---|----------|-------|-----------------|
+| SC-01 | Open chat | Navigate to chat | Conversations list with last message |
+| SC-02 | Search teacher in chat | Type teacher name | Filtered results shown |
+| SC-03 | Send message | Select conversation → Type message → Send | Message delivered, appears in chat |
+| SC-04 | Submit fiqh question | Navigate to fiqh → Fill form → Submit | Question created, status "pending" |
+| SC-05 | View fiqh answer | Open answered question | Question + answer displayed |
+| SC-06 | Browse forum categories | Navigate to forum | Categories listed |
+| SC-07 | Create forum topic | Click "New Topic" → Fill → Submit | Topic published, appears in category |
+| SC-08 | Reply to topic | Open topic → Type reply → Submit | Reply added, topic creator notified |
+| SC-09 | Filter notifications | Click "Unread" filter | Only unread notifications shown |
+| SC-10 | Mark notification as read | Click notification | Marked as read, bell count decreases |
+| SC-11 | Parent linking request | Receive request → Accept | Link established, parent sees child data |
+| SC-12 | Parent linking request - reject | Receive request → Reject | Request rejected, no link created |
+| SC-13 | Accept enrollment | Receive enrollment notification → Accept | Student enrolled, notification sent |
+| SC-14 | Reject enrollment | Receive enrollment notification → Reject with reason | Student notified with reason |
+| SC-15 | Enter invitation code | Navigate to `/invite/[code]` with valid code | Enrollment form shown |
+| SC-16 | View notifications | Bell icon shows count | Correct unread count displayed |
+
+### 18.4 Academy Teacher Course Delivery
+
+| # | Scenario | Steps | Expected Result |
+|---|----------|-------|-----------------|
+| TD-01 | View teacher dashboard | Login as teacher → Dashboard loads | Stats: courses, students, pending tasks, sessions |
+| TD-02 | Create course | Click "New Course" → Fill details → Save | Course created, status "draft" |
+| TD-03 | Edit course | Open course → Edit details → Save | Course updated |
+| TD-04 | Upload lesson | Open course lessons → Upload video/PDF | Lesson uploaded, status "pending review" |
+| TD-05 | Reorder lessons | Drag & drop lessons | Order saved correctly |
+| TD-06 | Create task | Click "New Task" → Set details → Save | Task created, assigned to students |
+| TD-07 | Create task - individual | Select specific student | Task assigned to that student only |
+| TD-08 | Grade submission | Open task → View submission → Add grade + notes | Grade saved, student notified |
+| TD-09 | View student list | Navigate to students | Students with progress % listed |
+| TD-10 | Create student account | Click "Create Student" → Fill form | Account created |
+| TD-11 | Start live session | Click "Start Live" → Select students | Session created, link generated |
+| TD-12 | Schedule session | Navigate to sessions → Schedule new | Session scheduled, reminders set |
+| TD-13 | Delete session | Select session → Delete | Session removed |
+| TD-14 | Create invitation | Navigate to invitations → Create code | Code generated (e.g., `ITQ-FIQH-2026-A1`) |
+| TD-15 | View recordings | Navigate to recordings | Past session recordings listed |
+| TD-16 | View memorization progress | Navigate to memorization | All students' progress displayed |
+| TD-17 | Set memorization goals | Select student → Set weekly goals | Goals saved, tracking enabled |
+| TD-18 | Accept enrollment request | View request → Accept | Student enrolled, notification sent |
+| TD-19 | Reject enrollment request | View request → Reject with reason | Student notified with reason |
+| TD-20 | Manage halaqat | Navigate to halaqat | Managed halaqat listed |
+| TD-21 | Send parent message | Navigate to parent messages → Send | Message delivered to parent |
+| TD-22 | Publish public lesson | Create public lesson → Publish | Lesson publicly accessible |
+| TD-23 | View path stats | Navigate to paths | Path completion stats shown |
+
+### 18.5 Academy Administration
+
+| # | Scenario | Steps | Expected Result |
+|---|----------|-------|-----------------|
+| AD-01 | View admin dashboard | Login as admin → Dashboard loads | Stats: students, teachers, courses, enrollments |
+| AD-02 | Create course | Click "New Course" → Fill → Assign teacher → Save | Course created with assigned teacher |
+| AD-03 | Edit course status | Change status to "Published" | Course visible to students |
+| AD-04 | Archive course | Change status to "Archived" | Course hidden from browse |
+| AD-05 | Add category | Navigate to categories → Add | Category created |
+| AD-06 | Edit category | Select category → Edit → Save | Category updated |
+| AD-07 | Delete category | Select category → Delete | Category removed |
+| AD-08 | View teachers | Navigate to teachers | Teacher list with stats |
+| AD-09 | Approve teacher application | View application → Accept | Teacher role assigned |
+| AD-10 | Reject teacher application | View application → Reject with reason | Applicant notified |
+| AD-11 | View students | Navigate to students | Student list with stats |
+| AD-12 | Create learning path | Navigate to paths → Create | Path created with stages |
+| AD-13 | Edit path stages | Select path → Edit stages | Stages updated |
+| AD-14 | Assign fiqh officer | Select path → Assign officer | Officer assigned |
+| AD-15 | Change access control | Toggle `has_academy_access` for user | Access updated, logged |
+| AD-16 | View access log | Navigate to access control → View log | "Who changed what when" shown |
+| AD-17 | Send invitation | Navigate to invitations → Create | Invitation sent and tracked |
+| AD-18 | Create competition | Navigate to competitions → Create | Competition created |
+| AD-19 | Configure competition participants | Edit competition → Set participants | Participants configured |
+| AD-20 | Set competition scope | Set scope to "halaqah" | Competition scoped correctly |
+| AD-21 | View leaderboard admin | Navigate to leaderboard | Rankings + point history |
+| AD-22 | Create badge | Navigate to badges → Create | Badge created |
+| AD-23 | Upload badge image | Create badge → Upload image | Image saved |
+| AD-24 | Edit badge requirements | Select badge → Edit criteria | Requirements updated |
+| AD-25 | Manual badge award | Select student → Award badge | Badge awarded, points added |
+| AD-26 | Moderate forum | Navigate to forum → Delete reply | Reply removed, user logged |
+| AD-27 | Review fiqh | Navigate to fiqh → Review question | Question visible with answer |
+| AD-28 | Assign fiqh supervisor | Select question → Assign supervisor | Supervisor assigned |
+| AD-29 | Publish announcement | Navigate to announcements → Create → Publish | Announcement visible to targeted roles |
+| AD-30 | Target announcement | Select target roles | Only targeted roles see it |
+| AD-31 | Export report | Navigate to reports → Export CSV/PDF | File downloaded with correct data |
+| AD-32 | View analytics | Navigate to analytics | Charts render with real data |
+| AD-33 | Create halaqah | Navigate to halaqat → Create | Halaqah created with teacher |
+| AD-34 | Manage halaqah students | Select halaqah → Add/remove students | Students updated |
+| AD-35 | Save settings | Navigate to settings → Edit → Save | Settings saved, toast shown |
+| AD-36 | Test SMTP | Settings → Notifications → Test Email | Test email sent, success shown |
+| AD-37 | Update point values | Settings → Gamification → Edit points | Points updated |
+| AD-38 | Update level thresholds | Settings → Gamification → Edit levels | Levels updated |
+| AD-39 | Toggle gamification | Settings → Toggle points system OFF | Points system disabled |
+| AD-40 | Toggle badges | Settings → Toggle badges OFF | Badges system disabled |
+| AD-41 | Toggle leaderboard | Settings → Toggle leaderboard OFF | Leaderboard hidden |
+| AD-42 | Toggle streak | Settings → Toggle streak OFF | Streak tracking disabled |
+| AD-43 | Toggle forum | Settings → Forum → Disable | Forum inaccessible |
+| AD-44 | Toggle fiqh | Settings → Fiqh → Disable | Fiqh page inaccessible |
+| AD-45 | Enable maintenance mode | Settings → Maintenance → Toggle ON | Platform blocked for non-admins |
+| AD-46 | Clear cache | Settings → Maintenance → Clear Cache | Cache cleared, confirmation shown |
+| AD-47 | Backup | Settings → Maintenance → Backup | JSON file downloaded |
+| AD-48 | Assign supervisor | Navigate to supervisors → Assign | Supervisor assigned to section |
+| AD-49 | View archive | Navigate to archive | Archived items listed |
+| AD-50 | View conversations | Navigate to conversations | All conversations listed |
+| AD-51 | View users | Navigate to users | User list with roles |
+| AD-52 | Manage library | Navigate to library | Books listed, add/edit/delete works |
+| AD-53 | Manage series | Navigate to series | Series listed, add/edit/delete works |
+| AD-54 | Manage public lessons | Navigate to public lessons | Lessons listed, publish/unpublish works |
+| AD-55 | View certificates | Navigate to certificates | Certificate list shown |
+| AD-56 | Video settings | Navigate to video settings | Settings saved correctly |
+| AD-57 | Contact messages | Navigate to contact messages | Messages listed |
+
+### 18.6 Parent Portal
+
+| # | Scenario | Steps | Expected Result |
+|---|----------|-------|-----------------|
+| PP-01 | View parent dashboard | Login as parent → Dashboard loads | Performance summary for linked children |
+| PP-02 | Link child | Enter child email → Select relationship → Submit | Link request sent |
+| PP-03 | Link with invalid email | Enter non-existent email → Submit | Error: "Child not found" |
+| PP-04 | Link already linked child | Enter already linked child's email | Error: "Already linked" |
+| PP-05 | View children | Navigate to children | All linked children with active courses |
+| PP-06 | View child progress | Click child → View progress | Charts, badges, level, attendance |
+| PP-07 | Generate report | Select child + time period → Generate | Report with attendance, tasks, grades |
+| PP-08 | Export report PDF | Click "Export PDF" | PDF downloaded |
+| PP-09 | Compare children | Select multiple children | Comparison data shown |
+| PP-10 | Set restrictions | Navigate to restrictions → Select surahs/paths | Restrictions saved |
+| PP-11 | Restrictions hidden from child | Parent sets restriction | Child's interface hides restricted items |
+| PP-12 | Remove restriction | Delete restriction | Items visible to child again |
+| PP-13 | Send message to teacher | Navigate to messages → Select teacher → Send | Message delivered |
+| PP-14 | View notifications | Navigate to notifications | Child performance alerts shown |
+| PP-15 | Unlink child | Navigate to children → Remove link | Link removed, data access lost |
+| PP-16 | View calendar | Navigate to calendar | Children's schedule displayed |
+| PP-17 | View teachers | Navigate to teachers | Children's linked teachers listed |
+
+### 18.7 Supervisor & Reviewer Workflows
+
+| # | Scenario | Steps | Expected Result |
+|---|----------|-------|-----------------|
+| SV-01 | Content supervisor - view pending | Login as content supervisor → Dashboard | Pending lessons listed by status |
+| SV-02 | Accept lesson | Select lesson → Accept | Lesson published, teacher notified |
+| SV-03 | Reject lesson with reason | Select lesson → Reject → Write reason | Lesson rejected, teacher notified with reason |
+| SV-04 | Content supervisor - manage courses | Navigate to courses | Courses listed, edit works |
+| SV-05 | Content supervisor - manage paths | Navigate to paths | Paths listed, edit works |
+| SV-06 | Content supervisor - manage series | Navigate to series | Series listed, edit works |
+| SV-07 | Content supervisor - messages | Navigate to messages | Messages listed |
+| SV-08 | Fiqh supervisor - view questions | Login as fiqh supervisor → Dashboard | Questions by status (new/under review/answered/rejected) |
+| SV-09 | Fiqh supervisor - answer question | Select question → Write answer (rich text) → Publish | Answer published, questioner notified |
+| SV-10 | Fiqh supervisor - reject question | Select question → Reject with reason | Questioner notified with reason |
+| SV-11 | Fiqh supervisor - messages | Navigate to messages | Messages listed |
+| SV-12 | Quality supervisor - view stats | Login as quality supervisor → Dashboard | Teacher grades, evaluation time, complaints |
+| SV-13 | Quality supervisor - write report | Navigate to report → Write → Send to admin | Report saved, admin notified |
+| SV-14 | General supervisor - view content | Login as supervisor → Navigate to content | Content review page |
+| SV-15 | General supervisor - forum moderation | Navigate to forum → Hide/delete reply | Reply removed, user logged |
+| SV-16 | General supervisor - track teachers | Navigate to teachers | Teacher performance shown |
+| SV-17 | Fiqh officer - view assigned | Login as officer → Navigate to fiqh | Assigned questions listed |
+
+### 18.8 Gamification & Performance Tracking
+
+| # | Scenario | Steps | Expected Result |
+|---|----------|-------|-----------------|
+| GP-01 | Award points - recitation | Submit recitation | +10 points added |
+| GP-02 | Award points - mastered | Teacher accepts as "mastered" | +30 points added |
+| GP-03 | Award points - task | Complete task | +15 points added |
+| GP-04 | Award points - attendance | Attend lesson | +20 points added |
+| GP-05 | Award points - streak | Submit daily recitation | +5 points added, streak incremented |
+| GP-06 | Award points - juz complete | Complete full juz | +100 points added |
+| GP-07 | Award points - session | Attend session | +20 points added |
+| GP-08 | Award points - forum | Answer in forum | +25 points added |
+| GP-09 | Award points - competition | Win competition | +500 points added |
+| GP-10 | Streak multiplier - 3 days | Maintain 3-day streak | ×2.0 multiplier applied |
+| GP-11 | Streak multiplier - 7 days | Maintain 7-day streak | ×2.0 multiplier applied |
+| GP-12 | Streak multiplier - 30 days | Maintain 30-day streak | ×2.0 multiplier applied |
+| GP-13 | Streak reset | Miss a day | Streak resets to 0 |
+| GP-14 | Level promotion | Points reach 500 | Level changes to "Intermediate", notification sent |
+| GP-15 | Level promotion - advanced | Points reach 2000 | Level changes to "Advanced" |
+| GP-16 | Level promotion - hafiz | Points reach 5000 | Level changes to "Hafiz" |
+| GP-17 | Level promotion - master | Points reach 10000 | Level changes to "Master" |
+| GP-18 | Badge - first recitation | Submit first recitation | Badge awarded, +20 points |
+| GP-19 | Badge - week streak | 7 consecutive days | Badge awarded, +70 points |
+| GP-20 | Badge - juz amma hafiz | Complete Juz 30 | Badge awarded, +200 points |
+| GP-21 | Badge - hundred recitations | 100 recitations | Badge awarded, +150 points |
+| GP-22 | Badge - tajweed master | Complete Tajweed path | Badge awarded, +300 points |
+| GP-23 | Badge - ramadan | Ramadan activity | Badge awarded, +250 points |
+| GP-24 | Badge - full Quran | Complete Quran | Badge awarded, +1000 points |
+| GP-25 | Badge - star of halaqah | Best in halaqah | Badge awarded, +180 points |
+| GP-26 | Badge progress tracking | Check badge progress | Correct progress shown (e.g., 67/100) |
+| GP-27 | Points log | View points history | All point entries with reasons shown |
+| GP-28 | Leaderboard ranking | View leaderboard | Correct ranking by points |
+| GP-29 | Leaderboard filter - halaqah | Filter by halaqah | Only halaqah members shown |
+| GP-30 | Leaderboard filter - platform | Filter by platform | All users ranked |
+| GP-31 | Points - admin adjust | Admin manually adjusts points | Points updated, logged |
+| GP-32 | Disable points system | Admin toggles OFF | Points not awarded |
+| GP-33 | Disable badges | Admin toggles OFF | Badges not awarded |
+| GP-34 | Disable leaderboard | Admin toggles OFF | Leaderboard hidden |
+| GP-35 | Disable streak | Admin toggles OFF | Streak not tracked |
+
+### 18.9 Live Sessions & Video Calls
+
+| # | Scenario | Steps | Expected Result |
+|---|----------|-------|-----------------|
+| LV-01 | Start LiveKit session | Teacher clicks "Start Live" | LiveKit session created |
+| LV-02 | Start Zoom session | Teacher selects Zoom → Add link | Zoom link shared with students |
+| LV-03 | Start Meet session | Teacher selects Meet → Add link | Meet link shared with students |
+| LV-04 | Student joins session | Student clicks join link | Enters waiting room or directly |
+| LV-05 | Waiting room | Student joins → Waits | Waiting room displayed until teacher admits |
+| LV-06 | Teacher admits student | Teacher admits from waiting room | Student joins session |
+| LV-07 | Session auto-end | Session time expires | Session ends, link expires |
+| LV-08 | Session reminder - 1 hour | 1 hour before session | Reminder notification sent |
+| LV-09 | Session reminder - 10 min | 10 minutes before session | Reminder notification sent |
+| LV-10 | Send session to individual | Teacher sends to one student | Only that student receives link |
+| LV-11 | Send session to group | Teacher sends to group | All group members receive link |
+| LV-12 | View recordings | Navigate to recordings | Past recordings listed |
+| LV-13 | Track attendance | Session ends | Attendance recorded in `session_attendance` |
+| LV-14 | Session link expiry | After session ends | Link no longer works |
+
+### 18.10 Notifications, Messaging & Community Alerts
+
+| # | Scenario | Steps | Expected Result |
+|---|----------|-------|-----------------|
+| NM-01 | In-app notification | Event occurs | Bell icon updates, notification appears |
+| NM-02 | Email notification | Event occurs | Email sent via SMTP |
+| NM-03 | Notification - enrollment accept | Teacher accepts enrollment | Student receives notification |
+| NM-04 | Notification - enrollment reject | Teacher rejects enrollment | Student receives notification with reason |
+| NM-05 | Notification - new task | Teacher creates task | Student receives notification |
+| NM-06 | Notification - task graded | Teacher grades submission | Student receives notification |
+| NM-07 | Notification - session link | Teacher creates session | Student receives link |
+| NM-08 | Notification - session reminder 1h | 1 hour before session | Reminder sent |
+| NM-09 | Notification - session reminder 10m | 10 minutes before session | Reminder sent |
+| NM-10 | Notification - forum reply | Someone replies to topic | Topic creator notified |
+| NM-11 | Notification - level up | Points reach next level | Level promotion notification |
+| NM-12 | Notification - new badge | Badge earned | Badge notification |
+| NM-13 | Notification - streak warning | End of day, no recitation | Streak warning sent |
+| NM-14 | Notification - parent link request | Parent sends link request | Child + parent notified |
+| NM-15 | Notification - fiqh answer | Fiqh question answered | Questioner notified |
+| NM-16 | Notification - fiqh rejected | Fiqh question rejected | Questioner notified with reason |
+| NM-17 | Notification - parent weekly report | Weekly cron runs | Parent receives report |
+| NM-18 | Notification - daily werd | Daily cron runs | Student receives werd reminder |
+| NM-19 | Search notifications | Type in search | Filtered notifications shown |
+| NM-20 | Filter unread | Click "Unread" | Only unread notifications shown |
+| NM-21 | Mark all as read | Click "Mark all read" | All marked as read |
+| NM-22 | Send message | Select conversation → Type → Send | Message delivered |
+
+### 18.11 Competitions
+
+| # | Scenario | Steps | Expected Result |
+|---|----------|-------|-----------------|
+| CP-01 | View open competitions | Navigate to competitions | Open competitions listed |
+| CP-02 | Submit to competition | Select competition → Submit recitation | Submission recorded |
+| CP-03 | Create competition (admin) | Navigate to competitions → Create | Competition created |
+| CP-04 | Edit competition | Select competition → Edit | Competition updated |
+| CP-05 | Configure participants | Edit competition → Set participants | Participants configured |
+| CP-06 | Set competition scope | Set to "halaqah" | Scoped correctly |
+| CP-07 | View competition results | After competition ends | Results displayed |
+| CP-08 | Award competition winner | Select winner | Badge awarded, points multiplied |
+| CP-09 | Competition rank system | View rankings | Ranks (1st, 2nd, 3rd) with points |
+| CP-10 | Competition judges | Assign judges | Judges can evaluate submissions |
+
+### 18.12 Academy Content Discovery
+
+| # | Scenario | Steps | Expected Result |
+|---|----------|-------|-----------------|
+| CD-01 | View series page | Navigate to series | Available series listed |
+| CD-02 | Open series detail | Click series | Episodes/lessons listed |
+| CD-03 | View lesson in series | Click lesson | Lesson content displayed |
+| CD-04 | Open public lesson | Navigate to public lesson | Lesson content publicly accessible |
+| CD-05 | Public lesson - no auth | Access public lesson without login | Lesson accessible (no auth required) |
+| CD-06 | Public lesson - tracking | View public lesson | View tracked (if implemented) |
+
+### 18.13 Fiqh Q&A Workflow
+
+| # | Scenario | Steps | Expected Result |
+|---|----------|-------|-----------------|
+| FQ-01 | Submit fiqh question | Fill form → Submit | Question created, status "pending" |
+| FQ-02 | Submit with custom fields | Fill custom fields → Submit | Custom data saved |
+| FQ-03 | View my questions | Navigate to "My Questions" | Questions listed with status |
+| FQ-04 | View answered question | Click answered question | Question + full answer displayed |
+| FQ-05 | Fiqh supervisor - review | Login as supervisor → View questions | Questions by status |
+| FQ-06 | Fiqh supervisor - answer | Select question → Write answer (rich text) → Publish | Answer published |
+| FQ-07 | Fiqh supervisor - reject | Select question → Reject with reason | Questioner notified |
+| FQ-08 | Fiqh officer - view assigned | Login as officer → View assigned | Only assigned questions shown |
+| FQ-09 | Admin - assign supervisor | Select question → Assign fiqh supervisor | Supervisor assigned |
+| FQ-10 | Admin - review all | Navigate to fiqh admin | All questions and answers visible |
+| FQ-11 | Fiqh categories | Navigate to categories | Categories listed |
+| FQ-12 | Fiqh - close question | Mark question as closed | Status changes to "closed" |
+
+### 18.14 Forum Moderation
+
+| # | Scenario | Steps | Expected Result |
+|---|----------|-------|-----------------|
+| FM-01 | Supervisor - view all topics | Login as supervisor → Forum | All topics and replies visible |
+| FM-02 | Supervisor - hide reply | Select reply → Hide | Reply hidden from public view |
+| FM-03 | Supervisor - delete reply | Select reply → Delete | Reply permanently removed |
+| FM-04 | Supervisor - view violations | Navigate to violations | Violation log per user |
+| FM-05 | Admin - create forum | Navigate to forum → Create forum | Forum created |
+| FM-06 | Admin - manage forums | Edit/delete forums | Forums updated/removed |
+| FM-07 | Student - create topic | Fill form → Submit | Topic published (if approval required, goes to pending) |
+| FM-08 | Topic approval workflow | Student creates topic → Supervisor approves | Topic published after approval |
+| FM-09 | Blocked word filter | Student types blocked word | Word filtered/blocked |
+
+### 18.15 Certificate Generation
+
+| # | Scenario | Steps | Expected Result |
+|---|----------|-------|-----------------|
+| CG-01 | Auto-issue on completion | Student completes course | Certificate auto-generated |
+| CG-02 | Download PDF | Navigate to certificates → Download | PDF with correct data + logo |
+| CG-03 | Admin - manage certificates | Navigate to certificates | All certificates listed |
+| CG-04 | Admin - issue manual | Select student → Issue certificate | Certificate created |
+| CG-05 | Certificate data | View certificate | Student name, course, date, issue number correct |
+
+### 18.16 Cron Jobs
+
+| # | Scenario | Steps | Expected Result |
+|---|----------|-------|-----------------|
+| CJ-01 | Session reminders | Cron runs hourly | Upcoming sessions get reminders |
+| CJ-02 | Task reminders | Cron runs daily morning | Pending tasks get reminders |
+| CJ-03 | Overdue task alerts | Cron detects overdue tasks | Alert sent to student + parent |
+| CJ-04 | Streak reminders | Cron runs daily evening | Students without recitation warned |
+| CJ-05 | Parent weekly reports | Cron runs weekly | Reports generated and emailed |
+| CJ-06 | Admin activity reports | Cron runs weekly/monthly | Reports generated |
+| CJ-07 | Academy reminders | Cron runs daily | General reminders sent |
+| CJ-08 | Check expirations | Cron runs daily | Expired items handled |
+| CJ-09 | Auto-end sessions | Cron runs every 5 min | Past sessions marked as ended |
+| CJ-10 | Daily werd reminders | Cron runs daily | Werd reminders sent |
+
+### 18.17 Mode Switcher
+
+| # | Scenario | Steps | Expected Result |
+|---|----------|-------|-----------------|
+| MS-01 | Switch to Reader | Click mode switcher → Select Reader | `/reader` loads, fade+slide animation |
+| MS-02 | Switch to Academy | Click mode switcher → Select Academy | `/academy/student` loads |
+| MS-03 | Hidden for academy-only | Login as academy-only user | Mode switcher not visible |
+| MS-04 | Visible for dual account | Login as academy+reader user | Mode switcher visible |
+| MS-05 | Preserve state | Switch mode → Switch back | Previous state preserved |
+
+### 18.18 Dark Mode
+
+| # | Scenario | Steps | Expected Result |
+|---|----------|-------|-----------------|
+| DM-01 | Toggle dark mode | Click theme toggle | Dark mode applied |
+| DM-02 | Dark mode - all pages | Navigate all academy pages | No unreadable text/elements |
+| DM-03 | Dark mode - forms | Fill forms in dark mode | All inputs readable |
+| DM-04 | Dark mode - charts | View charts in dark mode | Charts readable with correct colors |
+| DM-05 | Dark mode - persistence | Toggle dark → Reload | Preference persisted |
+
+### 18.19 Responsive Design
+
+| # | Scenario | Steps | Expected Result |
+|---|----------|-------|-----------------|
+| RD-01 | Mobile - dashboard | Open on mobile | Dashboard responsive, all elements visible |
+| RD-02 | Mobile - calendar | Open calendar on mobile | Switches to list view |
+| RD-03 | Mobile - chat | Open chat on mobile | Chat usable, keyboard doesn't hide input |
+| RD-04 | Mobile - video player | Play video on mobile | Video player responsive |
+| RD-05 | Mobile - task submission | Submit task on mobile | Upload works, form usable |
+| RD-06 | Mobile - forms | Fill any form on mobile | All inputs accessible, keyboard works |
+| RD-07 | Mobile - tables | View tables on mobile | Horizontal scroll or card layout |
+| RD-08 | Tablet - layout | Open on tablet | Layout adapts correctly |
+| RD-09 | Desktop - sidebar | Open on desktop | Sidebar visible and functional |
+| RD-10 | Mode Switcher - mobile | Use mode switcher on mobile | Works correctly |
+
+### 18.20 Error Handling
+
+| # | Scenario | Steps | Expected Result |
+|---|----------|-------|-----------------|
+| EH-01 | Network failure | Disconnect network → Make request | Error message shown, no crash |
+| EH-02 | API timeout | Server takes > 30s | Timeout error shown |
+| EH-03 | Invalid form input | Submit form with invalid data | Validation errors shown |
+| EH-04 | 404 - invalid route | Navigate to `/academy/invalid` | 404 page shown |
+| EH-05 | 403 - forbidden | Access restricted page | 403 page or redirect |
+| EH-06 | Session expired | Use expired JWT | Redirect to login |
+| EH-07 | Concurrent edits | Two users edit same data | Last write wins or conflict shown |
+| EH-08 | Large file upload | Upload file > limit | Error: "File too large" |
+| EH-09 | Invalid file type | Upload unsupported file type | Error: "Invalid file type" |
+| EH-10 | Empty required fields | Submit form with empty required fields | Validation errors shown |
+| EH-11 | SQL injection attempt | Enter `' OR 1=1 --` in input | Input sanitized, no breach |
+| EH-12 | XSS attempt | Enter `<script>alert('xss')</script>` | Script not executed, escaped |
+| EH-13 | Browser back button | Navigate forward → Click back | Correct state restored |
+| EH-14 | Double submit | Click submit button twice rapidly | Only one submission processed |
+
+### 18.21 Performance Testing
+
+| # | Scenario | Steps | Expected Result |
+|---|----------|-------|-----------------|
+| PF-01 | Dashboard load time | Measure dashboard load | < 3 seconds |
+| PF-02 | Course list load | Measure course list load | < 3 seconds |
+| PF-03 | Lesson page load | Measure lesson page load | < 3 seconds |
+| PF-04 | API response time | Measure API endpoints | < 1 second average |
+| PF-05 | Image loading | Load pages with images | Images optimized, lazy loaded |
+| PF-06 | Chart rendering | Load analytics page | Charts render smoothly |
+| PF-07 | Concurrent users | Simulate 100 concurrent users | No crashes, reasonable response times |
+| PF-08 | Memory leak check | Use app for 30 minutes | No memory leaks |
+| PF-09 | Duplicate API calls | Monitor network tab | No duplicate requests |
+| PF-10 | SWR caching | Navigate away → Back | Cached data shown instantly |
+
+### 18.22 Security Testing
+
+| # | Scenario | Steps | Expected Result |
+|---|----------|-------|-----------------|
+| ST-01 | RBAC - teacher to admin | Teacher navigates to `/academy/admin` | Blocked |
+| ST-02 | RBAC - student to admin | Student navigates to `/academy/admin` | Blocked |
+| ST-03 | RBAC - parent unauthorized | Parent accesses unrelated child | Blocked |
+| ST-04 | JWT manipulation | Modify JWT payload | Token rejected |
+| ST-05 | SQL injection | Enter SQL in forms | Input sanitized |
+| ST-06 | XSS in forum | Post script tag in forum | Script not executed |
+| ST-07 | File upload security | Upload `.exe` or `.php` file | File rejected |
+| ST-08 | Unauthorized API access | Call API without auth | 401 returned |
+| ST-09 | IDOR - access other user data | Modify ID in API request | Access denied |
+| ST-10 | Rate limiting | Send 1000 requests/min | Rate limited (when implemented) |
+
+### 18.24 File Upload & Download
+
+| # | Scenario | Steps | Expected Result |
+|---|----------|-------|-----------------|
+| FU-01 | Upload video | Teacher uploads MP4 | Video uploaded, processed |
+| FU-02 | Upload PDF | Teacher uploads PDF | PDF uploaded, accessible |
+| FU-03 | Upload audio | Student uploads MP3 | Audio uploaded, playable |
+| FU-04 | Upload image | User uploads avatar | Image uploaded, displayed |
+| FU-05 | Upload large file | Upload 500MB video | Upload completes (or error if too large) |
+| FU-06 | Upload invalid type | Upload `.exe` file | Rejected with error |
+| FU-07 | Download PDF | Click download on certificate | PDF downloads correctly |
+| FU-08 | Download audio | Click download on audio | Audio downloads correctly |
+| FU-09 | S3 storage | Files stored in S3 | Files accessible via S3 URL |
+| FU-10 | Cloudinary storage | Files stored in Cloudinary | Files accessible via Cloudinary URL |
+
+---
+
 *This document was created based on a comprehensive analysis of the project codebase.*
 *Last Updated: June 21, 2026*
