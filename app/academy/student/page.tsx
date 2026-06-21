@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { useI18n } from '@/lib/i18n/context'
 import { cn } from '@/lib/utils'
@@ -85,42 +85,72 @@ export default function AcademyStudentDashboard() {
   const [loading, setLoading] = useState(true)
   const [showAllSessions, setShowAllSessions] = useState(false)
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const [statsRes, coursesRes, sessionsRes, tasksRes, pointsRes] = await Promise.all([
+  // `statsOnly` lets us cheaply refresh the streak/points banner when the user
+  // returns to the dashboard after completing an activity elsewhere, without
+  // refetching the heavier course/session/task lists.
+  const fetchData = useCallback(async (statsOnly = false) => {
+    try {
+      if (statsOnly) {
+        const [statsRes, pointsRes] = await Promise.all([
           fetch('/api/academy/student/stats'),
-          fetch('/api/academy/student/courses?limit=3'),
-          fetch('/api/academy/student/sessions?limit=20&upcoming=true'),
-          fetch('/api/academy/student/tasks?limit=4&pending=true'),
           fetch('/api/academy/student/points'),
         ])
-
         if (statsRes.ok) setStats(await statsRes.json())
-        if (coursesRes.ok) {
-          const data = await coursesRes.json()
-          setCourses(data.data || [])
-        }
-        if (sessionsRes.ok) {
-          const data = await sessionsRes.json()
-          setSessions(data.data || [])
-        }
-        if (tasksRes.ok) {
-          const data = await tasksRes.json()
-          setTasks(data.data || [])
-        }
         if (pointsRes.ok) {
           const data = await pointsRes.json()
           setActivity(data.data?.log || [])
         }
-      } catch (error) {
-        console.error('Failed to fetch dashboard data:', error)
-      } finally {
-        setLoading(false)
+        return
       }
+
+      const [statsRes, coursesRes, sessionsRes, tasksRes, pointsRes] = await Promise.all([
+        fetch('/api/academy/student/stats'),
+        fetch('/api/academy/student/courses?limit=3'),
+        fetch('/api/academy/student/sessions?limit=20&upcoming=true'),
+        fetch('/api/academy/student/tasks?limit=4&pending=true'),
+        fetch('/api/academy/student/points'),
+      ])
+
+      if (statsRes.ok) setStats(await statsRes.json())
+      if (coursesRes.ok) {
+        const data = await coursesRes.json()
+        setCourses(data.data || [])
+      }
+      if (sessionsRes.ok) {
+        const data = await sessionsRes.json()
+        setSessions(data.data || [])
+      }
+      if (tasksRes.ok) {
+        const data = await tasksRes.json()
+        setTasks(data.data || [])
+      }
+      if (pointsRes.ok) {
+        const data = await pointsRes.json()
+        setActivity(data.data?.log || [])
+      }
+    } catch (error) {
+      console.error('Failed to fetch dashboard data:', error)
+    } finally {
+      setLoading(false)
     }
-    fetchData()
   }, [])
+
+  useEffect(() => {
+    fetchData()
+
+    // Refresh the streak/points banner when the tab regains focus or becomes
+    // visible again — e.g. after the student completes a tracked daily activity
+    // on another page and navigates back here.
+    const refresh = () => {
+      if (document.visibilityState === 'visible') fetchData(true)
+    }
+    window.addEventListener('focus', refresh)
+    document.addEventListener('visibilitychange', refresh)
+    return () => {
+      window.removeEventListener('focus', refresh)
+      document.removeEventListener('visibilitychange', refresh)
+    }
+  }, [fetchData])
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr)
