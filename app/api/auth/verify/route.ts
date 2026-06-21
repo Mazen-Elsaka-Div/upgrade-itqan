@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { query } from "@/lib/db"
 import { signToken } from "@/lib/auth"
+import { isQaBypassCode } from "@/lib/qa-bypass"
 import { sendWelcomeEmail } from "@/lib/email"
 
 export async function POST(req: NextRequest) {
@@ -36,22 +37,10 @@ export async function POST(req: NextRequest) {
 
         // QA bypass: allow a configured static code for whitelisted emails so that
         // E2E/automation suites (Playwright, TestSprite, etc.) can complete signup
-        // without polling a real inbox. The bypass is gated by THREE conditions:
-        //   1. QA_BYPASS_CODE env var is set (acts as the magic code)
-        //   2. The user's email is in QA_TEST_EMAILS (comma-separated whitelist)
-        //   3. NODE_ENV is not 'production', OR ALLOW_QA_BYPASS_IN_PROD is 'true'
-        // If any condition is missing, the bypass is silently disabled and the
-        // normal verification_code flow is enforced.
-        const qaBypassCode = process.env.QA_BYPASS_CODE
-        const qaTestEmails = (process.env.QA_TEST_EMAILS || "")
-            .split(",")
-            .map((e) => e.trim().toLowerCase())
-            .filter(Boolean)
-        const bypassEnabled =
-            !!qaBypassCode &&
-            qaTestEmails.includes(user.email.toLowerCase()) &&
-            (process.env.NODE_ENV !== "production" || process.env.ALLOW_QA_BYPASS_IN_PROD === "true")
-        const isQaBypass = bypassEnabled && code === qaBypassCode
+        // without polling a real inbox. The full gating logic (env var set, email
+        // whitelisted, non-prod or explicitly allowed) lives in isQaBypassCode()
+        // so it stays a single, unit-tested source of truth.
+        const isQaBypass = isQaBypassCode(user.email, code)
 
         if (!isQaBypass && user.verification_code !== code) {
             return NextResponse.json({ error: "كود التحقق غير صحيح" }, { status: 400 })
