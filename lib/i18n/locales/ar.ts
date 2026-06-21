@@ -1481,7 +1481,13 @@ export const ar = {
         memorizedAyahs: 'الآيات المحفوظة',
         ofQuran: 'من القرآن',
         attendanceRate: 'نسبة الحضور',
-        completionRate: 'معدل الإنجاز'
+        completionRate: 'معدل الإنجاز',
+        monthlyTrend: 'النشاط الشهري',
+        monthlyTotal: 'إجمالي {points} نقطة',
+        monthlyPoints: 'النقاط الشهرية',
+        activeDays: 'يوم نشط',
+        weekVsMonth: 'هذا الأسبوع: {week} • هذا الشهر: {month}',
+        noMonthlyActivity: 'لا يوجد نشاط في الأشهر الأخيرة'
       },
       series: {
         title: 'السلاسل التعليمية',

@@ -33,6 +33,14 @@ interface WeeklyActivity {
   lessons: number
 }
 
+interface MonthlyActivity {
+  label: string
+  points: number
+  tasks: number
+  lessons: number
+  active_days: number
+}
+
 interface Achievement {
   id: string
   title: string
@@ -45,15 +53,17 @@ export default function StudentProgressPage() {
   const { t, locale } = useI18n()
   const [stats, setStats] = useState<ProgressStats | null>(null)
   const [weeklyActivity, setWeeklyActivity] = useState<WeeklyActivity[]>([])
+  const [monthlyActivity, setMonthlyActivity] = useState<MonthlyActivity[]>([])
   const [recentAchievements, setRecentAchievements] = useState<Achievement[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const [statsRes, activityRes, achievementsRes] = await Promise.all([
+        const [statsRes, activityRes, monthlyRes, achievementsRes] = await Promise.all([
           fetch('/api/academy/student/progress'),
-          fetch('/api/academy/student/progress/weekly'),
+          fetch(`/api/academy/student/progress/weekly?locale=${locale}`),
+          fetch(`/api/academy/student/progress/monthly?locale=${locale}&months=6`),
           fetch('/api/academy/student/progress/achievements?limit=5')
         ])
 
@@ -64,6 +74,10 @@ export default function StudentProgressPage() {
         if (activityRes.ok) {
           const data = await activityRes.json()
           setWeeklyActivity(data.data || [])
+        }
+        if (monthlyRes.ok) {
+          const data = await monthlyRes.json()
+          setMonthlyActivity(data.data || [])
         }
         if (achievementsRes.ok) {
           const data = await achievementsRes.json()
@@ -76,7 +90,12 @@ export default function StudentProgressPage() {
       }
     }
     fetchData()
-  }, [])
+  }, [locale])
+
+  const weeklyTotalPoints = weeklyActivity.reduce((sum, d) => sum + d.points, 0)
+  const monthlyTotalPoints = monthlyActivity.reduce((sum, m) => sum + m.points, 0)
+  const currentMonthPoints = monthlyActivity.length > 0 ? monthlyActivity[monthlyActivity.length - 1].points : 0
+  const monthlyHasActivity = monthlyActivity.some((m) => m.points > 0)
 
   const getLevelProgress = () => {
     if (!stats) return 0
@@ -248,6 +267,61 @@ export default function StudentProgressPage() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Monthly Trend — lets students compare monthly vs weekly activity.
+          Renders independently of the weekly chart so it shows even when the
+          current week has no activity yet. */}
+      <div className="bg-card rounded-xl border border-border p-6">
+        <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
+          <h2 className="font-bold flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-emerald-600" />
+            {t.studentPages?.progress?.monthlyTrend || 'النشاط الشهري'}
+          </h2>
+          <span className="text-sm text-muted-foreground">
+            {(t.studentPages?.progress?.monthlyTotal || 'إجمالي {points} نقطة')
+              .replace('{points}', String(monthlyTotalPoints))}
+          </span>
+        </div>
+
+        {monthlyHasActivity ? (
+          <div className="space-y-4">
+            <div className="flex items-end gap-2 sm:gap-3 h-48">
+              {monthlyActivity.map((month, index) => {
+                const maxPoints = Math.max(...monthlyActivity.map(m => m.points), 1)
+                const height = (month.points / maxPoints) * 100
+                return (
+                  <div key={index} className="flex-1 flex flex-col items-center gap-2 min-w-0">
+                    <span className="text-xs font-medium text-muted-foreground">{month.points}</span>
+                    <div
+                      className="w-full bg-gradient-to-t from-emerald-600 to-emerald-400 rounded-t-lg transition-all hover:from-emerald-700 hover:to-emerald-500"
+                      style={{ height: `${Math.max(height, 4)}%` }}
+                      title={`${month.points} ${t.studentPages?.progress?.points || 'نقطة'} • ${month.active_days} ${t.studentPages?.progress?.activeDays || 'يوم نشط'}`}
+                    />
+                    <span className="text-xs text-muted-foreground truncate w-full text-center">{month.label}</span>
+                  </div>
+                )
+              })}
+            </div>
+            <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground flex-wrap">
+              <span className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded bg-emerald-500" />
+                {t.studentPages?.progress?.monthlyPoints || 'النقاط الشهرية'}
+              </span>
+              <span className="flex items-center gap-2">
+                <Calendar className="w-4 h-4" />
+                {(t.studentPages?.progress?.weekVsMonth || 'هذا الأسبوع: {week} • هذا الشهر: {month}')
+                  .replace('{week}', String(weeklyTotalPoints))
+                  .replace('{month}', String(currentMonthPoints))}
+              </span>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center py-8 text-muted-foreground">
+            <TrendingUp className="w-12 h-12 mx-auto mb-3 opacity-50" />
+            <p>{t.studentPages?.progress?.noMonthlyActivity || 'لا يوجد نشاط في الأشهر الأخيرة'}</p>
+          </div>
+        )}
       </div>
 
       {/* Additional Stats */}

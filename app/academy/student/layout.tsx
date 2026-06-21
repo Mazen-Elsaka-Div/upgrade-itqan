@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { getSession } from '@/lib/auth'
+import { resolveStudentDashboardRedirect } from '@/lib/academy/access'
 import { AcademyDashboardShell } from '@/components/academy-dashboard-shell'
 
 export default async function AcademyStudentLayout({
@@ -27,37 +28,11 @@ export default async function AcademyStudentLayout({
   // deployment, demo mode, matcher gaps). Enforce the student role here too so a
   // non-student authenticated user (admin, teacher, supervisor) is never shown
   // the student UI — they are redirected to their own dashboard instead.
-  const supervisorRoles = [
-    'supervisor',
-    'content_supervisor',
-    'fiqh_supervisor',
-    'quality_supervisor',
-    'student_supervisor',
-    'reciter_supervisor',
-    'academy_admin',
-  ]
-  const academyRoles = session.academy_roles || []
-  const isStudentLike =
-    session.role === 'student' ||
-    session.role === 'parent' ||
-    academyRoles.includes('student') ||
-    academyRoles.includes('parent')
-
-  if (!isStudentLike) {
-    if (session.role === 'admin') {
-      redirect('/academy/admin')
-    }
-    if (session.role === 'teacher' || academyRoles.includes('teacher')) {
-      redirect('/academy/teacher')
-    }
-    if (
-      supervisorRoles.includes(session.role) ||
-      academyRoles.some((r) => supervisorRoles.includes(r))
-    ) {
-      redirect('/academy/supervisor')
-    }
-    // Any other authenticated-but-unauthorized role: send to academy root.
-    redirect('/academy')
+  // The decision lives in resolveStudentDashboardRedirect() so it stays a single,
+  // unit-tested source of truth and can't drift from the middleware.
+  const redirectTarget = resolveStudentDashboardRedirect(session)
+  if (redirectTarget) {
+    redirect(redirectTarget)
   }
 
   // Determine if user has library access
