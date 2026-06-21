@@ -139,6 +139,21 @@ BEGIN
     WHERE l.user_id = v_student AND l.description = p.descr
   );
 
+  -- 7b) Roll the seeded points_log up into a user_points row. The student
+  --     "points" screen reads total_points / level / streak from user_points
+  --     (via getUserPointsSummary), NOT from points_log — so without this row
+  --     the screen would still show 0 even though the history above exists.
+  INSERT INTO user_points (user_id, total_points, level, streak_days, longest_streak, last_activity_date)
+  SELECT v_student,
+         COALESCE((SELECT SUM(points) FROM points_log WHERE user_id = v_student), 0),
+         'beginner', 4, 6, CURRENT_DATE
+  ON CONFLICT (user_id) DO UPDATE
+    SET total_points = (SELECT COALESCE(SUM(points), 0) FROM points_log WHERE user_id = v_student),
+        streak_days = GREATEST(user_points.streak_days, 4),
+        longest_streak = GREATEST(user_points.longest_streak, 6),
+        last_activity_date = CURRENT_DATE,
+        updated_at = NOW();
+
   -- 8) Fiqh questions in the moderation queue (answer IS NULL => "pending")
   INSERT INTO fiqh_questions (asked_by, question, category, is_published, asked_at)
   SELECT v_student, q.question, q.cat, FALSE, NOW() - (q.h || ' hours')::INTERVAL
