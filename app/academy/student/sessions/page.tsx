@@ -49,9 +49,9 @@ interface Recording {
 type Filter = 'upcoming' | 'live' | 'completed' | 'all' | 'recordings'
 
 const KIND_LABEL: Record<string, string> = {
-  halaqa: 'حلقة إقراء',
-  booking: 'جلسة فردية',
-  course_session: 'درس دورة',
+  halaqa: (t.addedTranslations_2026?.['حلقة إقراء'] || 'حلقة إقراء'),
+  booking: (t.addedTranslations_2026?.['جلسة فردية'] || 'جلسة فردية'),
+  course_session: (t.addedTranslations_2026?.['درس دورة'] || 'درس دورة'),
 }
 
 const KIND_LABEL_EN: Record<string, string> = {
@@ -127,12 +127,12 @@ export default function StudentSessionsPage() {
       const res = await fetch('/api/video/recordings?scope=mine&platform=academy&limit=200')
       if (!res.ok) {
         const j = await res.json().catch(() => ({}))
-        throw new Error(j.error || (isAr ? 'فشل تحميل التسجيلات' : 'Failed to load recordings'))
+        throw new Error(j.error || (isAr ? (t.addedTranslations_2026?.['فشل تحميل التسجيلات'] || 'فشل تحميل التسجيلات') : 'Failed to load recordings'))
       }
       const json = await res.json()
       setRecordings(json.data || [])
     } catch (e) {
-      setRecordingsError(e instanceof Error ? e.message : (isAr ? 'حدث خطأ غير متوقع أثناء الاتصال بالخادم' : 'An unexpected error occurred while connecting to the server'))
+      setRecordingsError(e instanceof Error ? e.message : (isAr ? (t.addedTranslations_2026?.['حدث خطأ غير متوقع أثناء الاتصال بالخادم'] || 'حدث خطأ غير متوقع أثناء الاتصال بالخادم') : 'An unexpected error occurred while connecting to the server'))
     } finally {
       setRecordingsLoading(false)
     }
@@ -196,10 +196,10 @@ export default function StudentSessionsPage() {
   }).length
 
   const statusConfig: Record<string, { label: string; color: string }> = {
-    scheduled:   { label: t.studentPages?.sessions?.scheduled || (isAr ? 'مجدولة' : 'Scheduled'),  color: 'bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20' },
-    in_progress: { label: t.studentPages?.sessions?.liveNow || (isAr ? 'مباشر الآن' : 'Live now'),    color: 'bg-red-500/10 text-red-700 dark:text-red-300 border-red-500/20' },
-    completed:   { label: t.studentPages?.sessions?.completed || (isAr ? 'منتهية' : 'Completed'),  color: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20' },
-    cancelled:   { label: t.studentPages?.sessions?.cancelled || (isAr ? 'ملغاة' : 'Cancelled'),  color: 'bg-slate-500/10 text-slate-700 dark:text-slate-400 border-slate-500/20' },
+    scheduled:   { label: t.studentPages?.sessions?.scheduled || (isAr ? (t.addedTranslations_2026?.['مجدولة'] || 'مجدولة') : 'Scheduled'),  color: 'bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20' },
+    in_progress: { label: t.studentPages?.sessions?.liveNow || (isAr ? (t.addedTranslations_2026?.['مباشر الآن'] || 'مباشر الآن') : 'Live now'),    color: 'bg-red-500/10 text-red-700 dark:text-red-300 border-red-500/20' },
+    completed:   { label: t.studentPages?.sessions?.completed || (isAr ? (t.addedTranslations_2026?.['منتهية'] || 'منتهية') : 'Completed'),  color: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20' },
+    cancelled:   { label: t.studentPages?.sessions?.cancelled || (isAr ? (t.addedTranslations_2026?.['ملغاة'] || 'ملغاة') : 'Cancelled'),  color: 'bg-slate-500/10 text-slate-700 dark:text-slate-400 border-slate-500/20' },
   }
 
   const fmtDate = (d: Date) => new Intl.DateTimeFormat(isAr ? 'ar-EG' : 'en-US', { weekday: 'long', day: 'numeric', month: 'long' }).format(d)
@@ -262,13 +262,13 @@ export default function StudentSessionsPage() {
         <div className="space-y-3">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase backdrop-blur-sm w-fit">
             <Video className="w-4 h-4" />
-            {t.studentPages?.sessions?.title || (isAr ? 'الجلسات الحية والتسجيلات' : 'Live Sessions & Recordings')}
+            {t.studentPages?.sessions?.title || (isAr ? (t.addedTranslations_2026?.['الجلسات الحية والتسجيلات'] || 'الجلسات الحية والتسجيلات') : 'Live Sessions & Recordings')}
           </div>
           <h1 className="text-3xl lg:text-4xl font-black bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-400 py-1">
-            {t.studentPages?.sessions?.title || (isAr ? 'الجلسات والتسجيلات' : 'Sessions & Recordings')}
+            {t.studentPages?.sessions?.title || (isAr ? (t.addedTranslations_2026?.['الجلسات والتسجيلات'] || 'الجلسات والتسجيلات') : 'Sessions & Recordings')}
           </h1>
           <p className="text-muted-foreground font-medium max-w-xl">
-            {t.studentPages?.sessions?.desc || (isAr ? 'احضر جلسات دوراتك المباشرة وراجع التسجيلات السابقة بكل سهولة.' : 'Attend your live class sessions and review recordings.')}
+            {t.studentPages?.sessions?.desc || (isAr ? (t.addedTranslations_2026?.['احضر جلسات دوراتك المباشرة وراجع التسجيلات السابقة بكل سهولة.'] || 'احضر جلسات دوراتك المباشرة وراجع التسجيلات السابقة بكل سهولة.') : 'Attend your live class sessions and review recordings.')}
           </p>
         </div>
         <div className="relative max-w-sm w-full">
@@ -276,7 +276,7 @@ export default function StudentSessionsPage() {
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder={t.studentPages?.sessions?.searchPlaceholder || (isAr ? 'ابحث بعنوان الجلسة، الدورة، أو المدرس...' : 'Search by session, course, or teacher...')}
+            placeholder={t.studentPages?.sessions?.searchPlaceholder || (isAr ? (t.addedTranslations_2026?.['ابحث بعنوان الجلسة، الدورة، أو المدرس...'] || 'ابحث بعنوان الجلسة، الدورة، أو المدرس...') : 'Search by session, course, or teacher...')}
             className="w-full ps-11 pe-4 py-3 rounded-xl border border-border/50 bg-white/50 dark:bg-slate-900/50 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 backdrop-blur-sm transition-all hover:bg-white/80 dark:hover:bg-slate-900/80"
           />
         </div>
@@ -298,10 +298,10 @@ export default function StudentSessionsPage() {
                 </div>
                 <div>
                   <p className="font-black text-red-700 dark:text-red-300 text-lg">
-                    {liveCount} {t.studentPages?.sessions?.sessionsLiveNow || (isAr ? 'جلسة مباشرة الآن' : 'live sessions right now')}
+                    {liveCount} {t.studentPages?.sessions?.sessionsLiveNow || (isAr ? (t.addedTranslations_2026?.['جلسة مباشرة الآن'] || 'جلسة مباشرة الآن') : 'live sessions right now')}
                   </p>
                   <p className="text-sm font-medium text-red-600/80 dark:text-red-400/80">
-                    {t.studentPages?.sessions?.joinNowDesc || (isAr ? 'انضم الآن قبل انتهاء البث المباشر' : 'Join now before it ends')}
+                    {t.studentPages?.sessions?.joinNowDesc || (isAr ? (t.addedTranslations_2026?.['انضم الآن قبل انتهاء البث المباشر'] || 'انضم الآن قبل انتهاء البث المباشر') : 'Join now before it ends')}
                   </p>
                 </div>
               </div>
@@ -309,7 +309,7 @@ export default function StudentSessionsPage() {
                 onClick={() => setFilter('live')}
                 className="self-start sm:self-center px-6 py-2.5 bg-gradient-to-r from-red-600 to-orange-600 text-white font-bold rounded-xl hover:scale-105 active:scale-95 transition-all shadow-md shadow-red-500/20"
               >
-                {t.studentPages?.sessions?.viewLiveSessions || (isAr ? 'عرض الجلسات المباشرة' : 'View live sessions')}
+                {t.studentPages?.sessions?.viewLiveSessions || (isAr ? (t.addedTranslations_2026?.['عرض الجلسات المباشرة'] || 'عرض الجلسات المباشرة') : 'View live sessions')}
               </button>
             </div>
           </motion.div>
@@ -324,11 +324,11 @@ export default function StudentSessionsPage() {
         className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide bg-white/40 dark:bg-slate-900/40 p-1.5 rounded-2xl border border-border/50 backdrop-blur-sm w-fit max-w-full"
       >
         {([
-          { id: 'upcoming'  as Filter, label: t.studentPages?.sessions?.upcoming || (isAr ? 'القادمة' : 'Upcoming'),  count: upcomingCount,  icon: Calendar },
-          { id: 'live'      as Filter, label: t.studentPages?.sessions?.live || (isAr ? 'مباشر' : 'Live'),        count: liveCount,      icon: Video },
-          { id: 'completed' as Filter, label: t.studentPages?.sessions?.completed || (isAr ? 'منتهية' : 'Completed'), count: completedCount, icon: CheckCircle2 },
-          { id: 'all'       as Filter, label: t.studentPages?.sessions?.all || (isAr ? 'الكل' : 'All'),                                      count: sessions.length, icon: History },
-          { id: 'recordings' as Filter, label: t.studentPages?.sessions?.recordings || (isAr ? 'مكتبة التسجيلات' : 'Recordings'),                  count: recordings.length, icon: Library },
+          { id: 'upcoming'  as Filter, label: t.studentPages?.sessions?.upcoming || (isAr ? (t.addedTranslations_2026?.['القادمة'] || 'القادمة') : 'Upcoming'),  count: upcomingCount,  icon: Calendar },
+          { id: 'live'      as Filter, label: t.studentPages?.sessions?.live || (isAr ? (t.addedTranslations_2026?.['مباشر'] || 'مباشر') : 'Live'),        count: liveCount,      icon: Video },
+          { id: 'completed' as Filter, label: t.studentPages?.sessions?.completed || (isAr ? (t.addedTranslations_2026?.['منتهية'] || 'منتهية') : 'Completed'), count: completedCount, icon: CheckCircle2 },
+          { id: 'all'       as Filter, label: t.studentPages?.sessions?.all || (isAr ? (t.addedTranslations_2026?.['الكل'] || 'الكل') : 'All'),                                      count: sessions.length, icon: History },
+          { id: 'recordings' as Filter, label: t.studentPages?.sessions?.recordings || (isAr ? (t.addedTranslations_2026?.['مكتبة التسجيلات'] || 'مكتبة التسجيلات') : 'Recordings'),                  count: recordings.length, icon: Library },
         ]).map(tab => {
           const isSelected = filter === tab.id
           return (
@@ -379,7 +379,7 @@ export default function StudentSessionsPage() {
                 <div className="p-4 rounded-2xl bg-emerald-100 dark:bg-emerald-900/30">
                   <Loader2 className="w-8 h-8 animate-spin text-emerald-600 dark:text-emerald-400" />
                 </div>
-                <p className="text-muted-foreground font-medium animate-pulse">{t.studentPages?.sessions?.loadingRecordings || (isAr ? 'جاري جلب التسجيلات...' : 'Fetching recordings...')}</p>
+                <p className="text-muted-foreground font-medium animate-pulse">{t.studentPages?.sessions?.loadingRecordings || (isAr ? (t.addedTranslations_2026?.['جاري جلب التسجيلات...'] || 'جاري جلب التسجيلات...') : 'Fetching recordings...')}</p>
               </div>
             ) : recordingsError ? (
               <div className="flex justify-center">
@@ -389,11 +389,11 @@ export default function StudentSessionsPage() {
                       <RefreshCcw className="w-8 h-8 text-red-600 dark:text-red-400" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-red-700 dark:text-red-400 mb-2">{t.studentPages?.sessions?.errorTitle || (isAr ? 'عذراً، حدث خطأ' : 'Sorry, an error occurred')}</h3>
+                      <h3 className="text-lg font-bold text-red-700 dark:text-red-400 mb-2">{t.studentPages?.sessions?.errorTitle || (isAr ? (t.addedTranslations_2026?.['عذراً، حدث خطأ'] || 'عذراً، حدث خطأ') : 'Sorry, an error occurred')}</h3>
                       <p className="text-sm text-red-600/80 dark:text-red-400/80 px-4">{recordingsError}</p>
                     </div>
                     <Button onClick={loadRecordings} variant="destructive" className="rounded-xl px-8 shadow-sm hover:shadow-md transition-all">
-                      {t.studentPages?.sessions?.retry || (isAr ? 'إعادة المحاولة' : 'Retry')}
+                      {t.studentPages?.sessions?.retry || (isAr ? (t.addedTranslations_2026?.['إعادة المحاولة'] || 'إعادة المحاولة') : 'Retry')}
                     </Button>
                   </CardContent>
                 </Card>
@@ -409,15 +409,15 @@ export default function StudentSessionsPage() {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <h3 className="text-xl font-bold">{search ? (t.studentPages?.sessions?.noResults || (isAr ? 'لا توجد نتائج' : 'No results')) : (t.studentPages?.sessions?.noRecordingsYet || (isAr ? 'لا توجد تسجيلات حتى الآن' : 'No recordings yet'))}</h3>
+                      <h3 className="text-xl font-bold">{search ? (t.studentPages?.sessions?.noResults || (isAr ? (t.addedTranslations_2026?.['لا توجد نتائج'] || 'لا توجد نتائج') : 'No results')) : (t.studentPages?.sessions?.noRecordingsYet || (isAr ? (t.addedTranslations_2026?.['لا توجد تسجيلات حتى الآن'] || 'لا توجد تسجيلات حتى الآن') : 'No recordings yet'))}</h3>
                       <p className="text-muted-foreground max-w-sm mx-auto leading-relaxed">
-                        {search ? (t.studentPages?.sessions?.noRecordingsMatched || (isAr ? `لم نعثر على تسجيلات تطابق "${search}".` : `No recordings matched "${search}".`)).replace('{search}', search) : (t.studentPages?.sessions?.noRecordingsDesc || (isAr ? 'لم يتم العثور على أي تسجيلات للجلسات التي حضرتها. بمجرد أن يقوم المعلم بمشاركة تسجيل جلسة سابقة، سيظهر هنا مباشرة.' : 'No recordings found for the sessions you attended. Once the teacher shares a recording, it will appear here.'))}
+                        {search ? (t.studentPages?.sessions?.noRecordingsMatched || (isAr ? `لم نعثر على تسجيلات تطابق "${search}".` : `No recordings matched "${search}".`)).replace('{search}', search) : (t.studentPages?.sessions?.noRecordingsDesc || (isAr ? (t.addedTranslations_2026?.['لم يتم العثور على أي تسجيلات للجلسات التي حضرتها. بمجرد أن يقوم المعلم بمشاركة تسجيل جلسة سابقة، سيظهر هنا مباشرة.'] || 'لم يتم العثور على أي تسجيلات للجلسات التي حضرتها. بمجرد أن يقوم المعلم بمشاركة تسجيل جلسة سابقة، سيظهر هنا مباشرة.') : 'No recordings found for the sessions you attended. Once the teacher shares a recording, it will appear here.'))}
                       </p>
                     </div>
                     {!search && (
                       <Button onClick={loadRecordings} variant="outline" className="mt-4 rounded-xl border-emerald-200 hover:bg-emerald-50 dark:border-emerald-900 dark:hover:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">
                         <RefreshCcw className="w-4 h-4 mr-2" />
-                        {t.studentPages?.sessions?.refreshPage || (isAr ? 'تحديث الصفحة' : 'Refresh Page')}
+                        {t.studentPages?.sessions?.refreshPage || (isAr ? (t.addedTranslations_2026?.['تحديث الصفحة'] || 'تحديث الصفحة') : 'Refresh Page')}
                       </Button>
                     )}
                   </CardContent>
@@ -431,7 +431,7 @@ export default function StudentSessionsPage() {
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex flex-col gap-2 flex-1">
                           <Badge variant="secondary" className={cn("w-fit font-bold border bg-gradient-to-r", KIND_COLORS[r.kind] || KIND_COLORS.halaqa)}>
-                            {t.studentPages?.sessions?.[r.kind] || (isAr ? KIND_LABEL[r.kind] : KIND_LABEL_EN[r.kind] || r.kind) || (isAr ? 'جلسة' : 'Session')}
+                            {t.studentPages?.sessions?.[r.kind] || (isAr ? KIND_LABEL[r.kind] : KIND_LABEL_EN[r.kind] || r.kind) || (isAr ? (t.addedTranslations_2026?.['جلسة'] || 'جلسة') : 'Session')}
                           </Badge>
                           <h3 className="font-bold text-lg leading-tight line-clamp-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                             {r.title || t.studentPages?.sessions?.[r.kind] || (isAr ? KIND_LABEL[r.kind] : KIND_LABEL_EN[r.kind] || r.kind)}
@@ -450,30 +450,30 @@ export default function StudentSessionsPage() {
                         </div>
                         <div className="col-span-2 flex items-center gap-2 text-sm text-muted-foreground bg-muted/30 p-2.5 rounded-lg">
                           <Users className="w-4 h-4 text-blue-500 shrink-0" />
-                          <span className="font-medium">{r.participants_count} {t.studentPages?.sessions?.participants || (isAr ? 'مشارك حضر الجلسة' : 'participants')}</span>
+                          <span className="font-medium">{r.participants_count} {t.studentPages?.sessions?.participants || (isAr ? (t.addedTranslations_2026?.['مشارك حضر الجلسة'] || 'مشارك حضر الجلسة') : 'participants')}</span>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-3 pt-2">
                         {r.recording_url ? (
                           <div className="flex-1">
-                            <VideoPlayerModal url={r.recording_url} title={r.title || t.studentPages?.sessions?.[r.kind] || (isAr ? KIND_LABEL[r.kind] : KIND_LABEL_EN[r.kind] || r.kind) || (isAr ? 'جلسة' : 'Session')}>
+                            <VideoPlayerModal url={r.recording_url} title={r.title || t.studentPages?.sessions?.[r.kind] || (isAr ? KIND_LABEL[r.kind] : KIND_LABEL_EN[r.kind] || r.kind) || (isAr ? (t.addedTranslations_2026?.['جلسة'] || 'جلسة') : 'Session')}>
                               <button className="inline-flex items-center justify-center gap-2 px-5 py-2 w-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl hover:scale-105 font-bold shadow-md shadow-emerald-500/20 transition-all text-sm">
                                 <PlayCircle className="w-4 h-4" />
-                                {t.studentPages?.sessions?.watchRecording || (isAr ? 'شاهد التسجيل' : 'Watch')}
+                                {t.studentPages?.sessions?.watchRecording || (isAr ? (t.addedTranslations_2026?.['شاهد التسجيل'] || 'شاهد التسجيل') : 'Watch')}
                               </button>
                             </VideoPlayerModal>
                           </div>
                         ) : (
                           <Button disabled className="flex-1 rounded-xl bg-muted text-muted-foreground" variant="secondary">
-                            {t.studentPages?.sessions?.processing || (isAr ? 'قيد المعالجة' : 'Processing')}
+                            {t.studentPages?.sessions?.processing || (isAr ? (t.addedTranslations_2026?.['قيد المعالجة'] || 'قيد المعالجة') : 'Processing')}
                           </Button>
                         )}
                         
                         {r.kind === 'course_session' && (
                           <Button asChild variant="outline" className="shrink-0 rounded-xl px-4 hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200 dark:hover:bg-emerald-900/30 dark:hover:text-emerald-400">
                             <Link href={`/academy/student/sessions/${r.ref_id}`}>
-                              {t.studentPages?.sessions?.details || (isAr ? 'التفاصيل' : 'Details')}
+                              {t.studentPages?.sessions?.details || (isAr ? (t.addedTranslations_2026?.['التفاصيل'] || 'التفاصيل') : 'Details')}
                             </Link>
                           </Button>
                         )}
@@ -498,16 +498,16 @@ export default function StudentSessionsPage() {
               <Video className="w-10 h-10 text-slate-400 dark:text-slate-500/50" />
             </div>
             <h3 className="text-2xl font-black text-foreground mb-3">
-              {search ? (t.studentPages?.sessions?.noResults || (isAr ? 'لا توجد نتائج' : 'No results')) : (t.studentPages?.sessions?.noSessions || (isAr ? 'لا توجد جلسات' : 'No sessions'))}
+              {search ? (t.studentPages?.sessions?.noResults || (isAr ? (t.addedTranslations_2026?.['لا توجد نتائج'] || 'لا توجد نتائج') : 'No results')) : (t.studentPages?.sessions?.noSessions || (isAr ? (t.addedTranslations_2026?.['لا توجد جلسات'] || 'لا توجد جلسات') : 'No sessions'))}
             </h3>
             <p className="text-muted-foreground font-medium max-w-sm mb-8 leading-relaxed">
               {search
                 ? (t.studentPages?.sessions?.noSessionsMatched || (isAr ? `لم نعثر على جلسات تطابق "${search}".` : `No sessions matched "${search}".`)).replace('{search}', search)
                 : (
-                  filter === 'upcoming'  ? (t.studentPages?.sessions?.noUpcomingSessions || (isAr ? 'لا توجد جلسات قادمة في الوقت الحالي. سيتم تنبيهك عند تحديد موعد.' : 'No upcoming sessions right now.')) :
-                  filter === 'live'      ? (t.studentPages?.sessions?.noLiveSessions     || (isAr ? 'لا توجد جلسات مباشرة الآن. راقب تبويب القادمة لمعرفة المواعيد.' : 'No live sessions at the moment.')) :
-                  filter === 'completed' ? (t.studentPages?.sessions?.noCompletedSessions || (isAr ? 'لم تنتهِ أي جلسات بعد للاطلاع على تسجيلاتها.' : 'No completed sessions yet.')) :
-                                            (t.studentPages?.sessions?.noRecordedSessions || (isAr ? 'لا توجد جلسات مسجّلة.' : 'No sessions recorded.'))
+                  filter === 'upcoming'  ? (t.studentPages?.sessions?.noUpcomingSessions || (isAr ? (t.addedTranslations_2026?.['لا توجد جلسات قادمة في الوقت الحالي. سيتم تنبيهك عند تحديد موعد.'] || 'لا توجد جلسات قادمة في الوقت الحالي. سيتم تنبيهك عند تحديد موعد.') : 'No upcoming sessions right now.')) :
+                  filter === 'live'      ? (t.studentPages?.sessions?.noLiveSessions     || (isAr ? (t.addedTranslations_2026?.['لا توجد جلسات مباشرة الآن. راقب تبويب القادمة لمعرفة المواعيد.'] || 'لا توجد جلسات مباشرة الآن. راقب تبويب القادمة لمعرفة المواعيد.') : 'No live sessions at the moment.')) :
+                  filter === 'completed' ? (t.studentPages?.sessions?.noCompletedSessions || (isAr ? (t.addedTranslations_2026?.['لم تنتهِ أي جلسات بعد للاطلاع على تسجيلاتها.'] || 'لم تنتهِ أي جلسات بعد للاطلاع على تسجيلاتها.') : 'No completed sessions yet.')) :
+                                            (t.studentPages?.sessions?.noRecordedSessions || (isAr ? (t.addedTranslations_2026?.['لا توجد جلسات مسجّلة.'] || 'لا توجد جلسات مسجّلة.') : 'No sessions recorded.'))
                 )
               }
             </p>
@@ -578,7 +578,7 @@ function SessionCard({ session, isLive, isAr, t, statusConfig, fmtTime, timeUnti
   const platformLabel =
     session.meeting_platform === 'google_meet' ? 'Google Meet' :
     session.meeting_platform === 'zoom' ? 'Zoom' :
-    (t.studentPages?.sessions?.externalLink || (isAr ? 'رابط خارجي' : 'External link'))
+    (t.studentPages?.sessions?.externalLink || (isAr ? (t.addedTranslations_2026?.['رابط خارجي'] || 'رابط خارجي') : 'External link'))
 
   return (
     <div
@@ -639,12 +639,12 @@ function SessionCard({ session, isLive, isAr, t, statusConfig, fmtTime, timeUnti
             </span>
             <span className="flex items-center gap-1.5">
               <Clock className="w-4 h-4 opacity-70" />
-              {session.duration_minutes} {t.studentPages?.sessions?.minutes || (isAr ? 'دقيقة' : 'min')}
+              {session.duration_minutes} {t.studentPages?.sessions?.minutes || (isAr ? (t.addedTranslations_2026?.['دقيقة'] || 'دقيقة') : 'min')}
             </span>
             {session.attendees_count !== undefined && (
               <span className="flex items-center gap-1.5">
                 <Users className="w-4 h-4 opacity-70" />
-                {session.attendees_count} {t.studentPages?.sessions?.attendees || (isAr ? 'حاضر' : 'attending')}
+                {session.attendees_count} {t.studentPages?.sessions?.attendees || (isAr ? (t.addedTranslations_2026?.['حاضر'] || 'حاضر') : 'attending')}
               </span>
             )}
             {session.meeting_link && (
@@ -671,7 +671,7 @@ function SessionCard({ session, isLive, isAr, t, statusConfig, fmtTime, timeUnti
               className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-red-600 to-orange-600 text-white rounded-xl hover:scale-105 font-bold shadow-md shadow-red-500/30 transition-all flex-1 md:flex-none"
             >
               <PlayCircle className="w-5 h-5" />
-              {t.studentPages?.sessions?.joinNow || (isAr ? 'انضم للبث المباشر' : 'Join live now')}
+              {t.studentPages?.sessions?.joinNow || (isAr ? (t.addedTranslations_2026?.['انضم للبث المباشر'] || 'انضم للبث المباشر') : 'Join live now')}
             </Link>
           ) : session.meeting_link && session.status === 'scheduled' ? (
             <a
@@ -681,7 +681,7 @@ function SessionCard({ session, isLive, isAr, t, statusConfig, fmtTime, timeUnti
               className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-bold transition-all flex-1 md:flex-none"
             >
               <Video className="w-5 h-5" />
-              {t.studentPages?.sessions?.externalLink || (isAr ? 'رابط خارجي' : 'External link')}
+              {t.studentPages?.sessions?.externalLink || (isAr ? (t.addedTranslations_2026?.['رابط خارجي'] || 'رابط خارجي') : 'External link')}
             </a>
           ) : session.status === 'completed' && session.recording_url ? (
             <VideoPlayerModal url={session.recording_url} title={session.title}>
@@ -689,7 +689,7 @@ function SessionCard({ session, isLive, isAr, t, statusConfig, fmtTime, timeUnti
                 className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl hover:scale-105 font-bold shadow-md shadow-emerald-500/20 transition-all flex-1 md:flex-none"
               >
                 <PlayCircle className="w-5 h-5" />
-                {t.studentPages?.sessions?.watchRecording || (isAr ? 'شاهد التسجيل' : 'Watch recording')}
+                {t.studentPages?.sessions?.watchRecording || (isAr ? (t.addedTranslations_2026?.['شاهد التسجيل'] || 'شاهد التسجيل') : 'Watch recording')}
               </button>
             </VideoPlayerModal>
           ) : (
@@ -698,14 +698,14 @@ function SessionCard({ session, isLive, isAr, t, statusConfig, fmtTime, timeUnti
               className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 rounded-xl font-bold cursor-not-allowed flex-1 md:flex-none"
             >
               <Clock className="w-5 h-5" />
-              {t.studentPages?.sessions?.notStartedYet || (isAr ? 'لم تبدأ بعد' : 'Not started')}
+              {t.studentPages?.sessions?.notStartedYet || (isAr ? (t.addedTranslations_2026?.['لم تبدأ بعد'] || 'لم تبدأ بعد') : 'Not started')}
             </button>
           )}
           <Link
             href={`/academy/student/sessions/${session.id}`}
             className="inline-flex items-center justify-center gap-1.5 px-4 py-2 text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-foreground border border-border/50 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex-1 md:flex-none"
           >
-            {t.studentPages?.sessions?.sessionDetails || (isAr ? 'تفاصيل الجلسة' : 'Details')}
+            {t.studentPages?.sessions?.sessionDetails || (isAr ? (t.addedTranslations_2026?.['تفاصيل الجلسة'] || 'تفاصيل الجلسة') : 'Details')}
             <ArrowUpRight className="w-4 h-4" />
           </Link>
           {session.is_public && session.public_join_token && (
@@ -714,7 +714,7 @@ function SessionCard({ session, isLive, isAr, t, statusConfig, fmtTime, timeUnti
               className="inline-flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-bold text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors flex-1 md:flex-none mt-1"
             >
               <ExternalLink className="w-3.5 h-3.5" />
-              {t.studentPages?.sessions?.shareLink || (isAr ? 'رابط المشاركة' : 'Share link')}
+              {t.studentPages?.sessions?.shareLink || (isAr ? (t.addedTranslations_2026?.['رابط المشاركة'] || 'رابط المشاركة') : 'Share link')}
             </Link>
           )}
         </div>

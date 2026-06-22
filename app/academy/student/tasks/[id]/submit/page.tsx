@@ -27,6 +27,7 @@ import {
 } from "lucide-react"
 import AudioRecorder from "@/components/academy/audio-recorder"
 import { cn } from "@/lib/utils"
+import { useI18n } from "@/lib/i18n/context";
 
 type TaskType =
   | "written"
@@ -79,6 +80,7 @@ interface Submission {
 }
 
 export default function SubmitTaskPage() {
+    const { t } = useI18n();
   const params = useParams()
   const router = useRouter()
   const taskId = params.id as string
@@ -109,7 +111,7 @@ export default function SubmitTaskPage() {
       try {
         const res = await fetch(`/api/academy/student/tasks/${taskId}`)
         if (!res.ok) {
-          setError("لم يتم العثور على المهمة أو ليس لديك صلاحية الوصول إليها.")
+          setError((t.addedTranslations_2026?.['لم يتم العثور على المهمة أو ليس لديك صلاحية الوصول إليها.'] || 'لم يتم العثور على المهمة أو ليس لديك صلاحية الوصول إليها.'))
           return
         }
         const json = await res.json()
@@ -140,7 +142,7 @@ export default function SubmitTaskPage() {
           if (json.submission.video_url) {
             setVideoData({
               url: json.submission.video_url,
-              name: json.submission.file_name || "مقطع فيديو",
+              name: json.submission.file_name || (t.addedTranslations_2026?.['مقطع فيديو'] || 'مقطع فيديو'),
               type: json.submission.file_type || "video/mp4",
               size: json.submission.file_size || 0,
             })
@@ -149,7 +151,7 @@ export default function SubmitTaskPage() {
             const isImg = (json.submission.file_type || "").startsWith("image/")
             const data = {
               url: json.submission.file_url,
-              name: json.submission.file_name || "ملف مرفق",
+              name: json.submission.file_name || (t.addedTranslations_2026?.['ملف مرفق'] || 'ملف مرفق'),
               type: json.submission.file_type || "",
               size: json.submission.file_size || 0,
             }
@@ -158,7 +160,7 @@ export default function SubmitTaskPage() {
           }
         }
       } catch {
-        if (mounted) setError("خطأ في الاتصال بالخادم.")
+        if (mounted) setError((t.addedTranslations_2026?.['خطأ في الاتصال بالخادم.'] || 'خطأ في الاتصال بالخادم.'))
       } finally {
         if (mounted) setLoading(false)
       }
@@ -196,7 +198,7 @@ export default function SubmitTaskPage() {
     e.preventDefault()
     setError("")
     if (quizAnswered < quizQuestions.length) {
-      return setError("يرجى الإجابة على جميع الأسئلة قبل التسليم")
+      return setError((t.addedTranslations_2026?.['يرجى الإجابة على جميع الأسئلة قبل التسليم'] || 'يرجى الإجابة على جميع الأسئلة قبل التسليم'))
     }
     setSubmitting(true)
     try {
@@ -215,7 +217,7 @@ export default function SubmitTaskPage() {
         body: JSON.stringify(payload),
       })
       const json = await res.json()
-      if (!res.ok) throw new Error(json.error || "فشل تسليم الاختبار")
+      if (!res.ok) throw new Error(json.error || (t.addedTranslations_2026?.['فشل تسليم الاختبار'] || 'فشل تسليم الاختبار'))
       if (json.quiz) {
         setQuizResult({
           auto_score: json.quiz.auto_score,
@@ -225,7 +227,7 @@ export default function SubmitTaskPage() {
       }
       setSuccess(true)
     } catch (err: any) {
-      setError(err?.message || "حدث خطأ أثناء تسليم الاختبار")
+      setError(err?.message || (t.addedTranslations_2026?.['حدث خطأ أثناء تسليم الاختبار'] || 'حدث خطأ أثناء تسليم الاختبار'))
     } finally {
       setSubmitting(false)
     }
@@ -260,7 +262,7 @@ export default function SubmitTaskPage() {
       const res = await fetch("/api/upload", { method: "POST", body: formData })
       const json = await res.json().catch(() => ({}))
       if (!res.ok) {
-        throw new Error(json?.error || "فشل رفع الملف")
+        throw new Error(json?.error || (t.addedTranslations_2026?.['فشل رفع الملف'] || 'فشل رفع الملف'))
       }
       return { url: json.url, name: file.name, type: file.type, size: file.size }
     } finally {
@@ -278,7 +280,7 @@ export default function SubmitTaskPage() {
       if (bucket === "image") setImageData(data)
       if (bucket === "video") setVideoData(data)
     } catch (err: any) {
-      setError(err?.message || "فشل رفع الملف")
+      setError(err?.message || (t.addedTranslations_2026?.['فشل رفع الملف'] || 'فشل رفع الملف'))
     } finally {
       e.target.value = ""
     }
@@ -295,11 +297,11 @@ export default function SubmitTaskPage() {
     e.preventDefault()
     setError("")
 
-    if (requiresAudio && !audioUrl) return setError("هذه المهمة تتطلب تسجيلاً صوتياً كمتطلب أساسي.")
-    if (requiresVideo && !videoData) return setError("هذه المهمة تتطلب رفع مقطع فيديو.")
-    if (requiresImage && !imageData) return setError("هذه المهمة تتطلب إرفاق صورة.")
-    if (requiresFile && !fileData && !imageData) return setError("هذه المهمة تتطلب إرفاق ملف.")
-    if (!hasAnyContent) return setError("لا يمكن إرسال تسليم فارغ. اكتب إجابة أو أرفق ملفاً.")
+    if (requiresAudio && !audioUrl) return setError((t.addedTranslations_2026?.['هذه المهمة تتطلب تسجيلاً صوتياً كمتطلب أساسي.'] || 'هذه المهمة تتطلب تسجيلاً صوتياً كمتطلب أساسي.'))
+    if (requiresVideo && !videoData) return setError((t.addedTranslations_2026?.['هذه المهمة تتطلب رفع مقطع فيديو.'] || 'هذه المهمة تتطلب رفع مقطع فيديو.'))
+    if (requiresImage && !imageData) return setError((t.addedTranslations_2026?.['هذه المهمة تتطلب إرفاق صورة.'] || 'هذه المهمة تتطلب إرفاق صورة.'))
+    if (requiresFile && !fileData && !imageData) return setError((t.addedTranslations_2026?.['هذه المهمة تتطلب إرفاق ملف.'] || 'هذه المهمة تتطلب إرفاق ملف.'))
+    if (!hasAnyContent) return setError((t.addedTranslations_2026?.['لا يمكن إرسال تسليم فارغ. اكتب إجابة أو أرفق ملفاً.'] || 'لا يمكن إرسال تسليم فارغ. اكتب إجابة أو أرفق ملفاً.'))
 
     setSubmitting(true)
     try {
@@ -331,13 +333,13 @@ export default function SubmitTaskPage() {
         body: JSON.stringify(payload),
       })
       const json = await res.json()
-      if (!res.ok) throw new Error(json.error || "فشل التسليم")
+      if (!res.ok) throw new Error(json.error || (t.addedTranslations_2026?.['فشل التسليم'] || 'فشل التسليم'))
 
       setSuccess(true)
       // Removed the setTimeout reload/push based on user request.
       // The user will see the success message and can manually go back.
     } catch (err: any) {
-      setError(err?.message || "حدث خطأ أثناء التسليم")
+      setError(err?.message || (t.addedTranslations_2026?.['حدث خطأ أثناء التسليم'] || 'حدث خطأ أثناء التسليم'))
     } finally {
       setSubmitting(false)
     }
@@ -347,7 +349,7 @@ export default function SubmitTaskPage() {
     return (
       <div className="flex flex-col items-center justify-center py-32 gap-4">
         <Loader2 className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-        <p className="text-muted-foreground animate-pulse font-medium">جاري تحميل المهمة...</p>
+        <p className="text-muted-foreground animate-pulse font-medium">{(t.addedTranslations_2026?.['جاري تحميل المهمة...'] || 'جاري تحميل المهمة...')}</p>
       </div>
     )
   }
@@ -357,12 +359,12 @@ export default function SubmitTaskPage() {
       <div className="max-w-2xl mx-auto py-12" dir="rtl">
         <div className="p-8 bg-red-500/10 border border-red-500/30 rounded-2xl text-center">
           <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-red-600 dark:text-red-400 mb-2">خطأ في استرجاع المهمة</h2>
+          <h2 className="text-xl font-bold text-red-600 dark:text-red-400 mb-2">{(t.addedTranslations_2026?.['خطأ في استرجاع المهمة'] || 'خطأ في استرجاع المهمة')}</h2>
           <p className="text-muted-foreground">{error}</p>
           <Link href="/academy/student/tasks" className="inline-flex items-center gap-2 mt-6 px-6 py-2.5 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl transition-colors">
             <ArrowRight className="w-4 h-4" />
-            العودة للمهام
-          </Link>
+            {(t.addedTranslations_2026?.['العودة للمهام'] || 'العودة للمهام')}
+                              </Link>
         </div>
       </div>
     )
@@ -375,7 +377,7 @@ export default function SubmitTaskPage() {
         <Link
           href="/academy/student/tasks"
           className="flex items-center justify-center w-10 h-10 border border-border bg-card hover:bg-primary/10 hover:text-primary hover:border-primary/20 text-muted-foreground rounded-xl transition-colors"
-          aria-label="رجوع"
+          aria-label={t.addedTranslations_2026?.['رجوع'] || 'رجوع'}
         >
           <ArrowRight className="w-5 h-5 rtl:rotate-180" />
         </Link>
@@ -384,7 +386,7 @@ export default function SubmitTaskPage() {
             <h1 className="text-3xl font-black text-foreground truncate">{task?.title}</h1>
             <TaskTypeBadge type={taskType} />
           </div>
-          <p className="text-muted-foreground font-medium mt-1">تجهيز وإرسال متطلبات المهمة</p>
+          <p className="text-muted-foreground font-medium mt-1">{(t.addedTranslations_2026?.['تجهيز وإرسال متطلبات المهمة'] || 'تجهيز وإرسال متطلبات المهمة')}</p>
         </div>
       </div>
 
@@ -398,16 +400,16 @@ export default function SubmitTaskPage() {
             </div>
             <div className="flex-1">
               <h3 className="text-xl font-black text-primary mb-1">
-                تم تقييم المهمة وتصحيحها!
-              </h3>
+                {(t.addedTranslations_2026?.['تم تقييم المهمة وتصحيحها!'] || 'تم تقييم المهمة وتصحيحها!')}
+                                            </h3>
               <p className="text-primary/80 font-bold mb-4">
-                النتيجة: <span className="text-2xl">{submission?.score}</span> من {task?.max_score}
+                {(t.addedTranslations_2026?.['النتيجة:'] || 'النتيجة:')} <span className="text-2xl">{submission?.score}</span> {(t.addedTranslations_2026?.['من'] || 'من')} {task?.max_score}
               </p>
               {submission?.feedback && (
                 <div className="p-4 bg-background/60 backdrop-blur-sm rounded-xl border border-primary/10 text-sm">
                   <span className="font-bold text-primary block mb-2 flex items-center gap-2">
-                    <PenTool className="w-4 h-4" /> تعليق المعلم:
-                  </span>
+                    <PenTool className="w-4 h-4" /> {(t.addedTranslations_2026?.['تعليق المعلم:'] || 'تعليق المعلم:')}
+                                                        </span>
                   <p className="whitespace-pre-wrap text-foreground/90 leading-relaxed">
                     {submission.feedback}
                   </p>
@@ -423,13 +425,13 @@ export default function SubmitTaskPage() {
         {isOverdue && !isGraded && (
           <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 text-red-700 dark:text-red-400">
             <AlertTriangle className="w-5 h-5 shrink-0" />
-            <span className="font-medium text-sm">لقد تجاوزت الموعد المحدد. تسليمك الآن سيُسجل كمهمة متأخرة.</span>
+            <span className="font-medium text-sm">{(t.addedTranslations_2026?.['لقد تجاوزت الموعد المحدد. تسليمك الآن سيُسجل كمهمة متأخرة.'] || 'لقد تجاوزت الموعد المحدد. تسليمك الآن سيُسجل كمهمة متأخرة.')}</span>
           </div>
         )}
         {submission && !isGraded && (
           <div className="p-4 bg-primary/10 border border-primary/20 rounded-xl flex items-center gap-3 text-primary">
             <Info className="w-5 h-5 shrink-0" />
-            <span className="font-medium text-sm">تم تسليم هذه المهمة مسبقاً (المحاولة #{submission.attempts || 1}). يمكنك تعديل المرفقات وإعادة الإرسال.</span>
+            <span className="font-medium text-sm">{(t.addedTranslations_2026?.['تم تسليم هذه المهمة مسبقاً (المحاولة #'] || 'تم تسليم هذه المهمة مسبقاً (المحاولة #')}{submission.attempts || 1}{(t.addedTranslations_2026?.['). يمكنك تعديل المرفقات وإعادة الإرسال.'] || '). يمكنك تعديل المرفقات وإعادة الإرسال.')}</span>
           </div>
         )}
       </div>
@@ -447,18 +449,18 @@ export default function SubmitTaskPage() {
             isOverdue && !isGraded ? "bg-red-500/10 border-red-500/20 text-red-600 dark:text-red-400" : "bg-background border-border/50 text-foreground"
           )}>
             <Calendar className="w-4 h-4" />
-            {task?.due_date ? new Date(task.due_date).toLocaleDateString("ar-EG", { month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "غير محدد"}
+            {task?.due_date ? new Date(task.due_date).toLocaleDateString("ar-EG", { month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" }) : (t.addedTranslations_2026?.['غير محدد'] || 'غير محدد')}
           </span>
           <span className="flex items-center gap-2 bg-background px-3 py-1.5 rounded-lg border border-border/50 shadow-sm text-foreground">
-            <Trophy className="w-4 h-4 text-primary" /> {task?.max_score} نقطة
-          </span>
+            <Trophy className="w-4 h-4 text-primary" /> {task?.max_score} {(t.addedTranslations_2026?.['نقطة'] || 'نقطة')}
+                                </span>
         </div>
 
         {task?.description && (
           <div className="p-6">
             <h3 className="text-xs font-black text-primary uppercase tracking-widest mb-3 flex items-center gap-2">
-              <FileText className="w-4 h-4" /> وصف المهمة المطلوب
-            </h3>
+              <FileText className="w-4 h-4" /> {(t.addedTranslations_2026?.['وصف المهمة المطلوب'] || 'وصف المهمة المطلوب')}
+                                      </h3>
             <p className="whitespace-pre-wrap text-foreground leading-relaxed text-[15px]">
               {task.description}
             </p>
@@ -468,8 +470,8 @@ export default function SubmitTaskPage() {
         {task?.submission_instructions && (
           <div className="p-6 bg-primary/5 border-t border-border">
             <h3 className="text-xs font-black text-primary uppercase tracking-widest mb-3 flex items-center gap-2">
-              <Info className="w-4 h-4" /> تعليمات هامة للتسليم
-            </h3>
+              <Info className="w-4 h-4" /> {(t.addedTranslations_2026?.['تعليمات هامة للتسليم'] || 'تعليمات هامة للتسليم')}
+                                      </h3>
             <p className="whitespace-pre-wrap text-primary/80 leading-relaxed text-[14px]">
               {task.submission_instructions}
             </p>
@@ -484,18 +486,18 @@ export default function SubmitTaskPage() {
             <CheckCircle2 className="w-10 h-10 text-primary-foreground" />
           </div>
           <h3 className="font-black text-2xl text-primary mb-4">
-            {isQuiz ? "تم تسليم الاختبار بنجاح!" : "تم استلام عملك بنجاح!"}
+            {isQuiz ? (t.addedTranslations_2026?.['تم تسليم الاختبار بنجاح!'] || 'تم تسليم الاختبار بنجاح!') : "تم استلام عملك بنجاح!"}
           </h3>
           {isQuiz && quizResult && (
             <div className="mb-6 w-full max-w-sm">
               {quizResult.needs_grading ? (
                 <p className="text-primary/80 font-bold">
-                  تم تصحيح أسئلة الاختيار تلقائياً. الأسئلة المقالية بانتظار تصحيح المعلم.
-                </p>
+                  {(t.addedTranslations_2026?.['تم تصحيح أسئلة الاختيار تلقائياً. الأسئلة المقالية بانتظار تصحيح المعلم.'] || 'تم تصحيح أسئلة الاختيار تلقائياً. الأسئلة المقالية بانتظار تصحيح المعلم.')}
+                                                  </p>
               ) : (
                 <p className="text-primary/80 font-bold">
-                  درجتك:{" "}
-                  <span className="text-3xl text-primary">{quizResult.auto_score}</span> من{" "}
+                  {(t.addedTranslations_2026?.['درجتك:'] || 'درجتك:')}{" "}
+                  <span className="text-3xl text-primary">{quizResult.auto_score}</span> {(t.addedTranslations_2026?.['من'] || 'من')}{" "}
                   {quizResult.max_score}
                 </p>
               )}
@@ -503,8 +505,8 @@ export default function SubmitTaskPage() {
           )}
           <Link href="/academy/student/tasks" className="inline-flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl transition-colors">
             <ArrowRight className="w-5 h-5 rtl:rotate-180" />
-            العودة لقائمة المهام
-          </Link>
+            {(t.addedTranslations_2026?.['العودة لقائمة المهام'] || 'العودة لقائمة المهام')}
+                                </Link>
         </div>
       ) : isQuiz ? (
         <form onSubmit={handleQuizSubmit} className="space-y-6">
@@ -516,17 +518,17 @@ export default function SubmitTaskPage() {
 
           {isGraded ? (
             <div className="p-6 bg-card border border-border rounded-2xl text-center text-muted-foreground font-bold">
-              تم تصحيح هذا الاختبار. لا يمكن إعادة حله.
-            </div>
+              {(t.addedTranslations_2026?.['تم تصحيح هذا الاختبار. لا يمكن إعادة حله.'] || 'تم تصحيح هذا الاختبار. لا يمكن إعادة حله.')}
+                                          </div>
           ) : (
             <>
               <div className="flex items-center justify-between flex-wrap gap-2 px-1">
                 <p className="text-sm font-bold text-muted-foreground">
-                  أجبت على {quizAnswered} من {quizQuestions.length} سؤال
-                </p>
+                  {(t.addedTranslations_2026?.['أجبت على'] || 'أجبت على')} {quizAnswered} {(t.addedTranslations_2026?.['من'] || 'من')} {quizQuestions.length} {(t.addedTranslations_2026?.['سؤال'] || 'سؤال')}
+                                                          </p>
                 <span className="text-xs font-bold text-primary bg-primary/10 px-3 py-1 rounded-full">
-                  {quizQuestions.reduce((s, q) => s + (q.points || 0), 0)} درجة إجمالية
-                </span>
+                  {quizQuestions.reduce((s, q) => s + (q.points || 0), 0)} {(t.addedTranslations_2026?.['درجة إجمالية'] || 'درجة إجمالية')}
+                                                          </span>
               </div>
 
               {quizQuestions.map((q, idx) => (
@@ -540,8 +542,8 @@ export default function SubmitTaskPage() {
                       <span className="whitespace-pre-wrap">{q.question}</span>
                     </h4>
                     <span className="text-xs font-bold text-muted-foreground bg-muted px-2 py-1 rounded-md shrink-0">
-                      {q.points} د
-                    </span>
+                      {q.points} {(t.addedTranslations_2026?.['د'] || 'د')}
+                                                  </span>
                   </div>
 
                   {q.type === "mcq" ? (
@@ -578,7 +580,7 @@ export default function SubmitTaskPage() {
                       rows={4}
                       value={quizAnswers[q.id]?.text || ""}
                       onChange={e => setQuizAnswer(q.id, { text: e.target.value })}
-                      placeholder="اكتب إجابتك هنا..."
+                      placeholder={t.addedTranslations_2026?.['اكتب إجابتك هنا...'] || 'اكتب إجابتك هنا...'}
                       className="w-full p-3 rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary resize-none text-sm"
                     />
                   )}
@@ -591,9 +593,9 @@ export default function SubmitTaskPage() {
                 className="w-full flex items-center justify-center gap-2 py-4 bg-primary hover:bg-primary/90 disabled:opacity-60 text-primary-foreground font-black rounded-xl transition-colors shadow-lg shadow-primary/20"
               >
                 {submitting ? (
-                  <><Loader2 className="w-5 h-5 animate-spin" /> جارٍ التسليم...</>
+                  <><Loader2 className="w-5 h-5 animate-spin" /> {(t.addedTranslations_2026?.['جارٍ التسليم...'] || 'جارٍ التسليم...')}</>
                 ) : (
-                  <><Save className="w-5 h-5" /> تسليم الاختبار</>
+                  <><Save className="w-5 h-5" /> {(t.addedTranslations_2026?.['تسليم الاختبار'] || 'تسليم الاختبار')}</>
                 )}
               </button>
             </>
@@ -612,7 +614,7 @@ export default function SubmitTaskPage() {
             {/* Audio Recording */}
             {requiresAudio && (
               <section className="col-span-1 md:col-span-2 bg-card/60 backdrop-blur-sm border border-border rounded-2xl p-6 shadow-sm hover:border-primary/30 transition-colors">
-                <SectionHeader icon={<Mic className="w-5 h-5 text-primary" />} title="تسجيل التلاوة / الإجابة الصوتية" required />
+                <SectionHeader icon={<Mic className="w-5 h-5 text-primary" />} title={t.addedTranslations_2026?.['تسجيل التلاوة / الإجابة الصوتية'] || 'تسجيل التلاوة / الإجابة الصوتية'} required />
                 <div className="mt-4">
                   <AudioRecorder value={audioUrl} onChange={setAudioUrl} disabled={submitting || isGraded} />
                 </div>
@@ -622,7 +624,7 @@ export default function SubmitTaskPage() {
             {/* Video Upload */}
             {requiresVideo && (
               <section className="col-span-1 md:col-span-2 bg-card/60 backdrop-blur-sm border border-border rounded-2xl p-6 shadow-sm hover:border-primary/30 transition-colors">
-                <SectionHeader icon={<Video className="w-5 h-5 text-primary" />} title="إرفاق مقطع فيديو" required />
+                <SectionHeader icon={<Video className="w-5 h-5 text-primary" />} title={t.addedTranslations_2026?.['إرفاق مقطع فيديو'] || 'إرفاق مقطع فيديو'} required />
                 <div className="mt-4">
                   <UploadField
                     accept="video/*"
@@ -632,7 +634,7 @@ export default function SubmitTaskPage() {
                     data={videoData}
                     onPick={(e: React.ChangeEvent<HTMLInputElement>) => handleFilePick(e, "video")}
                     onClear={() => setVideoData(null)}
-                    placeholder="اسحب الفيديو هنا أو اضغط للاختيار (MP4, WebM)"
+                    placeholder={t.addedTranslations_2026?.['اسحب الفيديو هنا أو اضغط للاختيار (MP4, WebM)'] || 'اسحب الفيديو هنا أو اضغط للاختيار (MP4, WebM)'}
                     icon={<Video className="w-8 h-8 text-primary/50" />}
                     preview={videoData && <video src={videoData.url} controls className="w-full rounded-xl bg-black shadow-md mt-4" />}
                   />
@@ -643,7 +645,7 @@ export default function SubmitTaskPage() {
             {/* Image Upload */}
             {requiresImage && (
               <section className="col-span-1 bg-card/60 backdrop-blur-sm border border-border rounded-2xl p-6 shadow-sm hover:border-primary/30 transition-colors">
-                <SectionHeader icon={<ImageIcon className="w-5 h-5 text-primary" />} title="إرفاق صورة" required />
+                <SectionHeader icon={<ImageIcon className="w-5 h-5 text-primary" />} title={t.addedTranslations_2026?.['إرفاق صورة'] || 'إرفاق صورة'} required />
                 <div className="mt-4">
                   <UploadField
                     accept="image/*"
@@ -653,7 +655,7 @@ export default function SubmitTaskPage() {
                     data={imageData}
                     onPick={(e: React.ChangeEvent<HTMLInputElement>) => handleFilePick(e, "image")}
                     onClear={() => setImageData(null)}
-                    placeholder="اضغط لاختيار صورة (JPG, PNG)"
+                    placeholder={t.addedTranslations_2026?.['اضغط لاختيار صورة (JPG, PNG)'] || 'اضغط لاختيار صورة (JPG, PNG)'}
                     icon={<ImageIcon className="w-8 h-8 text-primary/50" />}
                     preview={imageData && <img src={imageData.url} alt="Preview" className="w-full object-cover rounded-xl shadow-md mt-4 max-h-48 bg-muted" />}
                   />
@@ -664,7 +666,7 @@ export default function SubmitTaskPage() {
             {/* General File Upload */}
             {requiresFile && (
               <section className="col-span-1 md:col-span-2 bg-card/60 backdrop-blur-sm border border-border rounded-2xl p-6 shadow-sm hover:border-primary/30 transition-colors">
-                <SectionHeader icon={<Paperclip className="w-5 h-5 text-primary" />} title="رفع ملف المشروع" required />
+                <SectionHeader icon={<Paperclip className="w-5 h-5 text-primary" />} title={t.addedTranslations_2026?.['رفع ملف المشروع'] || 'رفع ملف المشروع'} required />
                 <div className="mt-4">
                   <UploadField
                     accept=".pdf,.doc,.docx,.zip,.rar,.txt,.ppt,.pptx"
@@ -674,7 +676,7 @@ export default function SubmitTaskPage() {
                     data={fileData}
                     onPick={(e: React.ChangeEvent<HTMLInputElement>) => handleFilePick(e, "file")}
                     onClear={() => setFileData(null)}
-                    placeholder="اضغط لاختيار ملف (PDF, Word, ZIP, PPTX)"
+                    placeholder={t.addedTranslations_2026?.['اضغط لاختيار ملف (PDF, Word, ZIP, PPTX)'] || 'اضغط لاختيار ملف (PDF, Word, ZIP, PPTX)'}
                     icon={<Paperclip className="w-8 h-8 text-primary/50" />}
                   />
                 </div>
@@ -684,7 +686,7 @@ export default function SubmitTaskPage() {
             {/* Optional Attachment (if no required files) */}
             {!requiresFile && !requiresImage && !requiresVideo && !requiresAudio && (
               <section className="col-span-1 bg-card/60 backdrop-blur-sm border border-border rounded-2xl p-6 shadow-sm hover:border-primary/30 transition-colors">
-                <SectionHeader icon={<Paperclip className="w-5 h-5 text-primary/70" />} title="مرفق اختياري" />
+                <SectionHeader icon={<Paperclip className="w-5 h-5 text-primary/70" />} title={t.addedTranslations_2026?.['مرفق اختياري'] || 'مرفق اختياري'} />
                 <div className="mt-4">
                   <UploadField
                     accept=".pdf,.doc,.docx,.jpg,.png,.zip"
@@ -694,7 +696,7 @@ export default function SubmitTaskPage() {
                     data={fileData}
                     onPick={(e: React.ChangeEvent<HTMLInputElement>) => handleFilePick(e, "file")}
                     onClear={() => setFileData(null)}
-                    placeholder="إرفاق ملف داعم لإجابتك"
+                    placeholder={t.addedTranslations_2026?.['إرفاق ملف داعم لإجابتك'] || 'إرفاق ملف داعم لإجابتك'}
                     icon={<Paperclip className="w-8 h-8 text-primary/30" />}
                   />
                 </div>
@@ -709,7 +711,7 @@ export default function SubmitTaskPage() {
               )}>
                 <SectionHeader 
                   icon={<PenTool className="w-5 h-5 text-primary" />} 
-                  title={allowsText && !requiresAudio && !requiresVideo && !requiresImage && !requiresFile ? "إجابتك النصية" : "ملاحظات للطالب (اختياري)"} 
+                  title={allowsText && !requiresAudio && !requiresVideo && !requiresImage && !requiresFile ? (t.addedTranslations_2026?.['إجابتك النصية'] || 'إجابتك النصية') : "ملاحظات للطالب (اختياري)"} 
                   required={allowsText && !requiresAudio && !requiresVideo && !requiresImage && !requiresFile} 
                 />
                 <textarea
@@ -718,7 +720,7 @@ export default function SubmitTaskPage() {
                   onChange={e => setTextContent(e.target.value)}
                   placeholder={
                     allowsText && !requiresAudio && !requiresVideo && !requiresImage && !requiresFile
-                      ? "اكتب إجابتك هنا بشكل واضح ومفصل..."
+                      ? (t.addedTranslations_2026?.['اكتب إجابتك هنا بشكل واضح ومفصل...'] || 'اكتب إجابتك هنا بشكل واضح ومفصل...')
                       : "هل لديك أي ملاحظات ترغب بإيصالها للمعلم بخصوص هذا التسليم؟"
                   }
                   className="w-full mt-4 p-4 rounded-xl border border-border/50 bg-background/50 focus:bg-background focus:outline-none focus:ring-2 focus:ring-primary resize-y transition-all"
@@ -730,8 +732,8 @@ export default function SubmitTaskPage() {
 
           {!hasAnyContent && (
             <div className="flex items-center gap-2 justify-center text-sm font-bold text-primary bg-primary/5 p-3 rounded-xl border border-primary/10">
-              <AlertCircle className="w-4 h-4" /> يجب استكمال عنصر واحد على الأقل للمهمة ليتم التفعيل
-            </div>
+              <AlertCircle className="w-4 h-4" /> {(t.addedTranslations_2026?.['يجب استكمال عنصر واحد على الأقل للمهمة ليتم التفعيل'] || 'يجب استكمال عنصر واحد على الأقل للمهمة ليتم التفعيل')}
+                                              </div>
           )}
 
           {/* Submit Actions */}
@@ -741,8 +743,8 @@ export default function SubmitTaskPage() {
                 href="/academy/student/tasks"
                 className="flex-1 sm:flex-none px-8 py-4 border-2 border-border bg-transparent hover:bg-muted text-foreground font-black rounded-xl transition-colors text-center"
               >
-                إلغاء والعودة
-              </Link>
+                {(t.addedTranslations_2026?.['إلغاء والعودة'] || 'إلغاء والعودة')}
+                                                    </Link>
               <button
                 type="submit"
                 disabled={!canSubmit}
@@ -754,9 +756,9 @@ export default function SubmitTaskPage() {
                 )}
               >
                 {submitting ? (
-                  <><Loader2 className="w-5 h-5 animate-spin" /> جاري رفع البيانات...</>
+                  <><Loader2 className="w-5 h-5 animate-spin" /> {(t.addedTranslations_2026?.['جاري رفع البيانات...'] || 'جاري رفع البيانات...')}</>
                 ) : (
-                  <><Save className="w-5 h-5" /> {submission ? "حفظ التعديلات وإعادة التسليم" : "تأكيد وتسليم المهمة"}</>
+                  <><Save className="w-5 h-5" /> {submission ? (t.addedTranslations_2026?.['حفظ التعديلات وإعادة التسليم'] || 'حفظ التعديلات وإعادة التسليم') : "تأكيد وتسليم المهمة"}</>
                 )}
               </button>
             </div>
@@ -795,7 +797,7 @@ export default function SubmitTaskPage() {
             {isUploading ? (
               <div className="flex flex-col items-center gap-3 text-primary">
                 <Loader2 className="w-10 h-10 animate-spin" />
-                <span className="font-bold text-sm">جاري الرفع بسيرفرات الأكاديمية...</span>
+                <span className="font-bold text-sm">{(t.addedTranslations_2026?.['جاري الرفع بسيرفرات الأكاديمية...'] || 'جاري الرفع بسيرفرات الأكاديمية...')}</span>
               </div>
             ) : (
               <div className="flex flex-col items-center gap-3 text-muted-foreground group-hover/uploader:text-primary transition-colors">
@@ -821,7 +823,7 @@ export default function SubmitTaskPage() {
                   type="button"
                   onClick={onClear}
                   className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-red-500 hover:text-white text-muted-foreground transition-all shrink-0 border border-transparent hover:border-red-600"
-                  aria-label="إزالة الملف"
+                  aria-label={t.addedTranslations_2026?.['إزالة الملف'] || 'إزالة الملف'}
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -837,14 +839,14 @@ export default function SubmitTaskPage() {
 
 function TaskTypeBadge({ type }: { type: TaskType }) {
   const map: Record<string, { label: string; cls: string; icon: any }> = {
-    written: { label: "مهمة كتابية", cls: "bg-primary text-primary-foreground", icon: PenTool },
-    quiz: { label: "اختبار", cls: "bg-primary text-primary-foreground", icon: FileText },
-    audio: { label: "تسجيل صوتي", cls: "bg-primary text-primary-foreground", icon: Mic },
-    recitation: { label: "تسميع مقطعي", cls: "bg-primary text-primary-foreground", icon: Mic },
-    video: { label: "مقطع فيديو", cls: "bg-primary text-primary-foreground", icon: Video },
-    image: { label: "مرفق صورة", cls: "bg-primary text-primary-foreground", icon: ImageIcon },
-    project: { label: "ملف مشروع", cls: "bg-primary text-primary-foreground", icon: Paperclip },
-    file: { label: "إرفاق ملف", cls: "bg-primary text-primary-foreground", icon: Paperclip },
+    written: { label: (t.addedTranslations_2026?.['مهمة كتابية'] || 'مهمة كتابية'), cls: "bg-primary text-primary-foreground", icon: PenTool },
+    quiz: { label: (t.addedTranslations_2026?.['اختبار'] || 'اختبار'), cls: "bg-primary text-primary-foreground", icon: FileText },
+    audio: { label: (t.addedTranslations_2026?.['تسجيل صوتي'] || 'تسجيل صوتي'), cls: "bg-primary text-primary-foreground", icon: Mic },
+    recitation: { label: (t.addedTranslations_2026?.['تسميع مقطعي'] || 'تسميع مقطعي'), cls: "bg-primary text-primary-foreground", icon: Mic },
+    video: { label: (t.addedTranslations_2026?.['مقطع فيديو'] || 'مقطع فيديو'), cls: "bg-primary text-primary-foreground", icon: Video },
+    image: { label: (t.addedTranslations_2026?.['مرفق صورة'] || 'مرفق صورة'), cls: "bg-primary text-primary-foreground", icon: ImageIcon },
+    project: { label: (t.addedTranslations_2026?.['ملف مشروع'] || 'ملف مشروع'), cls: "bg-primary text-primary-foreground", icon: Paperclip },
+    file: { label: (t.addedTranslations_2026?.['إرفاق ملف'] || 'إرفاق ملف'), cls: "bg-primary text-primary-foreground", icon: Paperclip },
   }
   const info = map[type] || map.written
   const Icon = info.icon

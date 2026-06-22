@@ -4,6 +4,7 @@ import { useState, useEffect, use } from 'react'
 import { Layers, BookOpen, Route, Loader2, ArrowRight } from 'lucide-react'
 import { PageLoadingSkeleton } from '@/components/ui/page-loading-skeleton'
 import Link from 'next/link'
+import { useI18n } from "@/lib/i18n/context";
 
 interface SeriesDetail {
   id: string
@@ -26,6 +27,7 @@ interface SeriesItem {
 }
 
 export default function StudentSeriesDetailPage({ params }: { params: Promise<{ id: string }> }) {
+    const { t } = useI18n();
   const { id } = use(params)
   const [series, setSeries] = useState<SeriesDetail | null>(null)
   const [loading, setLoading] = useState(true)
@@ -54,10 +56,10 @@ export default function StudentSeriesDetailPage({ params }: { params: Promise<{ 
   if (!series) {
     return (
       <div className="text-center py-20">
-        <p className="text-muted-foreground">السلسلة غير موجودة</p>
+        <p className="text-muted-foreground">{(t.addedTranslations_2026?.['السلسلة غير موجودة'] || 'السلسلة غير موجودة')}</p>
         <Link href="/academy/student/series" className="text-emerald-600 hover:underline mt-2 inline-block">
-          العودة للسلاسل
-        </Link>
+          {(t.addedTranslations_2026?.['العودة للسلاسل'] || 'العودة للسلاسل')}
+                        </Link>
       </div>
     )
   }
@@ -67,8 +69,8 @@ export default function StudentSeriesDetailPage({ params }: { params: Promise<{ 
       <div>
         <Link href="/academy/student/series" className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 mb-2">
           <ArrowRight className="w-4 h-4" />
-          العودة للسلاسل
-        </Link>
+          {(t.addedTranslations_2026?.['العودة للسلاسل'] || 'العودة للسلاسل')}
+                          </Link>
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <Layers className="w-7 h-7 text-emerald-600" />
           {series.title}
@@ -77,14 +79,14 @@ export default function StudentSeriesDetailPage({ params }: { params: Promise<{ 
           <p className="text-muted-foreground mt-1">{series.description}</p>
         )}
         {series.teacher_name && (
-          <p className="text-sm text-muted-foreground mt-1">الشيخ: {series.teacher_name}</p>
+          <p className="text-sm text-muted-foreground mt-1">{(t.addedTranslations_2026?.['الشيخ:'] || 'الشيخ:')} {series.teacher_name}</p>
         )}
       </div>
 
       {series.items.length === 0 ? (
         <div className="bg-card border border-border rounded-xl p-16 text-center">
           <Layers className="w-14 h-14 mx-auto mb-4 text-muted-foreground opacity-30" />
-          <p className="text-muted-foreground font-medium">لا توجد محتويات في هذه السلسلة بعد</p>
+          <p className="text-muted-foreground font-medium">{(t.addedTranslations_2026?.['لا توجد محتويات في هذه السلسلة بعد'] || 'لا توجد محتويات في هذه السلسلة بعد')}</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -111,11 +113,11 @@ export default function StudentSeriesDetailPage({ params }: { params: Promise<{ 
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-bold group-hover:text-emerald-600 transition-colors truncate">
-                    {item.title || 'بدون عنوان'}
+                    {item.title || (t.addedTranslations_2026?.['بدون عنوان'] || 'بدون عنوان')}
                   </p>
                   <div className="flex items-center gap-2 mt-0.5">
                     <span className="text-xs text-muted-foreground">
-                      {item.item_type === 'course' ? 'دورة' : 'مسار تعليمي'}
+                      {item.item_type === 'course' ? (t.addedTranslations_2026?.['دورة'] || 'دورة') : 'مسار تعليمي'}
                     </span>
                   </div>
                   {item.description && (

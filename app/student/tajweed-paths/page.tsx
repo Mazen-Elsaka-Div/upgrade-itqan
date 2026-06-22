@@ -65,7 +65,7 @@ export default function StudentTajweedPathsPage() {
 
   function formatDigits(n: number | string): string {
     if (locale === 'ar') {
-      return String(n).replace(/\d/g, d => '\u0660\u0661\u0662\u0663\u0664\u0665\u0666\u0667\u0668\u0669'[Number(d)])
+      return String(n).replace(/\d/g, d => (t.addedTranslations_2026?.['٠١٢٣٤٥٦٧٨٩'] || '٠١٢٣٤٥٦٧٨٩')[Number(d)])
     }
     return String(n)
   }
@@ -90,12 +90,12 @@ export default function StudentTajweedPathsPage() {
         <div className="relative z-10 space-y-4 max-w-2xl text-center md:text-start mx-auto md:mx-0">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 text-xs font-bold rounded-full bg-white/10 backdrop-blur-md border border-white/20 shadow-sm mx-auto md:mx-0">
             <GraduationCap className="w-4 h-4 text-emerald-200" />
-            <span className="text-emerald-50">{isAr ? "إتقان التلاوة والأحكام" : "Mastery of Recitation & Rules"}</span>
+            <span className="text-emerald-50">{isAr ? (t.addedTranslations_2026?.['إتقان التلاوة والأحكام'] || 'إتقان التلاوة والأحكام') : "Mastery of Recitation & Rules"}</span>
           </div>
           <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
             {isAr ? (
               <>
-                مسارات <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-200 to-emerald-50">التجويد</span>
+                {(t.addedTranslations_2026?.['مسارات'] || 'مسارات')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-200 to-emerald-50">{(t.addedTranslations_2026?.['التجويد'] || 'التجويد')}</span>
               </>
             ) : (
               <>
@@ -104,7 +104,7 @@ export default function StudentTajweedPathsPage() {
             )}
           </h1>
           <p className="text-emerald-100/90 text-base sm:text-lg font-medium leading-relaxed max-w-xl mx-auto md:mx-0">
-            {tp.studentSubtitleTajweed || (isAr ? "تدرج في تعلم أحكام التجويد من التأسيس حتى الإتقان" : "Gradually learn tajweed rules from foundation to mastery")}
+            {tp.studentSubtitleTajweed || (isAr ? (t.addedTranslations_2026?.['تدرج في تعلم أحكام التجويد من التأسيس حتى الإتقان'] || 'تدرج في تعلم أحكام التجويد من التأسيس حتى الإتقان') : "Gradually learn tajweed rules from foundation to mastery")}
           </p>
         </div>
       </div>
@@ -158,7 +158,7 @@ export default function StudentTajweedPathsPage() {
               <div className="w-20 h-20 bg-emerald-50 dark:bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-5">
                 <GraduationCap className="w-10 h-10 text-emerald-600/50 dark:text-emerald-400/50" />
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-2">{isAr ? "لم تشترك في أي مسار بعد" : "You haven't joined any paths yet"}</h3>
+              <h3 className="text-xl font-bold text-foreground mb-2">{isAr ? (t.addedTranslations_2026?.['لم تشترك في أي مسار بعد'] || 'لم تشترك في أي مسار بعد') : "You haven't joined any paths yet"}</h3>
               <p className="text-muted-foreground max-w-sm mx-auto">
                 {tp.emptyEnrolled}
               </p>

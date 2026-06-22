@@ -78,11 +78,11 @@ export default function StudentCoursesArchivePage() {
         setCourses(coursesRes.data || [])
 
         const subjectLabels: Record<string, string> = {
-          fiqh: t.studentPages?.archive?.subjects?.fiqh || 'الفقه',
-          aqeedah: t.studentPages?.archive?.subjects?.aqeedah || 'العقيدة',
-          seerah: t.studentPages?.archive?.subjects?.seerah || 'السيرة النبوية',
-          tafsir: t.studentPages?.archive?.subjects?.tafsir || 'التفسير',
-          tajweed: t.studentPages?.archive?.subjects?.tajweed || 'التجويد',
+          fiqh: t.studentPages?.archive?.subjects?.fiqh || (t.addedTranslations_2026?.['الفقه'] || 'الفقه'),
+          aqeedah: t.studentPages?.archive?.subjects?.aqeedah || (t.addedTranslations_2026?.['العقيدة'] || 'العقيدة'),
+          seerah: t.studentPages?.archive?.subjects?.seerah || (t.addedTranslations_2026?.['السيرة النبوية'] || 'السيرة النبوية'),
+          tafsir: t.studentPages?.archive?.subjects?.tafsir || (t.addedTranslations_2026?.['التفسير'] || 'التفسير'),
+          tajweed: t.studentPages?.archive?.subjects?.tajweed || (t.addedTranslations_2026?.['التجويد'] || 'التجويد'),
         }
 
         // Legacy learning_paths archive entries.

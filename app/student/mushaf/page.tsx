@@ -23,21 +23,21 @@ const AUTOPLAY_STORAGE_KEY = 'mushaf:autoContinue'
 type Reciter = { id: string; nameAr: string; nameEn: string }
 
 const RECITERS: Reciter[] = [
-  { id: 'Alafasy_128kbps', nameAr: 'مشاري راشد العفاسي', nameEn: 'Mishary Rashid Alafasy' },
-  { id: 'Husary_128kbps', nameAr: 'محمود خليل الحصري', nameEn: 'Mahmoud Khalil Al-Husary' },
-  { id: 'Husary_Mujawwad_64kbps', nameAr: 'الحصري (مجوّد)', nameEn: 'Al-Husary (Mujawwad)' },
-  { id: 'Abdul_Basit_Murattal_64kbps', nameAr: 'عبد الباسط عبد الصمد', nameEn: 'Abdul Basit Abdul Samad' },
-  { id: 'Abdul_Basit_Mujawwad_128kbps', nameAr: 'عبد الباسط (مجوّد)', nameEn: 'Abdul Basit (Mujawwad)' },
-  { id: 'Minshawy_Murattal_128kbps', nameAr: 'محمد صديق المنشاوي', nameEn: 'Mohammad Al-Minshawy' },
-  { id: 'Minshawy_Mujawwad_64kbps', nameAr: 'المنشاوي (مجوّد)', nameEn: 'Al-Minshawy (Mujawwad)' },
-  { id: 'Abdurrahmaan_As-Sudais_192kbps', nameAr: 'عبد الرحمن السديس', nameEn: 'Abdul Rahman As-Sudais' },
-  { id: 'Saood_ash-Shuraym_128kbps', nameAr: 'سعود الشريم', nameEn: 'Saud Ash-Shuraym' },
-  { id: 'Maher_AlMuaiqly_64kbps', nameAr: 'ماهر المعيقلي', nameEn: 'Maher Al-Muaiqly' },
-  { id: 'Ghamadi_40kbps', nameAr: 'سعد الغامدي', nameEn: 'Saad Al-Ghamidi' },
-  { id: 'Hudhaify_128kbps', nameAr: 'علي الحذيفي', nameEn: 'Ali Al-Hudhaify' },
-  { id: 'Muhammad_Ayyoub_128kbps', nameAr: 'محمد أيوب', nameEn: 'Muhammad Ayyoub' },
-  { id: 'Abu_Bakr_Ash-Shaatree_128kbps', nameAr: 'أبو بكر الشاطري', nameEn: 'Abu Bakr Ash-Shaatree' },
-  { id: 'Hani_Rifai_192kbps', nameAr: 'هاني الرفاعي', nameEn: 'Hani Ar-Rifai' },
+  { id: 'Alafasy_128kbps', nameAr: (t.addedTranslations_2026?.['مشاري راشد العفاسي'] || 'مشاري راشد العفاسي'), nameEn: 'Mishary Rashid Alafasy' },
+  { id: 'Husary_128kbps', nameAr: (t.addedTranslations_2026?.['محمود خليل الحصري'] || 'محمود خليل الحصري'), nameEn: 'Mahmoud Khalil Al-Husary' },
+  { id: 'Husary_Mujawwad_64kbps', nameAr: (t.addedTranslations_2026?.['الحصري (مجوّد)'] || 'الحصري (مجوّد)'), nameEn: 'Al-Husary (Mujawwad)' },
+  { id: 'Abdul_Basit_Murattal_64kbps', nameAr: (t.addedTranslations_2026?.['عبد الباسط عبد الصمد'] || 'عبد الباسط عبد الصمد'), nameEn: 'Abdul Basit Abdul Samad' },
+  { id: 'Abdul_Basit_Mujawwad_128kbps', nameAr: (t.addedTranslations_2026?.['عبد الباسط (مجوّد)'] || 'عبد الباسط (مجوّد)'), nameEn: 'Abdul Basit (Mujawwad)' },
+  { id: 'Minshawy_Murattal_128kbps', nameAr: (t.addedTranslations_2026?.['محمد صديق المنشاوي'] || 'محمد صديق المنشاوي'), nameEn: 'Mohammad Al-Minshawy' },
+  { id: 'Minshawy_Mujawwad_64kbps', nameAr: (t.addedTranslations_2026?.['المنشاوي (مجوّد)'] || 'المنشاوي (مجوّد)'), nameEn: 'Al-Minshawy (Mujawwad)' },
+  { id: 'Abdurrahmaan_As-Sudais_192kbps', nameAr: (t.addedTranslations_2026?.['عبد الرحمن السديس'] || 'عبد الرحمن السديس'), nameEn: 'Abdul Rahman As-Sudais' },
+  { id: 'Saood_ash-Shuraym_128kbps', nameAr: (t.addedTranslations_2026?.['سعود الشريم'] || 'سعود الشريم'), nameEn: 'Saud Ash-Shuraym' },
+  { id: 'Maher_AlMuaiqly_64kbps', nameAr: (t.addedTranslations_2026?.['ماهر المعيقلي'] || 'ماهر المعيقلي'), nameEn: 'Maher Al-Muaiqly' },
+  { id: 'Ghamadi_40kbps', nameAr: (t.addedTranslations_2026?.['سعد الغامدي'] || 'سعد الغامدي'), nameEn: 'Saad Al-Ghamidi' },
+  { id: 'Hudhaify_128kbps', nameAr: (t.addedTranslations_2026?.['علي الحذيفي'] || 'علي الحذيفي'), nameEn: 'Ali Al-Hudhaify' },
+  { id: 'Muhammad_Ayyoub_128kbps', nameAr: (t.addedTranslations_2026?.['محمد أيوب'] || 'محمد أيوب'), nameEn: 'Muhammad Ayyoub' },
+  { id: 'Abu_Bakr_Ash-Shaatree_128kbps', nameAr: (t.addedTranslations_2026?.['أبو بكر الشاطري'] || 'أبو بكر الشاطري'), nameEn: 'Abu Bakr Ash-Shaatree' },
+  { id: 'Hani_Rifai_192kbps', nameAr: (t.addedTranslations_2026?.['هاني الرفاعي'] || 'هاني الرفاعي'), nameEn: 'Hani Ar-Rifai' },
 ]
 
 const DEFAULT_RECITER = 'Alafasy_128kbps'
@@ -75,10 +75,10 @@ type PageData = {
 }
 
 function toArabicDigits(n: number | string): string {
-  return String(n).replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[Number(d)])
+  return String(n).replace(/\d/g, d => (t.addedTranslations_2026?.['٠١٢٣٤٥٦٧٨٩'] || '٠١٢٣٤٥٦٧٨٩')[Number(d)])
 }
 
-const BISMILLAH = 'بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ'
+const BISMILLAH = (t.addedTranslations_2026?.['بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ'] || 'بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ')
 
 // Remove all Arabic diacritics (tashkeel) so we can compare/match plain letters
 function stripTashkeel(text: string): string {
@@ -89,11 +89,11 @@ function stripTashkeel(text: string): string {
 function stripSurahPrefix(name: string): string {
   if (!name) return name
   const plain = stripTashkeel(name).trim()
-  if (!plain.startsWith('سورة')) return name
+  if (!plain.startsWith((t.addedTranslations_2026?.['سورة'] || 'سورة'))) return name
 
   // Find the actual end of the prefix in the original (with tashkeel) string
   // by walking through both strings in parallel.
-  const prefixPlainLen = 'سورة'.length
+  const prefixPlainLen = (t.addedTranslations_2026?.['سورة'] || 'سورة').length
   let plainSeen = 0
   let i = 0
   while (i < name.length && plainSeen < prefixPlainLen) {
@@ -123,12 +123,12 @@ function stripLeadingBismillah(text: string, surahNumber: number, ayahNumber: nu
   if (surahNumber === 1 || surahNumber === 9) return text
   if (!text) return text
 
-  const PLAIN_TARGET = 'بسماللهالرحمنالرحيم'
+  const PLAIN_TARGET = (t.addedTranslations_2026?.['بسماللهالرحمنالرحيم'] || 'بسماللهالرحمنالرحيم')
   const TASHKEEL_RE = /[\u064B-\u0652\u0670\u06D6-\u06ED\u08D3-\u08FF\u0640]/
 
   const normalize = (ch: string): string => {
     if (TASHKEEL_RE.test(ch)) return ''
-    if (ch === 'ٱ' || ch === 'أ' || ch === 'إ' || ch === 'آ') return 'ا'
+    if (ch === (t.addedTranslations_2026?.['ٱ'] || 'ٱ') || ch === (t.addedTranslations_2026?.['أ'] || 'أ') || ch === (t.addedTranslations_2026?.['إ'] || 'إ') || ch === (t.addedTranslations_2026?.['آ'] || 'آ')) return (t.addedTranslations_2026?.['ا'] || 'ا')
     if (/\s/.test(ch)) return ''
     return ch
   }
@@ -241,7 +241,7 @@ export default function MushafPage() {
       })
       .catch(err => {
         console.error('[v0] audio play error', err)
-        setAudioError(isAr ? 'تعذّر تشغيل الصوت' : 'Failed to play audio')
+        setAudioError(isAr ? (t.addedTranslations_2026?.['تعذّر تشغيل الصوت'] || 'تعذّر تشغيل الصوت') : 'Failed to play audio')
         setIsPlaying(false)
       })
   }, [reciterId])
@@ -482,7 +482,7 @@ export default function MushafPage() {
               className="whitespace-nowrap font-bold text-sm opacity-0 max-w-0 group-hover/item:max-w-[250px] group-hover/item:opacity-100 transition-all duration-500 overflow-hidden"
             >
               <div className="px-4">
-                {headerInfo ? (isAr ? `${stripSurahPrefix(headerInfo.surahName)} • الجزء ${toArabicDigits(headerInfo.juz)}` : `${headerInfo.surahEnglish} • Juz ${headerInfo.juz}`) : (isAr ? (t.student?.mushaf || 'مصحفي') : (t.student?.mushaf || 'My Mushaf'))}
+                {headerInfo ? (isAr ? `${stripSurahPrefix(headerInfo.surahName)} • الجزء ${toArabicDigits(headerInfo.juz)}` : `${headerInfo.surahEnglish} • Juz ${headerInfo.juz}`) : (isAr ? (t.student?.mushaf || (t.addedTranslations_2026?.['مصحفي'] || 'مصحفي')) : (t.student?.mushaf || 'My Mushaf'))}
               </div>
             </div>
           </div>
@@ -541,7 +541,7 @@ export default function MushafPage() {
               className="whitespace-nowrap font-bold text-sm opacity-0 max-w-0 group-hover/item:max-w-[200px] group-hover/item:opacity-100 transition-all duration-500 overflow-hidden"
             >
               <div className="px-4">
-                {isAr ? "خريطة التقدم" : "Progress Map"}
+                {isAr ? (t.addedTranslations_2026?.['خريطة التقدم'] || 'خريطة التقدم') : "Progress Map"}
               </div>
             </div>
           </Link>
@@ -558,7 +558,7 @@ export default function MushafPage() {
                   className="whitespace-nowrap font-bold text-sm opacity-0 max-w-0 group-hover/item:max-w-[200px] group-hover/item:opacity-100 transition-all duration-500 overflow-hidden"
                 >
                   <div className="px-4">
-                    {isAr ? "فهرس السور" : "Surah Index"}
+                    {isAr ? (t.addedTranslations_2026?.['فهرس السور'] || 'فهرس السور') : "Surah Index"}
                   </div>
                 </div>
               </button>
@@ -567,14 +567,14 @@ export default function MushafPage() {
               <div className="p-5 border-b border-border/50 bg-card">
                 <SheetTitle className="text-xl font-black mb-4 flex items-center gap-2">
                   <BookOpen className="w-5 h-5 text-emerald-600" />
-                  {isAr ? 'فهرس السور' : 'Surah Index'}
+                  {isAr ? (t.addedTranslations_2026?.['فهرس السور'] || 'فهرس السور') : 'Surah Index'}
                 </SheetTitle>
                 <div className="relative group">
                   <Search className="absolute top-1/2 -translate-y-1/2 start-3 w-4 h-4 text-muted-foreground group-focus-within:text-emerald-600 transition-colors" />
                   <Input
                     value={search}
                     onChange={e => setSearch(e.target.value)}
-                    placeholder={t.student?.searchSurah || (isAr ? 'ابحث عن سورة...' : 'Search for surah...')}
+                    placeholder={t.student?.searchSurah || (isAr ? (t.addedTranslations_2026?.['ابحث عن سورة...'] || 'ابحث عن سورة...') : 'Search for surah...')}
                     className="ps-10 h-11 rounded-xl bg-muted/50 border-transparent focus:bg-background focus:border-emerald-500 focus:ring-emerald-500/20 transition-all"
                   />
                 </div>
@@ -597,10 +597,10 @@ export default function MushafPage() {
                         <div className="text-xs text-muted-foreground font-bold flex items-center gap-1.5 opacity-80">
                           <span className="truncate">{s.englishName}</span>
                           <span>•</span>
-                          <span className="whitespace-nowrap">{isAr ? toArabicDigits(s.numberOfAyahs) : s.numberOfAyahs} {t.student?.versesCount || (isAr ? 'آية' : 'verses')}</span>
+                          <span className="whitespace-nowrap">{isAr ? toArabicDigits(s.numberOfAyahs) : s.numberOfAyahs} {t.student?.versesCount || (isAr ? (t.addedTranslations_2026?.['آية'] || 'آية') : 'verses')}</span>
                           <span>•</span>
                           <span className="text-[10px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 px-1.5 py-0.5 rounded-md">
-                            {s.revelationType === 'Meccan' ? (t.student?.revelationMakkah || (isAr ? 'مكية' : 'Meccan')) : (t.student?.revelationMadinah || (isAr ? 'مدنية' : 'Medinan'))}
+                            {s.revelationType === 'Meccan' ? (t.student?.revelationMakkah || (isAr ? (t.addedTranslations_2026?.['مكية'] || 'مكية') : 'Meccan')) : (t.student?.revelationMadinah || (isAr ? (t.addedTranslations_2026?.['مدنية'] || 'مدنية') : 'Medinan'))}
                           </span>
                         </div>
                       </div>
@@ -644,7 +644,7 @@ export default function MushafPage() {
                 <AlertCircle className="w-10 h-10 text-rose-500" />
                 <p className="text-sm font-bold text-foreground">{error}</p>
                 <Button onClick={() => setPageNumber(p => p)} variant="outline" className="mt-2">
-                  {isAr ? 'إعادة المحاولة' : 'Retry'}
+                  {isAr ? (t.addedTranslations_2026?.['إعادة المحاولة'] || 'إعادة المحاولة') : 'Retry'}
                 </Button>
               </div>
             ) : pageData && (
@@ -659,7 +659,7 @@ export default function MushafPage() {
                           <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-transparent via-amber-700/50 dark:via-primary/50 to-transparent" />
                           <div className="flex items-center justify-between gap-4">
                             <div className="text-[10px] font-black tracking-widest text-amber-800 dark:text-primary/80 uppercase">
-                              {g.surah.revelationType === 'Meccan' ? (t.student?.revelationMakkah || (isAr ? 'مكية' : 'Meccan')) : (t.student?.revelationMadinah || (isAr ? 'مدنية' : 'Medinan'))}
+                              {g.surah.revelationType === 'Meccan' ? (t.student?.revelationMakkah || (isAr ? (t.addedTranslations_2026?.['مكية'] || 'مكية') : 'Meccan')) : (t.student?.revelationMadinah || (isAr ? (t.addedTranslations_2026?.['مدنية'] || 'مدنية') : 'Medinan'))}
                             </div>
                             <div
                               className="text-3xl sm:text-4xl text-amber-900 dark:text-foreground animate-pulse-subtle"
@@ -744,7 +744,7 @@ export default function MushafPage() {
                               >
                                 <div className="px-2 py-1.5 mb-1 border-b border-border/50">
                                   <div className="text-[11px] text-muted-foreground font-bold">
-                                    {isAr ? 'الآية' : 'Ayah'}
+                                    {isAr ? (t.addedTranslations_2026?.['الآية'] || 'الآية') : 'Ayah'}
                                   </div>
                                   <div className="text-sm font-black text-foreground">
                                     {stripSurahPrefix(a.surah.name)} · {isAr ? toArabicDigits(a.numberInSurah) : a.numberInSurah}
@@ -757,7 +757,7 @@ export default function MushafPage() {
                                     className="w-full justify-start gap-2 h-9 font-bold"
                                   >
                                     <Pause className="w-4 h-4 text-primary" />
-                                    {isAr ? 'إيقاف مؤقت' : 'Pause'}
+                                    {isAr ? (t.addedTranslations_2026?.['إيقاف مؤقت'] || 'إيقاف مؤقت') : 'Pause'}
                                   </Button>
                                 ) : (
                                   <Button
@@ -767,8 +767,8 @@ export default function MushafPage() {
                                   >
                                     <Play className="w-4 h-4 text-primary" />
                                     {isActive
-                                      ? (isAr ? 'متابعة التشغيل' : 'Resume')
-                                      : (isAr ? 'تشغيل الآية' : 'Listen to ayah')}
+                                      ? (isAr ? (t.addedTranslations_2026?.['متابعة التشغيل'] || 'متابعة التشغيل') : 'Resume')
+                                      : (isAr ? (t.addedTranslations_2026?.['تشغيل الآية'] || 'تشغيل الآية') : 'Listen to ayah')}
                                   </Button>
                                 )}
                                 {isActive && (
@@ -778,7 +778,7 @@ export default function MushafPage() {
                                     className="w-full justify-start gap-2 h-9 font-bold text-rose-600 dark:text-rose-400 hover:text-rose-600"
                                   >
                                     <Square className="w-4 h-4" />
-                                    {isAr ? 'إيقاف' : 'Stop'}
+                                    {isAr ? (t.addedTranslations_2026?.['إيقاف'] || 'إيقاف') : 'Stop'}
                                   </Button>
                                 )}
                                 <div className="mt-1 px-2 py-1.5 border-t border-border/50 flex items-center gap-1.5 text-[11px] text-muted-foreground font-bold">
@@ -813,7 +813,7 @@ export default function MushafPage() {
               className="rounded-2xl h-11 px-5 font-black w-full sm:w-auto bg-[#fbf6e6]/90 dark:bg-card border-amber-700/40 hover:bg-[#fbf6e6] dark:hover:bg-card/80"
             >
               <ChevronRight className="w-4 h-4 me-2" />
-              {t.student?.prevPage || (isAr ? 'الصفحة السابقة' : 'Previous Page')}
+              {t.student?.prevPage || (isAr ? (t.addedTranslations_2026?.['الصفحة السابقة'] || 'الصفحة السابقة') : 'Previous Page')}
             </Button>
 
             <div className="flex items-center gap-2">
@@ -829,7 +829,7 @@ export default function MushafPage() {
                 className="w-24 h-11 rounded-2xl text-center font-black bg-[#fbf6e6]/90 dark:bg-card border-amber-700/40"
               />
               <Button onClick={handleGoToPage} className="rounded-2xl h-11 px-5 font-black">
-                {isAr ? 'انتقال' : 'Go'}
+                {isAr ? (t.addedTranslations_2026?.['انتقال'] || 'انتقال') : 'Go'}
               </Button>
             </div>
 
@@ -839,7 +839,7 @@ export default function MushafPage() {
               disabled={pageNumber >= TOTAL_PAGES}
               className="rounded-2xl h-11 px-5 font-black w-full sm:w-auto bg-[#fbf6e6]/90 dark:bg-card border-amber-700/40 hover:bg-[#fbf6e6] dark:hover:bg-card/80"
             >
-              {t.student?.nextPage || (isAr ? 'الصفحة التالية' : 'Next Page')}
+              {t.student?.nextPage || (isAr ? (t.addedTranslations_2026?.['الصفحة التالية'] || 'الصفحة التالية') : 'Next Page')}
               <ChevronLeft className="w-4 h-4 ms-2" />
             </Button>
           </div>
@@ -888,7 +888,7 @@ export default function MushafPage() {
                   variant={autoContinue ? 'default' : 'ghost'}
                   onClick={() => setAutoContinue(v => !v)}
                   className="rounded-xl h-9 w-9"
-                  title={isAr ? 'متابعة تلقائية' : 'Auto-continue'}
+                  title={isAr ? (t.addedTranslations_2026?.['متابعة تلقائية'] || 'متابعة تلقائية') : 'Auto-continue'}
                 >
                   <Repeat className="w-4 h-4" />
                 </Button>
@@ -940,7 +940,7 @@ export default function MushafPage() {
             }
           }}
           onError={() => {
-            setAudioError(isAr ? 'تعذّر تشغيل الصوت، حاول قارئاً آخر' : 'Audio failed to load, try another reciter')
+            setAudioError(isAr ? (t.addedTranslations_2026?.['تعذّر تشغيل الصوت، حاول قارئاً آخر'] || 'تعذّر تشغيل الصوت، حاول قارئاً آخر') : 'Audio failed to load, try another reciter')
             setIsPlaying(false)
           }}
         />

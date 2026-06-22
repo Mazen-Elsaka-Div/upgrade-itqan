@@ -63,7 +63,7 @@ export default function SessionDetailsPage() {
 
   const fetchSession = useCallback(async () => {
     if (!sessionId) {
-      setError(isAr ? 'معرف الجلسة مفقود' : 'Session ID is missing')
+      setError((t.addedTranslations_2026?.['معرف الجلسة مفقود'] || 'معرف الجلسة مفقود'))
       setLoading(false)
       return
     }
@@ -78,17 +78,17 @@ export default function SessionDetailsPage() {
         setSession(data.session)
         setError(null)
       } else if (res.status === 404) {
-        setError(isAr ? 'الجلسة غير موجودة أو غير متاحة' : 'Session not found or not available')
+        setError((t.addedTranslations_2026?.['الجلسة غير موجودة أو غير متاحة'] || 'الجلسة غير موجودة أو غير متاحة'))
       } else if (res.status === 401) {
         router.push('/login')
         return
       } else {
         const data = await res.json().catch(() => ({}))
-        setError(data.error || (isAr ? 'فشل تحميل الجلسة' : 'Failed to load session'))
+        setError(data.error || ((t.addedTranslations_2026?.['فشل تحميل الجلسة'] || 'فشل تحميل الجلسة')))
       }
     } catch (err) {
       console.error('[SessionDetails] Fetch error:', err)
-      setError(isAr ? 'تعذّر الاتصال بالخادم' : 'Could not connect to server')
+      setError((t.addedTranslations_2026?.['تعذّر الاتصال بالخادم'] || 'تعذّر الاتصال بالخادم'))
     } finally {
       setLoading(false)
     }
@@ -114,11 +114,11 @@ export default function SessionDetailsPage() {
         fetchSession()
       } else {
         const data = await res.json().catch(() => ({}))
-        setError(data.error || (isAr ? 'فشل الانضمام للجلسة' : 'Failed to join session'))
+        setError(data.error || ((t.addedTranslations_2026?.['فشل الانضمام للجلسة'] || 'فشل الانضمام للجلسة')))
       }
     } catch (err) {
       console.error('[SessionDetails] Join error:', err)
-      setError(isAr ? 'حدث خطأ أثناء الانضمام' : 'Error occurred while joining')
+      setError((t.addedTranslations_2026?.['حدث خطأ أثناء الانضمام'] || 'حدث خطأ أثناء الانضمام'))
     } finally {
       setJoining(false)
     }
@@ -134,7 +134,7 @@ export default function SessionDetailsPage() {
         <Button variant="ghost" asChild className="gap-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl">
           <Link href="/academy/student/sessions">
             {isAr ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
-            {isAr ? 'العودة للجلسات' : 'Back to Sessions'}
+            {(t.addedTranslations_2026?.['العودة للجلسات'] || 'العودة للجلسات')}
           </Link>
         </Button>
 
@@ -147,17 +147,17 @@ export default function SessionDetailsPage() {
           </div>
           <div className="space-y-2">
             <h2 className="text-2xl font-black">
-              {isAr ? 'حدث خطأ' : 'An error occurred'}
+              {(t.addedTranslations_2026?.['حدث خطأ'] || 'حدث خطأ')}
             </h2>
             <p className="text-muted-foreground max-w-sm mx-auto leading-relaxed">{error}</p>
           </div>
           <div className="flex gap-3 mt-4">
             <Button size="lg" className="rounded-xl font-bold px-8 shadow-md" onClick={() => { setLoading(true); setError(null); fetchSession() }}>
-              {isAr ? 'إعادة المحاولة' : 'Try Again'}
+              {(t.addedTranslations_2026?.['إعادة المحاولة'] || 'إعادة المحاولة')}
             </Button>
             <Button size="lg" variant="outline" asChild className="rounded-xl font-bold px-8">
               <Link href="/academy/student/sessions">
-                {isAr ? 'العودة للجلسات' : 'Back to Sessions'}
+                {(t.addedTranslations_2026?.['العودة للجلسات'] || 'العودة للجلسات')}
               </Link>
             </Button>
           </div>
@@ -172,7 +172,7 @@ export default function SessionDetailsPage() {
         <Button variant="ghost" asChild className="gap-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl">
           <Link href="/academy/student/sessions">
             {isAr ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
-            {isAr ? 'العودة للجلسات' : 'Back to Sessions'}
+            {(t.addedTranslations_2026?.['العودة للجلسات'] || 'العودة للجلسات')}
           </Link>
         </Button>
 
@@ -184,14 +184,14 @@ export default function SessionDetailsPage() {
             <Video className="w-10 h-10 text-slate-400 dark:text-slate-500/50" />
           </div>
           <h3 className="text-2xl font-black mb-3">
-            {isAr ? 'الجلسة غير موجودة' : 'Session not found'}
+            {(t.addedTranslations_2026?.['الجلسة غير موجودة'] || 'الجلسة غير موجودة')}
           </h3>
           <p className="text-muted-foreground mb-8 max-w-md mx-auto leading-relaxed">
-            {isAr ? 'قد تكون الجلسة محذوفة أو غير متاحة لك للاطلاع عليها في الوقت الحالي.' : 'The session may have been deleted or is not available to you.'}
+            {(t.addedTranslations_2026?.['قد تكون الجلسة محذوفة أو غير متاحة لك للاطلاع عليها في الوقت الحالي.'] || 'قد تكون الجلسة محذوفة أو غير متاحة لك للاطلاع عليها في الوقت الحالي.')}
           </p>
           <Button size="lg" className="rounded-xl font-bold px-8 shadow-md" asChild>
             <Link href="/academy/student/sessions">
-              {isAr ? 'العودة للجلسات' : 'Back to Sessions'}
+              {(t.addedTranslations_2026?.['العودة للجلسات'] || 'العودة للجلسات')}
             </Link>
           </Button>
         </motion.div>
@@ -219,25 +219,25 @@ export default function SessionDetailsPage() {
 
   const statusConfig = {
     scheduled: {
-      label: isAr ? 'مجدولة' : 'Scheduled',
+      label: (t.addedTranslations_2026?.['مجدولة'] || 'مجدولة'),
       color: 'bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20',
       gradient: 'from-blue-600 to-indigo-600',
       shadow: 'shadow-blue-500/30'
     },
     in_progress: {
-      label: isAr ? 'مباشر الآن' : 'Live Now',
+      label: (t.addedTranslations_2026?.['مباشر الآن'] || 'مباشر الآن'),
       color: 'bg-red-500/10 text-red-700 dark:text-red-300 border-red-500/20',
       gradient: 'from-red-600 to-orange-600',
       shadow: 'shadow-red-500/30'
     },
     completed: {
-      label: isAr ? 'منتهية' : 'Completed',
+      label: (t.addedTranslations_2026?.['منتهية'] || 'منتهية'),
       color: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20',
       gradient: 'from-emerald-500 to-teal-600',
       shadow: 'shadow-emerald-500/30'
     },
     cancelled: {
-      label: isAr ? 'ملغاة' : 'Cancelled',
+      label: (t.addedTranslations_2026?.['ملغاة'] || 'ملغاة'),
       color: 'bg-slate-500/10 text-slate-700 dark:text-slate-400 border-slate-500/20',
       gradient: 'from-slate-600 to-slate-800',
       shadow: 'shadow-slate-500/30'
@@ -256,7 +256,7 @@ export default function SessionDetailsPage() {
       <Button variant="ghost" asChild className="gap-2 hover:bg-white/50 dark:hover:bg-slate-800/50 rounded-xl backdrop-blur-sm -ml-2">
         <Link href="/academy/student/sessions">
           {isAr ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
-          {isAr ? 'العودة للجلسات' : 'Back to Sessions'}
+          {(t.addedTranslations_2026?.['العودة للجلسات'] || 'العودة للجلسات')}
         </Link>
       </Button>
 
@@ -283,7 +283,7 @@ export default function SessionDetailsPage() {
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
                         <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white" />
                       </span>
-                      {isAr ? 'بث مباشر الآن' : 'Live Now'}
+                      {(t.addedTranslations_2026?.['بث مباشر الآن'] || 'بث مباشر الآن')}
                     </span>
                   )}
                 </div>
@@ -304,26 +304,26 @@ export default function SessionDetailsPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <InfoCard
                 icon={<Calendar className="w-6 h-6 text-blue-500" />}
-                label={isAr ? 'التاريخ والوقت' : 'Date & Time'}
+                label={(t.addedTranslations_2026?.['التاريخ والوقت'] || 'التاريخ والوقت')}
                 value={formatDateTime(session.scheduled_at)}
                 isAr={isAr}
               />
               <InfoCard
                 icon={<Clock className="w-6 h-6 text-purple-500" />}
-                label={isAr ? 'المدة' : 'Duration'}
-                value={`${session.duration_minutes} ${isAr ? 'دقيقة' : 'min'}`}
+                label={(t.addedTranslations_2026?.['المدة'] || 'المدة')}
+                value={`${session.duration_minutes} ${(t.addedTranslations_2026?.['دقيقة'] || 'دقيقة')}`}
                 isAr={isAr}
               />
               <InfoCard
                 icon={<Users className="w-6 h-6 text-orange-500" />}
-                label={isAr ? 'الحضور' : 'Attendees'}
+                label={(t.addedTranslations_2026?.['الحضور'] || 'الحضور')}
                 value={String(session.attendees_count)}
                 isAr={isAr}
               />
               <InfoCard
                 icon={<CheckCircle2 className="w-6 h-6 text-emerald-500" />}
-                label={isAr ? 'حضورك' : 'Your Attendance'}
-                value={session.user_attended ? (isAr ? 'حضرت' : 'Attended') : (isAr ? 'لم تحضر' : 'Not attended')}
+                label={(t.addedTranslations_2026?.['حضورك'] || 'حضورك')}
+                value={session.user_attended ? ((t.addedTranslations_2026?.['حضرت'] || 'حضرت')) : ((t.addedTranslations_2026?.['لم تحضر'] || 'لم تحضر'))}
                 isAr={isAr}
                 highlight={session.user_attended}
               />
@@ -338,7 +338,7 @@ export default function SessionDetailsPage() {
                 </AvatarFallback>
               </Avatar>
               <div>
-                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">{isAr ? 'المدرس' : 'Teacher'}</p>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">{(t.addedTranslations_2026?.['المدرس'] || 'المدرس')}</p>
                 <p className="font-black text-xl text-foreground">{session.teacher_name}</p>
               </div>
             </div>
@@ -349,7 +349,7 @@ export default function SessionDetailsPage() {
                 <div className="bg-slate-50 dark:bg-slate-800/30 border border-border/50 rounded-2xl p-6 shadow-sm">
                   <h3 className="font-black mb-3 flex items-center gap-2 text-lg">
                     <FileText className="w-5 h-5 text-blue-500" />
-                    {isAr ? 'وصف الجلسة' : 'Session Description'}
+                    {(t.addedTranslations_2026?.['وصف الجلسة'] || 'وصف الجلسة')}
                   </h3>
                   <p className="text-muted-foreground leading-relaxed font-medium">{session.description}</p>
                 </div>
@@ -360,7 +360,7 @@ export default function SessionDetailsPage() {
                 <div className="p-6 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border border-amber-200/50 dark:border-amber-800/50 shadow-sm">
                   <h4 className="font-black text-amber-900 dark:text-amber-100 flex items-center gap-2 text-lg mb-3">
                     <Info className="w-5 h-5 text-amber-600 dark:text-amber-400" />
-                    {isAr ? 'ملاحظات المدرس' : 'Teacher Notes'}
+                    {(t.addedTranslations_2026?.['ملاحظات المدرس'] || 'ملاحظات المدرس')}
                   </h4>
                   <p className="text-amber-800 dark:text-amber-200 leading-relaxed font-medium">{session.notes}</p>
                 </div>
@@ -377,7 +377,7 @@ export default function SessionDetailsPage() {
                 >
                   <Link href={`/academy/student/sessions/${session.id}/live`}>
                     <PlayCircle className="w-6 h-6" />
-                    {isAr ? 'انضم للبث المباشر الآن' : 'Join Live Stream Now'}
+                    {(t.addedTranslations_2026?.['انضم للبث المباشر الآن'] || 'انضم للبث المباشر الآن')}
                   </Link>
                 </Button>
               )}
@@ -398,8 +398,8 @@ export default function SessionDetailsPage() {
                     <ExternalLink className="w-6 h-6" />
                   )}
                   {isLive
-                    ? (isAr ? 'فتح الرابط الخارجي' : 'Open External Link')
-                    : (isAr ? 'فتح رابط الجلسة' : 'Open Meeting Link')}
+                    ? ((t.addedTranslations_2026?.['فتح الرابط الخارجي'] || 'فتح الرابط الخارجي'))
+                    : ((t.addedTranslations_2026?.['فتح رابط الجلسة'] || 'فتح رابط الجلسة'))}
                 </Button>
               )}
 
@@ -410,7 +410,7 @@ export default function SessionDetailsPage() {
                     className="gap-2 flex-1 w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shadow-lg shadow-emerald-500/25 font-black text-base h-14 rounded-2xl"
                   >
                     <PlayCircle className="w-6 h-6" />
-                    {isAr ? 'شاهد التسجيل' : 'Watch Recording'}
+                    {(t.addedTranslations_2026?.['شاهد التسجيل'] || 'شاهد التسجيل')}
                   </Button>
                 </VideoPlayerModal>
               )}
@@ -418,7 +418,7 @@ export default function SessionDetailsPage() {
               {isUpcoming && !session.meeting_link && (
                 <Button size="lg" disabled className="gap-2 flex-1 font-bold h-14 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 opacity-100">
                   <Clock className="w-6 h-6" />
-                  {isAr ? 'الجلسة لم تبدأ بعد' : 'Session not started yet'}
+                  {(t.addedTranslations_2026?.['الجلسة لم تبدأ بعد'] || 'الجلسة لم تبدأ بعد')}
                 </Button>
               )}
 
@@ -426,7 +426,7 @@ export default function SessionDetailsPage() {
                 <Button size="lg" variant="outline" asChild className="gap-2 font-bold h-14 rounded-2xl border-2 border-border/50 hover:bg-slate-50 dark:hover:bg-slate-800">
                   <Link href={`/academy/public/session/${session.public_join_token}`}>
                     <ExternalLink className="w-5 h-5" />
-                    {isAr ? 'رابط الدرس العام' : 'Public Lesson Link'}
+                    {(t.addedTranslations_2026?.['رابط الدرس العام'] || 'رابط الدرس العام')}
                   </Link>
                 </Button>
               )}
@@ -444,7 +444,7 @@ export default function SessionDetailsPage() {
                 <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               </div>
               <h2 className="text-xl font-black">
-                {isAr ? 'مواد الدورة' : 'Course Materials'}
+                {(t.addedTranslations_2026?.['مواد الدورة'] || 'مواد الدورة')}
               </h2>
             </div>
             <div className="p-4 md:p-6 grid gap-4 md:grid-cols-2">

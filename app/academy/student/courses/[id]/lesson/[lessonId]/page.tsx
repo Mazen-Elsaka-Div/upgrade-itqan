@@ -30,7 +30,7 @@ export default function LessonPage() {
         const lRes = await fetch(`/api/academy/student/lessons/${lessonId}`)
         if (!lRes.ok) {
           const err = await lRes.json()
-          setErrorText(err.error || 'حدث خطأ في تحميل الدرس')
+          setErrorText(err.error || (t.addedTranslations_2026?.['حدث خطأ في تحميل الدرس'] || 'حدث خطأ في تحميل الدرس'))
           setLoading(false)
           return
         }
@@ -50,7 +50,7 @@ export default function LessonPage() {
         }
 
       } catch (e) {
-        setErrorText('حدث خطأ في الاتصال')
+        setErrorText((t.addedTranslations_2026?.['حدث خطأ في الاتصال'] || 'حدث خطأ في الاتصال'))
       } finally {
         setLoading(false)
       }
@@ -72,8 +72,8 @@ export default function LessonPage() {
         <PlayCircle className="w-16 h-16 text-red-500/50 mb-4" />
         <h2 className="text-2xl font-bold mb-2 text-foreground">{errorText}</h2>
         <button onClick={() => router.push(`/academy/student/courses/${courseId}`)} className="text-blue-600 hover:underline mt-4">
-          العودة لصفحة الدورة
-        </button>
+          {(t.addedTranslations_2026?.['العودة لصفحة الدورة'] || 'العودة لصفحة الدورة')}
+                        </button>
       </div>
     )
   }
@@ -107,7 +107,7 @@ export default function LessonPage() {
         <div className="mb-4">
           <Link href={`/academy/student/courses/${courseId}`} className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-blue-600 transition-colors">
             <ArrowRight className="w-4 h-4 rtl:rotate-180" />
-            العودة للدورة: {lessonData.course_title}
+            {(t.addedTranslations_2026?.['العودة للدورة:'] || 'العودة للدورة:')} {lessonData.course_title}
           </Link>
         </div>
 
@@ -131,7 +131,7 @@ export default function LessonPage() {
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-blue-900 to-blue-950 flex flex-col items-center justify-center">
               <PlayCircle className="w-20 h-20 text-blue-500/50 mb-4" />
-              <p className="text-blue-200 font-medium text-lg">لا يوجد فيديو لهذا الدرس بعد</p>
+              <p className="text-blue-200 font-medium text-lg">{(t.addedTranslations_2026?.['لا يوجد فيديو لهذا الدرس بعد'] || 'لا يوجد فيديو لهذا الدرس بعد')}</p>
             </div>
           )}
         </div>
@@ -142,12 +142,12 @@ export default function LessonPage() {
             <div>
               <div className="flex items-center gap-3 mb-2">
                 <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-bold text-xs rounded-full">
-                  الدرس {lessonData.order_index}
+                  {(t.addedTranslations_2026?.['الدرس'] || 'الدرس')} {lessonData.order_index}
                 </span>
                 {lessonData.duration_minutes && (
                   <span className="text-sm text-muted-foreground whitespace-nowrap font-medium">
-                    {lessonData.duration_minutes} دقيقة
-                  </span>
+                    {lessonData.duration_minutes} {(t.addedTranslations_2026?.['دقيقة'] || 'دقيقة')}
+                                                        </span>
                 )}
               </div>
               <h1 className="text-2xl md:text-3xl font-bold text-foreground">
@@ -168,10 +168,10 @@ export default function LessonPage() {
                     setCourseLessons(prev => prev.map(l => l.id === lessonId ? { ...l, is_completed: true } : l))
                   } else {
                     const err = await res.json();
-                    alert(err.error || 'حدث خطأ');
+                    alert(err.error || (t.addedTranslations_2026?.['حدث خطأ'] || 'حدث خطأ'));
                   }
                 } catch {
-                  alert('حدث خطأ في الاتصال');
+                  alert((t.addedTranslations_2026?.['حدث خطأ في الاتصال'] || 'حدث خطأ في الاتصال'));
                 } finally {
                   setIsCompleting(false)
                 }
@@ -184,7 +184,7 @@ export default function LessonPage() {
               )}
             >
               {isCompleting ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle2 className="w-5 h-5" />}
-              {lessonData.is_completed ? 'مكتمل' : 'تحديد كمكتمل'}
+              {lessonData.is_completed ? (t.addedTranslations_2026?.['مكتمل'] || 'مكتمل') : 'تحديد كمكتمل'}
             </button>
           </div>
 
@@ -196,22 +196,22 @@ export default function LessonPage() {
                   <CheckCircle2 className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-green-800 dark:text-green-300">أحسنت! لقد أتممت هذا الدرس</h3>
-                  <p className="text-sm text-green-700/80 dark:text-green-400/80">أنت الآن مستعد للانتقال للدرس التالي</p>
+                  <h3 className="font-bold text-green-800 dark:text-green-300">{(t.addedTranslations_2026?.['أحسنت! لقد أتممت هذا الدرس'] || 'أحسنت! لقد أتممت هذا الدرس')}</h3>
+                  <p className="text-sm text-green-700/80 dark:text-green-400/80">{(t.addedTranslations_2026?.['أنت الآن مستعد للانتقال للدرس التالي'] || 'أنت الآن مستعد للانتقال للدرس التالي')}</p>
                 </div>
               </div>
               <Link
                 href={`/academy/student/courses/${courseId}/lesson/${nextLesson.id}`}
                 className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold text-sm transition-all shadow-md hover:shadow-lg active:scale-95 flex items-center gap-2"
               >
-                انتقل للدرس التالي
-                <ChevronLeft className="w-4 h-4 rtl:rotate-180" />
+                {(t.addedTranslations_2026?.['انتقل للدرس التالي'] || 'انتقل للدرس التالي')}
+                                              <ChevronLeft className="w-4 h-4 rtl:rotate-180" />
               </Link>
             </div>
           )}
 
           <div className="prose prose-blue dark:prose-invert max-w-none text-muted-foreground mb-10 leading-relaxed font-medium whitespace-pre-wrap">
-            {lessonData.description || lessonData.content || <span className="opacity-50">لا يوجد وصف للدرس.</span>}
+            {lessonData.description || lessonData.content || <span className="opacity-50">{(t.addedTranslations_2026?.['لا يوجد وصف للدرس.'] || 'لا يوجد وصف للدرس.')}</span>}
           </div>
 
           {/* Attachments Section */}
@@ -219,8 +219,8 @@ export default function LessonPage() {
             <div className="mb-10 p-6 bg-muted/30 rounded-2xl border border-border border-dashed">
               <h3 className="font-bold text-lg mb-4 flex items-center gap-2 text-foreground">
                 <Download className="w-5 h-5 text-blue-600" />
-                المرفقات والملفات التعزيزية
-              </h3>
+                {(t.addedTranslations_2026?.['المرفقات والملفات التعزيزية'] || 'المرفقات والملفات التعزيزية')}
+                                            </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {lessonData.attachments.map((att: any) => (
                   <a
@@ -253,8 +253,8 @@ export default function LessonPage() {
                 className="px-5 py-3 rounded-xl border border-border bg-card hover:bg-muted text-foreground flex items-center gap-2 text-sm font-bold transition-colors"
               >
                 <ChevronRight className="w-4 h-4 rtl:rotate-180" />
-                الدرس السابق
-              </Link>
+                {(t.addedTranslations_2026?.['الدرس السابق'] || 'الدرس السابق')}
+                                            </Link>
             ) : <div />}
 
             {nextLesson && (
@@ -262,8 +262,8 @@ export default function LessonPage() {
                 href={`/academy/student/courses/${courseId}/lesson/${nextLesson.id}`}
                 className="px-5 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2 text-sm font-bold transition-colors shadow-sm ml-auto"
               >
-                الدرس التالي
-                <ChevronLeft className="w-4 h-4 rtl:rotate-180" />
+                {(t.addedTranslations_2026?.['الدرس التالي'] || 'الدرس التالي')}
+                                              <ChevronLeft className="w-4 h-4 rtl:rotate-180" />
               </Link>
             )}
           </div>
@@ -276,8 +276,8 @@ export default function LessonPage() {
           <div className="p-5 border-b border-border bg-muted/30">
             <h3 className="font-bold flex items-center gap-2 text-foreground">
               <ListVideo className="w-5 h-5 text-blue-600" />
-              قائمة الدروس
-            </h3>
+              {(t.addedTranslations_2026?.['قائمة الدروس'] || 'قائمة الدروس')}
+                                      </h3>
             <p className="text-xs text-muted-foreground mt-1 truncate">
               {lessonData.course_title}
             </p>
@@ -309,8 +309,8 @@ export default function LessonPage() {
                       <div className="flex items-center gap-2 mt-0.5">
                         {lesson.duration_minutes && (
                           <p className={cn("text-[10px]", isActive ? "text-blue-100" : "opacity-60")}>
-                            {lesson.duration_minutes} دقيقة
-                          </p>
+                            {lesson.duration_minutes} {(t.addedTranslations_2026?.['دقيقة'] || 'دقيقة')}
+                                                                  </p>
                         )}
                         {lesson.is_completed && (
                           <CheckCircle2 className={cn("w-3 h-3", isActive ? "text-white" : "text-green-500")} />

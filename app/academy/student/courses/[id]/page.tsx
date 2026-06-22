@@ -39,11 +39,11 @@ export default function CourseDetailPage() {
           const json = await res.json()
           setData(json)
         } else {
-          setErrorText('الدورة غير موجودة')
+          setErrorText((t.addedTranslations_2026?.['الدورة غير موجودة'] || 'الدورة غير موجودة'))
         }
       } catch (error) {
         console.error('Failed to fetch course details:', error)
-        setErrorText('حدث خطأ أثناء تحميل الدورة')
+        setErrorText((t.addedTranslations_2026?.['حدث خطأ أثناء تحميل الدورة'] || 'حدث خطأ أثناء تحميل الدورة'))
       } finally {
         setLoading(false)
       }
@@ -64,10 +64,10 @@ export default function CourseDetailPage() {
         setData(prev => prev ? { ...prev, enrollment_status: 'pending' } : prev)
       } else {
         const json = await res.json()
-        alert(json.error || 'حدث خطأ')
+        alert(json.error || (t.addedTranslations_2026?.['حدث خطأ'] || 'حدث خطأ'))
       }
     } catch (e) {
-      alert('حدث خطأ في الاتصال')
+      alert((t.addedTranslations_2026?.['حدث خطأ في الاتصال'] || 'حدث خطأ في الاتصال'))
     } finally {
       setEnrolling(false)
     }
@@ -82,19 +82,19 @@ export default function CourseDetailPage() {
         router.push('/academy/student/courses')
       } else {
         const json = await res.json()
-        alert(json.error || 'حدث خطأ أثناء الخروج من الدورة')
+        alert(json.error || (t.addedTranslations_2026?.['حدث خطأ أثناء الخروج من الدورة'] || 'حدث خطأ أثناء الخروج من الدورة'))
       }
     } catch (e) {
-      alert('حدث خطأ في الاتصال')
+      alert((t.addedTranslations_2026?.['حدث خطأ في الاتصال'] || 'حدث خطأ في الاتصال'))
     } finally {
       setLeaving(false)
     }
   }
 
   const levelLabels: Record<string, string> = {
-    beginner: t.academy?.beginner || 'مبتدئ',
-    intermediate: t.academy?.intermediate || 'متوسط',
-    advanced: t.academy?.advanced || 'متقدم'
+    beginner: t.academy?.beginner || (t.addedTranslations_2026?.['مبتدئ'] || 'مبتدئ'),
+    intermediate: t.academy?.intermediate || (t.addedTranslations_2026?.['متوسط'] || 'متوسط'),
+    advanced: t.academy?.advanced || (t.addedTranslations_2026?.['متقدم'] || 'متقدم')
   }
 
   if (loading) {
@@ -109,10 +109,10 @@ export default function CourseDetailPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
         <BookOpen className="w-16 h-16 text-muted-foreground opacity-50 mb-4" />
-        <h2 className="text-2xl font-bold mb-2">{errorText || 'حدث خطأ'}</h2>
+        <h2 className="text-2xl font-bold mb-2">{errorText || (t.addedTranslations_2026?.['حدث خطأ'] || 'حدث خطأ')}</h2>
         <Link href="/academy/student/courses/browse" className="text-blue-600 hover:underline">
-          العودة للتصفح
-        </Link>
+          {(t.addedTranslations_2026?.['العودة للتصفح'] || 'العودة للتصفح')}
+                        </Link>
       </div>
     )
   }
@@ -155,11 +155,11 @@ export default function CourseDetailPage() {
             </div>
             <div className="flex items-center gap-2">
               <PlayCircle className="w-5 h-5 opacity-70" />
-              <span className="font-medium">{lessons.length} درس</span>
+              <span className="font-medium">{lessons.length} {(t.addedTranslations_2026?.['درس'] || 'درس')}</span>
             </div>
             <div className="flex items-center gap-2">
               <Users className="w-5 h-5 opacity-70" />
-              <span className="font-medium">{course.total_enrolled} طالب</span>
+              <span className="font-medium">{course.total_enrolled} {(t.addedTranslations_2026?.['طالب'] || 'طالب')}</span>
             </div>
           </div>
 
@@ -181,7 +181,7 @@ export default function CourseDetailPage() {
                 ) : (
                   <>
                     <BookMarked className="w-5 h-5" />
-                    {t.academy?.enrollNow || 'طلب الانضمام'}
+                    {t.academy?.enrollNow || (t.addedTranslations_2026?.['طلب الانضمام'] || 'طلب الانضمام')}
                   </>
                 )}
               </button>
@@ -190,14 +190,14 @@ export default function CourseDetailPage() {
             {enrollment_status === 'pending' && (
               <button disabled className="px-8 py-3.5 bg-white/10 text-white text-base font-bold rounded-xl border border-white/20 flex items-center gap-2 cursor-not-allowed">
                 <Clock className="w-5 h-5" />
-                {t.academy?.enrollmentPending || 'في انتظار موافقة الأستاذ'}
+                {t.academy?.enrollmentPending || (t.addedTranslations_2026?.['في انتظار موافقة الأستاذ'] || 'في انتظار موافقة الأستاذ')}
               </button>
             )}
 
             {enrollment_status === 'rejected' && (
               <button disabled className="px-8 py-3.5 bg-red-500/20 text-red-100 text-base font-bold rounded-xl border border-red-500/50 flex items-center gap-2 cursor-not-allowed">
-                تم رفض طلبك لهذه الدورة
-              </button>
+                {(t.addedTranslations_2026?.['تم رفض طلبك لهذه الدورة'] || 'تم رفض طلبك لهذه الدورة')}
+                                            </button>
             )}
 
             {enrollment_status === 'active' && lessons.length > 0 && (
@@ -206,7 +206,7 @@ export default function CourseDetailPage() {
                 className="px-8 py-3.5 bg-green-500 hover:bg-green-400 text-white text-base font-bold rounded-xl transition-all shadow-lg flex items-center gap-2"
               >
                 <PlayCircle className="w-5 h-5" />
-                {t.academy?.continueLearning || 'متابعة الدورة'}
+                {t.academy?.continueLearning || (t.addedTranslations_2026?.['متابعة الدورة'] || 'متابعة الدورة')}
               </Link>
             )}
 
@@ -214,10 +214,10 @@ export default function CourseDetailPage() {
               <Link
                 href={`/academy/student/chat?teacherId=${course.teacher_id}`}
                 className="px-6 py-3.5 bg-white/10 hover:bg-white/20 text-white text-base font-bold rounded-xl transition-all border border-white/20 backdrop-blur-sm flex items-center gap-2"
-                title={t.academy?.messageTeacher || 'مراسلة المدرس'}
+                title={t.academy?.messageTeacher || (t.addedTranslations_2026?.['مراسلة المدرس'] || 'مراسلة المدرس')}
               >
                 <MessageSquare className="w-5 h-5" />
-                {t.academy?.messageTeacher || 'مراسلة المدرس'}
+                {t.academy?.messageTeacher || (t.addedTranslations_2026?.['مراسلة المدرس'] || 'مراسلة المدرس')}
               </Link>
             )}
 
@@ -225,10 +225,10 @@ export default function CourseDetailPage() {
               <button
                 onClick={() => setShowLeaveModal(true)}
                 className="px-6 py-3.5 bg-red-500/15 hover:bg-red-500/25 text-red-100 text-base font-bold rounded-xl transition-all border border-red-400/40 backdrop-blur-sm flex items-center gap-2"
-                title={enrollment_status === 'pending' ? 'إلغاء طلب الانضمام' : 'الخروج من الدورة'}
+                title={enrollment_status === 'pending' ? (t.addedTranslations_2026?.['إلغاء طلب الانضمام'] || 'إلغاء طلب الانضمام') : 'الخروج من الدورة'}
               >
                 <LogOut className="w-5 h-5" />
-                {enrollment_status === 'pending' ? 'إلغاء الطلب' : 'الخروج من الدورة'}
+                {enrollment_status === 'pending' ? (t.addedTranslations_2026?.['إلغاء الطلب'] || 'إلغاء الطلب') : 'الخروج من الدورة'}
               </button>
             )}
           </div>
@@ -243,11 +243,11 @@ export default function CourseDetailPage() {
               <AlertTriangle className="w-7 h-7" />
             </div>
             <h3 className="text-xl font-bold mb-2">
-              {enrollment_status === 'pending' ? 'إلغاء طلب الانضمام؟' : 'الخروج من الدورة؟'}
+              {enrollment_status === 'pending' ? (t.addedTranslations_2026?.['إلغاء طلب الانضمام؟'] || 'إلغاء طلب الانضمام؟') : 'الخروج من الدورة؟'}
             </h3>
             <p className="text-muted-foreground mb-6 leading-relaxed">
               {enrollment_status === 'pending'
-                ? 'سيتم إلغاء طلب انضمامك لهذه الدورة. يمكنك التقديم مرة أخرى لاحقاً.'
+                ? (t.addedTranslations_2026?.['سيتم إلغاء طلب انضمامك لهذه الدورة. يمكنك التقديم مرة أخرى لاحقاً.'] || 'سيتم إلغاء طلب انضمامك لهذه الدورة. يمكنك التقديم مرة أخرى لاحقاً.')
                 : 'سيتم إلغاء تسجيلك وحذف تقدمك في هذه الدورة. يمكنك إعادة الانضمام لاحقاً مع البدء من جديد.'}
             </p>
             <div className="flex gap-3">
@@ -256,8 +256,8 @@ export default function CourseDetailPage() {
                 disabled={leaving}
                 className="flex-1 px-4 py-3 bg-muted hover:bg-muted/70 text-foreground font-bold rounded-xl transition-colors disabled:opacity-60"
               >
-                تراجع
-              </button>
+                {(t.addedTranslations_2026?.['تراجع'] || 'تراجع')}
+                                            </button>
               <button
                 onClick={handleLeave}
                 disabled={leaving}
@@ -268,7 +268,7 @@ export default function CourseDetailPage() {
                 ) : (
                   <>
                     <LogOut className="w-4 h-4" />
-                    {enrollment_status === 'pending' ? 'تأكيد الإلغاء' : 'تأكيد الخروج'}
+                    {enrollment_status === 'pending' ? (t.addedTranslations_2026?.['تأكيد الإلغاء'] || 'تأكيد الإلغاء') : 'تأكيد الخروج'}
                   </>
                 )}
               </button>
@@ -282,16 +282,16 @@ export default function CourseDetailPage() {
         <div className="p-6 border-b border-border bg-muted/30">
           <h2 className="text-xl font-bold flex items-center gap-2">
             <BookOpen className="w-6 h-6 text-blue-600" />
-            {t.academy?.courseContent || 'محتوى الدورة'}
-            <span className="text-sm font-normal text-muted-foreground ml-2">({lessons.length} درس)</span>
+            {t.academy?.courseContent || (t.addedTranslations_2026?.['محتوى الدورة'] || 'محتوى الدورة')}
+            <span className="text-sm font-normal text-muted-foreground ml-2">({lessons.length} {(t.addedTranslations_2026?.['درس)'] || 'درس)')}</span>
           </h2>
         </div>
 
         <div className="divide-y divide-border">
           {lessons.length === 0 ? (
             <div className="p-8 text-center text-muted-foreground">
-              لا توجد دروس مضافة حتى الآن.
-            </div>
+              {(t.addedTranslations_2026?.['لا توجد دروس مضافة حتى الآن.'] || 'لا توجد دروس مضافة حتى الآن.')}
+                                      </div>
           ) : (
             lessons.map((lesson, idx) => (
               <div key={lesson.id} className={cn("p-4 flex items-center gap-4 transition-colors", hasAccess ? 'hover:bg-muted/50' : 'opacity-75')}>
@@ -305,8 +305,8 @@ export default function CourseDetailPage() {
                   {lesson.duration_minutes && (
                     <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
                       <Clock className="w-3 h-3" />
-                      {lesson.duration_minutes} دقيقة
-                    </p>
+                      {lesson.duration_minutes} {(t.addedTranslations_2026?.['دقيقة'] || 'دقيقة')}
+                                                    </p>
                   )}
                 </div>
                 <div>

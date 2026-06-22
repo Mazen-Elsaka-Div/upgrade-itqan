@@ -164,7 +164,7 @@ export default function AcademyStudentDashboard() {
     const date = new Date(dateStr)
     const diff = Date.now() - date.getTime()
     const mins = Math.floor(diff / 60000)
-    if (mins < 1) return isAr ? 'الآن' : 'now'
+    if (mins < 1) return isAr ? (t.addedTranslations_2026?.['الآن'] || 'الآن') : 'now'
     if (mins < 60) return isAr ? `منذ ${mins} د` : `${mins}m ago`
     const hrs = Math.floor(mins / 60)
     if (hrs < 24) return isAr ? `منذ ${hrs} س` : `${hrs}h ago`
@@ -176,10 +176,10 @@ export default function AcademyStudentDashboard() {
   const formatDueDate = (dateStr: string) => {
     const date = new Date(dateStr)
     const days = Math.ceil((date.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
-    if (days < 0) return t.studentPages?.dashboard?.dueLate || 'متأخر'
-    if (days === 0) return t.studentPages?.dashboard?.dueToday || 'اليوم'
-    if (days === 1) return t.studentPages?.dashboard?.dueTomorrow || 'غداً'
-    return (t.studentPages?.dashboard?.dueDays || '{days} أيام').replace('{days}', String(days))
+    if (days < 0) return t.studentPages?.dashboard?.dueLate || (t.addedTranslations_2026?.['متأخر'] || 'متأخر')
+    if (days === 0) return t.studentPages?.dashboard?.dueToday || (t.addedTranslations_2026?.['اليوم'] || 'اليوم')
+    if (days === 1) return t.studentPages?.dashboard?.dueTomorrow || (t.addedTranslations_2026?.['غداً'] || 'غداً')
+    return (t.studentPages?.dashboard?.dueDays || (t.addedTranslations_2026?.['{days} أيام'] || '{days} أيام')).replace('{days}', String(days))
   }
 
   // Next upcoming session highlighted separately
@@ -190,15 +190,15 @@ export default function AcademyStudentDashboard() {
   }
 
   const levelLabels: Record<string, string> = {
-    beginner: t.studentPages?.dashboard?.levels?.beginner || 'مبتدئ',
-    intermediate: t.studentPages?.dashboard?.levels?.intermediate || 'متوسط',
-    advanced: t.studentPages?.dashboard?.levels?.advanced || 'متقدم',
-    hafiz: t.studentPages?.dashboard?.levels?.hafiz || 'حافظ',
-    master: t.studentPages?.dashboard?.levels?.master || 'متقن',
+    beginner: t.studentPages?.dashboard?.levels?.beginner || (t.addedTranslations_2026?.['مبتدئ'] || 'مبتدئ'),
+    intermediate: t.studentPages?.dashboard?.levels?.intermediate || (t.addedTranslations_2026?.['متوسط'] || 'متوسط'),
+    advanced: t.studentPages?.dashboard?.levels?.advanced || (t.addedTranslations_2026?.['متقدم'] || 'متقدم'),
+    hafiz: t.studentPages?.dashboard?.levels?.hafiz || (t.addedTranslations_2026?.['حافظ'] || 'حافظ'),
+    master: t.studentPages?.dashboard?.levels?.master || (t.addedTranslations_2026?.['متقن'] || 'متقن'),
   }
 
   const lp = stats?.level_progress
-  const levelLabel = levelLabels[lp?.level || stats?.current_level || 'beginner'] || 'مبتدئ'
+  const levelLabel = levelLabels[lp?.level || stats?.current_level || 'beginner'] || (t.addedTranslations_2026?.['مبتدئ'] || 'مبتدئ')
   const nextLevelLabel = lp?.next ? levelLabels[lp.next] : null
   const pointsToNext = lp?.next_floor != null ? Math.max(0, lp.next_floor - (stats?.total_points || 0)) : 0
 
@@ -208,10 +208,10 @@ export default function AcademyStudentDashboard() {
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="lg:col-span-2 bg-gradient-to-br from-violet-600 via-indigo-600 to-sky-500 rounded-2xl p-6 text-white shadow-lg shadow-indigo-500/20">
           <h1 className="text-2xl font-bold mb-1 text-balance">
-            {t.studentPages?.dashboard?.welcomeBack || 'مرحباً بعودتك!'}
+            {t.studentPages?.dashboard?.welcomeBack || (t.addedTranslations_2026?.['مرحباً بعودتك!'] || 'مرحباً بعودتك!')}
           </h1>
           <p className="text-white/80 mb-5 text-sm leading-relaxed">
-            {t.studentPages?.dashboard?.continueJourney || 'واصل رحلتك التعليمية واكسب المزيد من النقاط'}
+            {t.studentPages?.dashboard?.continueJourney || (t.addedTranslations_2026?.['واصل رحلتك التعليمية واكسب المزيد من النقاط'] || 'واصل رحلتك التعليمية واكسب المزيد من النقاط')}
           </p>
           <div className="mb-5">
             <PrayerTimesDialog
@@ -267,7 +267,7 @@ export default function AcademyStudentDashboard() {
             </div>
             <p className="text-xs text-muted-foreground">
               {nextLevelLabel
-                ? (t.studentPages?.dashboard?.pointsToNextLevel || 'باقي {points} نقطة للوصول إلى «{level}»')
+                ? (t.studentPages?.dashboard?.pointsToNextLevel || (t.addedTranslations_2026?.['باقي {points} نقطة للوصول إلى «{level}»'] || 'باقي {points} نقطة للوصول إلى «{level}»'))
                   .replace('{points}', String(pointsToNext))
                   .replace('{level}', nextLevelLabel)
                 : t.studentPages?.dashboard?.maxLevelReached}
@@ -393,17 +393,17 @@ export default function AcademyStudentDashboard() {
               <div className="space-y-1">
                 {activity.slice(0, 6).map((entry) => {
                   const reasonLabels: Record<string, string> = {
-                    recitation: t.studentPages?.dashboard?.reasons?.recitation || 'سجّلت تلاوة',
-                    mastered: t.studentPages?.dashboard?.reasons?.mastered || 'أتقنت حفظاً',
-                    task: t.studentPages?.dashboard?.reasons?.task || 'أنجزت مهمة',
-                    lesson: t.studentPages?.dashboard?.reasons?.lesson || 'أكملت درساً',
-                    streak: t.studentPages?.dashboard?.reasons?.streak || 'مكافأة المثابرة',
-                    juz_complete: t.studentPages?.dashboard?.reasons?.juz_complete || 'أتممت جزءاً',
-                    course_complete: t.studentPages?.dashboard?.reasons?.course_complete || 'أكملت دورة',
-                    session_attend: t.studentPages?.dashboard?.reasons?.session_attend || 'حضرت جلسة',
-                    daily_login: t.studentPages?.dashboard?.reasons?.daily_login || 'دخول يومي',
-                    competition_win: t.studentPages?.dashboard?.reasons?.competition_win || 'فزت في مسابقة',
-                    badge_earned: t.studentPages?.dashboard?.reasons?.badge_earned || 'حصلت على شارة',
+                    recitation: t.studentPages?.dashboard?.reasons?.recitation || (t.addedTranslations_2026?.['سجّلت تلاوة'] || 'سجّلت تلاوة'),
+                    mastered: t.studentPages?.dashboard?.reasons?.mastered || (t.addedTranslations_2026?.['أتقنت حفظاً'] || 'أتقنت حفظاً'),
+                    task: t.studentPages?.dashboard?.reasons?.task || (t.addedTranslations_2026?.['أنجزت مهمة'] || 'أنجزت مهمة'),
+                    lesson: t.studentPages?.dashboard?.reasons?.lesson || (t.addedTranslations_2026?.['أكملت درساً'] || 'أكملت درساً'),
+                    streak: t.studentPages?.dashboard?.reasons?.streak || (t.addedTranslations_2026?.['مكافأة المثابرة'] || 'مكافأة المثابرة'),
+                    juz_complete: t.studentPages?.dashboard?.reasons?.juz_complete || (t.addedTranslations_2026?.['أتممت جزءاً'] || 'أتممت جزءاً'),
+                    course_complete: t.studentPages?.dashboard?.reasons?.course_complete || (t.addedTranslations_2026?.['أكملت دورة'] || 'أكملت دورة'),
+                    session_attend: t.studentPages?.dashboard?.reasons?.session_attend || (t.addedTranslations_2026?.['حضرت جلسة'] || 'حضرت جلسة'),
+                    daily_login: t.studentPages?.dashboard?.reasons?.daily_login || (t.addedTranslations_2026?.['دخول يومي'] || 'دخول يومي'),
+                    competition_win: t.studentPages?.dashboard?.reasons?.competition_win || (t.addedTranslations_2026?.['فزت في مسابقة'] || 'فزت في مسابقة'),
+                    badge_earned: t.studentPages?.dashboard?.reasons?.badge_earned || (t.addedTranslations_2026?.['حصلت على شارة'] || 'حصلت على شارة'),
                   }
                   return (
                     <div key={entry.id} className="flex items-center gap-3 py-2.5 border-b border-border/50 last:border-0">
@@ -483,7 +483,7 @@ export default function AcademyStudentDashboard() {
               <div className="space-y-2">
                 {tasks.map((task) => {
                   const due = formatDueDate(task.due_date)
-                  const late = due === t.studentPages?.dashboard?.dueLate || due === 'متأخر'
+                  const late = due === t.studentPages?.dashboard?.dueLate || due === (t.addedTranslations_2026?.['متأخر'] || 'متأخر')
                   return (
                     <Link
                       key={task.id}

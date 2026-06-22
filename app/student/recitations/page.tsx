@@ -86,7 +86,7 @@ export default function StudentRecitationsPage() {
             <span className="relative z-10 flex items-center justify-center w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 shadow-sm group-hover:rotate-90 transition-transform duration-500">
               <Plus className="w-5 h-5" />
             </span>
-            <span className="relative z-10 text-base">{t.student.newRecitation || "تسميع جديد"}</span>
+            <span className="relative z-10 text-base">{t.student.newRecitation || (t.addedTranslations_2026?.['تسميع جديد'] || 'تسميع جديد')}</span>
           </Link>
         </div>
       </div>
@@ -138,8 +138,8 @@ export default function StudentRecitationsPage() {
             onClick={() => setFilter('all')}
             className="mt-6 px-6 py-2.5 bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 rounded-xl font-bold transition-colors"
           >
-            عرض الكل
-          </button>
+            {(t.addedTranslations_2026?.['عرض الكل'] || 'عرض الكل')}
+                                    </button>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
@@ -160,7 +160,7 @@ export default function StudentRecitationsPage() {
                     <div className="flex items-center gap-3 mt-2 text-sm text-muted-foreground font-medium">
                       <span className="flex items-center gap-1.5">
                         <Calendar className="w-4 h-4" />
-                        {new Date(rec.created_at).toLocaleDateString(locale === 'ar' ? 'ar-SA' : 'en-US', { year: "numeric", month: "short", day: "numeric" })}
+                        {new Date(rec.created_at).toLocaleDateString((t.addedTranslations_2026?.['ar-SA'] || 'ar-SA'), { year: "numeric", month: "short", day: "numeric" })}
                       </span>
                       {rec.audio_duration_seconds && (
                         <span className="flex items-center gap-1.5">

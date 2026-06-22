@@ -64,7 +64,7 @@ export default function StudentMemorizationPathsPage() {
 
   function formatDigits(n: number | string): string {
     if (locale === 'ar') {
-      return String(n).replace(/\d/g, d => '\u0660\u0661\u0662\u0663\u0664\u0665\u0666\u0667\u0668\u0669'[Number(d)])
+      return String(n).replace(/\d/g, d => (t.addedTranslations_2026?.['٠١٢٣٤٥٦٧٨٩'] || '٠١٢٣٤٥٦٧٨٩')[Number(d)])
     }
     return String(n)
   }
@@ -91,7 +91,7 @@ export default function StudentMemorizationPathsPage() {
           <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
             {isAr ? (
               <>
-                مسارات <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-200 to-emerald-50">الحفظ</span>
+                {(t.addedTranslations_2026?.['مسارات'] || 'مسارات')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-200 to-emerald-50">{(t.addedTranslations_2026?.['الحفظ'] || 'الحفظ')}</span>
               </>
             ) : (
               <>

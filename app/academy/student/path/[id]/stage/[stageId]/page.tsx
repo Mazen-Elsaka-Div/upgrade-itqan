@@ -9,6 +9,7 @@ import {
   BookOpen, PlayCircle, CheckCircle2, Lock, ArrowRight, ArrowLeft,
   ExternalLink, GraduationCap, FileText, Award, ChevronRight,
 } from 'lucide-react'
+import { useI18n } from "@/lib/i18n/context";
 
 interface PathStage {
   id: string
@@ -58,6 +59,7 @@ interface Enrollment {
 }
 
 export default function StudentPathStagePage() {
+    const { t } = useI18n();
   const params = useParams()
   const router = useRouter()
   const pathId = params.id as string
@@ -78,11 +80,11 @@ export default function StudentPathStagePage() {
         setStages(data.stages || [])
         setEnrollment(data.enrollment)
       } else {
-        toast.error('فشل في تحميل المرحلة')
+        toast.error((t.addedTranslations_2026?.['فشل في تحميل المرحلة'] || 'فشل في تحميل المرحلة'))
       }
     } catch (error) {
       console.error('Error fetching stage:', error)
-      toast.error('حدث خطأ أثناء تحميل البيانات')
+      toast.error((t.addedTranslations_2026?.['حدث خطأ أثناء تحميل البيانات'] || 'حدث خطأ أثناء تحميل البيانات'))
     } finally {
       setLoading(false)
     }
@@ -109,9 +111,9 @@ export default function StudentPathStagePage() {
       const data = await res.json()
       if (res.ok) {
         if (data.finished) {
-          toast.success('تهانينا! أكملت المسار بالكامل')
+          toast.success((t.addedTranslations_2026?.['تهانينا! أكملت المسار بالكامل'] || 'تهانينا! أكملت المسار بالكامل'))
         } else {
-          toast.success('تهانينا! تم إكمال المرحلة بنجاح')
+          toast.success((t.addedTranslations_2026?.['تهانينا! تم إكمال المرحلة بنجاح'] || 'تهانينا! تم إكمال المرحلة بنجاح'))
         }
         await fetchDetails()
         if (data.finished) {
@@ -120,11 +122,11 @@ export default function StudentPathStagePage() {
           router.push(`/academy/student/path/${pathId}/stage/${data.next_stage_id}`)
         }
       } else {
-        toast.error(data.error || 'لا يمكن إكمال المرحلة حالياً')
+        toast.error(data.error || (t.addedTranslations_2026?.['لا يمكن إكمال المرحلة حالياً'] || 'لا يمكن إكمال المرحلة حالياً'))
       }
     } catch (error) {
       console.error('Complete stage error:', error)
-      toast.error('خطأ في الاتصال بالخادم')
+      toast.error((t.addedTranslations_2026?.['خطأ في الاتصال بالخادم'] || 'خطأ في الاتصال بالخادم'))
     } finally {
       setCompleting(false)
     }
@@ -134,7 +136,7 @@ export default function StudentPathStagePage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[500px] space-y-4">
         <div className="w-12 h-12 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin" />
-        <p className="text-muted-foreground animate-pulse text-sm">جاري تحميل المرحلة...</p>
+        <p className="text-muted-foreground animate-pulse text-sm">{(t.addedTranslations_2026?.['جاري تحميل المرحلة...'] || 'جاري تحميل المرحلة...')}</p>
       </div>
     )
   }
@@ -143,17 +145,17 @@ export default function StudentPathStagePage() {
   if (!path || !stage || !enrollment || enrollment.status === 'dropped') {
     return (
       <div className="text-center py-16 space-y-4 max-w-md mx-auto">
-        <h2 className="text-2xl font-bold text-destructive">المرحلة غير متاحة</h2>
+        <h2 className="text-2xl font-bold text-destructive">{(t.addedTranslations_2026?.['المرحلة غير متاحة'] || 'المرحلة غير متاحة')}</h2>
         <p className="text-muted-foreground">
-          عذراً، لم نتمكن من فتح هذه المرحلة. قد تكون غير مسجل في المسار أو أن المرحلة غير موجودة.
-        </p>
+          {(t.addedTranslations_2026?.['عذراً، لم نتمكن من فتح هذه المرحلة. قد تكون غير مسجل في المسار أو أن المرحلة غير موجودة.'] || 'عذراً، لم نتمكن من فتح هذه المرحلة. قد تكون غير مسجل في المسار أو أن المرحلة غير موجودة.')}
+                        </p>
         <Link
           href={`/academy/student/path/${pathId}`}
           className="inline-flex items-center gap-2 text-emerald-600 font-semibold hover:underline"
         >
           <ArrowRight className="w-4 h-4 rtl:rotate-180" />
-          العودة لصفحة المسار
-        </Link>
+          {(t.addedTranslations_2026?.['العودة لصفحة المسار'] || 'العودة لصفحة المسار')}
+                        </Link>
       </div>
     )
   }
@@ -167,15 +169,15 @@ export default function StudentPathStagePage() {
         <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto">
           <Lock className="w-8 h-8 text-slate-400" />
         </div>
-        <h2 className="text-2xl font-bold text-foreground">هذه المرحلة مقفولة</h2>
-        <p className="text-muted-foreground">يجب إكمال المراحل السابقة أولاً للوصول إلى هذه المرحلة.</p>
+        <h2 className="text-2xl font-bold text-foreground">{(t.addedTranslations_2026?.['هذه المرحلة مقفولة'] || 'هذه المرحلة مقفولة')}</h2>
+        <p className="text-muted-foreground">{(t.addedTranslations_2026?.['يجب إكمال المراحل السابقة أولاً للوصول إلى هذه المرحلة.'] || 'يجب إكمال المراحل السابقة أولاً للوصول إلى هذه المرحلة.')}</p>
         <Link
           href={`/academy/student/path/${pathId}`}
           className="inline-flex items-center gap-2 text-emerald-600 font-semibold hover:underline"
         >
           <ArrowRight className="w-4 h-4 rtl:rotate-180" />
-          العودة لصفحة المسار
-        </Link>
+          {(t.addedTranslations_2026?.['العودة لصفحة المسار'] || 'العودة لصفحة المسار')}
+                        </Link>
       </div>
     )
   }
@@ -187,30 +189,30 @@ export default function StudentPathStagePage() {
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-1.5 text-sm text-muted-foreground flex-wrap">
-        <Link href="/academy/student/path" className="hover:text-emerald-600 transition-colors">المسارات</Link>
+        <Link href="/academy/student/path" className="hover:text-emerald-600 transition-colors">{(t.addedTranslations_2026?.['المسارات'] || 'المسارات')}</Link>
         <ChevronRight className="w-3.5 h-3.5 rtl:rotate-180" />
         <Link href={`/academy/student/path/${pathId}`} className="hover:text-emerald-600 transition-colors line-clamp-1">
           {path.title}
         </Link>
         <ChevronRight className="w-3.5 h-3.5 rtl:rotate-180" />
-        <span className="text-foreground font-semibold">المرحلة {stageIdx + 1}</span>
+        <span className="text-foreground font-semibold">{(t.addedTranslations_2026?.['المرحلة'] || 'المرحلة')} {stageIdx + 1}</span>
       </nav>
 
       {/* Stage Header */}
       <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 shadow-sm">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-            المرحلة {stageIdx + 1} من {stages.length}
+            {(t.addedTranslations_2026?.['المرحلة'] || 'المرحلة')} {stageIdx + 1} {(t.addedTranslations_2026?.['من'] || 'من')} {stages.length}
           </span>
           {isCompleted ? (
             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 text-xs font-bold">
               <CheckCircle2 className="w-3.5 h-3.5" />
-              مكتملة
-            </span>
+              {(t.addedTranslations_2026?.['مكتملة'] || 'مكتملة')}
+                                      </span>
           ) : (
             <span className="px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-600 text-xs font-bold">
-              قيد التعلم
-            </span>
+              {(t.addedTranslations_2026?.['قيد التعلم'] || 'قيد التعلم')}
+                                          </span>
           )}
         </div>
         <h1 className="text-2xl sm:text-3xl font-extrabold mt-3 text-foreground leading-snug">{stage.title}</h1>
@@ -224,8 +226,8 @@ export default function StudentPathStagePage() {
         <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 shadow-sm space-y-3">
           <h2 className="text-lg font-bold flex items-center gap-2">
             <BookOpen className="w-5 h-5 text-emerald-600" />
-            محتوى المرحلة
-          </h2>
+            {(t.addedTranslations_2026?.['محتوى المرحلة'] || 'محتوى المرحلة')}
+                                </h2>
           <div className="text-sm text-foreground/95 leading-relaxed whitespace-pre-line">
             {stage.content}
           </div>
@@ -237,8 +239,8 @@ export default function StudentPathStagePage() {
         <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 shadow-sm space-y-3">
           <h2 className="text-lg font-bold flex items-center gap-2">
             <FileText className="w-5 h-5 text-emerald-600" />
-            النص المرجعي
-          </h2>
+            {(t.addedTranslations_2026?.['النص المرجعي'] || 'النص المرجعي')}
+                                </h2>
           <div className="text-base text-foreground leading-loose whitespace-pre-line bg-muted/30 p-5 rounded-2xl border border-border/40">
             {stage.passage_text}
           </div>
@@ -253,7 +255,7 @@ export default function StudentPathStagePage() {
             <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 shadow-sm space-y-4">
               <h2 className="text-lg font-bold flex items-center gap-2">
                 <PlayCircle className="w-5 h-5 text-emerald-600" />
-                فيديو الدرس ({stage.lesson_title})
+                {(t.addedTranslations_2026?.['فيديو الدرس ('] || 'فيديو الدرس (')}{stage.lesson_title})
               </h2>
               <div className="aspect-video bg-black rounded-2xl overflow-hidden shadow-inner border border-border/50">
                 <iframe
@@ -271,12 +273,12 @@ export default function StudentPathStagePage() {
             <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 shadow-sm space-y-4">
               <h2 className="text-lg font-bold flex items-center gap-2">
                 <PlayCircle className="w-5 h-5 text-emerald-600" />
-                مقطع صوتي
-              </h2>
+                {(t.addedTranslations_2026?.['مقطع صوتي'] || 'مقطع صوتي')}
+                                            </h2>
               <audio controls className="w-full">
                 <source src={stage.lesson_audio_url} type="audio/mpeg" />
-                متصفحك لا يدعم مشغل الصوت.
-              </audio>
+                {(t.addedTranslations_2026?.['متصفحك لا يدعم مشغل الصوت.'] || 'متصفحك لا يدعم مشغل الصوت.')}
+                                            </audio>
             </div>
           )}
 
@@ -285,8 +287,8 @@ export default function StudentPathStagePage() {
             <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 shadow-sm space-y-4">
               <h2 className="text-lg font-bold flex items-center gap-2">
                 <FileText className="w-5 h-5 text-emerald-600" />
-                نص الدرس
-              </h2>
+                {(t.addedTranslations_2026?.['نص الدرس'] || 'نص الدرس')}
+                                            </h2>
               <div className="prose prose-emerald max-w-none text-foreground/90 whitespace-pre-wrap bg-muted/30 p-6 rounded-2xl border border-border/40">
                 {stage.lesson_transcript}
               </div>
@@ -298,8 +300,8 @@ export default function StudentPathStagePage() {
             <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 shadow-sm space-y-4">
               <h2 className="text-lg font-bold flex items-center gap-2">
                 <FileText className="w-5 h-5 text-emerald-600" />
-                مرفقات الدرس
-              </h2>
+                {(t.addedTranslations_2026?.['مرفقات الدرس'] || 'مرفقات الدرس')}
+                                            </h2>
               <div className="flex flex-wrap gap-3">
                 {stage.lesson_attachments.map((att) => (
                   <a
@@ -310,7 +312,7 @@ export default function StudentPathStagePage() {
                     className="inline-flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 font-semibold hover:underline bg-blue-500/5 px-4 py-2.5 rounded-xl border border-blue-500/10"
                   >
                     <FileText className="w-4 h-4" />
-                    {att.file_name || 'تحميل المرفق'}
+                    {att.file_name || (t.addedTranslations_2026?.['تحميل المرفق'] || 'تحميل المرفق')}
                   </a>
                 ))}
               </div>
@@ -324,8 +326,8 @@ export default function StudentPathStagePage() {
         <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 shadow-sm space-y-4">
           <h2 className="text-lg font-bold flex items-center gap-2">
             <PlayCircle className="w-5 h-5 text-emerald-600" />
-            مصادر المرحلة
-          </h2>
+            {(t.addedTranslations_2026?.['مصادر المرحلة'] || 'مصادر المرحلة')}
+                                </h2>
           <div className="flex flex-wrap gap-3">
             {stage.video_url && (
               <a
@@ -335,8 +337,8 @@ export default function StudentPathStagePage() {
                 className="inline-flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400 font-semibold hover:underline bg-emerald-500/5 px-4 py-2.5 rounded-xl border border-emerald-500/10"
               >
                 <PlayCircle className="w-4 h-4" />
-                مشاهدة الفيديو المرفق
-              </a>
+                {(t.addedTranslations_2026?.['مشاهدة الفيديو المرفق'] || 'مشاهدة الفيديو المرفق')}
+                                            </a>
             )}
             {stage.pdf_url && (
               <a
@@ -346,8 +348,8 @@ export default function StudentPathStagePage() {
                 className="inline-flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 font-semibold hover:underline bg-blue-500/5 px-4 py-2.5 rounded-xl border border-blue-500/10"
               >
                 <FileText className="w-4 h-4" />
-                تحميل الملف المرفق (PDF)
-              </a>
+                {(t.addedTranslations_2026?.['تحميل الملف المرفق (PDF)'] || 'تحميل الملف المرفق (PDF)')}
+                                            </a>
             )}
           </div>
         </div>
@@ -358,8 +360,8 @@ export default function StudentPathStagePage() {
         <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 shadow-sm space-y-4">
           <h2 className="text-lg font-bold flex items-center gap-2">
             <BookOpen className="w-5 h-5 text-emerald-600" />
-            الدورة المرتبطة بالمرحلة
-          </h2>
+            {(t.addedTranslations_2026?.['الدورة المرتبطة بالمرحلة'] || 'الدورة المرتبطة بالمرحلة')}
+                                </h2>
           <div className="flex flex-col sm:flex-row gap-4 sm:items-center justify-between bg-muted/30 p-4 rounded-2xl border border-border/40">
             <div className="flex gap-4 items-center min-w-0">
               <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 bg-slate-200 dark:bg-slate-700 relative">
@@ -372,7 +374,7 @@ export default function StudentPathStagePage() {
                 )}
               </div>
               <div className="min-w-0">
-                <h3 className="font-bold text-foreground truncate">{stage.course_title || 'دورة أكاديمية مرتبطة'}</h3>
+                <h3 className="font-bold text-foreground truncate">{stage.course_title || (t.addedTranslations_2026?.['دورة أكاديمية مرتبطة'] || 'دورة أكاديمية مرتبطة')}</h3>
                 <div className="flex items-center gap-2 mt-1.5">
                   <div className="h-1.5 w-28 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                     <div
@@ -390,14 +392,14 @@ export default function StudentPathStagePage() {
               href={`/academy/student/courses/${stage.course_id}`}
               className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 text-sm font-bold rounded-xl bg-white dark:bg-slate-950 text-foreground border border-border hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors shrink-0"
             >
-              صفحة الدورة
-              <ExternalLink className="w-4 h-4" />
+              {(t.addedTranslations_2026?.['صفحة الدورة'] || 'صفحة الدورة')}
+                                        <ExternalLink className="w-4 h-4" />
             </Link>
           </div>
           {!courseDone && (
             <p className="text-xs text-amber-600 font-medium">
-              يجب إكمال الدورة المرتبطة بنسبة 100% قبل أن تتمكن من اعتماد إكمال هذه المرحلة.
-            </p>
+              {(t.addedTranslations_2026?.['يجب إكمال الدورة المرتبطة بنسبة 100% قبل أن تتمكن من اعتماد إكمال هذه المرحلة.'] || 'يجب إكمال الدورة المرتبطة بنسبة 100% قبل أن تتمكن من اعتماد إكمال هذه المرحلة.')}
+                                      </p>
           )}
         </div>
       )}
@@ -407,8 +409,8 @@ export default function StudentPathStagePage() {
         <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 shadow-sm space-y-4">
           <h2 className="text-lg font-bold flex items-center gap-2">
             <GraduationCap className="w-5 h-5 text-emerald-600" />
-            الحلقة التطبيقية
-          </h2>
+            {(t.addedTranslations_2026?.['الحلقة التطبيقية'] || 'الحلقة التطبيقية')}
+                                </h2>
           <div className="flex flex-col sm:flex-row gap-4 sm:items-center justify-between bg-emerald-50/60 dark:bg-emerald-950/30 p-4 rounded-2xl border border-emerald-200/50 dark:border-emerald-800/50">
             <div className="flex gap-4 items-center min-w-0">
               <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center shrink-0">
@@ -420,8 +422,8 @@ export default function StudentPathStagePage() {
               href={`/academy/student/halaqat/${stage.halaqa_id}`}
               className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 text-sm font-bold rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:from-emerald-500 hover:to-teal-500 transition-all shadow-md shrink-0"
             >
-              الذهاب للحلقة
-              <ArrowRight className="w-4 h-4 rtl:rotate-180" />
+              {(t.addedTranslations_2026?.['الذهاب للحلقة'] || 'الذهاب للحلقة')}
+                                        <ArrowRight className="w-4 h-4 rtl:rotate-180" />
             </Link>
           </div>
         </div>
@@ -431,10 +433,10 @@ export default function StudentPathStagePage() {
       {!isCompleted && (
         <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-lg font-bold text-foreground">اعتماد إكمال المرحلة</h2>
+            <h2 className="text-lg font-bold text-foreground">{(t.addedTranslations_2026?.['اعتماد إكمال المرحلة'] || 'اعتماد إكمال المرحلة')}</h2>
             <p className="text-sm text-muted-foreground mt-1">
               {canComplete
-                ? 'بمجرد اعتماد الإكمال، سيتم فتح المرحلة التالية تلقائياً.'
+                ? (t.addedTranslations_2026?.['بمجرد اعتماد الإكمال، سيتم فتح المرحلة التالية تلقائياً.'] || 'بمجرد اعتماد الإكمال، سيتم فتح المرحلة التالية تلقائياً.')
                 : 'أكمل متطلبات هذه المرحلة أولاً لتتمكن من اعتمادها.'}
             </p>
           </div>
@@ -448,8 +450,8 @@ export default function StudentPathStagePage() {
             ) : (
               <CheckCircle2 className="w-4 h-4" />
             )}
-            اعتماد الإكمال
-          </button>
+            {(t.addedTranslations_2026?.['اعتماد الإكمال'] || 'اعتماد الإكمال')}
+                                </button>
         </div>
       )}
 
@@ -459,8 +461,8 @@ export default function StudentPathStagePage() {
             <CheckCircle2 className="w-5 h-5" />
           </div>
           <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">
-            أكملت هذه المرحلة بنجاح. يمكنك مراجعتها في أي وقت.
-          </p>
+            {(t.addedTranslations_2026?.['أكملت هذه المرحلة بنجاح. يمكنك مراجعتها في أي وقت.'] || 'أكملت هذه المرحلة بنجاح. يمكنك مراجعتها في أي وقت.')}
+                                </p>
         </div>
       )}
 
@@ -472,8 +474,8 @@ export default function StudentPathStagePage() {
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-card border border-border text-sm font-bold text-foreground hover:bg-muted/50 transition-colors"
           >
             <ArrowRight className="w-4 h-4 rtl:rotate-180" />
-            المرحلة السابقة
-          </Link>
+            {(t.addedTranslations_2026?.['المرحلة السابقة'] || 'المرحلة السابقة')}
+                                </Link>
         ) : (
           <span />
         )}
@@ -482,8 +484,8 @@ export default function StudentPathStagePage() {
             href={`/academy/student/path/${pathId}/stage/${nextStage.id}`}
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-card border border-border text-sm font-bold text-foreground hover:bg-muted/50 transition-colors"
           >
-            المرحلة التالية
-            <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
+            {(t.addedTranslations_2026?.['المرحلة التالية'] || 'المرحلة التالية')}
+                                  <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
           </Link>
         ) : (
           <Link
@@ -491,8 +493,8 @@ export default function StudentPathStagePage() {
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-card border border-border text-sm font-bold text-foreground hover:bg-muted/50 transition-colors"
           >
             <Award className="w-4 h-4" />
-            عرض كل المراحل
-          </Link>
+            {(t.addedTranslations_2026?.['عرض كل المراحل'] || 'عرض كل المراحل')}
+                                    </Link>
         )}
       </div>
     </div>

@@ -77,7 +77,7 @@ export default function AcademyCalendarPage() {
         setEvents(processed)
       })
       .catch(() => {
-        if (!cancelled) setError(isAr ? 'فشل تحميل الأحداث' : 'Failed to load events')
+        if (!cancelled) setError(isAr ? (t.addedTranslations_2026?.['فشل تحميل الأحداث'] || 'فشل تحميل الأحداث') : 'Failed to load events')
       })
       .finally(() => {
         if (!cancelled) setLoading(false)
@@ -98,9 +98,9 @@ export default function AcademyCalendarPage() {
   const daysInMonth    = new Date(year, mon + 1, 0).getDate()
   const firstDayOfWeek = new Date(year, mon, 1).getDay()
 
-  const monthNamesAr = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر']
+  const monthNamesAr = [(t.addedTranslations_2026?.['يناير'] || 'يناير'),'فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر']
   const monthNamesEn = ['January','February','March','April','May','June','July','August','September','October','November','December']
-  const dayNamesAr   = ['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت']
+  const dayNamesAr   = [(t.addedTranslations_2026?.['الأحد'] || 'الأحد'),'الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت']
   const dayNamesEn   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
 
   const monthName = t.studentPages?.calendar?.months?.[mon] || (isAr ? monthNamesAr[mon] : monthNamesEn[mon])
@@ -149,16 +149,16 @@ export default function AcademyCalendarPage() {
             isAr ? "tracking-normal" : "tracking-wider"
           )}>
             <Sparkles className="w-4 h-4" />
-            {t.studentPages?.calendar?.academicCalendar || (isAr ? 'التقويم الأكاديمي' : 'Academic Calendar')}
+            {t.studentPages?.calendar?.academicCalendar || (isAr ? (t.addedTranslations_2026?.['التقويم الأكاديمي'] || 'التقويم الأكاديمي') : 'Academic Calendar')}
           </div>
           <h1 className={cn(
             "text-4xl lg:text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-400 py-2 leading-relaxed",
             isAr ? "tracking-normal" : "tracking-tight"
           )}>
-            {t.studentPages?.calendar?.calendarAndSchedule || (isAr ? 'التقويم والمواعيد' : 'Calendar & Schedule')}
+            {t.studentPages?.calendar?.calendarAndSchedule || (isAr ? (t.addedTranslations_2026?.['التقويم والمواعيد'] || 'التقويم والمواعيد') : 'Calendar & Schedule')}
           </h1>
           <p className="text-muted-foreground font-medium max-w-xl">
-            {t.studentPages?.calendar?.description || (isAr ? 'نظم وقتك وتابع جلساتك ومهامك الأكاديمية بكل سهولة واحترافية.' : 'Organize your time and track your academic sessions and tasks with ease and professionalism.')}
+            {t.studentPages?.calendar?.description || (isAr ? (t.addedTranslations_2026?.['نظم وقتك وتابع جلساتك ومهامك الأكاديمية بكل سهولة واحترافية.'] || 'نظم وقتك وتابع جلساتك ومهامك الأكاديمية بكل سهولة واحترافية.') : 'Organize your time and track your academic sessions and tasks with ease and professionalism.')}
           </p>
         </div>
       </motion.div>
@@ -178,7 +178,7 @@ export default function AcademyCalendarPage() {
               <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
                 <Video className="w-5 h-5" />
               </div>
-              <h3 className="font-bold text-lg">{t.studentPages?.calendar?.todaySessions || (isAr ? 'جلسات اليوم' : "Today's sessions")}</h3>
+              <h3 className="font-bold text-lg">{t.studentPages?.calendar?.todaySessions || (isAr ? (t.addedTranslations_2026?.['جلسات اليوم'] || 'جلسات اليوم') : "Today's sessions")}</h3>
             </div>
             <span className="flex items-center justify-center w-8 h-8 font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-full">
               {todaySessions.length}
@@ -187,7 +187,7 @@ export default function AcademyCalendarPage() {
           <CardContent className="p-5 relative">
             {todaySessions.length === 0 ? (
               <p className="text-sm text-muted-foreground py-6 text-center font-medium">
-                {t.studentPages?.calendar?.noSessionsToday || (isAr ? 'لا توجد جلسات اليوم، وقت رائع للمراجعة!' : 'No sessions today, great time for a review!')}
+                {t.studentPages?.calendar?.noSessionsToday || (isAr ? (t.addedTranslations_2026?.['لا توجد جلسات اليوم، وقت رائع للمراجعة!'] || 'لا توجد جلسات اليوم، وقت رائع للمراجعة!') : 'No sessions today, great time for a review!')}
               </p>
             ) : (
               <ul className="space-y-3">
@@ -216,7 +216,7 @@ export default function AcademyCalendarPage() {
                       {ev.link && (
                         <a href={ev.link} target="_blank" rel="noreferrer"
                            className="px-4 py-1.5 text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-sm transition-transform hover:scale-105 active:scale-95 shrink-0">
-                          {t.studentPages?.calendar?.join || (isAr ? 'انضمام' : 'Join')}
+                          {t.studentPages?.calendar?.join || (isAr ? (t.addedTranslations_2026?.['انضمام'] || 'انضمام') : 'Join')}
                         </a>
                       )}
                     </motion.li>
@@ -235,7 +235,7 @@ export default function AcademyCalendarPage() {
               <div className="p-2.5 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400">
                 <FileText className="w-5 h-5" />
               </div>
-              <h3 className="font-bold text-lg">{t.studentPages?.calendar?.todayTasks || (isAr ? 'مهام اليوم' : "Today's tasks")}</h3>
+              <h3 className="font-bold text-lg">{t.studentPages?.calendar?.todayTasks || (isAr ? (t.addedTranslations_2026?.['مهام اليوم'] || 'مهام اليوم') : "Today's tasks")}</h3>
             </div>
             <span className="flex items-center justify-center w-8 h-8 font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-full">
               {todayTasks.length}
@@ -244,7 +244,7 @@ export default function AcademyCalendarPage() {
           <CardContent className="p-5 relative">
             {todayTasks.length === 0 ? (
               <p className="text-sm text-muted-foreground py-6 text-center font-medium">
-                {t.studentPages?.calendar?.noTasksToday || (isAr ? 'لا توجد مهام مستحقة اليوم، عمل ممتاز!' : 'No tasks due today, great job!')}
+                {t.studentPages?.calendar?.noTasksToday || (isAr ? (t.addedTranslations_2026?.['لا توجد مهام مستحقة اليوم، عمل ممتاز!'] || 'لا توجد مهام مستحقة اليوم، عمل ممتاز!') : 'No tasks due today, great job!')}
               </p>
             ) : (
               <ul className="space-y-3">
@@ -420,7 +420,7 @@ export default function AcademyCalendarPage() {
                 isAr ? "tracking-normal" : "tracking-widest"
               )}>
                 <LayoutDashboard className="w-4 h-4" />
-                {t.studentPages?.calendar?.dayDetails || (isAr ? 'تفاصيل اليوم' : 'Day Details')}
+                {t.studentPages?.calendar?.dayDetails || (isAr ? (t.addedTranslations_2026?.['تفاصيل اليوم'] || 'تفاصيل اليوم') : 'Day Details')}
               </p>
               <h3 className="text-3xl font-black text-foreground relative z-10">
                 {new Date(selectedDate + 'T12:00:00').toLocaleDateString(
@@ -453,8 +453,8 @@ export default function AcademyCalendarPage() {
                     <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-6">
                       <CalendarIcon className="w-10 h-10 text-slate-400" />
                     </div>
-                    <p className="font-bold text-lg text-foreground mb-2">{t.studentPages?.calendar?.freeDay || (isAr ? 'يوم حر!' : 'Free day!')}</p>
-                    <p className="text-sm text-muted-foreground">{t.studentPages?.calendar?.noEventsScheduled || (isAr ? 'لا توجد أحداث أو مهام مجدولة في هذا اليوم.' : 'No events or tasks scheduled for this day.')}</p>
+                    <p className="font-bold text-lg text-foreground mb-2">{t.studentPages?.calendar?.freeDay || (isAr ? (t.addedTranslations_2026?.['يوم حر!'] || 'يوم حر!') : 'Free day!')}</p>
+                    <p className="text-sm text-muted-foreground">{t.studentPages?.calendar?.noEventsScheduled || (isAr ? (t.addedTranslations_2026?.['لا توجد أحداث أو مهام مجدولة في هذا اليوم.'] || 'لا توجد أحداث أو مهام مجدولة في هذا اليوم.') : 'No events or tasks scheduled for this day.')}</p>
                   </motion.div>
                 ) : (
                   <motion.div 
@@ -496,17 +496,17 @@ export default function AcademyCalendarPage() {
                                 <a href={ev.link} target="_blank" rel="noreferrer"
                                    className="flex-1 inline-flex items-center justify-center font-bold shadow-md shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-95 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl h-12 px-4 group/btn">
                                   <Video className={cn("w-4 h-4 transition-transform group-hover/btn:scale-110", isAr ? 'ml-2' : 'mr-2')} />
-                                  {t.studentPages?.calendar?.joinNow || (isAr ? 'انضمام الآن' : 'Join Now')}
+                                  {t.studentPages?.calendar?.joinNow || (isAr ? (t.addedTranslations_2026?.['انضمام الآن'] || 'انضمام الآن') : 'Join Now')}
                                 </a>
                               ) : (
                                 <Button disabled className="flex-1 font-bold rounded-xl h-12 bg-slate-100 dark:bg-slate-800 text-muted-foreground border-0">
                                   <Video className={cn("w-4 h-4 opacity-50", isAr ? 'ml-2' : 'mr-2')} />
-                                  {ev.link ? (t.studentPages?.calendar?.availableOnSessionDay || (isAr ? 'متاح يوم الجلسة' : 'Available on session day')) : (t.studentPages?.calendar?.linkNotAvailable || (isAr ? 'الرابط غير متوفر' : 'Link not available'))}
+                                  {ev.link ? (t.studentPages?.calendar?.availableOnSessionDay || (isAr ? (t.addedTranslations_2026?.['متاح يوم الجلسة'] || 'متاح يوم الجلسة') : 'Available on session day')) : (t.studentPages?.calendar?.linkNotAvailable || (isAr ? (t.addedTranslations_2026?.['الرابط غير متوفر'] || 'الرابط غير متوفر') : 'Link not available'))}
                                 </Button>
                               )}
                               <Button asChild variant="outline" className="font-bold rounded-xl h-12 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800">
                                 <Link href={`/academy/student/sessions/${sessionId}`}>
-                                  {t.studentPages?.calendar?.details || (isAr ? 'التفاصيل' : 'Details')}
+                                  {t.studentPages?.calendar?.details || (isAr ? (t.addedTranslations_2026?.['التفاصيل'] || 'التفاصيل') : 'Details')}
                                 </Link>
                               </Button>
                             </div>
@@ -519,7 +519,7 @@ export default function AcademyCalendarPage() {
                                       className="w-full font-bold rounded-xl h-12 border-rose-200 dark:border-rose-900 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20">
                                 <Link href={`/academy/student/tasks/${ev.id.replace(/^task-/, '')}/submit`}>
                                   <FileText className={cn("w-4 h-4", isAr ? 'ml-2' : 'mr-2')} />
-                                  {t.studentPages?.calendar?.submitAssignment || (isAr ? 'تسليم الواجب' : 'Submit Assignment')}
+                                  {t.studentPages?.calendar?.submitAssignment || (isAr ? (t.addedTranslations_2026?.['تسليم الواجب'] || 'تسليم الواجب') : 'Submit Assignment')}
                                 </Link>
                               </Button>
                             </div>
@@ -531,7 +531,7 @@ export default function AcademyCalendarPage() {
                               <Button asChild className="w-full font-bold rounded-xl h-12 bg-purple-600 hover:bg-purple-700 text-white shadow-md shadow-purple-500/20 transition-all hover:scale-[1.02] active:scale-95">
                                 <Link href={`/academy/student/courses/${ev.course_id}/lesson/${ev.id.replace(/^lesson-/, '')}`}>
                                   <BookOpen className={cn("w-4 h-4", isAr ? 'ml-2' : 'mr-2')} />
-                                  {t.studentPages?.calendar?.openLesson || (isAr ? 'فتح الدرس' : 'Open Lesson')}
+                                  {t.studentPages?.calendar?.openLesson || (isAr ? (t.addedTranslations_2026?.['فتح الدرس'] || 'فتح الدرس') : 'Open Lesson')}
                                 </Link>
                               </Button>
                             </div>

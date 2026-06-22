@@ -224,7 +224,7 @@ export default function RecitationDetailPage() {
                   <div className="w-4 h-2 bg-white/40 rounded-full mx-0.5" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[10px] font-bold text-white/50 uppercase tracking-widest leading-none mb-1">{isAr ? 'تلاوة الطالب' : 'Student Recitation'}</span>
+                  <span className="text-[10px] font-bold text-white/50 uppercase tracking-widest leading-none mb-1">{(t.addedTranslations_2026?.['تلاوة الطالب'] || 'تلاوة الطالب')}</span>
                   <span className="text-sm font-bold truncate max-w-[150px]">{recitation.surah_name}</span>
                 </div>
               </div>
@@ -288,7 +288,7 @@ export default function RecitationDetailPage() {
               </div>
               <div>
                 <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">{t.student.myNotesLabel}</h3>
-                <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">{isAr ? "ملاحظاتك عند تسجيل التلاوة" : "Your notes when recording the recitation"}</p>
+                <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">{(t.addedTranslations_2026?.['ملاحظاتك عند تسجيل التلاوة'] || 'ملاحظاتك عند تسجيل التلاوة')}</p>
               </div>
             </div>
 
@@ -309,7 +309,7 @@ export default function RecitationDetailPage() {
               </div>
               <div>
                 <h3 className="text-lg font-bold text-slate-800">{t.student.readerEvaluation}</h3>
-                <p className="text-[11px] text-slate-400 mt-0.5">{isAr ? "مراجعة وتقييم التلاوة من المقرئ" : "Reader's review and assessment of your recitation"}</p>
+                <p className="text-[11px] text-slate-400 mt-0.5">{(t.addedTranslations_2026?.['مراجعة وتقييم التلاوة من المقرئ'] || 'مراجعة وتقييم التلاوة من المقرئ')}</p>
               </div>
             </div>
 
@@ -329,11 +329,11 @@ export default function RecitationDetailPage() {
             {wordMistakes && wordMistakes.length > 0 && (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">الكلمات التي تحتاج إلى تحسين</label>
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">{(t.addedTranslations_2026?.['الكلمات التي تحتاج إلى تحسين'] || 'الكلمات التي تحتاج إلى تحسين')}</label>
                   <div className="h-px flex-1 bg-slate-100 dark:bg-white/5 mx-4" />
                   <span className="text-xs bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 px-2 py-1 rounded-full">
-                    {wordMistakes.length} كلمات
-                  </span>
+                    {wordMistakes.length} {(t.addedTranslations_2026?.['كلمات'] || 'كلمات')}
+                                                        </span>
                 </div>
                 <div className="w-full p-4 bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/20 rounded-2xl">
                   <div className="flex flex-wrap gap-2">
@@ -347,8 +347,8 @@ export default function RecitationDetailPage() {
                     ))}
                   </div>
                   <p className="text-xs text-amber-600 dark:text-amber-400 mt-3 text-center">
-                    💡 انتبه لهذه الكلمات وركز على نطقها الصحيح في التلاوات القادمة
-                  </p>
+                    {(t.addedTranslations_2026?.['💡 انتبه لهذه الكلمات وركز على نطقها الصحيح في التلاوات القادمة'] || '💡 انتبه لهذه الكلمات وركز على نطقها الصحيح في التلاوات القادمة')}
+                                                        </p>
                 </div>
               </div>
             )}
