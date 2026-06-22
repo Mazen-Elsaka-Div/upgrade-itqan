@@ -140,9 +140,7 @@ export default function AuditLogPage() {
             {a.alTitle}
           </h1>
           <p className="text-muted-foreground mt-1">
-            {isAr 
-              ? 'سجل جميع التغييرات على الصلاحيات والحسابات'
-              : 'Log of all permission and account changes'}
+            {(t.addedTranslations_2026?.['سجل جميع التغييرات على الصلاحيات والحسابات'] || (t.addedTranslations_2026?.['سجل جميع التغييرات على الصلاحيات والحسابات'] || 'سجل جميع التغييرات على الصلاحيات والحسابات'))}
           </p>
         </div>
         <Button onClick={fetchLogs} variant="outline" className="gap-2">
@@ -287,9 +285,7 @@ export default function AuditLogPage() {
           {totalPages > 1 && (
             <div className="flex items-center justify-between mt-6 pt-4 border-t">
               <p className="text-sm text-muted-foreground">
-                {isAr 
-                  ? `صفحة ${page + 1} من ${totalPages}`
-                  : `Page ${page + 1} of ${totalPages}`}
+                {(t.addedTranslations_2026?.['صفحة ${page + 1} من ${totalPages}'] || (t.addedTranslations_2026?.['صفحة ${page + 1} من ${totalPages}'] || 'صفحة ${page + 1} من ${totalPages}'))}
               </p>
               <div className="flex gap-2">
                 <Button

@@ -100,7 +100,7 @@ export default function PublicLibraryPage() {
 
   const languageOptions = useMemo(
     () => [
-      { code: "", label: lib?.allLanguages || "كل اللغات" },
+      { code: "", label: lib?.allLanguages || (t.addedTranslations_2026?.['كل اللغات'] || 'كل اللغات') },
       ...BOOK_LANGUAGES.map((l) => ({
         code: l.code,
         label: isAr ? l.labelAr : l.labelEn,
@@ -116,7 +116,7 @@ export default function PublicLibraryPage() {
         <div className="flex flex-col sm:flex-row gap-3 mb-12 bg-card/90 backdrop-blur-2xl border border-border/60 p-3 rounded-3xl shadow-xl shadow-black/5">
           <div className={cn("flex items-center justify-center sm:justify-start gap-2 text-foreground/80 px-5", isAr ? "sm:border-l" : "sm:border-r", "border-border/60")}>
             <Filter className="w-5 h-5 text-primary" />
-            <span className="font-bold text-sm whitespace-nowrap">{lib?.filterResults || (isAr ? "تصفية النتائج:" : "Filter results:")}</span>
+            <span className="font-bold text-sm whitespace-nowrap">{lib?.filterResults || ((t.addedTranslations_2026?.['تصفية النتائج:'] || (t.addedTranslations_2026?.['تصفية النتائج:'] || 'تصفية النتائج:')))}</span>
           </div>
           
           <div className="relative flex-1 group">
@@ -124,7 +124,7 @@ export default function PublicLibraryPage() {
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder={lib?.searchPlaceholder || "ابحث بعنوان الكتاب، المؤلف..."}
+              placeholder={lib?.searchPlaceholder || (t.addedTranslations_2026?.['ابحث بعنوان الكتاب، المؤلف...'] || 'ابحث بعنوان الكتاب، المؤلف...')}
               className={cn("w-full bg-muted/40 border-0 rounded-2xl h-14 text-base font-bold placeholder:font-normal hover:bg-muted/60 focus-visible:bg-background focus-visible:ring-2 focus-visible:ring-primary/30 transition-all outline-none shadow-none", isAr ? "pr-12 pl-4" : "pl-12 pr-4")}
             />
           </div>
@@ -136,7 +136,7 @@ export default function PublicLibraryPage() {
               onChange={(e) => setCategory(e.target.value)}
               className={cn("w-full appearance-none bg-muted/40 border-0 rounded-2xl h-14 text-base font-bold hover:bg-muted/60 focus:bg-background focus:ring-2 focus:ring-primary/30 transition-all cursor-pointer outline-none", isAr ? "pr-12 pl-4" : "pl-12 pr-4")}
             >
-              <option value="">{lib?.allCategories || "كل التصنيفات"}</option>
+              <option value="">{lib?.allCategories || (t.addedTranslations_2026?.['كل التصنيفات'] || 'كل التصنيفات')}</option>
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>{c.name}</option>
               ))}
@@ -166,7 +166,7 @@ export default function PublicLibraryPage() {
               <div className="w-16 h-16 border-4 border-primary/20 rounded-full animate-pulse" />
               <div className="absolute inset-0 w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin" />
             </div>
-            <p className="mt-4 text-lg font-bold text-primary animate-pulse">{lib?.loading || (isAr ? "جاري تحميل المكتبة..." : "Loading library...")}</p>
+            <p className="mt-4 text-lg font-bold text-primary animate-pulse">{lib?.loading || ((t.addedTranslations_2026?.['جاري تحميل المكتبة...'] || (t.addedTranslations_2026?.['جاري تحميل المكتبة...'] || 'جاري تحميل المكتبة...')))}</p>
           </div>
         ) : books.length === 0 ? (
           <div className="flex-1 flex items-center justify-center py-20">
@@ -175,16 +175,16 @@ export default function PublicLibraryPage() {
                 <BookOpen className="w-10 h-10 text-primary opacity-60" />
               </div>
               <h3 className="text-xl font-bold text-foreground">
-                {lib?.noResults || "لا توجد نتائج"}
+                {lib?.noResults || (t.addedTranslations_2026?.['لا توجد نتائج'] || 'لا توجد نتائج')}
               </h3>
               <p className="text-muted-foreground text-sm">
-                {lib?.noResultsDesc || (isAr ? "لم نعثر على أي كتب تطابق معايير البحث الخاصة بك. جرب تغيير كلمات البحث أو التصنيفات." : "We did not find any books matching your search criteria. Try changing your search query or categories.")}
+                {lib?.noResultsDesc || ((t.addedTranslations_2026?.['لم نعثر على أي كتب تطابق معايير البحث الخاصة بك. جرب تغيير كلمات البحث أو التصنيفات.'] || (t.addedTranslations_2026?.['لم نعثر على أي كتب تطابق معايير البحث الخاصة بك. جرب تغيير كلمات البحث أو التصنيفات.'] || 'لم نعثر على أي كتب تطابق معايير البحث الخاصة بك. جرب تغيير كلمات البحث أو التصنيفات.')))}
               </p>
               <button 
                 onClick={() => { setSearch(''); setCategory(''); setLanguage(''); }}
                 className="mt-4 px-6 py-2 bg-primary/10 hover:bg-primary/20 text-primary font-bold rounded-xl transition-colors"
               >
-                {lib?.clearFilters || (isAr ? "مسح الفلاتر" : "Clear Filters")}
+                {lib?.clearFilters || ((t.addedTranslations_2026?.['مسح الفلاتر'] || (t.addedTranslations_2026?.['مسح الفلاتر'] || 'مسح الفلاتر')))}
               </button>
             </div>
           </div>
@@ -216,7 +216,7 @@ export default function PublicLibraryPage() {
                       ) : (
                         <div className="w-full h-full flex flex-col items-center justify-center bg-primary/5 text-primary/30 gap-3 border border-primary/10">
                           <BookOpen className="w-12 h-12" />
-                          <span className="text-[10px] font-bold uppercase tracking-widest opacity-50">{lib?.noCover || (isAr ? "بدون غلاف" : "No Cover")}</span>
+                          <span className="text-[10px] font-bold uppercase tracking-widest opacity-50">{lib?.noCover || ((t.addedTranslations_2026?.['بدون غلاف'] || (t.addedTranslations_2026?.['بدون غلاف'] || 'بدون غلاف')))}</span>
                         </div>
                       )}
                     </div>
@@ -225,7 +225,7 @@ export default function PublicLibraryPage() {
                     <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center z-20">
                       <div className="translate-y-8 group-hover:translate-y-0 transition-transform duration-500 bg-primary text-primary-foreground px-6 py-2.5 rounded-full font-bold text-sm flex items-center gap-2 shadow-xl">
                         <BookOpen className="w-4 h-4" />
-                        <span>{lib?.readNow || (isAr ? "اقرأ الآن" : "Read Now")}</span>
+                        <span>{lib?.readNow || ((t.addedTranslations_2026?.['اقرأ الآن'] || (t.addedTranslations_2026?.['اقرأ الآن'] || 'اقرأ الآن')))}</span>
                       </div>
                     </div>
 
@@ -258,7 +258,7 @@ export default function PublicLibraryPage() {
                           className="inline-flex items-center justify-center px-2 py-0.5 rounded-md bg-primary/10 text-primary text-[10px] font-bold border border-primary/10"
                         >
                           {lf.language === OTHER_LANGUAGE_CODE
-                            ? lf.language_label || lib?.otherLanguage || (isAr ? "أخرى" : "Other")
+                            ? lf.language_label || lib?.otherLanguage || ((t.addedTranslations_2026?.['أخرى'] || (t.addedTranslations_2026?.['أخرى'] || 'أخرى')))
                             : getLanguageDisplay(lf.language, lf.language_label, t.locale)}
                         </span>
                       ))}
@@ -271,16 +271,16 @@ export default function PublicLibraryPage() {
 
                     <div className="flex items-center justify-between pt-3 border-t border-border/50 text-[11px] font-semibold text-muted-foreground/80">
                       {book.pages_count ? (
-                        <div className="flex items-center gap-1.5" title="عدد الصفحات">
+                        <div className="flex items-center gap-1.5" title={(t.addedTranslations_2026?.['عدد الصفحات'] || (t.addedTranslations_2026?.['عدد الصفحات'] || 'عدد الصفحات'))}>
                           <FileText className="w-3.5 h-3.5 text-primary/60" />
-                          <span>{book.pages_count} {lib?.pages || (isAr ? "صفحة" : "pages")}</span>
+                          <span>{book.pages_count} {lib?.pages || ((t.addedTranslations_2026?.['صفحة'] || (t.addedTranslations_2026?.['صفحة'] || 'صفحة')))}</span>
                         </div>
                       ) : (
                         <div /> // Spacer
                       )}
                       
                       {formatDate(book.publish_date) && (
-                        <div className="flex items-center gap-1.5" title="سنة النشر">
+                        <div className="flex items-center gap-1.5" title={(t.addedTranslations_2026?.['سنة النشر'] || (t.addedTranslations_2026?.['سنة النشر'] || 'سنة النشر'))}>
                           <Calendar className="w-3.5 h-3.5 text-primary/60" />
                           <span>{formatDate(book.publish_date)}</span>
                         </div>

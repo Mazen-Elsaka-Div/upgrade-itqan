@@ -19,7 +19,7 @@ export default function ContactPage() {
   const [contactInfo, setContactInfo] = useState({
     email: 'info@itqaan.com',
     phone: '+966 50 000 0000',
-    address: 'الرياض، المملكة العربية السعودية'
+    address: (t.addedTranslations_2026?.['الرياض، المملكة العربية السعودية'] || 'الرياض، المملكة العربية السعودية')
   })
 
   useEffect(() => {
@@ -81,13 +81,13 @@ export default function ContactPage() {
 
       if (res.ok) {
         setSubmitted(true)
-        toast.success(t?.contactPage?.successTitle || "تم إرسال رسالتك بنجاح")
+        toast.success(t?.contactPage?.successTitle || (t.addedTranslations_2026?.['تم إرسال رسالتك بنجاح'] || 'تم إرسال رسالتك بنجاح'))
       } else {
         const err = await res.json()
-        toast.error(err.error || t?.contactPage?.connectionError || "حدث خطأ أثناء إرسال الرسالة")
+        toast.error(err.error || t?.contactPage?.connectionError || (t.addedTranslations_2026?.['حدث خطأ أثناء إرسال الرسالة'] || 'حدث خطأ أثناء إرسال الرسالة'))
       }
     } catch (error) {
-      toast.error(t?.contactPage?.connectionError || "حدث خطأ في الاتصال بالخادم")
+      toast.error(t?.contactPage?.connectionError || (t.addedTranslations_2026?.['حدث خطأ في الاتصال بالخادم'] || 'حدث خطأ في الاتصال بالخادم'))
     } finally {
       setLoading(false)
     }

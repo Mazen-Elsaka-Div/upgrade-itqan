@@ -1,3 +1,4 @@
+import { useI18n } from '@/lib/i18n/context';
 "use client"
 
 import { useState, useEffect, use } from 'react'
@@ -21,6 +22,8 @@ interface FiqhQuestion {
 }
 
 export default function FiqhQuestionDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { t } = useI18n();
+
   const { id } = use(params)
 
   const [question, setQuestion] = useState<FiqhQuestion | null>(null)
@@ -60,7 +63,7 @@ export default function FiqhQuestionDetailPage({ params }: { params: Promise<{ i
       })
       if (!res.ok) {
         const d = await res.json()
-        setError(d.error || 'حدث خطأ')
+        setError(d.error || (t.addedTranslations_2026?.['حدث خطأ'] || 'حدث خطأ'))
         return
       }
       const d = await res.json()
@@ -69,7 +72,7 @@ export default function FiqhQuestionDetailPage({ params }: { params: Promise<{ i
       setSaved(true)
       setTimeout(() => setSaved(false), 3000)
     } catch {
-      setError('حدث خطأ في الاتصال')
+      setError((t.addedTranslations_2026?.['حدث خطأ في الاتصال'] || 'حدث خطأ في الاتصال'))
     } finally {
       setSaving(false)
     }
@@ -83,7 +86,7 @@ export default function FiqhQuestionDetailPage({ params }: { params: Promise<{ i
           <div className="absolute inset-0 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
           <Loader2 className="absolute inset-0 m-auto w-10 h-10 animate-spin text-primary opacity-50" />
         </div>
-        <p className="text-xl font-black text-muted-foreground animate-pulse">جاري تحميل بيانات السؤال...</p>
+        <p className="text-xl font-black text-muted-foreground animate-pulse">{(t.addedTranslations_2026?.['جاري تحميل بيانات السؤال...'] || 'جاري تحميل بيانات السؤال...')}</p>
       </div>
     )
   }
@@ -94,11 +97,11 @@ export default function FiqhQuestionDetailPage({ params }: { params: Promise<{ i
         <div className="w-24 h-24 bg-muted/50 rounded-full flex items-center justify-center mb-6 shadow-inner border border-border">
           <AlertCircle className="w-10 h-10 text-muted-foreground opacity-50" />
         </div>
-        <h3 className="text-2xl font-black text-foreground mb-2">السؤال غير موجود</h3>
-        <p className="text-muted-foreground font-bold mb-8">عذراً، لم نتمكن من العثور على السؤال المطلوب.</p>
+        <h3 className="text-2xl font-black text-foreground mb-2">{(t.addedTranslations_2026?.['السؤال غير موجود'] || 'السؤال غير موجود')}</h3>
+        <p className="text-muted-foreground font-bold mb-8">{(t.addedTranslations_2026?.['عذراً، لم نتمكن من العثور على السؤال المطلوب.'] || 'عذراً، لم نتمكن من العثور على السؤال المطلوب.')}</p>
         <Link href="/academy/supervisor/fiqh" className="flex items-center gap-2 px-8 py-3 bg-primary text-primary-foreground rounded-2xl font-black shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all">
-          <ArrowRight className="w-5 h-5" /> العودة لصندوق الأسئلة
-        </Link>
+          <ArrowRight className="w-5 h-5" /> {(t.addedTranslations_2026?.['العودة لصندوق الأسئلة'] || 'العودة لصندوق الأسئلة')}
+                        </Link>
       </div>
     )
   }
@@ -127,8 +130,8 @@ export default function FiqhQuestionDetailPage({ params }: { params: Promise<{ i
               <HelpCircle className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-lg font-black text-foreground">تفاصيل السؤال ومحرر الإجابة</h1>
-              <p className="text-xs font-bold text-muted-foreground mt-0.5">لوحة الإشراف الفقهي العليا</p>
+              <h1 className="text-lg font-black text-foreground">{(t.addedTranslations_2026?.['تفاصيل السؤال ومحرر الإجابة'] || 'تفاصيل السؤال ومحرر الإجابة')}</h1>
+              <p className="text-xs font-bold text-muted-foreground mt-0.5">{(t.addedTranslations_2026?.['لوحة الإشراف الفقهي العليا'] || 'لوحة الإشراف الفقهي العليا')}</p>
             </div>
           </div>
         </div>
@@ -159,8 +162,8 @@ export default function FiqhQuestionDetailPage({ params }: { params: Promise<{ i
                 <User className="w-5 h-5 text-muted-foreground" />
               </div>
               <div>
-                <p className="font-bold text-foreground">السائل</p>
-                <p className="text-xs text-muted-foreground font-medium">{question.is_anonymous ? 'مجهول الهوية' : question.student_name}</p>
+                <p className="font-bold text-foreground">{(t.addedTranslations_2026?.['السائل'] || 'السائل')}</p>
+                <p className="text-xs text-muted-foreground font-medium">{question.is_anonymous ? (t.addedTranslations_2026?.['مجهول الهوية'] || 'مجهول الهوية') : question.student_name}</p>
               </div>
             </div>
           </div>
@@ -177,14 +180,14 @@ export default function FiqhQuestionDetailPage({ params }: { params: Promise<{ i
                   <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30 shadow-inner">
                     <CheckCircle className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
                   </div>
-                  الإجابة الفقهية المعتمدة
-                </h2>
+                  {(t.addedTranslations_2026?.['الإجابة الفقهية المعتمدة'] || 'الإجابة الفقهية المعتمدة')}
+                                                  </h2>
                 <button
                   onClick={() => setEditing(true)}
                   className="flex items-center justify-center gap-2 px-5 py-2.5 bg-white/50 dark:bg-black/20 hover:bg-white dark:hover:bg-black/40 text-emerald-700 dark:text-emerald-400 font-bold rounded-xl border border-emerald-500/30 transition-all shadow-sm"
                 >
-                  <Pencil className="w-4 h-4" /> تعديل أو إضافة
-                </button>
+                  <Pencil className="w-4 h-4" /> {(t.addedTranslations_2026?.['تعديل أو إضافة'] || 'تعديل أو إضافة')}
+                                                  </button>
               </div>
               
               <div className="bg-white/60 dark:bg-black/20 rounded-3xl p-6 border border-emerald-500/10 shadow-inner">
@@ -196,7 +199,7 @@ export default function FiqhQuestionDetailPage({ params }: { params: Promise<{ i
               <div className="flex flex-wrap items-center gap-3 text-xs font-bold text-emerald-800/70 dark:text-emerald-300/70">
                 {question.answered_by_name && (
                   <span className="flex items-center gap-1.5 bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/20">
-                    <User className="w-4 h-4" /> المجيب: {question.answered_by_name}
+                    <User className="w-4 h-4" /> {(t.addedTranslations_2026?.['المجيب:'] || 'المجيب:')} {question.answered_by_name}
                   </span>
                 )}
                 {question.answered_at && (
@@ -205,7 +208,7 @@ export default function FiqhQuestionDetailPage({ params }: { params: Promise<{ i
                   </span>
                 )}
                 <span className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border ${question.is_published ? 'bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20' : 'bg-muted text-muted-foreground border-border'}`}>
-                  {question.is_published ? <><Globe className="w-4 h-4" /> منشور للعامة</> : <><EyeOff className="w-4 h-4" /> غير منشور (للطالب فقط)</>}
+                  {question.is_published ? <><Globe className="w-4 h-4" /> {(t.addedTranslations_2026?.['منشور للعامة'] || 'منشور للعامة')}</> : <><EyeOff className="w-4 h-4" /> {(t.addedTranslations_2026?.['غير منشور (للطالب فقط)'] || 'غير منشور (للطالب فقط)')}</>}
                 </span>
               </div>
             </div>
@@ -223,14 +226,14 @@ export default function FiqhQuestionDetailPage({ params }: { params: Promise<{ i
                   <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20 shadow-inner">
                     {isAnswered ? <Pencil className="w-6 h-6 text-primary" /> : <Send className="w-6 h-6 text-primary" />}
                   </div>
-                  {isAnswered ? 'تعديل وتحديث الإجابة' : 'كتابة إجابة جديدة'}
+                  {isAnswered ? (t.addedTranslations_2026?.['تعديل وتحديث الإجابة'] || 'تعديل وتحديث الإجابة') : 'كتابة إجابة جديدة'}
                 </h2>
                 
                 {/* Publish toggle */}
                 <label className="flex items-center gap-4 cursor-pointer select-none bg-muted/40 p-2 rounded-2xl border border-border">
                   <div className="flex-1 text-left sm:text-right px-2">
-                    <p className="text-sm font-black text-foreground">النشر للعامة</p>
-                    <p className="text-[10px] font-bold text-muted-foreground">تظهر للطلاب في الأسئلة الشائعة</p>
+                    <p className="text-sm font-black text-foreground">{(t.addedTranslations_2026?.['النشر للعامة'] || 'النشر للعامة')}</p>
+                    <p className="text-[10px] font-bold text-muted-foreground">{(t.addedTranslations_2026?.['تظهر للطلاب في الأسئلة الشائعة'] || 'تظهر للطلاب في الأسئلة الشائعة')}</p>
                   </div>
                   <button
                     type="button"
@@ -245,8 +248,8 @@ export default function FiqhQuestionDetailPage({ params }: { params: Promise<{ i
               <div className="bg-blue-50/50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-900/30 rounded-2xl p-4 flex items-start gap-3">
                 <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
                 <p className="text-sm text-blue-800 dark:text-blue-300 font-medium leading-relaxed">
-                  يُرجى تحري الدقة والوضوح في الإجابة، مع ذكر الأدلة إن أمكن. تذكر أن هذه الإجابات تمثل الأكاديمية منهجياً وعلمياً.
-                </p>
+                  {(t.addedTranslations_2026?.['يُرجى تحري الدقة والوضوح في الإجابة، مع ذكر الأدلة إن أمكن. تذكر أن هذه الإجابات تمثل الأكاديمية منهجياً وعلمياً.'] || 'يُرجى تحري الدقة والوضوح في الإجابة، مع ذكر الأدلة إن أمكن. تذكر أن هذه الإجابات تمثل الأكاديمية منهجياً وعلمياً.')}
+                                                  </p>
               </div>
 
               <div className="relative group/input">
@@ -255,7 +258,7 @@ export default function FiqhQuestionDetailPage({ params }: { params: Promise<{ i
                   value={answer}
                   onChange={e => setAnswer(e.target.value)}
                   rows={8}
-                  placeholder="اكتب الإجابة الفقهية المفصلة هنا..."
+                  placeholder={(t.addedTranslations_2026?.['اكتب الإجابة الفقهية المفصلة هنا...'] || 'اكتب الإجابة الفقهية المفصلة هنا...')}
                   required
                   className="relative w-full bg-background border-2 border-border focus:border-transparent rounded-3xl px-6 py-5 text-base font-medium text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-4 focus:ring-primary/20 resize-none leading-loose shadow-inner transition-all"
                 />
@@ -271,8 +274,8 @@ export default function FiqhQuestionDetailPage({ params }: { params: Promise<{ i
               {saved && (
                 <div className="flex items-center gap-3 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-emerald-700 dark:text-emerald-400 font-bold shadow-inner">
                   <CheckCircle className="w-5 h-5 shrink-0" />
-                  تمت مراجعة الإجابة وحفظها بنجاح!
-                </div>
+                  {(t.addedTranslations_2026?.['تمت مراجعة الإجابة وحفظها بنجاح!'] || 'تمت مراجعة الإجابة وحفظها بنجاح!')}
+                                                  </div>
               )}
 
               <div className="flex flex-col sm:flex-row items-center gap-4 pt-4">
@@ -282,7 +285,7 @@ export default function FiqhQuestionDetailPage({ params }: { params: Promise<{ i
                   className="w-full sm:w-auto flex-1 flex items-center justify-center gap-3 px-8 py-4 bg-primary text-primary-foreground rounded-2xl font-black text-base hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 hover:shadow-xl hover:-translate-y-1 disabled:opacity-50 disabled:hover:scale-100 disabled:hover:translate-y-0"
                 >
                   {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <ShieldCheck className="w-5 h-5" />}
-                  {saving ? 'جاري الاعتماد...' : (isAnswered ? 'تحديث واعتماد الإجابة' : 'اعتماد الإجابة')}
+                  {saving ? (t.addedTranslations_2026?.['جاري الاعتماد...'] || 'جاري الاعتماد...') : (isAnswered ? (t.addedTranslations_2026?.['تحديث واعتماد الإجابة'] || 'تحديث واعتماد الإجابة') : 'اعتماد الإجابة')}
                 </button>
                 {editing && (
                   <button
@@ -290,8 +293,8 @@ export default function FiqhQuestionDetailPage({ params }: { params: Promise<{ i
                     onClick={() => { setEditing(false); setAnswer(question.answer || '') }}
                     className="w-full sm:w-auto px-8 py-4 bg-muted text-foreground rounded-2xl font-black text-base hover:bg-muted/80 transition-colors"
                   >
-                    إلغاء التعديل
-                  </button>
+                    {(t.addedTranslations_2026?.['إلغاء التعديل'] || 'إلغاء التعديل')}
+                                                        </button>
                 )}
               </div>
             </div>

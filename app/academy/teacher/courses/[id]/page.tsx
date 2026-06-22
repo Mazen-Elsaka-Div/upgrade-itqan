@@ -134,7 +134,7 @@ export default function ManageCoursePage() {
       })
       if (res.ok) {
         await fetchCourseData()
-        alert("تم الحفظ بنجاح!")
+        alert((t.addedTranslations_2026?.['تم الحفظ بنجاح!'] || 'تم الحفظ بنجاح!'))
       }
     } catch (er) {
       console.error(er)
@@ -217,10 +217,10 @@ export default function ManageCoursePage() {
     )
   }
 
-  if (!course) return <div className="text-center p-8 bg-card rounded-xl border border-border">الدورة غير موجودة</div>
+  if (!course) return <div className="text-center p-8 bg-card rounded-xl border border-border">{(t.addedTranslations_2026?.['الدورة غير موجودة'] || 'الدورة غير موجودة')}</div>
 
   const handleResubmitForReview = async () => {
-    if (!confirm('إرسال الدورة للأدمن للمراجعة؟ تأكد أنك عدلت المحتوى والدروس بناءً على سبب الرفض.')) return
+    if (!confirm((t.addedTranslations_2026?.['إرسال الدورة للأدمن للمراجعة؟ تأكد أنك عدلت المحتوى والدروس بناءً على سبب الرفض.'] || 'إرسال الدورة للأدمن للمراجعة؟ تأكد أنك عدلت المحتوى والدروس بناءً على سبب الرفض.'))) return
     try {
       const res = await fetch(`/api/academy/teacher/courses/${courseId}`, {
         method: 'PUT',
@@ -229,14 +229,14 @@ export default function ManageCoursePage() {
       })
       if (res.ok) {
         await fetchCourseData()
-        alert('تم إرسال الدورة للأدمن للمراجعة.')
+        alert((t.addedTranslations_2026?.['تم إرسال الدورة للأدمن للمراجعة.'] || 'تم إرسال الدورة للأدمن للمراجعة.'))
       } else {
         const json = await res.json().catch(() => ({}))
-        alert(json?.error || 'تعذر إرسال الدورة للمراجعة.')
+        alert(json?.error || (t.addedTranslations_2026?.['تعذر إرسال الدورة للمراجعة.'] || 'تعذر إرسال الدورة للمراجعة.'))
       }
     } catch (e) {
       console.error(e)
-      alert('حدث خطأ أثناء الإرسال.')
+      alert((t.addedTranslations_2026?.['حدث خطأ أثناء الإرسال.'] || 'حدث خطأ أثناء الإرسال.'))
     }
   }
 
@@ -250,18 +250,18 @@ export default function ManageCoursePage() {
               <XCircle className="w-5 h-5 text-red-700 dark:text-red-300" />
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="font-bold text-red-900 dark:text-red-200">تم رفض الدورة من الأدمن</h3>
+              <h3 className="font-bold text-red-900 dark:text-red-200">{(t.addedTranslations_2026?.['تم رفض الدورة من الأدمن'] || 'تم رفض الدورة من الأدمن')}</h3>
               <p className="text-sm text-red-800 dark:text-red-200/90 whitespace-pre-wrap mt-1">{course.rejection_reason}</p>
               <p className="text-xs text-red-700/70 dark:text-red-300/70 mt-2">
-                عدّل الدروس والمحتوى بناءً على السبب ثم اضغط "إعادة الإرسال للمراجعة".
-              </p>
+                {(t.addedTranslations_2026?.['عدّل الدروس والمحتوى بناءً على السبب ثم اضغط "إعادة الإرسال للمراجعة".'] || 'عدّل الدروس والمحتوى بناءً على السبب ثم اضغط "إعادة الإرسال للمراجعة".')}
+                                            </p>
               <button
                 onClick={handleResubmitForReview}
                 className="mt-3 inline-flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-bold text-sm shadow-sm transition-colors"
               >
                 <Send className="w-4 h-4" />
-                إعادة الإرسال للمراجعة
-              </button>
+                {(t.addedTranslations_2026?.['إعادة الإرسال للمراجعة'] || 'إعادة الإرسال للمراجعة')}
+                                            </button>
             </div>
           </div>
         </div>
@@ -271,8 +271,8 @@ export default function ManageCoursePage() {
         <div className="bg-amber-50 dark:bg-amber-900/15 border border-amber-300 dark:border-amber-700/60 rounded-2xl p-4 flex items-center gap-3 shadow-sm">
           <Clock className="w-5 h-5 text-amber-700 dark:text-amber-300 shrink-0" />
           <div className="text-sm text-amber-900 dark:text-amber-100">
-            <strong>الدورة بانتظار مراجعة الأدمن.</strong> لا تظهر للطلاب حتى تتم الموافقة عليها.
-          </div>
+            <strong>{(t.addedTranslations_2026?.['الدورة بانتظار مراجعة الأدمن.'] || 'الدورة بانتظار مراجعة الأدمن.')}</strong> {(t.addedTranslations_2026?.['لا تظهر للطلاب حتى تتم الموافقة عليها.'] || 'لا تظهر للطلاب حتى تتم الموافقة عليها.')}
+                                </div>
         </div>
       )}
 
@@ -281,16 +281,16 @@ export default function ManageCoursePage() {
           <div className="flex items-center gap-3">
             <AlertTriangle className="w-5 h-5 text-slate-600 dark:text-slate-300 shrink-0" />
             <div className="text-sm text-slate-800 dark:text-slate-200">
-              <strong>الدورة في وضع المسودة.</strong> أرسلها للأدمن للمراجعة عندما تصبح جاهزة.
-            </div>
+              <strong>{(t.addedTranslations_2026?.['الدورة في وضع المسودة.'] || 'الدورة في وضع المسودة.')}</strong> {(t.addedTranslations_2026?.['أرسلها للأدمن للمراجعة عندما تصبح جاهزة.'] || 'أرسلها للأدمن للمراجعة عندما تصبح جاهزة.')}
+                                      </div>
           </div>
           <button
             onClick={handleResubmitForReview}
             className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-sm shadow-sm transition-colors"
           >
             <Send className="w-4 h-4" />
-            إرسال للمراجعة
-          </button>
+            {(t.addedTranslations_2026?.['إرسال للمراجعة'] || 'إرسال للمراجعة')}
+                                </button>
         </div>
       )}
 
@@ -311,13 +311,13 @@ export default function ManageCoursePage() {
                 <h1 className="text-3xl font-bold">{course.title}</h1>
                 <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
                   <span className="px-2 py-0.5 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 rounded font-medium">
-                    {course.level === 'beginner' ? 'مبتدئ' : course.level === 'advanced' ? 'متقدم' : 'متوسط'}
+                    {course.level === 'beginner' ? (t.addedTranslations_2026?.['مبتدئ'] || 'مبتدئ') : course.level === 'advanced' ? (t.addedTranslations_2026?.['متقدم'] || 'متقدم') : 'متوسط'}
                   </span>
                   {course.category_name && <span>• {course.category_name}</span>}
                 </p>
               </div>
               <Link href="/academy/teacher/courses" className="px-4 py-2 border border-border bg-card hover:bg-muted font-bold rounded-lg transition-colors flex items-center gap-2">
-                العودة <ArrowRight className="w-4 h-4 rtl:rotate-180" />
+                {(t.addedTranslations_2026?.['العودة'] || 'العودة')} <ArrowRight className="w-4 h-4 rtl:rotate-180" />
               </Link>
             </div>
           </div>
@@ -330,20 +330,20 @@ export default function ManageCoursePage() {
           onClick={() => setActiveTab('lessons')}
           className={`flex-1 flex gap-2 justify-center items-center py-3 px-4 font-bold rounded-lg transition-all ${activeTab === 'lessons' ? 'bg-card text-blue-600 shadow-sm border border-border' : 'text-muted-foreground hover:bg-muted/50'}`}
         >
-          <PlayCircle className="w-5 h-5" /> دروس الدورة
-        </button>
+          <PlayCircle className="w-5 h-5" /> {(t.addedTranslations_2026?.['دروس الدورة'] || 'دروس الدورة')}
+                          </button>
         <button
           onClick={() => setActiveTab('settings')}
           className={`flex-1 flex gap-2 justify-center items-center py-3 px-4 font-bold rounded-lg transition-all ${activeTab === 'settings' ? 'bg-card text-blue-600 shadow-sm border border-border' : 'text-muted-foreground hover:bg-muted/50'}`}
         >
-          <Settings className="w-5 h-5" /> إعدادات الدورة
-        </button>
+          <Settings className="w-5 h-5" /> {(t.addedTranslations_2026?.['إعدادات الدورة'] || 'إعدادات الدورة')}
+                          </button>
         <button
           onClick={() => setActiveTab('students')}
           className={`flex-1 flex gap-2 justify-center items-center py-3 px-4 font-bold rounded-lg transition-all ${activeTab === 'students' ? 'bg-card text-blue-600 shadow-sm border border-border' : 'text-muted-foreground hover:bg-muted/50'}`}
         >
-          <Users className="w-5 h-5" /> الطلاب المسجلين
-        </button>
+          <Users className="w-5 h-5" /> {(t.addedTranslations_2026?.['الطلاب المسجلين'] || 'الطلاب المسجلين')}
+                          </button>
       </div>
 
       <div className="grid md:grid-cols-4 gap-6">
@@ -354,7 +354,7 @@ export default function ManageCoursePage() {
           {activeTab === 'lessons' && (
             <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
               <div className="p-6 border-b border-border flex items-center justify-between bg-muted/10">
-                <h2 className="text-xl font-bold flex items-center gap-2">المحتوى التعليمي</h2>
+                <h2 className="text-xl font-bold flex items-center gap-2">{(t.addedTranslations_2026?.['المحتوى التعليمي'] || 'المحتوى التعليمي')}</h2>
                 <button
                   onClick={() => {
                     if (showAddLesson) {
@@ -366,8 +366,8 @@ export default function ManageCoursePage() {
                   }}
                   className="px-4 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-sm shadow-md"
                 >
-                  <Plus className="w-4 h-4" /> إضافة درس
-                </button>
+                  <Plus className="w-4 h-4" /> {(t.addedTranslations_2026?.['إضافة درس'] || 'إضافة درس')}
+                                                  </button>
               </div>
 
               {showAddLesson && (
@@ -375,20 +375,20 @@ export default function ManageCoursePage() {
                   <form onSubmit={handleAddLesson} className="space-y-5">
                     <div className="grid md:grid-cols-2 gap-5">
                       <div className="col-span-2">
-                        <label className="text-sm font-bold block mb-1">عنوان الدرس <span className="text-red-500">*</span></label>
-                        <input required value={newLesson.title} onChange={e => setNewLesson({ ...newLesson, title: e.target.value })} type="text" placeholder="اكتب عنواناً جذاباً للدرس" className="w-full p-3 rounded-xl border border-border bg-background focus:ring-2 focus:ring-blue-500 outline-none" />
+                        <label className="text-sm font-bold block mb-1">{(t.addedTranslations_2026?.['عنوان الدرس'] || 'عنوان الدرس')} <span className="text-red-500">*</span></label>
+                        <input required value={newLesson.title} onChange={e => setNewLesson({ ...newLesson, title: e.target.value })} type="text" placeholder={(t.addedTranslations_2026?.['اكتب عنواناً جذاباً للدرس'] || 'اكتب عنواناً جذاباً للدرس')} className="w-full p-3 rounded-xl border border-border bg-background focus:ring-2 focus:ring-blue-500 outline-none" />
                       </div>
                       <div className="col-span-2">
-                        <label className="text-sm font-bold block mb-1">المحتوى المرئي (فيديو)</label>
+                        <label className="text-sm font-bold block mb-1">{(t.addedTranslations_2026?.['المحتوى المرئي (فيديو)'] || 'المحتوى المرئي (فيديو)')}</label>
                         <div className="flex flex-col gap-3">
                           <div className="flex gap-2">
-                            <input type="url" placeholder="رابط يوتيوب أو Vimeo" value={newLesson.video_url} onChange={e => setNewLesson({ ...newLesson, video_url: e.target.value })} className="flex-1 p-3 rounded-xl border border-border bg-background text-left dir-ltr focus:ring-2 focus:ring-blue-500 outline-none" />
+                            <input type="url" placeholder={(t.addedTranslations_2026?.['رابط يوتيوب أو Vimeo'] || 'رابط يوتيوب أو Vimeo')} value={newLesson.video_url} onChange={e => setNewLesson({ ...newLesson, video_url: e.target.value })} className="flex-1 p-3 rounded-xl border border-border bg-background text-left dir-ltr focus:ring-2 focus:ring-blue-500 outline-none" />
                             <div className="relative">
                               <input type="file" accept="video/*" onChange={e => handleFileUpload(e, 'lesson_video')} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
                               <button type="button" disabled={uploadingFiles['lesson_video']} className="h-full px-4 bg-muted hover:bg-muted/80 text-foreground font-bold border border-border rounded-xl flex items-center gap-2 transition-colors">
                                 {uploadingFiles['lesson_video'] ? <Loader2 className="w-4 h-4 animate-spin" /> : <Video className="w-4 h-4" />}
-                                رفع فيديو
-                              </button>
+                                {(t.addedTranslations_2026?.['رفع فيديو'] || 'رفع فيديو')}
+                                                                                            </button>
                             </div>
                           </div>
 
@@ -414,19 +414,19 @@ export default function ManageCoursePage() {
                       </div>
 
                       <div className="col-span-2 md:col-span-1">
-                        <label className="text-sm font-bold block mb-1">مدة الدرس التقريبية (بالدقائق)</label>
+                        <label className="text-sm font-bold block mb-1">{(t.addedTranslations_2026?.['مدة الدرس التقريبية (بالدقائق)'] || 'مدة الدرس التقريبية (بالدقائق)')}</label>
                         <input type="number" min="1" value={newLesson.duration_minutes} onChange={e => setNewLesson({ ...newLesson, duration_minutes: e.target.value })} placeholder="30" className="w-full p-3 rounded-xl border border-border bg-background focus:ring-2 focus:ring-blue-500 outline-none" />
                       </div>
                     </div>
 
                     <div className="col-span-2">
-                      <label className="text-sm font-bold block mb-1">المرفقات والملفات (PDF/Docs)</label>
+                      <label className="text-sm font-bold block mb-1">{(t.addedTranslations_2026?.['المرفقات والملفات (PDF/Docs)'] || 'المرفقات والملفات (PDF/Docs)')}</label>
                       <div className="p-4 border-2 border-dashed border-border rounded-xl bg-background text-center relative group hover:border-blue-500 transition-colors">
                         <input type="file" accept=".pdf,.doc,.docx,.ppt,.pptx" onChange={e => handleFileUpload(e, 'lesson_doc')} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
                         <div className="flex flex-col items-center justify-center space-y-2 text-muted-foreground pointer-events-none">
                           {uploadingFiles['lesson_doc'] ? <Loader2 className="w-8 h-8 animate-spin text-blue-500" /> : <UploadCloud className="w-8 h-8 group-hover:text-blue-500 transition-colors tracking-widest" />}
-                          <span className="font-bold text-sm">اسحب وافلت الملفات هنا أو اضغط للرفع</span>
-                          <span className="text-xs">يدعم PDF, Word, Excel حتى 20 ميجابايت</span>
+                          <span className="font-bold text-sm">{(t.addedTranslations_2026?.['اسحب وافلت الملفات هنا أو اضغط للرفع'] || 'اسحب وافلت الملفات هنا أو اضغط للرفع')}</span>
+                          <span className="text-xs">{(t.addedTranslations_2026?.['يدعم PDF, Word, Excel حتى 20 ميجابايت'] || 'يدعم PDF, Word, Excel حتى 20 ميجابايت')}</span>
                         </div>
                       </div>
                       {attachments.length > 0 && (
@@ -443,15 +443,15 @@ export default function ManageCoursePage() {
                     </div>
 
                     <div className="col-span-2">
-                      <label className="text-sm font-bold block mb-1">وصف الدرس التدريبي</label>
-                      <textarea value={newLesson.description} onChange={e => setNewLesson({ ...newLesson, description: e.target.value })} className="w-full p-3 rounded-xl border border-border bg-background focus:ring-2 focus:ring-blue-500 outline-none" rows={3} placeholder="ماذا سيتعلم الطالب في هذا الدرس؟" />
+                      <label className="text-sm font-bold block mb-1">{(t.addedTranslations_2026?.['وصف الدرس التدريبي'] || 'وصف الدرس التدريبي')}</label>
+                      <textarea value={newLesson.description} onChange={e => setNewLesson({ ...newLesson, description: e.target.value })} className="w-full p-3 rounded-xl border border-border bg-background focus:ring-2 focus:ring-blue-500 outline-none" rows={3} placeholder={(t.addedTranslations_2026?.['ماذا سيتعلم الطالب في هذا الدرس؟'] || 'ماذا سيتعلم الطالب في هذا الدرس؟')} />
                     </div>
 
                     <div className="flex gap-3 justify-end pt-4 border-t border-border">
-                      <button type="button" onClick={handleCancelLesson} className="px-5 py-2.5 bg-muted hover:bg-muted/80 rounded-xl font-bold transition-colors">إلغاء</button>
+                      <button type="button" onClick={handleCancelLesson} className="px-5 py-2.5 bg-muted hover:bg-muted/80 rounded-xl font-bold transition-colors">{(t.addedTranslations_2026?.['إلغاء'] || 'إلغاء')}</button>
                       <button type="submit" disabled={isSubmitLesson || uploadingFiles['lesson_video'] || uploadingFiles['lesson_doc']} className="px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold flex items-center gap-2 transition-colors disabled:opacity-50">
                         {isSubmitLesson ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                        {editingLessonId ? "تحديث الدرس" : "حفظ الدرس"}
+                        {editingLessonId ? (t.addedTranslations_2026?.['تحديث الدرس'] || 'تحديث الدرس') : "حفظ الدرس"}
                       </button>
                     </div>
                   </form>
@@ -462,8 +462,8 @@ export default function ManageCoursePage() {
                 {lessons.length === 0 ? (
                   <div className="p-12 text-center flex flex-col items-center">
                     <BookOpen className="w-16 h-16 text-muted/50 mb-4" />
-                    <h3 className="text-lg font-bold text-muted-foreground mb-1">لم يتم إضافة دروس بعد</h3>
-                    <p className="text-sm text-muted-foreground/80">ابدأ بإضافة أول درس تعليمي للطلاب الآن</p>
+                    <h3 className="text-lg font-bold text-muted-foreground mb-1">{(t.addedTranslations_2026?.['لم يتم إضافة دروس بعد'] || 'لم يتم إضافة دروس بعد')}</h3>
+                    <p className="text-sm text-muted-foreground/80">{(t.addedTranslations_2026?.['ابدأ بإضافة أول درس تعليمي للطلاب الآن'] || 'ابدأ بإضافة أول درس تعليمي للطلاب الآن')}</p>
                   </div>
                 ) : (
                   lessons.map((lesson, idx) => (
@@ -473,13 +473,13 @@ export default function ManageCoursePage() {
                       <div className="flex-1">
                         <h3 className="font-bold text-lg mb-1">{lesson.title}</h3>
                         <p className="text-xs text-muted-foreground flex items-center gap-3">
-                          {lesson.duration_minutes && <span><Clock className="w-3.5 h-3.5 inline mr-1" /> {lesson.duration_minutes} دقيقة</span>}
-                          {lesson.video_url && <span className="text-green-600 dark:text-green-500 font-medium"><CheckCircle2 className="w-3.5 h-3.5 inline mr-1" /> يوجد فيديو مفهرس</span>}
+                          {lesson.duration_minutes && <span><Clock className="w-3.5 h-3.5 inline mr-1" /> {lesson.duration_minutes} {(t.addedTranslations_2026?.['دقيقة'] || 'دقيقة')}</span>}
+                          {lesson.video_url && <span className="text-green-600 dark:text-green-500 font-medium"><CheckCircle2 className="w-3.5 h-3.5 inline mr-1" /> {(t.addedTranslations_2026?.['يوجد فيديو مفهرس'] || 'يوجد فيديو مفهرس')}</span>}
                         </p>
                       </div>
                       <div className="flex gap-1">
-                        <button title="تعديل الدرس" onClick={() => handleEditClick(lesson)} className="p-2 text-blue-500 opacity-0 group-hover:opacity-100 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all"><Edit2 className="w-5 h-5" /></button>
-                        <button title="حذف الدرس" className="p-2 text-red-500 opacity-0 group-hover:opacity-100 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"><Trash2 className="w-5 h-5" /></button>
+                        <button title={(t.addedTranslations_2026?.['تعديل الدرس'] || 'تعديل الدرس')} onClick={() => handleEditClick(lesson)} className="p-2 text-blue-500 opacity-0 group-hover:opacity-100 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all"><Edit2 className="w-5 h-5" /></button>
+                        <button title={(t.addedTranslations_2026?.['حذف الدرس'] || 'حذف الدرس')} className="p-2 text-red-500 opacity-0 group-hover:opacity-100 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"><Trash2 className="w-5 h-5" /></button>
                       </div>
                     </div>
                   ))
@@ -493,13 +493,13 @@ export default function ManageCoursePage() {
             <div className="bg-card rounded-xl border border-border shadow-sm p-6 lg:p-8">
               <h2 className="text-xl font-bold mb-6 border-b border-border pb-4 flex items-center gap-2">
                 <Settings className="w-6 h-6 text-blue-600" />
-                إدارة خصائص الدورة
-              </h2>
+                {(t.addedTranslations_2026?.['إدارة خصائص الدورة'] || 'إدارة خصائص الدورة')}
+                                            </h2>
 
               <form onSubmit={handleSaveSettings} className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="col-span-2">
-                    <label className="text-sm font-bold block mb-2">الصورة التعريفية (Thumbnail)</label>
+                    <label className="text-sm font-bold block mb-2">{(t.addedTranslations_2026?.['الصورة التعريفية (Thumbnail)'] || 'الصورة التعريفية (Thumbnail)')}</label>
                     <div className="flex items-end gap-4">
                       <div className="w-40 h-24 bg-muted rounded-xl border-2 border-dashed border-border overflow-hidden flex items-center justify-center relative shadow-inner">
                         {courseSettings.thumbnail_url ? (
@@ -512,37 +512,37 @@ export default function ManageCoursePage() {
                         <input type="file" accept="image/*" onChange={e => handleFileUpload(e, 'thumbnail')} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
                         <button type="button" disabled={uploadingFiles['thumbnail']} className="px-5 py-2.5 bg-card border border-border hover:bg-muted font-bold rounded-xl flex items-center gap-2 shadow-sm transition-colors">
                           {uploadingFiles['thumbnail'] ? <Loader2 className="w-5 h-5 animate-spin" /> : <UploadCloud className="w-5 h-5" />}
-                          رفع صورة جديدة
-                        </button>
-                        <p className="text-xs text-muted-foreground mt-2">الحجم الأمثل 1280x720. أقصى حجم 4MB.</p>
+                          {(t.addedTranslations_2026?.['رفع صورة جديدة'] || 'رفع صورة جديدة')}
+                                                                          </button>
+                        <p className="text-xs text-muted-foreground mt-2">{(t.addedTranslations_2026?.['الحجم الأمثل 1280x720. أقصى حجم 4MB.'] || 'الحجم الأمثل 1280x720. أقصى حجم 4MB.')}</p>
                       </div>
                     </div>
                   </div>
 
                   <div className="col-span-2">
-                    <label className="text-sm font-bold block mb-1">عنوان الدورة الأساسي</label>
+                    <label className="text-sm font-bold block mb-1">{(t.addedTranslations_2026?.['عنوان الدورة الأساسي'] || 'عنوان الدورة الأساسي')}</label>
                     <input type="text" value={courseSettings.title} onChange={e => setCourseSettings({ ...courseSettings, title: e.target.value })} className="w-full p-3 rounded-xl border border-border bg-background focus:ring-2 focus:ring-blue-500 font-bold" />
                   </div>
 
                   <div className="col-span-2 md:col-span-1">
-                    <label className="text-sm font-bold block mb-1">مستوى الصعوبة</label>
+                    <label className="text-sm font-bold block mb-1">{(t.addedTranslations_2026?.['مستوى الصعوبة'] || 'مستوى الصعوبة')}</label>
                     <select value={courseSettings.level} onChange={e => setCourseSettings({ ...courseSettings, level: e.target.value })} className="w-full p-3 rounded-xl border border-border bg-background font-medium">
-                      <option value="beginner">مبتدئ (تأسيس)</option>
-                      <option value="intermediate">متوسط</option>
-                      <option value="advanced">متقدم (احترافي)</option>
+                      <option value="beginner">{(t.addedTranslations_2026?.['مبتدئ (تأسيس)'] || 'مبتدئ (تأسيس)')}</option>
+                      <option value="intermediate">{(t.addedTranslations_2026?.['متوسط'] || 'متوسط')}</option>
+                      <option value="advanced">{(t.addedTranslations_2026?.['متقدم (احترافي)'] || 'متقدم (احترافي)')}</option>
                     </select>
                   </div>
 
                   <div className="col-span-2 md:col-span-1">
-                    <label className="text-sm font-bold block mb-1">حالة الظهور (النشر)</label>
+                    <label className="text-sm font-bold block mb-1">{(t.addedTranslations_2026?.['حالة الظهور (النشر)'] || 'حالة الظهور (النشر)')}</label>
                     <select value={courseSettings.status} onChange={e => setCourseSettings({ ...courseSettings, status: e.target.value })} className="w-full p-3 rounded-xl border border-border bg-background font-medium">
-                      <option value="published">فعالة / منشورة للكل</option>
-                      <option value="draft">مسودة خفية</option>
+                      <option value="published">{(t.addedTranslations_2026?.['فعالة / منشورة للكل'] || 'فعالة / منشورة للكل')}</option>
+                      <option value="draft">{(t.addedTranslations_2026?.['مسودة خفية'] || 'مسودة خفية')}</option>
                     </select>
                   </div>
 
                   <div className="col-span-2">
-                    <label className="text-sm font-bold block mb-1">وصف الدورة (نبذة عامة)</label>
+                    <label className="text-sm font-bold block mb-1">{(t.addedTranslations_2026?.['وصف الدورة (نبذة عامة)'] || 'وصف الدورة (نبذة عامة)')}</label>
                     <textarea value={courseSettings.description} onChange={e => setCourseSettings({ ...courseSettings, description: e.target.value })} className="w-full p-3 rounded-xl border border-border bg-background leading-relaxed" rows={4}></textarea>
                   </div>
                 </div>
@@ -550,8 +550,8 @@ export default function ManageCoursePage() {
                 <div className="pt-6 border-t border-border flex justify-end">
                   <button type="submit" disabled={isSavingSettings} className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg shadow-blue-600/20 font-bold flex items-center gap-2 transition-transform active:scale-95 disabled:opacity-50">
                     {isSavingSettings ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
-                    تحديث مساحات الدورة
-                  </button>
+                    {(t.addedTranslations_2026?.['تحديث مساحات الدورة'] || 'تحديث مساحات الدورة')}
+                                                        </button>
                 </div>
               </form>
             </div>
@@ -562,11 +562,11 @@ export default function ManageCoursePage() {
             <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
               <div className="p-6 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-muted/50 to-transparent">
                 <div>
-                  <h2 className="text-xl font-bold flex items-center gap-2"><Users className="w-6 h-6 text-indigo-600" /> الطلاب المسجلين</h2>
-                  <p className="text-sm text-muted-foreground mt-1">قائمة بالطلاب الحاليين ومتابعة تقدمهم واستيعابهم.</p>
+                  <h2 className="text-xl font-bold flex items-center gap-2"><Users className="w-6 h-6 text-indigo-600" /> {(t.addedTranslations_2026?.['الطلاب المسجلين'] || 'الطلاب المسجلين')}</h2>
+                  <p className="text-sm text-muted-foreground mt-1">{(t.addedTranslations_2026?.['قائمة بالطلاب الحاليين ومتابعة تقدمهم واستيعابهم.'] || 'قائمة بالطلاب الحاليين ومتابعة تقدمهم واستيعابهم.')}</p>
                 </div>
                 <div className="px-4 py-2 bg-card border border-border rounded-lg text-sm font-bold shadow-sm">
-                  إجمالي المسجلين: <span className="text-indigo-600 text-lg mx-1">{students.length}</span>
+                  {(t.addedTranslations_2026?.['إجمالي المسجلين:'] || 'إجمالي المسجلين:')} <span className="text-indigo-600 text-lg mx-1">{students.length}</span>
                 </div>
               </div>
 
@@ -574,17 +574,17 @@ export default function ManageCoursePage() {
                 <table className="w-full text-right text-sm">
                   <thead className="bg-muted/40 font-bold border-b border-border">
                     <tr>
-                      <th className="p-4 rounded-tr-lg">الطالب</th>
-                      <th className="p-4">تاريخ الانضمام</th>
-                      <th className="p-4">نسبة التقدم المحرز</th>
-                      <th className="p-4">حالة الحساب</th>
-                      <th className="p-4 border-l-0 text-center">الإجراءات</th>
+                      <th className="p-4 rounded-tr-lg">{(t.addedTranslations_2026?.['الطالب'] || 'الطالب')}</th>
+                      <th className="p-4">{(t.addedTranslations_2026?.['تاريخ الانضمام'] || 'تاريخ الانضمام')}</th>
+                      <th className="p-4">{(t.addedTranslations_2026?.['نسبة التقدم المحرز'] || 'نسبة التقدم المحرز')}</th>
+                      <th className="p-4">{(t.addedTranslations_2026?.['حالة الحساب'] || 'حالة الحساب')}</th>
+                      <th className="p-4 border-l-0 text-center">{(t.addedTranslations_2026?.['الإجراءات'] || 'الإجراءات')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
                     {students.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="p-8 text-center text-muted-foreground">لا يوجد طلاب مسجلين في الوقت الحالي.</td>
+                        <td colSpan={5} className="p-8 text-center text-muted-foreground">{(t.addedTranslations_2026?.['لا يوجد طلاب مسجلين في الوقت الحالي.'] || 'لا يوجد طلاب مسجلين في الوقت الحالي.')}</td>
                       </tr>
                     ) : (
                       students.map(s => (
@@ -606,15 +606,15 @@ export default function ManageCoursePage() {
                                 <div className="h-full bg-green-500 rounded-full" style={{ width: `${s.progress}%` }}></div>
                               </div>
                             </div>
-                            <div className="text-xs text-muted-foreground mt-1">{s.completed_lessons} دروس منجزة</div>
+                            <div className="text-xs text-muted-foreground mt-1">{s.completed_lessons} {(t.addedTranslations_2026?.['دروس منجزة'] || 'دروس منجزة')}</div>
                           </td>
                           <td className="p-4">
                             <span className="px-3 py-1 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 rounded-full text-xs font-bold ring-1 ring-green-500/20">
-                              مفعل وحر
-                            </span>
+                              {(t.addedTranslations_2026?.['مفعل وحر'] || 'مفعل وحر')}
+                                                                  </span>
                           </td>
                           <td className="p-4 text-center">
-                            <button className="text-xs font-bold text-red-500 hover:text-red-700 hover:underline px-2 py-1 rounded transition-colors text-center w-full">إزالة الطالب</button>
+                            <button className="text-xs font-bold text-red-500 hover:text-red-700 hover:underline px-2 py-1 rounded transition-colors text-center w-full">{(t.addedTranslations_2026?.['إزالة الطالب'] || 'إزالة الطالب')}</button>
                           </td>
                         </tr>
                       ))
@@ -633,33 +633,33 @@ export default function ManageCoursePage() {
             <div className="absolute top-0 right-0 p-3 opacity-10">
               <BookOpen className="w-24 h-24" />
             </div>
-            <h3 className="font-bold mb-2 text-lg relative z-10">لوحة التحكم السريعة</h3>
-            <p className="text-sm text-blue-100 mb-5 relative z-10 leading-relaxed">أبقِ دورتك محدثة وتابّع طلّابك لضمان تجربة تعليمية فريدة لهم.</p>
+            <h3 className="font-bold mb-2 text-lg relative z-10">{(t.addedTranslations_2026?.['لوحة التحكم السريعة'] || 'لوحة التحكم السريعة')}</h3>
+            <p className="text-sm text-blue-100 mb-5 relative z-10 leading-relaxed">{(t.addedTranslations_2026?.['أبقِ دورتك محدثة وتابّع طلّابك لضمان تجربة تعليمية فريدة لهم.'] || 'أبقِ دورتك محدثة وتابّع طلّابك لضمان تجربة تعليمية فريدة لهم.')}</p>
 
             {pendingRequests > 0 && (
               <div className="bg-yellow-400 text-yellow-900 rounded-xl p-4 font-bold text-sm relative z-10 shadow-sm animate-pulse">
-                لديك {pendingRequests} طلب انضمام جديد!
-                <Link href={`/academy/teacher/enrollment-requests?course_id=${courseId}`} className="block mt-2 text-center py-2 bg-white/30 hover:bg-white/50 rounded-lg transition-colors">
-                  مراجعة الطلبات
-                </Link>
+                {(t.addedTranslations_2026?.['لديك'] || 'لديك')} {pendingRequests} {(t.addedTranslations_2026?.['طلب انضمام جديد!'] || 'طلب انضمام جديد!')}
+                                              <Link href={`/academy/teacher/enrollment-requests?course_id=${courseId}`} className="block mt-2 text-center py-2 bg-white/30 hover:bg-white/50 rounded-lg transition-colors">
+                  {(t.addedTranslations_2026?.['مراجعة الطلبات'] || 'مراجعة الطلبات')}
+                                                  </Link>
               </div>
             )}
           </div>
 
           <div className="bg-card rounded-xl border border-border shadow-sm p-5">
-            <h3 className="font-bold mb-4 flex items-center gap-2"><Settings className="w-5 h-5 text-indigo-600" /> ملخص الدورة</h3>
+            <h3 className="font-bold mb-4 flex items-center gap-2"><Settings className="w-5 h-5 text-indigo-600" /> {(t.addedTranslations_2026?.['ملخص الدورة'] || 'ملخص الدورة')}</h3>
             <div className="space-y-3 text-sm">
               <div className="flex justify-between p-3 bg-muted/30 hover:bg-muted/60 transition-colors rounded-lg border border-border/50">
-                <span className="text-muted-foreground font-medium">حالة النشر</span>
-                <span className="font-bold">{course.status === 'published' ? 'منشورة عامة' : 'مسودة خاصة'}</span>
+                <span className="text-muted-foreground font-medium">{(t.addedTranslations_2026?.['حالة النشر'] || 'حالة النشر')}</span>
+                <span className="font-bold">{course.status === 'published' ? (t.addedTranslations_2026?.['منشورة عامة'] || 'منشورة عامة') : 'مسودة خاصة'}</span>
               </div>
               <div className="flex justify-between p-3 bg-muted/30 hover:bg-muted/60 transition-colors rounded-lg border border-border/50">
-                <span className="text-muted-foreground font-medium">عدد الدروس</span>
+                <span className="text-muted-foreground font-medium">{(t.addedTranslations_2026?.['عدد الدروس'] || 'عدد الدروس')}</span>
                 <span className="font-bold text-blue-600 bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 rounded shadow-sm">{lessons.length}</span>
               </div>
               <div className="flex justify-between p-3 bg-muted/30 hover:bg-muted/60 transition-colors rounded-lg border border-border/50">
-                <span className="text-muted-foreground font-medium">مستوى المادة</span>
-                <span className="font-bold">{course.level === 'beginner' ? 'مبتدئ' : course.level === 'advanced' ? 'متقدم' : 'متوسط'}</span>
+                <span className="text-muted-foreground font-medium">{(t.addedTranslations_2026?.['مستوى المادة'] || 'مستوى المادة')}</span>
+                <span className="font-bold">{course.level === 'beginner' ? (t.addedTranslations_2026?.['مبتدئ'] || 'مبتدئ') : course.level === 'advanced' ? (t.addedTranslations_2026?.['متقدم'] || 'متقدم') : 'متوسط'}</span>
               </div>
             </div>
           </div>

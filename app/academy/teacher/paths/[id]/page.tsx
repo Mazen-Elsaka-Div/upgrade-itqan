@@ -11,6 +11,7 @@ import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import PathStagesManager from '@/components/paths/path-stages-manager'
 import PathSubmissionsReview from '@/components/paths/path-submissions-review'
+import { useI18n } from "@/lib/i18n/context";
 
 interface PathDetails {
   id: string
@@ -68,6 +69,7 @@ interface RosterStudent {
 }
 
 export default function TeacherPathStatsPage() {
+    const { t } = useI18n();
   const params = useParams()
   const pathId = params.id as string
   const [data, setData] = useState<StatsApiResponse['data'] | null>(null)
@@ -82,11 +84,11 @@ export default function TeacherPathStatsPage() {
           const json = await res.json()
           setData(json.data)
         } else {
-          toast.error('فشل في جلب إحصائيات المسار')
+          toast.error((t.addedTranslations_2026?.['فشل في جلب إحصائيات المسار'] || (t.addedTranslations_2026?.['فشل في جلب إحصائيات المسار'] || 'فشل في جلب إحصائيات المسار')))
         }
       } catch (error) {
         console.error('Error fetching path stats:', error)
-        toast.error('حدث خطأ أثناء تحميل البيانات')
+        toast.error((t.addedTranslations_2026?.['حدث خطأ أثناء تحميل البيانات'] || (t.addedTranslations_2026?.['حدث خطأ أثناء تحميل البيانات'] || 'حدث خطأ أثناء تحميل البيانات')))
       } finally {
         setLoading(false)
       }
@@ -101,7 +103,7 @@ export default function TeacherPathStatsPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[500px] space-y-4">
         <Loader2 className="w-12 h-12 animate-spin text-emerald-600" />
-        <p className="text-muted-foreground animate-pulse text-sm">جاري تحميل إحصائيات المسار...</p>
+        <p className="text-muted-foreground animate-pulse text-sm">{(t.addedTranslations_2026?.['جاري تحميل إحصائيات المسار...'] || (t.addedTranslations_2026?.['جاري تحميل إحصائيات المسار...'] || 'جاري تحميل إحصائيات المسار...'))}</p>
       </div>
     )
   }
@@ -109,12 +111,12 @@ export default function TeacherPathStatsPage() {
   if (!data) {
     return (
       <div className="text-center py-16 space-y-4">
-        <h2 className="text-2xl font-bold text-destructive">المسار غير موجود</h2>
-        <p className="text-muted-foreground">عذراً، لم نتمكن من العثور على المسار المطلوب أو لا تملك الصلاحية للوصول إليه.</p>
+        <h2 className="text-2xl font-bold text-destructive">{(t.addedTranslations_2026?.['المسار غير موجود'] || (t.addedTranslations_2026?.['المسار غير موجود'] || 'المسار غير موجود'))}</h2>
+        <p className="text-muted-foreground">{(t.addedTranslations_2026?.['عذراً، لم نتمكن من العثور على المسار المطلوب أو لا تملك الصلاحية للوصول إليه.'] || (t.addedTranslations_2026?.['عذراً، لم نتمكن من العثور على المسار المطلوب أو لا تملك الصلاحية للوصول إليه.'] || 'عذراً، لم نتمكن من العثور على المسار المطلوب أو لا تملك الصلاحية للوصول إليه.'))}</p>
         <Link href="/academy/teacher/paths" className="inline-flex items-center gap-2 text-emerald-600 font-semibold hover:underline">
           <ArrowRight className="w-4 h-4" />
-          العودة للمسارات
-        </Link>
+          {(t.addedTranslations_2026?.['العودة للمسارات'] || (t.addedTranslations_2026?.['العودة للمسارات'] || 'العودة للمسارات'))}
+                        </Link>
       </div>
     )
   }
@@ -131,22 +133,22 @@ export default function TeacherPathStatsPage() {
       {/* Back button */}
       <Link href="/academy/teacher/paths" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-emerald-600 transition-colors">
         <ArrowRight className="w-4 h-4" />
-        العودة للوحة التحكم والمسارات
-      </Link>
+        {(t.addedTranslations_2026?.['العودة للوحة التحكم والمسارات'] || (t.addedTranslations_2026?.['العودة للوحة التحكم والمسارات'] || 'العودة للوحة التحكم والمسارات'))}
+                    </Link>
 
       {/* Header Info */}
       <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-            لوحة الإشراف والمتابعة
-          </span>
+            {(t.addedTranslations_2026?.['لوحة الإشراف والمتابعة'] || (t.addedTranslations_2026?.['لوحة الإشراف والمتابعة'] || 'لوحة الإشراف والمتابعة'))}
+                                </span>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground mt-2">{path.title}</h1>
-          <p className="text-sm text-muted-foreground mt-1">تتبع مؤشرات التقدم للطلاب وقمع التحويل عبر المراحل.</p>
+          <p className="text-sm text-muted-foreground mt-1">{(t.addedTranslations_2026?.['تتبع مؤشرات التقدم للطلاب وقمع التحويل عبر المراحل.'] || (t.addedTranslations_2026?.['تتبع مؤشرات التقدم للطلاب وقمع التحويل عبر المراحل.'] || 'تتبع مؤشرات التقدم للطلاب وقمع التحويل عبر المراحل.'))}</p>
         </div>
         <div className="flex items-center gap-2 bg-emerald-600/10 border border-emerald-500/10 rounded-2xl px-4 py-2.5 text-emerald-600 dark:text-emerald-400 text-sm font-semibold shrink-0">
           <GraduationCap className="w-5 h-5" />
-          {path.total_stages} مرحلة في المسار
-        </div>
+          {path.total_stages} {(t.addedTranslations_2026?.['مرحلة في المسار'] || (t.addedTranslations_2026?.['مرحلة في المسار'] || 'مرحلة في المسار'))}
+                          </div>
       </div>
 
       {/* Tabs */}
@@ -161,8 +163,8 @@ export default function TeacherPathStatsPage() {
           )}
         >
           <Layers className="w-4 h-4" />
-          المحتوى والمراحل
-        </button>
+          {(t.addedTranslations_2026?.['المحتوى والمراحل'] || (t.addedTranslations_2026?.['المحتوى والمراحل'] || 'المحتوى والمراحل'))}
+                          </button>
         <button
           onClick={() => setActiveTab('submissions')}
           className={cn(
@@ -173,8 +175,8 @@ export default function TeacherPathStatsPage() {
           )}
         >
           <ClipboardCheck className="w-4 h-4" />
-          مراجعة التسليمات
-        </button>
+          {(t.addedTranslations_2026?.['مراجعة التسليمات'] || (t.addedTranslations_2026?.['مراجعة التسليمات'] || 'مراجعة التسليمات'))}
+                          </button>
         <button
           onClick={() => setActiveTab('stats')}
           className={cn(
@@ -185,8 +187,8 @@ export default function TeacherPathStatsPage() {
           )}
         >
           <BarChart3 className="w-4 h-4" />
-          الإحصائيات والمتابعة
-        </button>
+          {(t.addedTranslations_2026?.['الإحصائيات والمتابعة'] || (t.addedTranslations_2026?.['الإحصائيات والمتابعة'] || 'الإحصائيات والمتابعة'))}
+                          </button>
       </div>
 
       {activeTab === 'content' && <PathStagesManager pathId={path.id} />}
@@ -202,55 +204,55 @@ export default function TeacherPathStatsPage() {
         {/* Enrolled */}
         <div className="bg-card border border-border rounded-2xl p-5 shadow-sm space-y-2 flex flex-col justify-between">
           <div className="flex justify-between items-center text-muted-foreground">
-            <span className="text-xs sm:text-sm font-medium">الطلاب المسجلين</span>
+            <span className="text-xs sm:text-sm font-medium">{(t.addedTranslations_2026?.['الطلاب المسجلين'] || (t.addedTranslations_2026?.['الطلاب المسجلين'] || 'الطلاب المسجلين'))}</span>
             <Users className="w-5 h-5 text-emerald-600" />
           </div>
           <div className="space-y-1">
             <h3 className="text-2xl sm:text-3xl font-extrabold">{stats.enrolled_students}</h3>
-            <p className="text-[10px] text-muted-foreground">إجمالي الاشتراكات بالمسار</p>
+            <p className="text-[10px] text-muted-foreground">{(t.addedTranslations_2026?.['إجمالي الاشتراكات بالمسار'] || (t.addedTranslations_2026?.['إجمالي الاشتراكات بالمسار'] || 'إجمالي الاشتراكات بالمسار'))}</p>
           </div>
         </div>
 
         {/* Active */}
         <div className="bg-card border border-border rounded-2xl p-5 shadow-sm space-y-2 flex flex-col justify-between">
           <div className="flex justify-between items-center text-muted-foreground">
-            <span className="text-xs sm:text-sm font-medium">الطلاب النشطين</span>
+            <span className="text-xs sm:text-sm font-medium">{(t.addedTranslations_2026?.['الطلاب النشطين'] || (t.addedTranslations_2026?.['الطلاب النشطين'] || 'الطلاب النشطين'))}</span>
             <TrendingUp className="w-5 h-5 text-amber-500" />
           </div>
           <div className="space-y-1">
             <h3 className="text-2xl sm:text-3xl font-extrabold">{stats.active_students}</h3>
-            <p className="text-[10px] text-muted-foreground">يدرسون المسار حالياً</p>
+            <p className="text-[10px] text-muted-foreground">{(t.addedTranslations_2026?.['يدرسون المسار حالياً'] || (t.addedTranslations_2026?.['يدرسون المسار حالياً'] || 'يدرسون المسار حالياً'))}</p>
           </div>
         </div>
 
         {/* Completed */}
         <div className="bg-card border border-border rounded-2xl p-5 shadow-sm space-y-2 flex flex-col justify-between">
           <div className="flex justify-between items-center text-muted-foreground">
-            <span className="text-xs sm:text-sm font-medium">الخريجين</span>
+            <span className="text-xs sm:text-sm font-medium">{(t.addedTranslations_2026?.['الخريجين'] || (t.addedTranslations_2026?.['الخريجين'] || 'الخريجين'))}</span>
             <Award className="w-5 h-5 text-blue-500" />
           </div>
           <div className="space-y-1">
             <h3 className="text-2xl sm:text-3xl font-extrabold">{stats.completed_students}</h3>
-            <p className="text-[10px] text-muted-foreground">أكملوا كافة المراحل</p>
+            <p className="text-[10px] text-muted-foreground">{(t.addedTranslations_2026?.['أكملوا كافة المراحل'] || (t.addedTranslations_2026?.['أكملوا كافة المراحل'] || 'أكملوا كافة المراحل'))}</p>
           </div>
         </div>
 
         {/* Dropped */}
         <div className="bg-card border border-border rounded-2xl p-5 shadow-sm space-y-2 flex flex-col justify-between">
           <div className="flex justify-between items-center text-muted-foreground">
-            <span className="text-xs sm:text-sm font-medium">المنسحبين</span>
+            <span className="text-xs sm:text-sm font-medium">{(t.addedTranslations_2026?.['المنسحبين'] || (t.addedTranslations_2026?.['المنسحبين'] || 'المنسحبين'))}</span>
             <UserMinus className="w-5 h-5 text-rose-500" />
           </div>
           <div className="space-y-1">
             <h3 className="text-2xl sm:text-3xl font-extrabold">{stats.dropped_students}</h3>
-            <p className="text-[10px] text-muted-foreground">لم يكملوا المسار</p>
+            <p className="text-[10px] text-muted-foreground">{(t.addedTranslations_2026?.['لم يكملوا المسار'] || (t.addedTranslations_2026?.['لم يكملوا المسار'] || 'لم يكملوا المسار'))}</p>
           </div>
         </div>
 
         {/* Completion Rate / Avg Progress */}
         <div className="bg-card border border-border rounded-2xl p-5 shadow-sm space-y-2 col-span-2 lg:col-span-1 flex flex-col justify-between">
           <div className="flex justify-between items-center text-muted-foreground">
-            <span className="text-xs sm:text-sm font-medium">معدل الإتمام</span>
+            <span className="text-xs sm:text-sm font-medium">{(t.addedTranslations_2026?.['معدل الإتمام'] || (t.addedTranslations_2026?.['معدل الإتمام'] || 'معدل الإتمام'))}</span>
             <Percent className="w-5 h-5 text-indigo-500" />
           </div>
           <div className="space-y-1">
@@ -258,7 +260,7 @@ export default function TeacherPathStatsPage() {
             <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden mt-1">
               <div className="h-full bg-indigo-600 rounded-full" style={{ width: `${completionRate}%` }} />
             </div>
-            <p className="text-[10px] text-muted-foreground pt-1">متوسط الإنجاز: {Math.round(stats.avg_progress_percent)}%</p>
+            <p className="text-[10px] text-muted-foreground pt-1">{(t.addedTranslations_2026?.['متوسط الإنجاز:'] || (t.addedTranslations_2026?.['متوسط الإنجاز:'] || 'متوسط الإنجاز:'))} {Math.round(stats.avg_progress_percent)}%</p>
           </div>
         </div>
       </div>
@@ -269,13 +271,13 @@ export default function TeacherPathStatsPage() {
           <div>
             <h2 className="text-xl font-bold flex items-center gap-2">
               <BarChart3 className="w-5 h-5 text-emerald-600" />
-              قمع التحول للمسار (Student Conversion Funnel)
-            </h2>
-            <p className="text-xs text-muted-foreground mt-1">نسبة وعدد الطلاب الذين بدأوا وأكملوا كل مرحلة دراسية في المسار.</p>
+              {(t.addedTranslations_2026?.['قمع التحول للمسار (Student Conversion Funnel)'] || (t.addedTranslations_2026?.['قمع التحول للمسار (Student Conversion Funnel)'] || 'قمع التحول للمسار (Student Conversion Funnel)'))}
+                                              </h2>
+            <p className="text-xs text-muted-foreground mt-1">{(t.addedTranslations_2026?.['نسبة وعدد الطلاب الذين بدأوا وأكملوا كل مرحلة دراسية في المسار.'] || (t.addedTranslations_2026?.['نسبة وعدد الطلاب الذين بدأوا وأكملوا كل مرحلة دراسية في المسار.'] || 'نسبة وعدد الطلاب الذين بدأوا وأكملوا كل مرحلة دراسية في المسار.'))}</p>
           </div>
 
           {funnel.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-8">لا توجد مراحل دراسية مضافة لهذا المسار.</p>
+            <p className="text-sm text-muted-foreground text-center py-8">{(t.addedTranslations_2026?.['لا توجد مراحل دراسية مضافة لهذا المسار.'] || (t.addedTranslations_2026?.['لا توجد مراحل دراسية مضافة لهذا المسار.'] || 'لا توجد مراحل دراسية مضافة لهذا المسار.'))}</p>
           ) : (
             <div className="space-y-6 pt-2">
               {funnel.map((stage, idx) => {
@@ -296,8 +298,8 @@ export default function TeacherPathStatsPage() {
                         <h4 className="font-bold text-sm text-foreground line-clamp-1">{stage.title}</h4>
                       </div>
                       <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs font-semibold text-muted-foreground">
-                        <span className="text-amber-600 dark:text-amber-400">بدأوا: {stage.started_count} ({startPercent}%)</span>
-                        <span className="text-emerald-600 dark:text-emerald-400">أكملوا: {stage.completed_count} ({completePercent}%)</span>
+                        <span className="text-amber-600 dark:text-amber-400">{(t.addedTranslations_2026?.['بدأوا:'] || (t.addedTranslations_2026?.['بدأوا:'] || 'بدأوا:'))} {stage.started_count} ({startPercent}%)</span>
+                        <span className="text-emerald-600 dark:text-emerald-400">{(t.addedTranslations_2026?.['أكملوا:'] || (t.addedTranslations_2026?.['أكملوا:'] || 'أكملوا:'))} {stage.completed_count} ({completePercent}%)</span>
                       </div>
                     </div>
 
@@ -331,13 +333,13 @@ export default function TeacherPathStatsPage() {
             <div>
               <h2 className="text-xl font-bold flex items-center gap-2">
                 <TrendingUp className="w-5 h-5 text-emerald-600" />
-                أبرز الطلاب المتقدمين
-              </h2>
-              <p className="text-xs text-muted-foreground mt-1">الطلاب الـ 10 الأكثر إنجازاً ونشاطاً بالمسار.</p>
+                {(t.addedTranslations_2026?.['أبرز الطلاب المتقدمين'] || (t.addedTranslations_2026?.['أبرز الطلاب المتقدمين'] || 'أبرز الطلاب المتقدمين'))}
+                                                    </h2>
+              <p className="text-xs text-muted-foreground mt-1">{(t.addedTranslations_2026?.['الطلاب الـ 10 الأكثر إنجازاً ونشاطاً بالمسار.'] || (t.addedTranslations_2026?.['الطلاب الـ 10 الأكثر إنجازاً ونشاطاً بالمسار.'] || 'الطلاب الـ 10 الأكثر إنجازاً ونشاطاً بالمسار.'))}</p>
             </div>
 
             {top_students.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-12">لا توجد اشتراكات نشطة بعد.</p>
+              <p className="text-sm text-muted-foreground text-center py-12">{(t.addedTranslations_2026?.['لا توجد اشتراكات نشطة بعد.'] || (t.addedTranslations_2026?.['لا توجد اشتراكات نشطة بعد.'] || 'لا توجد اشتراكات نشطة بعد.'))}</p>
             ) : (
               <div className="divide-y divide-border/60">
                 {top_students.map((student, idx) => (
@@ -351,7 +353,7 @@ export default function TeacherPathStatsPage() {
                     </div>
                     <div className="text-right shrink-0">
                       <span className="text-xs font-bold text-emerald-600">{student.progress_percent}%</span>
-                      <p className="text-[9px] text-muted-foreground mt-0.5">{student.stages_completed} مراحل</p>
+                      <p className="text-[9px] text-muted-foreground mt-0.5">{student.stages_completed} {(t.addedTranslations_2026?.['مراحل'] || (t.addedTranslations_2026?.['مراحل'] || 'مراحل'))}</p>
                     </div>
                   </div>
                 ))}
@@ -363,8 +365,8 @@ export default function TeacherPathStatsPage() {
             <div className="border-t border-border/60 pt-4 mt-4 text-center">
               <span className="text-[10px] text-muted-foreground flex items-center justify-center gap-1">
                 <Calendar className="w-3.5 h-3.5" />
-                آخر تحديث للبيانات تلقائياً الآن
-              </span>
+                {(t.addedTranslations_2026?.['آخر تحديث للبيانات تلقائياً الآن'] || (t.addedTranslations_2026?.['آخر تحديث للبيانات تلقائياً الآن'] || 'آخر تحديث للبيانات تلقائياً الآن'))}
+                                                    </span>
             </div>
           )}
         </div>
@@ -375,23 +377,23 @@ export default function TeacherPathStatsPage() {
         <div>
           <h2 className="text-xl font-bold flex items-center gap-2">
             <Users className="w-5 h-5 text-emerald-600" />
-            جميع الطلاب المسجلين ({students.length})
+            {(t.addedTranslations_2026?.['جميع الطلاب المسجلين ('] || (t.addedTranslations_2026?.['جميع الطلاب المسجلين ('] || 'جميع الطلاب المسجلين ('))}{students.length})
           </h2>
-          <p className="text-xs text-muted-foreground mt-1">قائمة كاملة بكل الطلاب في المسار وحالتهم ونسبة تقدمهم.</p>
+          <p className="text-xs text-muted-foreground mt-1">{(t.addedTranslations_2026?.['قائمة كاملة بكل الطلاب في المسار وحالتهم ونسبة تقدمهم.'] || (t.addedTranslations_2026?.['قائمة كاملة بكل الطلاب في المسار وحالتهم ونسبة تقدمهم.'] || 'قائمة كاملة بكل الطلاب في المسار وحالتهم ونسبة تقدمهم.'))}</p>
         </div>
 
         {students.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-12">لا يوجد طلاب مسجلين في هذا المسار بعد.</p>
+          <p className="text-sm text-muted-foreground text-center py-12">{(t.addedTranslations_2026?.['لا يوجد طلاب مسجلين في هذا المسار بعد.'] || (t.addedTranslations_2026?.['لا يوجد طلاب مسجلين في هذا المسار بعد.'] || 'لا يوجد طلاب مسجلين في هذا المسار بعد.'))}</p>
         ) : (
           <div className="overflow-x-auto -mx-2 sm:mx-0">
             <table className="w-full min-w-[640px] text-sm">
               <thead>
                 <tr className="text-right text-xs text-muted-foreground border-b border-border">
-                  <th className="font-semibold py-3 px-3">الطالب</th>
-                  <th className="font-semibold py-3 px-3">الحالة</th>
-                  <th className="font-semibold py-3 px-3">المراحل المكتملة</th>
-                  <th className="font-semibold py-3 px-3">نسبة التقدم</th>
-                  <th className="font-semibold py-3 px-3">آخر نشاط</th>
+                  <th className="font-semibold py-3 px-3">{(t.addedTranslations_2026?.['الطالب'] || (t.addedTranslations_2026?.['الطالب'] || 'الطالب'))}</th>
+                  <th className="font-semibold py-3 px-3">{(t.addedTranslations_2026?.['الحالة'] || (t.addedTranslations_2026?.['الحالة'] || 'الحالة'))}</th>
+                  <th className="font-semibold py-3 px-3">{(t.addedTranslations_2026?.['المراحل المكتملة'] || (t.addedTranslations_2026?.['المراحل المكتملة'] || 'المراحل المكتملة'))}</th>
+                  <th className="font-semibold py-3 px-3">{(t.addedTranslations_2026?.['نسبة التقدم'] || (t.addedTranslations_2026?.['نسبة التقدم'] || 'نسبة التقدم'))}</th>
+                  <th className="font-semibold py-3 px-3">{(t.addedTranslations_2026?.['آخر نشاط'] || (t.addedTranslations_2026?.['آخر نشاط'] || 'آخر نشاط'))}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">
@@ -445,10 +447,10 @@ export default function TeacherPathStatsPage() {
 
 function StatusPill({ status }: { status: 'active' | 'completed' | 'dropped' }) {
   if (status === 'completed') {
-    return <span className="inline-block text-[11px] font-bold px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400">خريج</span>
+    return <span className="inline-block text-[11px] font-bold px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400">{(t.addedTranslations_2026?.['خريج'] || (t.addedTranslations_2026?.['خريج'] || 'خريج'))}</span>
   }
   if (status === 'dropped') {
-    return <span className="inline-block text-[11px] font-bold px-2.5 py-1 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400">منسحب</span>
+    return <span className="inline-block text-[11px] font-bold px-2.5 py-1 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400">{(t.addedTranslations_2026?.['منسحب'] || (t.addedTranslations_2026?.['منسحب'] || 'منسحب'))}</span>
   }
-  return <span className="inline-block text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">نشط</span>
+  return <span className="inline-block text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">{(t.addedTranslations_2026?.['نشط'] || (t.addedTranslations_2026?.['نشط'] || 'نشط'))}</span>
 }

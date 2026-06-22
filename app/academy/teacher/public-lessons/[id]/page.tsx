@@ -1,3 +1,4 @@
+import { useI18n } from '@/lib/i18n/context';
 'use client'
 
 import { use, useEffect, useState } from 'react'
@@ -24,6 +25,8 @@ interface LessonData {
 }
 
 export default function EditPublicLessonPage({ params }: { params: Promise<{ id: string }> }) {
+  const { t } = useI18n();
+
   const { id } = use(params)
   const router = useRouter()
   const [data, setData] = useState<LessonData | null>(null)
@@ -43,8 +46,8 @@ export default function EditPublicLessonPage({ params }: { params: Promise<{ id:
       .finally(() => setLoading(false))
   }, [id])
 
-  if (loading) return <div className="text-center py-12">جاري التحميل...</div>
-  if (!data) return <div className="text-center py-12">الدرس غير موجود</div>
+  if (loading) return <div className="text-center py-12">{(t.addedTranslations_2026?.['جاري التحميل...'] || (t.addedTranslations_2026?.['جاري التحميل...'] || 'جاري التحميل...'))}</div>
+  if (!data) return <div className="text-center py-12">{(t.addedTranslations_2026?.['الدرس غير موجود'] || (t.addedTranslations_2026?.['الدرس غير موجود'] || 'الدرس غير موجود'))}</div>
 
   const url = `${origin}/lessons/${data.public_slug}`
   const initialValues: PublicLessonFormValues = {
@@ -69,25 +72,25 @@ export default function EditPublicLessonPage({ params }: { params: Promise<{ id:
       <Button variant="ghost" asChild>
         <Link href="/academy/teacher/public-lessons">
           <ArrowRight className="w-4 h-4 me-1 rotate-180" />
-          العودة لقائمة الدروس
+          {(t.addedTranslations_2026?.['العودة لقائمة الدروس'] || (t.addedTranslations_2026?.['العودة لقائمة الدروس'] || 'العودة لقائمة الدروس'))}
         </Link>
       </Button>
 
-      <h1 className="text-3xl font-bold">تعديل الدرس العام</h1>
+      <h1 className="text-3xl font-bold">{(t.addedTranslations_2026?.['تعديل الدرس العام'] || (t.addedTranslations_2026?.['تعديل الدرس العام'] || 'تعديل الدرس العام'))}</h1>
 
       <Card>
         <CardContent className="pt-6 space-y-4">
           <div>
-            <div className="text-xs text-muted-foreground mb-1">رابط الدرس العام</div>
+            <div className="text-xs text-muted-foreground mb-1">{(t.addedTranslations_2026?.['رابط الدرس العام'] || (t.addedTranslations_2026?.['رابط الدرس العام'] || 'رابط الدرس العام'))}</div>
             <div className="flex items-center gap-2 flex-wrap">
               <code className="bg-muted px-3 py-2 rounded flex-1 break-all text-sm" dir="ltr">{url}</code>
               <Button size="sm" variant="outline" onClick={copy}>
                 <Copy className="w-4 h-4 me-1" />
-                {copied ? 'تم النسخ' : 'نسخ'}
+                {copied ? (t.addedTranslations_2026?.['تم النسخ'] || 'تم النسخ') : (t.addedTranslations_2026?.['نسخ'] || 'نسخ')}
               </Button>
               <Button size="sm" asChild>
                 <a href={url} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="w-4 h-4 me-1" /> فتح
+                  <ExternalLink className="w-4 h-4 me-1" /> {(t.addedTranslations_2026?.['فتح'] || (t.addedTranslations_2026?.['فتح'] || 'فتح'))}
                 </a>
               </Button>
             </div>
@@ -95,9 +98,9 @@ export default function EditPublicLessonPage({ params }: { params: Promise<{ id:
 
           {stats && (
             <div className="grid grid-cols-3 gap-3 pt-2">
-              <Stat icon={<Eye className="w-4 h-4" />} label="مشاهدات" value={stats.views} />
-              <Stat icon={<Eye className="w-4 h-4" />} label="زوار فريدون" value={stats.uniques} />
-              <Stat icon={<UserPlus className="w-4 h-4" />} label="تسجيلات" value={stats.signups} />
+              <Stat icon={<Eye className="w-4 h-4" />} label={(t.addedTranslations_2026?.['مشاهدات'] || (t.addedTranslations_2026?.['مشاهدات'] || 'مشاهدات'))} value={stats.views} />
+              <Stat icon={<Eye className="w-4 h-4" />} label={(t.addedTranslations_2026?.['زوار فريدون'] || (t.addedTranslations_2026?.['زوار فريدون'] || 'زوار فريدون'))} value={stats.uniques} />
+              <Stat icon={<UserPlus className="w-4 h-4" />} label={(t.addedTranslations_2026?.['تسجيلات'] || (t.addedTranslations_2026?.['تسجيلات'] || 'تسجيلات'))} value={stats.signups} />
             </div>
           )}
         </CardContent>
@@ -105,7 +108,7 @@ export default function EditPublicLessonPage({ params }: { params: Promise<{ id:
 
       <PublicLessonForm
         initial={initialValues}
-        submitLabel="حفظ التعديلات"
+        submitLabel={(t.addedTranslations_2026?.['حفظ التعديلات'] || (t.addedTranslations_2026?.['حفظ التعديلات'] || 'حفظ التعديلات'))}
         onSubmit={async (form) => {
           const res = await fetch(`/api/academy/teacher/public-lessons/${id}`, {
             method: 'PATCH',
@@ -113,11 +116,11 @@ export default function EditPublicLessonPage({ params }: { params: Promise<{ id:
             body: JSON.stringify(form),
           })
           const d = await res.json()
-          if (!res.ok) throw new Error(d.error || 'تعذر الحفظ')
+          if (!res.ok) throw new Error(d.error || (t.addedTranslations_2026?.['تعذر الحفظ'] || 'تعذر الحفظ'))
           setData(d.data)
         }}
         onDelete={async () => {
-          if (!confirm('متأكد من حذف الدرس نهائياً؟')) return
+          if (!confirm((t.addedTranslations_2026?.['متأكد من حذف الدرس نهائياً؟'] || 'متأكد من حذف الدرس نهائياً؟'))) return
           const res = await fetch(`/api/academy/teacher/public-lessons/${id}`, { method: 'DELETE' })
           if (res.ok) router.push('/academy/teacher/public-lessons')
         }}

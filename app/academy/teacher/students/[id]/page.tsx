@@ -12,6 +12,7 @@ import {
   ClipboardList, FileText, ListChecks, ExternalLink
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { useI18n } from "@/lib/i18n/context";
 
 interface StudentData {
   id: string
@@ -65,6 +66,7 @@ interface Badge {
 }
 
 export default function TeacherStudentProfilePage() {
+    const { t } = useI18n();
   const params = useParams()
   const router = useRouter()
   const studentId = params.id as string
@@ -89,11 +91,11 @@ export default function TeacherStudentProfilePage() {
           setSpecializations(json.specializations || [])
           setSubmissions(json.submissions || [])
         } else {
-          toast.error(json.error || 'حدث خطأ أثناء جلب البيانات')
+          toast.error(json.error || (t.addedTranslations_2026?.['حدث خطأ أثناء جلب البيانات'] || (t.addedTranslations_2026?.['حدث خطأ أثناء جلب البيانات'] || 'حدث خطأ أثناء جلب البيانات')))
         }
       } catch (error) {
         console.error('Failed to fetch student:', error)
-        toast.error('تعذر جلب بيانات الطالب')
+        toast.error((t.addedTranslations_2026?.['تعذر جلب بيانات الطالب'] || (t.addedTranslations_2026?.['تعذر جلب بيانات الطالب'] || 'تعذر جلب بيانات الطالب')))
       } finally {
         setLoading(false)
       }
@@ -108,7 +110,7 @@ export default function TeacherStudentProfilePage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
         <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-        <p className="text-muted-foreground font-medium animate-pulse">جاري تحميل بيانات الطالب...</p>
+        <p className="text-muted-foreground font-medium animate-pulse">{(t.addedTranslations_2026?.['جاري تحميل بيانات الطالب...'] || (t.addedTranslations_2026?.['جاري تحميل بيانات الطالب...'] || 'جاري تحميل بيانات الطالب...'))}</p>
       </div>
     )
   }
@@ -118,25 +120,25 @@ export default function TeacherStudentProfilePage() {
       <Card className="max-w-md mx-auto mt-12 border-border shadow-lg">
         <CardContent className="flex flex-col items-center justify-center p-12 text-center">
           <User className="w-16 h-16 text-muted-foreground mb-4 opacity-50" />
-          <h2 className="text-xl font-bold mb-2">الطالب غير موجود</h2>
+          <h2 className="text-xl font-bold mb-2">{(t.addedTranslations_2026?.['الطالب غير موجود'] || (t.addedTranslations_2026?.['الطالب غير موجود'] || 'الطالب غير موجود'))}</h2>
           <p className="text-muted-foreground mb-6">
-            عذراً، هذا الطالب غير موجود أو ليس لديك صلاحية لرؤية بياناته.
-          </p>
+            {(t.addedTranslations_2026?.['عذراً، هذا الطالب غير موجود أو ليس لديك صلاحية لرؤية بياناته.'] || (t.addedTranslations_2026?.['عذراً، هذا الطالب غير موجود أو ليس لديك صلاحية لرؤية بياناته.'] || 'عذراً، هذا الطالب غير موجود أو ليس لديك صلاحية لرؤية بياناته.'))}
+                              </p>
           <Button onClick={() => router.push('/academy/teacher/students')} variant="outline">
-            العودة للقائمة
-          </Button>
+            {(t.addedTranslations_2026?.['العودة للقائمة'] || (t.addedTranslations_2026?.['العودة للقائمة'] || 'العودة للقائمة'))}
+                              </Button>
         </CardContent>
       </Card>
     )
   }
 
   const SPECIALIZATIONS_MAP: Record<string, string> = {
-    'sira': 'السيرة النبوية',
-    'fiqh': 'الفقه',
-    'aqeedah': 'العقيدة',
-    'tajweed': 'التجويد',
-    'tafseer': 'التفسير',
-    'arabic': 'اللغة العربية',
+    'sira': (t.addedTranslations_2026?.['السيرة النبوية'] || (t.addedTranslations_2026?.['السيرة النبوية'] || 'السيرة النبوية')),
+    'fiqh': (t.addedTranslations_2026?.['الفقه'] || (t.addedTranslations_2026?.['الفقه'] || 'الفقه')),
+    'aqeedah': (t.addedTranslations_2026?.['العقيدة'] || (t.addedTranslations_2026?.['العقيدة'] || 'العقيدة')),
+    'tajweed': (t.addedTranslations_2026?.['التجويد'] || (t.addedTranslations_2026?.['التجويد'] || 'التجويد')),
+    'tafseer': (t.addedTranslations_2026?.['التفسير'] || (t.addedTranslations_2026?.['التفسير'] || 'التفسير')),
+    'arabic': (t.addedTranslations_2026?.['اللغة العربية'] || (t.addedTranslations_2026?.['اللغة العربية'] || 'اللغة العربية')),
   }
 
   return (
@@ -152,8 +154,8 @@ export default function TeacherStudentProfilePage() {
           <ArrowRight className="w-5 h-5" />
         </Button>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">بروفايل الطالب</h1>
-          <p className="text-sm text-muted-foreground font-medium">عرض بيانات وتقدم الطالب التفصيلية</p>
+          <h1 className="text-2xl font-bold tracking-tight">{(t.addedTranslations_2026?.['بروفايل الطالب'] || (t.addedTranslations_2026?.['بروفايل الطالب'] || 'بروفايل الطالب'))}</h1>
+          <p className="text-sm text-muted-foreground font-medium">{(t.addedTranslations_2026?.['عرض بيانات وتقدم الطالب التفصيلية'] || (t.addedTranslations_2026?.['عرض بيانات وتقدم الطالب التفصيلية'] || 'عرض بيانات وتقدم الطالب التفصيلية'))}</p>
         </div>
       </div>
 
@@ -186,8 +188,8 @@ export default function TeacherStudentProfilePage() {
                   onClick={() => router.push(`/academy/teacher/chat?studentId=${student.id}`)}
                 >
                   <Mail className="w-4 h-4 ml-2" />
-                  مراسلة
-                </Button>
+                  {(t.addedTranslations_2026?.['مراسلة'] || (t.addedTranslations_2026?.['مراسلة'] || 'مراسلة'))}
+                                                  </Button>
               </div>
 
               <div className="w-full space-y-3 text-sm text-right">
@@ -199,16 +201,16 @@ export default function TeacherStudentProfilePage() {
                 )}
                 <div className="flex items-center gap-3 text-muted-foreground p-2 rounded-lg bg-muted/30">
                   <User className="w-4 h-4 shrink-0 text-primary/60" />
-                  <span className="font-medium">{student.gender === 'female' ? 'أنثى' : student.gender === 'male' ? 'ذكر' : 'غير محدد'}</span>
+                  <span className="font-medium">{student.gender === 'female' ? (t.addedTranslations_2026?.['أنثى'] || (t.addedTranslations_2026?.['أنثى'] || 'أنثى')) : student.gender === 'male' ? (t.addedTranslations_2026?.['ذكر'] || (t.addedTranslations_2026?.['ذكر'] || 'ذكر')) : (t.addedTranslations_2026?.['غير محدد'] || 'غير محدد')}</span>
                 </div>
                 <div className="flex items-center gap-3 text-muted-foreground p-2 rounded-lg bg-muted/30">
                   <Calendar className="w-4 h-4 shrink-0 text-primary/60" />
-                  <span className="font-medium">انضم في {new Date(student.created_at).toLocaleDateString('ar-EG')}</span>
+                  <span className="font-medium">{(t.addedTranslations_2026?.['انضم في'] || (t.addedTranslations_2026?.['انضم في'] || 'انضم في'))} {new Date(student.created_at).toLocaleDateString('ar-EG')}</span>
                 </div>
                 {student.last_activity && (
                   <div className="flex items-center gap-3 text-muted-foreground p-2 rounded-lg bg-muted/30">
                     <Clock className="w-4 h-4 shrink-0 text-primary/60" />
-                    <span className="font-medium">آخر نشاط: {new Date(student.last_activity).toLocaleDateString('ar-EG')}</span>
+                    <span className="font-medium">{(t.addedTranslations_2026?.['آخر نشاط:'] || (t.addedTranslations_2026?.['آخر نشاط:'] || 'آخر نشاط:'))} {new Date(student.last_activity).toLocaleDateString('ar-EG')}</span>
                   </div>
                 )}
                 {student.qualification && (
@@ -233,7 +235,7 @@ export default function TeacherStudentProfilePage() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{student.courses_count}</p>
-                  <p className="text-xs text-muted-foreground font-medium">الدورات المسجلة</p>
+                  <p className="text-xs text-muted-foreground font-medium">{(t.addedTranslations_2026?.['الدورات المسجلة'] || (t.addedTranslations_2026?.['الدورات المسجلة'] || 'الدورات المسجلة'))}</p>
                 </div>
               </CardContent>
             </Card>
@@ -245,7 +247,7 @@ export default function TeacherStudentProfilePage() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{student.progress_percentage}%</p>
-                  <p className="text-xs text-muted-foreground font-medium">متوسط التقدم</p>
+                  <p className="text-xs text-muted-foreground font-medium">{(t.addedTranslations_2026?.['متوسط التقدم'] || (t.addedTranslations_2026?.['متوسط التقدم'] || 'متوسط التقدم'))}</p>
                 </div>
               </CardContent>
             </Card>
@@ -257,7 +259,7 @@ export default function TeacherStudentProfilePage() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{student.tasks_completed} <span className="text-sm text-muted-foreground font-normal">/ {student.tasks_total}</span></p>
-                  <p className="text-xs text-muted-foreground font-medium">المهام المنجزة</p>
+                  <p className="text-xs text-muted-foreground font-medium">{(t.addedTranslations_2026?.['المهام المنجزة'] || (t.addedTranslations_2026?.['المهام المنجزة'] || 'المهام المنجزة'))}</p>
                 </div>
               </CardContent>
             </Card>
@@ -269,7 +271,7 @@ export default function TeacherStudentProfilePage() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{student.total_points}</p>
-                  <p className="text-xs text-muted-foreground font-medium">إجمالي النقاط</p>
+                  <p className="text-xs text-muted-foreground font-medium">{(t.addedTranslations_2026?.['إجمالي النقاط'] || (t.addedTranslations_2026?.['إجمالي النقاط'] || 'إجمالي النقاط'))}</p>
                 </div>
               </CardContent>
             </Card>
@@ -284,26 +286,26 @@ export default function TeacherStudentProfilePage() {
                     value="courses" 
                     className="h-full px-6 data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none font-bold"
                   >
-                    الدورات المشتركة
-                  </TabsTrigger>
+                    {(t.addedTranslations_2026?.['الدورات المشتركة'] || (t.addedTranslations_2026?.['الدورات المشتركة'] || 'الدورات المشتركة'))}
+                                                        </TabsTrigger>
                   <TabsTrigger 
                     value="submissions" 
                     className="h-full px-6 data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none font-bold"
                   >
-                    المهام والتسليمات ({submissions.length})
+                    {(t.addedTranslations_2026?.['المهام والتسليمات ('] || (t.addedTranslations_2026?.['المهام والتسليمات ('] || 'المهام والتسليمات ('))}{submissions.length})
                   </TabsTrigger>
                   <TabsTrigger 
                     value="badges" 
                     className="h-full px-6 data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none font-bold"
                   >
-                    الشارات ({badges.length})
+                    {(t.addedTranslations_2026?.['الشارات ('] || (t.addedTranslations_2026?.['الشارات ('] || 'الشارات ('))}{badges.length})
                   </TabsTrigger>
                   <TabsTrigger 
                     value="specializations" 
                     className="h-full px-6 data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none font-bold"
                   >
-                    التخصصات
-                  </TabsTrigger>
+                    {(t.addedTranslations_2026?.['التخصصات'] || (t.addedTranslations_2026?.['التخصصات'] || 'التخصصات'))}
+                                                        </TabsTrigger>
                 </TabsList>
               </div>
 
@@ -328,23 +330,23 @@ export default function TeacherStudentProfilePage() {
                           <div>
                             <h3 className="font-bold text-foreground">{enrollment.title}</h3>
                             <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                              <span>انضم في: {new Date(enrollment.enrolled_at).toLocaleDateString('ar-EG')}</span>
+                              <span>{(t.addedTranslations_2026?.['انضم في:'] || (t.addedTranslations_2026?.['انضم في:'] || 'انضم في:'))} {new Date(enrollment.enrolled_at).toLocaleDateString('ar-EG')}</span>
                               <span className="w-1 h-1 rounded-full bg-border"></span>
                               <span className={`px-2 py-0.5 rounded-full font-medium ${
                                 enrollment.status === 'active' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
                                 enrollment.status === 'completed' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
                                 'bg-muted text-muted-foreground'
                               }`}>
-                                {enrollment.status === 'active' ? 'نشط' : 
-                                 enrollment.status === 'completed' ? 'مكتمل' : 
-                                 enrollment.status === 'pending' ? 'قيد الانتظار' : 'غير نشط'}
+                                {enrollment.status === 'active' ? (t.addedTranslations_2026?.['نشط'] || (t.addedTranslations_2026?.['نشط'] || 'نشط')) : 
+                                 enrollment.status === 'completed' ? (t.addedTranslations_2026?.['مكتمل'] || (t.addedTranslations_2026?.['مكتمل'] || 'مكتمل')) : 
+                                 enrollment.status === 'pending' ? (t.addedTranslations_2026?.['قيد الانتظار'] || (t.addedTranslations_2026?.['قيد الانتظار'] || 'قيد الانتظار')) : (t.addedTranslations_2026?.['غير نشط'] || 'غير نشط')}
                               </span>
                             </div>
                           </div>
                         </div>
                         <div className="flex flex-col items-end shrink-0 gap-2">
                           <div className="flex items-center justify-between w-32 text-xs font-bold mb-1">
-                            <span>التقدم</span>
+                            <span>{(t.addedTranslations_2026?.['التقدم'] || (t.addedTranslations_2026?.['التقدم'] || 'التقدم'))}</span>
                             <span className="text-primary">{enrollment.progress_percentage}%</span>
                           </div>
                           <div className="w-32 h-2 rounded-full bg-muted overflow-hidden">
@@ -360,7 +362,7 @@ export default function TeacherStudentProfilePage() {
                 ) : (
                   <div className="text-center py-12">
                     <BookOpen className="w-12 h-12 mx-auto text-muted-foreground opacity-20 mb-3" />
-                    <p className="text-muted-foreground font-medium">لا توجد دورات مشتركة حالياً</p>
+                    <p className="text-muted-foreground font-medium">{(t.addedTranslations_2026?.['لا توجد دورات مشتركة حالياً'] || (t.addedTranslations_2026?.['لا توجد دورات مشتركة حالياً'] || 'لا توجد دورات مشتركة حالياً'))}</p>
                   </div>
                 )}
               </TabsContent>
@@ -400,7 +402,7 @@ export default function TeacherStudentProfilePage() {
                                     ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
                                     : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
                                 }`}>
-                                  {isGraded ? "مصححة" : sub.status === "late" ? "متأخرة" : "بانتظار التصحيح"}
+                                  {isGraded ? (t.addedTranslations_2026?.['مصححة'] || (t.addedTranslations_2026?.['مصححة'] || 'مصححة')) : sub.status === "late" ? (t.addedTranslations_2026?.['متأخرة'] || (t.addedTranslations_2026?.['متأخرة'] || 'متأخرة')) : (t.addedTranslations_2026?.['بانتظار التصحيح'] || 'بانتظار التصحيح')}
                                 </span>
                               </div>
                             </div>
@@ -415,15 +417,15 @@ export default function TeacherStudentProfilePage() {
                                   <span className="text-sm text-muted-foreground font-normal">—</span>
                                 )}
                               </p>
-                              <p className="text-[10px] text-muted-foreground">{isQuiz ? "درجة الاختبار" : "الدرجة"}</p>
+                              <p className="text-[10px] text-muted-foreground">{isQuiz ? (t.addedTranslations_2026?.['درجة الاختبار'] || (t.addedTranslations_2026?.['درجة الاختبار'] || 'درجة الاختبار')) : (t.addedTranslations_2026?.['الدرجة'] || 'الدرجة')}</p>
                             </div>
                             <Link
                               href={`/academy/teacher/tasks/${sub.task_id}/grade`}
                               className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 text-sm font-bold transition-colors"
                             >
                               <ExternalLink className="w-4 h-4" />
-                              فتح
-                            </Link>
+                              {(t.addedTranslations_2026?.['فتح'] || (t.addedTranslations_2026?.['فتح'] || 'فتح'))}
+                                                                  </Link>
                           </div>
                         </div>
                       )
@@ -432,7 +434,7 @@ export default function TeacherStudentProfilePage() {
                 ) : (
                   <div className="text-center py-12">
                     <ClipboardList className="w-12 h-12 mx-auto text-muted-foreground opacity-20 mb-3" />
-                    <p className="text-muted-foreground font-medium">لم يسلّم الطالب أي مهام بعد</p>
+                    <p className="text-muted-foreground font-medium">{(t.addedTranslations_2026?.['لم يسلّم الطالب أي مهام بعد'] || (t.addedTranslations_2026?.['لم يسلّم الطالب أي مهام بعد'] || 'لم يسلّم الطالب أي مهام بعد'))}</p>
                   </div>
                 )}
               </TabsContent>
@@ -462,7 +464,7 @@ export default function TeacherStudentProfilePage() {
                 ) : (
                   <div className="text-center py-12">
                     <Award className="w-12 h-12 mx-auto text-muted-foreground opacity-20 mb-3" />
-                    <p className="text-muted-foreground font-medium">لم يحصل الطالب على أي شارات بعد</p>
+                    <p className="text-muted-foreground font-medium">{(t.addedTranslations_2026?.['لم يحصل الطالب على أي شارات بعد'] || (t.addedTranslations_2026?.['لم يحصل الطالب على أي شارات بعد'] || 'لم يحصل الطالب على أي شارات بعد'))}</p>
                   </div>
                 )}
               </TabsContent>
@@ -481,7 +483,7 @@ export default function TeacherStudentProfilePage() {
                 ) : (
                   <div className="text-center py-12">
                     <BookMarked className="w-12 h-12 mx-auto text-muted-foreground opacity-20 mb-3" />
-                    <p className="text-muted-foreground font-medium">لم يحدد الطالب أي تخصصات بعد</p>
+                    <p className="text-muted-foreground font-medium">{(t.addedTranslations_2026?.['لم يحدد الطالب أي تخصصات بعد'] || (t.addedTranslations_2026?.['لم يحدد الطالب أي تخصصات بعد'] || 'لم يحدد الطالب أي تخصصات بعد'))}</p>
                   </div>
                 )}
               </TabsContent>

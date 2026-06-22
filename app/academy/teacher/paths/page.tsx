@@ -47,22 +47,24 @@ const emptyForm = {
 }
 
 export default function TeacherPathsPage() {
+  const { t } = useI18n();
+
   const router = useRouter()
   const { locale } = useI18n()
   const isAr = locale === 'ar'
 
   const SUBJECTS = [
-    { value: 'tajweed', label: isAr ? 'التجويد والمقرأة' : 'Tajweed & Maqra' },
-    { value: 'fiqh', label: isAr ? 'الفقه الإسلامي' : 'Islamic Jurisprudence (Fiqh)' },
-    { value: 'aqeedah', label: isAr ? 'العقيدة الإسلامية' : 'Islamic Creed (Aqeedah)' },
-    { value: 'seerah', label: isAr ? 'السيرة النبوية' : 'Prophetic Biography (Seerah)' },
-    { value: 'tafsir', label: isAr ? 'التفسير وعلوم القرآن' : 'Tafsir & Quranic Sciences' },
+    { value: 'tajweed', label: (t.addedTranslations_2026?.['التجويد والمقرأة'] || 'التجويد والمقرأة') },
+    { value: 'fiqh', label: (t.addedTranslations_2026?.['الفقه الإسلامي'] || 'الفقه الإسلامي') },
+    { value: 'aqeedah', label: (t.addedTranslations_2026?.['العقيدة الإسلامية'] || 'العقيدة الإسلامية') },
+    { value: 'seerah', label: (t.addedTranslations_2026?.['السيرة النبوية'] || 'السيرة النبوية') },
+    { value: 'tafsir', label: (t.addedTranslations_2026?.['التفسير وعلوم القرآن'] || 'التفسير وعلوم القرآن') },
   ]
   
   const LEVELS = [
-    { value: 'beginner', label: isAr ? 'مبتدئ' : 'Beginner' },
-    { value: 'intermediate', label: isAr ? 'متوسط' : 'Intermediate' },
-    { value: 'advanced', label: isAr ? 'متقدم' : 'Advanced' },
+    { value: 'beginner', label: (t.addedTranslations_2026?.['مبتدئ'] || 'مبتدئ') },
+    { value: 'intermediate', label: (t.addedTranslations_2026?.['متوسط'] || 'متوسط') },
+    { value: 'advanced', label: (t.addedTranslations_2026?.['متقدم'] || 'متقدم') },
   ]
 
   const [paths, setPaths] = useState<Path[]>([])
@@ -209,7 +211,7 @@ export default function TeacherPathsPage() {
         setEnrollPath(null)
         fetchPaths()
       } else {
-        alert(data.error || (isAr ? 'حدث خطأ أثناء التسجيل' : 'An error occurred during enrollment'))
+        alert(data.error || ((t.addedTranslations_2026?.['حدث خطأ أثناء التسجيل'] || 'حدث خطأ أثناء التسجيل')))
       }
     } finally {
       setEnrolling(false)
@@ -225,12 +227,12 @@ export default function TeacherPathsPage() {
       const json = await res.json()
       if (res.ok && json.url) {
         setForm((prev) => ({ ...prev, thumbnail_url: json.url }))
-        toast.success(isAr ? 'تم رفع الصورة' : 'Image uploaded successfully')
+        toast.success((t.addedTranslations_2026?.['تم رفع الصورة'] || 'تم رفع الصورة'))
       } else {
-        toast.error(json.error || (isAr ? 'فشل رفع الصورة' : 'Failed to upload image'))
+        toast.error(json.error || ((t.addedTranslations_2026?.['فشل رفع الصورة'] || 'فشل رفع الصورة')))
       }
     } catch {
-      toast.error(isAr ? 'حدث خطأ أثناء رفع الصورة' : 'An error occurred during image upload')
+      toast.error((t.addedTranslations_2026?.['حدث خطأ أثناء رفع الصورة'] || 'حدث خطأ أثناء رفع الصورة'))
     } finally {
       setUploadingThumb(false)
     }
@@ -253,14 +255,14 @@ export default function TeacherPathsPage() {
         setShowModal(false)
         if (!editItem && json?.data?.id) {
           // Take the teacher straight to the new path so they can add its content
-          toast.success(isAr ? 'تم إنشاء المسار، أضف محتواه الآن' : 'Path created, add content now')
+          toast.success((t.addedTranslations_2026?.['تم إنشاء المسار، أضف محتواه الآن'] || 'تم إنشاء المسار، أضف محتواه الآن'))
           router.push(`/academy/teacher/paths/${json.data.id}`)
           return
         }
-        toast.success(isAr ? 'تم حفظ التعديلات' : 'Changes saved successfully')
+        toast.success((t.addedTranslations_2026?.['تم حفظ التعديلات'] || 'تم حفظ التعديلات'))
         fetchPaths()
       } else {
-        toast.error(isAr ? 'حدث خطأ في الحفظ' : 'An error occurred during save')
+        toast.error((t.addedTranslations_2026?.['حدث خطأ في الحفظ'] || 'حدث خطأ في الحفظ'))
       }
     } finally {
       setSaving(false)
@@ -268,12 +270,12 @@ export default function TeacherPathsPage() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm(isAr ? 'هل أنت متأكد من حذف هذا المسار؟' : 'Are you sure you want to delete this path?')) return
+    if (!confirm((t.addedTranslations_2026?.['هل أنت متأكد من حذف هذا المسار؟'] || 'هل أنت متأكد من حذف هذا المسار؟'))) return
     setDeletingId(id)
     try {
       const res = await fetch(`/api/academy/teacher/paths/${id}`, { method: 'DELETE' })
       if (res.ok) fetchPaths()
-      else alert(isAr ? 'لا يمكن الحذف' : 'Cannot delete')
+      else alert((t.addedTranslations_2026?.['لا يمكن الحذف'] || 'لا يمكن الحذف'))
     } finally {
       setDeletingId(null)
     }
@@ -314,15 +316,13 @@ export default function TeacherPathsPage() {
           <div className="space-y-3">
             <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/20 shadow-sm">
               <Layers className="w-4 h-4 text-emerald-100" />
-              <span className="text-sm font-bold tracking-wide">{isAr ? "البرامج والمسارات" : "Programs & Paths"}</span>
+              <span className="text-sm font-bold tracking-wide">{(t.addedTranslations_2026?.['البرامج والمسارات'] || 'البرامج والمسارات')}</span>
             </div>
             <h1 className="text-3xl font-black sm:text-4xl drop-shadow-sm">
-              {isAr ? "إدارة المسارات التعليمية" : "Manage Learning Paths"}
+              {(t.addedTranslations_2026?.['إدارة المسارات التعليمية'] || 'إدارة المسارات التعليمية')}
             </h1>
             <p className="text-emerald-50 max-w-xl leading-relaxed text-base">
-              {isAr 
-                ? "أنشئ مسارات متسلسلة للطلاب تتكون من عدة دورات ومراحل. قم بإضافة الطلاب الجدد، وتتبع مستوى إنجازهم بشكل مفصل."
-                : "Create sequential paths for students consisting of multiple courses and stages. Add new students and track their progress in detail."}
+              {(t.addedTranslations_2026?.['أنشئ مسارات متسلسلة للطلاب تتكون من عدة دورات ومراحل. قم بإضافة الطلاب الجدد، وتتبع مستوى إنجازهم بشكل مفصل.'] || 'أنشئ مسارات متسلسلة للطلاب تتكون من عدة دورات ومراحل. قم بإضافة الطلاب الجدد، وتتبع مستوى إنجازهم بشكل مفصل.')}
             </p>
           </div>
           
@@ -331,7 +331,7 @@ export default function TeacherPathsPage() {
             className="flex items-center justify-center gap-2 px-6 py-3 bg-white text-emerald-700 rounded-xl font-black transition-colors shadow-lg hover:bg-emerald-50 w-full sm:w-auto shrink-0"
           >
             <Plus className="w-5 h-5" />
-            {isAr ? "إنشاء مسار جديد" : "Create New Path"}
+            {(t.addedTranslations_2026?.['إنشاء مسار جديد'] || 'إنشاء مسار جديد')}
           </button>
         </div>
       </motion.div>
@@ -341,14 +341,12 @@ export default function TeacherPathsPage() {
           <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
             <BookOpen className="w-10 h-10 text-emerald-600/50" />
           </div>
-          <h2 className="text-xl font-bold mb-3">{isAr ? "لا توجد مسارات تعليمية بعد" : "No learning paths yet"}</h2>
+          <h2 className="text-xl font-bold mb-3">{(t.addedTranslations_2026?.['لا توجد مسارات تعليمية بعد'] || 'لا توجد مسارات تعليمية بعد')}</h2>
           <p className="text-muted-foreground font-medium mb-8 max-w-sm mx-auto leading-relaxed">
-            {isAr 
-              ? "المسار التعليمي هو سلسلة من الدورات. ابدأ بإنشاء مسارك الأول ثم أضف إليه الدورات من صفحة تفاصيل المسار."
-              : "A learning path is a series of courses. Start by creating your first path, then add courses to it from the path details page."}
+            {(t.addedTranslations_2026?.['المسار التعليمي هو سلسلة من الدورات. ابدأ بإنشاء مسارك الأول ثم أضف إليه الدورات من صفحة تفاصيل المسار.'] || 'المسار التعليمي هو سلسلة من الدورات. ابدأ بإنشاء مسارك الأول ثم أضف إليه الدورات من صفحة تفاصيل المسار.')}
           </p>
           <button onClick={openAdd} className="px-8 py-3 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition-colors shadow-md">
-            <Plus className="w-5 h-5 inline mr-1" /> {isAr ? "أضف أول مسار" : "Add First Path"}
+            <Plus className="w-5 h-5 inline mr-1" /> {(t.addedTranslations_2026?.['أضف أول مسار'] || 'أضف أول مسار')}
           </button>
         </motion.div>
       ) : (
@@ -373,11 +371,11 @@ export default function TeacherPathsPage() {
                   
                   <div className="flex flex-wrap items-center gap-2 text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-6">
                     <span className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2.5 py-1 rounded-md">{getSubjectLabel(path.subject)}</span>
-                    <span className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2.5 py-1 rounded-md inline-flex items-center gap-1.5"><Layers className="w-3.5 h-3.5" /> {path.total_courses || 0} {isAr ? "مرحلة" : "stages"}</span>
-                    <span className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2.5 py-1 rounded-md inline-flex items-center gap-1.5"><Users className="w-3.5 h-3.5" /> {path.enrolled_count || 0} {isAr ? "طالب" : "students"}</span>
+                    <span className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2.5 py-1 rounded-md inline-flex items-center gap-1.5"><Layers className="w-3.5 h-3.5" /> {path.total_courses || 0} {(t.addedTranslations_2026?.['مرحلة'] || 'مرحلة')}</span>
+                    <span className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2.5 py-1 rounded-md inline-flex items-center gap-1.5"><Users className="w-3.5 h-3.5" /> {path.enrolled_count || 0} {(t.addedTranslations_2026?.['طالب'] || 'طالب')}</span>
                     {path.is_published
-                      ? <span className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-2.5 py-1 rounded-md border border-emerald-200/50">{isAr ? "منشور" : "Published"}</span>
-                      : <span className="bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-2.5 py-1 rounded-md border border-amber-200/50">{isAr ? "مسودة" : "Draft"}</span>}
+                      ? <span className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-2.5 py-1 rounded-md border border-emerald-200/50">{(t.addedTranslations_2026?.['منشور'] || 'منشور')}</span>
+                      : <span className="bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-2.5 py-1 rounded-md border border-amber-200/50">{(t.addedTranslations_2026?.['مسودة'] || 'مسودة')}</span>}
                   </div>
                 </div>
 
@@ -386,19 +384,19 @@ export default function TeacherPathsPage() {
                     href={`/academy/teacher/paths/${path.id}`} 
                     className="flex-1 flex items-center justify-center gap-2 py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold transition-colors shadow-sm"
                   >
-                    <Layers className="w-4 h-4" /> {isAr ? "إدارة المسار" : "Manage Path"}
+                    <Layers className="w-4 h-4" /> {(t.addedTranslations_2026?.['إدارة المسار'] || 'إدارة المسار')}
                   </Link>
                   <button
                     onClick={() => openEnroll(path)}
                     className="flex items-center justify-center p-2.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/40 rounded-xl transition-colors shrink-0"
-                    title={isAr ? "إضافة طلاب من دوراتك" : "Add students from your courses"}
+                    title={(t.addedTranslations_2026?.['إضافة طلاب من دوراتك'] || 'إضافة طلاب من دوراتك')}
                   >
                     <UserPlus className="w-4 h-4" />
                   </button>
                   <button 
                     onClick={() => openEdit(path)} 
                     className="flex items-center justify-center p-2.5 bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl transition-colors shrink-0"
-                    title={isAr ? "تعديل المسار" : "Edit Path"}
+                    title={(t.addedTranslations_2026?.['تعديل المسار'] || 'تعديل المسار')}
                   >
                     <Edit2 className="w-4 h-4" />
                   </button>
@@ -406,7 +404,7 @@ export default function TeacherPathsPage() {
                     onClick={() => handleDelete(path.id)}
                     disabled={deletingId === path.id}
                     className="flex items-center justify-center p-2.5 bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-900/20 dark:hover:bg-rose-900/40 rounded-xl transition-colors shrink-0 disabled:opacity-50"
-                    title={isAr ? "حذف المسار" : "Delete Path"}
+                    title={(t.addedTranslations_2026?.['حذف المسار'] || 'حذف المسار')}
                   >
                     {deletingId === path.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                   </button>
@@ -430,36 +428,36 @@ export default function TeacherPathsPage() {
               className="relative bg-card/95 backdrop-blur-xl border border-border/50 rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-full"
             >
               <div className="flex items-center justify-between p-6 sm:p-8 border-b border-border/50 bg-muted/20">
-                <h3 className="text-xl font-black">{editItem ? (isAr ? 'تعديل المسار الأكاديمي' : 'Edit Academic Path') : (isAr ? 'إضافة مسار أكاديمي جديد' : 'Add New Academic Path')}</h3>
+                <h3 className="text-xl font-black">{editItem ? ((t.addedTranslations_2026?.['تعديل المسار الأكاديمي'] || 'تعديل المسار الأكاديمي')) : ((t.addedTranslations_2026?.['إضافة مسار أكاديمي جديد'] || 'إضافة مسار أكاديمي جديد'))}</h3>
                 <button onClick={() => setShowModal(false)} className="p-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 rounded-full transition-colors shrink-0">
                   <X className="w-5 h-5" />
                 </button>
               </div>
               <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-5 overflow-y-auto scrollbar-thin scrollbar-thumb-border">
                 <div className="space-y-1.5">
-                  <label className="text-sm font-bold text-foreground">{isAr ? "اسم المسار" : "Path Name"} <span className="text-red-500">*</span></label>
+                  <label className="text-sm font-bold text-foreground">{(t.addedTranslations_2026?.['اسم المسار'] || 'اسم المسار')} <span className="text-red-500">*</span></label>
                   <input
                     required
                     type="text"
                     value={form.title}
                     onChange={e => setForm({ ...form, title: e.target.value })}
-                    placeholder={isAr ? "مثال: مسار الفقه المالكي للمبتدئين" : "e.g. Maliki Fiqh Path for Beginners"}
+                    placeholder={(t.addedTranslations_2026?.['مثال: مسار الفقه المالكي للمبتدئين'] || 'مثال: مسار الفقه المالكي للمبتدئين')}
                     className="w-full px-4 py-3 border border-border/60 rounded-xl bg-background/50 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-sm font-bold text-foreground">{isAr ? "الوصف" : "Description"}</label>
+                  <label className="text-sm font-bold text-foreground">{(t.addedTranslations_2026?.['الوصف'] || 'الوصف')}</label>
                   <textarea
                     rows={3}
                     value={form.description}
                     onChange={e => setForm({ ...form, description: e.target.value })}
-                    placeholder={isAr ? "وصف مختصر لأهداف المسار ومحتواه..." : "Brief description of the path goals and content..."}
+                    placeholder={(t.addedTranslations_2026?.['وصف مختصر لأهداف المسار ومحتواه...'] || 'وصف مختصر لأهداف المسار ومحتواه...')}
                     className="w-full px-4 py-3 border border-border/60 rounded-xl bg-background/50 focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none transition-all font-medium"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-5">
                   <div className="space-y-1.5">
-                    <label className="text-sm font-bold text-foreground">{isAr ? "التخصص" : "Subject"}</label>
+                    <label className="text-sm font-bold text-foreground">{(t.addedTranslations_2026?.['التخصص'] || 'التخصص')}</label>
                     <select
                       value={form.subject}
                       onChange={e => setForm({ ...form, subject: e.target.value })}
@@ -469,7 +467,7 @@ export default function TeacherPathsPage() {
                     </select>
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-sm font-bold text-foreground">{isAr ? "المستوى" : "Level"}</label>
+                    <label className="text-sm font-bold text-foreground">{(t.addedTranslations_2026?.['المستوى'] || 'المستوى')}</label>
                     <select
                       value={form.level}
                       onChange={e => setForm({ ...form, level: e.target.value })}
@@ -480,7 +478,7 @@ export default function TeacherPathsPage() {
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-sm font-bold text-foreground">{isAr ? "المدة التقديرية (بالأيام)" : "Estimated Duration (Days)"}</label>
+                  <label className="text-sm font-bold text-foreground">{(t.addedTranslations_2026?.['المدة التقديرية (بالأيام)'] || 'المدة التقديرية (بالأيام)')}</label>
                   <input
                     type="number"
                     min={0}
@@ -491,7 +489,7 @@ export default function TeacherPathsPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-sm font-bold text-foreground">{isAr ? "صورة غلاف المسار (اختياري)" : "Path Cover Image (Optional)"}</label>
+                  <label className="text-sm font-bold text-foreground">{(t.addedTranslations_2026?.['صورة غلاف المسار (اختياري)'] || 'صورة غلاف المسار (اختياري)')}</label>
                   <input
                     ref={thumbInputRef}
                     type="file"
@@ -519,7 +517,7 @@ export default function TeacherPathsPage() {
                         className="w-full flex items-center justify-center gap-2 px-4 py-3 border border-border/60 rounded-xl bg-background/50 hover:bg-muted/50 transition-colors text-sm font-medium disabled:opacity-60"
                       >
                         {uploadingThumb ? <Loader2 className="w-4 h-4 animate-spin" /> : <UploadCloud className="w-4 h-4" />}
-                        {uploadingThumb ? (isAr ? 'جاري الرفع...' : 'Uploading...') : form.thumbnail_url ? (isAr ? 'تغيير الصورة' : 'Change Image') : (isAr ? 'رفع صورة من جهازك' : 'Upload image from device')}
+                        {uploadingThumb ? ((t.addedTranslations_2026?.['جاري الرفع...'] || 'جاري الرفع...')) : form.thumbnail_url ? ((t.addedTranslations_2026?.['تغيير الصورة'] || 'تغيير الصورة')) : ((t.addedTranslations_2026?.['رفع صورة من جهازك'] || 'رفع صورة من جهازك'))}
                       </button>
                       {form.thumbnail_url && (
                         <button
@@ -527,7 +525,7 @@ export default function TeacherPathsPage() {
                           onClick={() => setForm({ ...form, thumbnail_url: '' })}
                           className="text-xs text-rose-500 hover:underline"
                         >
-                          {isAr ? "إزالة الصورة" : "Remove Image"}
+                          {(t.addedTranslations_2026?.['إزالة الصورة'] || 'إزالة الصورة')}
                         </button>
                       )}
                     </div>
@@ -548,8 +546,8 @@ export default function TeacherPathsPage() {
                         <Mic className="w-5 h-5" />
                       </div>
                       <span className="text-sm">
-                        <span className="font-bold block mb-0.5">{isAr ? "طلب تسجيل صوتي" : "Require Audio Recording"}</span>
-                        <span className="text-[11px] text-muted-foreground font-medium">{isAr ? "إلزام الطالب برفع تلاوة صوتية لكل مرحلة" : "Require student to upload audio recitation for each stage"}</span>
+                        <span className="font-bold block mb-0.5">{(t.addedTranslations_2026?.['طلب تسجيل صوتي'] || 'طلب تسجيل صوتي')}</span>
+                        <span className="text-[11px] text-muted-foreground font-medium">{(t.addedTranslations_2026?.['إلزام الطالب برفع تلاوة صوتية لكل مرحلة'] || 'إلزام الطالب برفع تلاوة صوتية لكل مرحلة')}</span>
                       </span>
                     </span>
                     <span className={cn("relative w-11 h-6 rounded-full transition-colors shrink-0", form.require_audio ? "bg-emerald-500" : "bg-slate-300 dark:bg-slate-700")}>
@@ -570,8 +568,8 @@ export default function TeacherPathsPage() {
                         {form.is_published ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
                       </div>
                       <span className="text-sm">
-                        <span className="font-bold block mb-0.5">{isAr ? "نشر المسار للطلاب" : "Publish Path to Students"}</span>
-                        <span className="text-[11px] text-muted-foreground font-medium">{isAr ? "إتاحة المسار للطلاب للاشتراك به" : "Make path available for students to enroll"}</span>
+                        <span className="font-bold block mb-0.5">{(t.addedTranslations_2026?.['نشر المسار للطلاب'] || 'نشر المسار للطلاب')}</span>
+                        <span className="text-[11px] text-muted-foreground font-medium">{(t.addedTranslations_2026?.['إتاحة المسار للطلاب للاشتراك به'] || 'إتاحة المسار للطلاب للاشتراك به')}</span>
                       </span>
                     </span>
                     <span className={cn("relative w-11 h-6 rounded-full transition-colors shrink-0", form.is_published ? "bg-emerald-500" : "bg-slate-300 dark:bg-slate-700")}>
@@ -582,7 +580,7 @@ export default function TeacherPathsPage() {
                 
                 <div className="flex gap-4 pt-4 border-t border-border/50 mt-4">
                   <button type="button" onClick={() => setShowModal(false)} className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-bold transition-colors">
-                    {isAr ? "إلغاء" : "Cancel"}
+                    {(t.addedTranslations_2026?.['إلغاء'] || 'إلغاء')}
                   </button>
                   <button
                     type="submit"
@@ -590,7 +588,7 @@ export default function TeacherPathsPage() {
                     className="flex-[2] py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition-colors shadow-md flex items-center justify-center gap-2"
                   >
                     {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Check className="w-5 h-5" />}
-                    {editItem ? (isAr ? 'حفظ التعديلات' : 'Save Changes') : (isAr ? 'إضافة المسار' : 'Add Path')}
+                    {editItem ? ((t.addedTranslations_2026?.['حفظ التعديلات'] || 'حفظ التعديلات')) : ((t.addedTranslations_2026?.['إضافة المسار'] || 'إضافة المسار'))}
                   </button>
                 </div>
               </form>
@@ -617,7 +615,7 @@ export default function TeacherPathsPage() {
                     <div className="p-2 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600">
                       <UserPlus className="w-5 h-5" />
                     </div>
-                    {isAr ? "إضافة طلاب للمسار" : "Add Students to Path"}
+                    {(t.addedTranslations_2026?.['إضافة طلاب للمسار'] || 'إضافة طلاب للمسار')}
                   </h3>
                   <p className="text-sm font-medium text-muted-foreground mt-2 line-clamp-1">{enrollPath.title}</p>
                 </div>
@@ -628,20 +626,20 @@ export default function TeacherPathsPage() {
 
               <div className="p-6 sm:p-8 space-y-6 overflow-y-auto scrollbar-thin scrollbar-thumb-border">
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-foreground">{isAr ? "اختر مصدر الطلاب (دوراتك)" : "Choose students source (Your courses)"}</label>
+                  <label className="text-sm font-bold text-foreground">{(t.addedTranslations_2026?.['اختر مصدر الطلاب (دوراتك)'] || 'اختر مصدر الطلاب (دوراتك)')}</label>
                   <select
                     value={enrollCourseId}
                     onChange={e => selectCourse(e.target.value)}
                     className="w-full px-4 py-3.5 border border-border/60 rounded-xl bg-background/50 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium appearance-none"
                   >
-                    <option value="">{isAr ? "— حدد الدورة لسحب الطلاب منها —" : "— Select course to pull students from —"}</option>
+                    <option value="">{(t.addedTranslations_2026?.['— حدد الدورة لسحب الطلاب منها —'] || '— حدد الدورة لسحب الطلاب منها —')}</option>
                     {courses.map(c => (
-                      <option key={c.id} value={c.id}>{c.title} ({c.total_enrolled} {isAr ? "طالب مسجل" : "enrolled students"})</option>
+                      <option key={c.id} value={c.id}>{c.title} ({c.total_enrolled} {(t.addedTranslations_2026?.['طالب مسجل'] || 'طالب مسجل')})</option>
                     ))}
                   </select>
                   {coursesLoaded && courses.length === 0 && (
                     <p className="text-xs font-medium text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 p-3 rounded-lg border border-amber-200/50 mt-2">
-                      {isAr ? "لا توجد دورات مرتبطة بحسابك بعد. قم بإنشاء دورة لتمكين سحب الطلاب." : "No courses associated with your account yet. Create a course to enable student enrollment."}
+                      {(t.addedTranslations_2026?.['لا توجد دورات مرتبطة بحسابك بعد. قم بإنشاء دورة لتمكين سحب الطلاب.'] || 'لا توجد دورات مرتبطة بحسابك بعد. قم بإنشاء دورة لتمكين سحب الطلاب.')}
                     </p>
                   )}
                 </div>
@@ -654,7 +652,7 @@ export default function TeacherPathsPage() {
                         type="text"
                         value={studentSearch}
                         onChange={e => setStudentSearch(e.target.value)}
-                        placeholder={isAr ? "ابحث بالاسم أو البريد الإلكتروني..." : "Search by name or email..."}
+                        placeholder={(t.addedTranslations_2026?.['ابحث بالاسم أو البريد الإلكتروني...'] || 'ابحث بالاسم أو البريد الإلكتروني...')}
                         className="w-full pr-11 pl-4 py-3 border border-border/60 rounded-xl bg-background/50 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm transition-all font-medium"
                       />
                     </div>
@@ -662,12 +660,12 @@ export default function TeacherPathsPage() {
                     {loadingStudents ? (
                       <div className="flex flex-col items-center justify-center py-12 space-y-3 bg-muted/20 rounded-2xl border border-dashed border-border/50">
                         <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
-                        <span className="text-sm font-medium text-muted-foreground">{isAr ? "جاري جلب قائمة الطلاب..." : "Fetching student list..."}</span>
+                        <span className="text-sm font-medium text-muted-foreground">{(t.addedTranslations_2026?.['جاري جلب قائمة الطلاب...'] || 'جاري جلب قائمة الطلاب...')}</span>
                       </div>
                     ) : courseStudents.length === 0 ? (
                       <div className="text-center py-10 bg-muted/20 rounded-2xl border border-dashed border-border/50">
                         <Users className="w-8 h-8 mx-auto mb-3 opacity-30" />
-                        <p className="text-sm font-semibold text-muted-foreground">{isAr ? "لا يوجد طلاب مسجلون في هذه الدورة." : "No students enrolled in this course."}</p>
+                        <p className="text-sm font-semibold text-muted-foreground">{(t.addedTranslations_2026?.['لا يوجد طلاب مسجلون في هذه الدورة.'] || 'لا يوجد طلاب مسجلون في هذه الدورة.')}</p>
                       </div>
                     ) : (
                       <div className="border border-border/60 rounded-2xl overflow-hidden bg-card shadow-sm">

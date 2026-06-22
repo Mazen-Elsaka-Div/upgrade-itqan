@@ -26,6 +26,8 @@ interface Message {
 }
 
 export default function FiqhSupervisorMessagesPage() {
+  const { t } = useI18n();
+
   const { locale } = useI18n()
   const isAr = locale === 'ar'
   const [conversations, setConversations] = useState<Conversation[]>([])
@@ -119,11 +121,11 @@ export default function FiqhSupervisorMessagesPage() {
           <div className="p-2.5 bg-primary/10 rounded-xl text-primary border border-primary/20 shadow-inner">
             <MessageSquare className="w-6 h-6" />
           </div>
-          {isAr ? 'الرسائل والمحادثات' : 'Messages'}
+          {(t.addedTranslations_2026?.['الرسائل والمحادثات'] || (t.addedTranslations_2026?.['الرسائل والمحادثات'] || 'الرسائل والمحادثات'))}
         </h1>
         <p className="text-muted-foreground text-sm flex items-center gap-2 mt-2 font-medium">
           <Sparkles className="w-4 h-4 text-amber-500" />
-          {isAr ? 'تواصل مباشر مع فريق الإدارة والمعلمين' : 'Direct communication with teachers and administrators'}
+          {(t.addedTranslations_2026?.['تواصل مباشر مع فريق الإدارة والمعلمين'] || (t.addedTranslations_2026?.['تواصل مباشر مع فريق الإدارة والمعلمين'] || 'تواصل مباشر مع فريق الإدارة والمعلمين'))}
         </p>
       </div>
 
@@ -134,7 +136,7 @@ export default function FiqhSupervisorMessagesPage() {
             <div className="relative group">
               <Search className={`absolute ${isAr ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors`} />
               <input
-                placeholder={isAr ? 'ابحث في المحادثات...' : 'Search conversations...'}
+                placeholder={(t.addedTranslations_2026?.['ابحث في المحادثات...'] || (t.addedTranslations_2026?.['ابحث في المحادثات...'] || 'ابحث في المحادثات...'))}
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 className={`w-full h-12 ${isAr ? 'pr-12 pl-4' : 'pl-12 pr-4'} bg-background border-2 border-border focus:border-primary rounded-2xl text-sm font-bold focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all shadow-inner placeholder:text-muted-foreground`}
@@ -152,7 +154,7 @@ export default function FiqhSupervisorMessagesPage() {
                 <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center border border-border shadow-inner">
                   <MessageSquare className="w-8 h-8 text-muted-foreground" />
                 </div>
-                <p className="text-muted-foreground text-sm font-bold">{isAr ? 'لا توجد محادثات بعد' : 'No conversations yet'}</p>
+                <p className="text-muted-foreground text-sm font-bold">{(t.addedTranslations_2026?.['لا توجد محادثات بعد'] || (t.addedTranslations_2026?.['لا توجد محادثات بعد'] || 'لا توجد محادثات بعد'))}</p>
               </div>
             ) : filtered.map(conv => (
               <button
@@ -186,7 +188,7 @@ export default function FiqhSupervisorMessagesPage() {
                     <span className="text-[10px] font-bold text-muted-foreground shrink-0 bg-muted/50 px-1.5 py-0.5 rounded-md border border-border/50">{formatTime(conv.last_message_at)}</span>
                   </div>
                   <p className={`text-xs truncate font-medium ${conv.unread_count > 0 ? 'text-foreground font-black' : 'text-muted-foreground'}`}>
-                    {conv.last_message || (isAr ? 'اضغط لبدء المحادثة' : 'Click to start conversation')}
+                    {conv.last_message || ((t.addedTranslations_2026?.['اضغط لبدء المحادثة'] || (t.addedTranslations_2026?.['اضغط لبدء المحادثة'] || 'اضغط لبدء المحادثة')))}
                   </p>
                 </div>
               </button>
@@ -203,8 +205,8 @@ export default function FiqhSupervisorMessagesPage() {
               <div className="w-24 h-24 rounded-[32px] bg-muted/50 flex items-center justify-center border border-white/10 shadow-inner">
                 <MessageSquare className="w-10 h-10 opacity-40 text-primary" />
               </div>
-              <p className="font-black text-xl text-foreground/70">{isAr ? 'اختر محادثة للبدء' : 'Select a conversation to start'}</p>
-              <p className="text-sm font-bold text-muted-foreground bg-muted px-4 py-2 rounded-xl">{isAr ? 'التواصل السريع والفعال يبدأ من هنا' : 'Quick and effective communication starts here'}</p>
+              <p className="font-black text-xl text-foreground/70">{(t.addedTranslations_2026?.['اختر محادثة للبدء'] || (t.addedTranslations_2026?.['اختر محادثة للبدء'] || 'اختر محادثة للبدء'))}</p>
+              <p className="text-sm font-bold text-muted-foreground bg-muted px-4 py-2 rounded-xl">{(t.addedTranslations_2026?.['التواصل السريع والفعال يبدأ من هنا'] || (t.addedTranslations_2026?.['التواصل السريع والفعال يبدأ من هنا'] || 'التواصل السريع والفعال يبدأ من هنا'))}</p>
             </div>
           ) : (
             <div className="flex flex-col h-full relative z-10">
@@ -224,7 +226,7 @@ export default function FiqhSupervisorMessagesPage() {
                   <h3 className="font-black text-lg text-foreground">{activeConv.other_user_name}</h3>
                   <p className="text-xs text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    {isAr ? 'محادثة نشطة' : 'Active Conversation'}
+                    {(t.addedTranslations_2026?.['محادثة نشطة'] || (t.addedTranslations_2026?.['محادثة نشطة'] || 'محادثة نشطة'))}
                   </p>
                 </div>
               </div>
@@ -268,7 +270,7 @@ export default function FiqhSupervisorMessagesPage() {
                     <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-blue-500 rounded-2xl opacity-0 group-focus-within:opacity-20 transition duration-500 blur" />
                     <input
                       type="text"
-                      placeholder={isAr ? "اكتب رسالتك هنا..." : "Type your message here..."}
+                      placeholder={(t.addedTranslations_2026?.['اكتب رسالتك هنا...'] || (t.addedTranslations_2026?.['اكتب رسالتك هنا...'] || 'اكتب رسالتك هنا...'))}
                       value={reply}
                       onChange={e => setReply(e.target.value)}
                       className="relative w-full rounded-2xl h-14 px-6 bg-background border-2 border-border focus:border-transparent text-sm font-bold focus:outline-none focus:ring-4 focus:ring-primary/20 transition-all shadow-inner placeholder:font-medium"

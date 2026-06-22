@@ -13,6 +13,7 @@ import {
   PencilLine,
   Loader2,
 } from "lucide-react"
+import { useI18n } from "@/lib/i18n/context";
 
 interface QuizQuestion {
   id: string
@@ -24,6 +25,7 @@ interface QuizQuestion {
 }
 
 export default function GradeTaskPage() {
+    const { t } = useI18n();
   const params = useParams()
   const taskId = params.id as string
 
@@ -95,10 +97,10 @@ export default function GradeTaskPage() {
           <ArrowRight className="w-5 h-5 rtl:rotate-180" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold">تقييم تسليمات الطلاب</h1>
+          <h1 className="text-2xl font-bold">{(t.addedTranslations_2026?.['تقييم تسليمات الطلاب'] || (t.addedTranslations_2026?.['تقييم تسليمات الطلاب'] || 'تقييم تسليمات الطلاب'))}</h1>
           <p className="text-muted-foreground mt-1">
             {task?.title ? `«${task.title}» — ` : ""}
-            {isQuiz ? "تصحيح الاختبار ورصد الدرجات" : "مراجعة المهام ورصد الدرجات"}
+            {isQuiz ? (t.addedTranslations_2026?.['تصحيح الاختبار ورصد الدرجات'] || (t.addedTranslations_2026?.['تصحيح الاختبار ورصد الدرجات'] || 'تصحيح الاختبار ورصد الدرجات')) : (t.addedTranslations_2026?.['مراجعة المهام ورصد الدرجات'] || 'مراجعة المهام ورصد الدرجات')}
           </p>
         </div>
       </div>
@@ -106,8 +108,8 @@ export default function GradeTaskPage() {
       <div className="bg-card rounded-xl border border-border divide-y divide-border">
         {submissions.length === 0 ? (
           <div className="p-8 text-center text-muted-foreground">
-            لا توجد تسليمات لهذه المهمة حتى الآن.
-          </div>
+            {(t.addedTranslations_2026?.['لا توجد تسليمات لهذه المهمة حتى الآن.'] || (t.addedTranslations_2026?.['لا توجد تسليمات لهذه المهمة حتى الآن.'] || 'لا توجد تسليمات لهذه المهمة حتى الآن.'))}
+                                </div>
         ) : (
           submissions.map(sub => (
             <GradeCard
@@ -182,12 +184,12 @@ function GradeCard({
             <div className="mr-auto">
               {submission.status === "graded" ? (
                 <span className="px-2 py-1 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 text-xs font-bold rounded-full flex items-center gap-1">
-                  <CheckCircle2 className="w-3 h-3" /> تم التقييم
-                </span>
+                  <CheckCircle2 className="w-3 h-3" /> {(t.addedTranslations_2026?.['تم التقييم'] || (t.addedTranslations_2026?.['تم التقييم'] || 'تم التقييم'))}
+                                                  </span>
               ) : (
                 <span className="px-2 py-1 bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300 text-xs font-bold rounded-full">
-                  بانتظار التقييم
-                </span>
+                  {(t.addedTranslations_2026?.['بانتظار التقييم'] || (t.addedTranslations_2026?.['بانتظار التقييم'] || 'بانتظار التقييم'))}
+                                                      </span>
               )}
             </div>
           </div>
@@ -196,7 +198,7 @@ function GradeCard({
             <div className="space-y-3">
               {submission.auto_score != null && (
                 <p className="text-xs font-bold text-muted-foreground bg-muted/60 inline-flex px-3 py-1.5 rounded-lg">
-                  درجة الاختيارات التلقائية: {submission.auto_score}
+                  {(t.addedTranslations_2026?.['درجة الاختيارات التلقائية:'] || (t.addedTranslations_2026?.['درجة الاختيارات التلقائية:'] || 'درجة الاختيارات التلقائية:'))} {submission.auto_score}
                 </p>
               )}
               {quizQuestions.map((q, idx) => {
@@ -217,8 +219,8 @@ function GradeCard({
                         ) : (
                           <PencilLine className="w-3 h-3" />
                         )}
-                        {q.points} د
-                      </span>
+                        {q.points} {(t.addedTranslations_2026?.['د'] || (t.addedTranslations_2026?.['د'] || 'د'))}
+                                                      </span>
                     </div>
 
                     {q.type === "mcq" ? (
@@ -257,8 +259,8 @@ function GradeCard({
                               </span>
                               {isSelected && (
                                 <span className="text-[11px] text-muted-foreground mr-auto">
-                                  (إجابة الطالب)
-                                </span>
+                                  {(t.addedTranslations_2026?.['(إجابة الطالب)'] || (t.addedTranslations_2026?.['(إجابة الطالب)'] || '(إجابة الطالب)'))}
+                                                                          </span>
                               )}
                             </div>
                           )
@@ -268,8 +270,8 @@ function GradeCard({
                       <div className="bg-background border border-border rounded-lg p-3 text-sm whitespace-pre-wrap">
                         {a?.text || (
                           <span className="text-muted-foreground italic">
-                            لم يجب الطالب على هذا السؤال
-                          </span>
+                            {(t.addedTranslations_2026?.['لم يجب الطالب على هذا السؤال'] || (t.addedTranslations_2026?.['لم يجب الطالب على هذا السؤال'] || 'لم يجب الطالب على هذا السؤال'))}
+                                                                      </span>
                         )}
                       </div>
                     )}
@@ -282,8 +284,8 @@ function GradeCard({
               <div className="bg-muted/50 p-4 rounded-xl text-sm whitespace-pre-wrap font-medium">
                 {submission.content || (
                   <span className="text-muted-foreground italic">
-                    لم يكتب الطالب نصاً
-                  </span>
+                    {(t.addedTranslations_2026?.['لم يكتب الطالب نصاً'] || (t.addedTranslations_2026?.['لم يكتب الطالب نصاً'] || 'لم يكتب الطالب نصاً'))}
+                                                            </span>
                 )}
               </div>
 
@@ -301,19 +303,19 @@ function GradeCard({
                   className="mt-3 inline-flex items-center gap-2 text-sm text-primary hover:underline font-bold bg-primary/10 px-3 py-2 rounded-lg"
                 >
                   <FileText className="w-4 h-4" />
-                  فتح المرفق
-                </a>
+                  {(t.addedTranslations_2026?.['فتح المرفق'] || (t.addedTranslations_2026?.['فتح المرفق'] || 'فتح المرفق'))}
+                                                      </a>
               )}
             </>
           )}
         </div>
 
         <div className="md:w-1/3 bg-background border border-border p-4 rounded-xl flex flex-col h-fit">
-          <h4 className="font-bold text-sm mb-3">رصد الدرجة</h4>
+          <h4 className="font-bold text-sm mb-3">{(t.addedTranslations_2026?.['رصد الدرجة'] || (t.addedTranslations_2026?.['رصد الدرجة'] || 'رصد الدرجة'))}</h4>
           <div className="space-y-4 flex-1">
             <div>
               <label className="text-xs text-muted-foreground block mb-1">
-                الدرجة (من {submission.max_score || 100})
+                {(t.addedTranslations_2026?.['الدرجة (من'] || (t.addedTranslations_2026?.['الدرجة (من'] || 'الدرجة (من'))} {submission.max_score || 100})
               </label>
               <input
                 type="number"
@@ -326,14 +328,14 @@ function GradeCard({
             </div>
             <div>
               <label className="text-xs text-muted-foreground block mb-1">
-                ملاحظات الأستاذ (اختياري)
-              </label>
+                {(t.addedTranslations_2026?.['ملاحظات الأستاذ (اختياري)'] || (t.addedTranslations_2026?.['ملاحظات الأستاذ (اختياري)'] || 'ملاحظات الأستاذ (اختياري)'))}
+                                            </label>
               <textarea
                 rows={3}
                 value={feedback}
                 onChange={e => setFeedback(e.target.value)}
                 className="w-full p-2 border border-border rounded-lg bg-card text-sm"
-                placeholder="أحسنت صنعاً..."
+                placeholder={t.addedTranslations_2026?.['أحسنت صنعاً...'] || (t.addedTranslations_2026?.['أحسنت صنعاً...'] || 'أحسنت صنعاً...')}
               />
             </div>
           </div>
@@ -343,11 +345,11 @@ function GradeCard({
             className="w-full py-2 bg-primary hover:bg-primary/90 disabled:opacity-60 text-primary-foreground font-bold rounded-lg text-sm mt-4 transition-colors inline-flex items-center justify-center gap-2"
           >
             {saving ? (
-              <><Loader2 className="w-4 h-4 animate-spin" /> جارٍ الحفظ...</>
+              <><Loader2 className="w-4 h-4 animate-spin" /> {(t.addedTranslations_2026?.['جارٍ الحفظ...'] || (t.addedTranslations_2026?.['جارٍ الحفظ...'] || 'جارٍ الحفظ...'))}</>
             ) : saved ? (
-              <><CheckCircle2 className="w-4 h-4" /> تم الحفظ</>
+              <><CheckCircle2 className="w-4 h-4" /> {(t.addedTranslations_2026?.['تم الحفظ'] || (t.addedTranslations_2026?.['تم الحفظ'] || 'تم الحفظ'))}</>
             ) : (
-              "حفظ التقييم"
+              (t.addedTranslations_2026?.['حفظ التقييم'] || (t.addedTranslations_2026?.['حفظ التقييم'] || 'حفظ التقييم'))
             )}
           </button>
         </div>

@@ -139,9 +139,9 @@ function ReaderChatContent() {
 
   const currentConv = conversations.find(c => c.id === selectedConvId)
 
-  const getOtherPartyName = (c: Conversation) => c.student_name || c.admin_name || (isAr ? "الدعم الفني" : "Support")
+  const getOtherPartyName = (c: Conversation) => c.student_name || c.admin_name || ((t.addedTranslations_2026?.['الدعم الفني'] || (t.addedTranslations_2026?.['الدعم الفني'] || 'الدعم الفني')))
   const getOtherPartyAvatar = (c: Conversation) => c.student_avatar || c.admin_avatar
-  const getOtherPartyRole = (c: Conversation) => c.student_id ? (isAr ? "طالب" : "Student") : (isAr ? "الدعم الفني" : "Support")
+  const getOtherPartyRole = (c: Conversation) => c.student_id ? ((t.addedTranslations_2026?.['طالب'] || (t.addedTranslations_2026?.['طالب'] || 'طالب'))) : ((t.addedTranslations_2026?.['الدعم الفني'] || (t.addedTranslations_2026?.['الدعم الفني'] || 'الدعم الفني')))
 
   const handleSend = async () => {
     if ((!messageText.trim() && !linkText.trim()) || !selectedConvId) return
@@ -204,17 +204,17 @@ function ReaderChatContent() {
         scrollToBottom()
       } else {
         const errorData = await res.json().catch(() => ({}))
-        alert(errorData.error || (isAr ? "فشل إرسال الرسالة" : "Failed to send message"))
+        alert(errorData.error || ((t.addedTranslations_2026?.['فشل إرسال الرسالة'] || (t.addedTranslations_2026?.['فشل إرسال الرسالة'] || 'فشل إرسال الرسالة'))))
       }
     } catch {
-      alert(isAr ? "حدث خطأ في الإتصال" : "Connection error occurred")
+      alert((t.addedTranslations_2026?.['حدث خطأ في الإتصال'] || (t.addedTranslations_2026?.['حدث خطأ في الإتصال'] || 'حدث خطأ في الإتصال')))
     } finally {
       setSending(false)
     }
   }
 
   const handleDeleteMessage = async (msgId: string) => {
-    if (!selectedConvId || !confirm(isAr ? "هل أنت متأكد من حذف هذه الرسالة؟" : "Are you sure you want to delete this message?")) return
+    if (!selectedConvId || !confirm((t.addedTranslations_2026?.['هل أنت متأكد من حذف هذه الرسالة؟'] || (t.addedTranslations_2026?.['هل أنت متأكد من حذف هذه الرسالة؟'] || 'هل أنت متأكد من حذف هذه الرسالة؟')))) return
     setMessages(p => p.filter(m => m.id !== msgId))
     try {
       await fetch(`/api/conversations/${selectedConvId}/messages/${msgId}`, { method: "DELETE" })
@@ -222,7 +222,7 @@ function ReaderChatContent() {
   }
 
   const handleDeleteConversation = async () => {
-    if (!selectedConvId || !confirm(isAr ? "هل أنت متأكد من حذف هذه المحادثة نهائياً لكلا الطرفين؟" : "Are you sure you want to permanently delete this conversation for both parties?")) return
+    if (!selectedConvId || !confirm((t.addedTranslations_2026?.['هل أنت متأكد من حذف هذه المحادثة نهائياً لكلا الطرفين؟'] || (t.addedTranslations_2026?.['هل أنت متأكد من حذف هذه المحادثة نهائياً لكلا الطرفين؟'] || 'هل أنت متأكد من حذف هذه المحادثة نهائياً لكلا الطرفين؟')))) return
     setDeletingConvId(selectedConvId)
     try {
       await fetch(`/api/conversations/${selectedConvId}`, { method: "DELETE" })
@@ -282,10 +282,10 @@ function ReaderChatContent() {
         setSelectedConvId(newConv.id)
         setIsNewChatOpen(false)
       } else {
-        alert(isAr ? "فشل إنشاء المحادثة" : "Failed to create conversation")
+        alert((t.addedTranslations_2026?.['فشل إنشاء المحادثة'] || (t.addedTranslations_2026?.['فشل إنشاء المحادثة'] || 'فشل إنشاء المحادثة')))
       }
     } catch {
-      alert(isAr ? "حدث خطأ" : "Error occurred")
+      alert((t.addedTranslations_2026?.['حدث خطأ'] || (t.addedTranslations_2026?.['حدث خطأ'] || 'حدث خطأ')))
     } finally {
       setCreating(false)
     }
@@ -302,10 +302,10 @@ function ReaderChatContent() {
     <div className="space-y-6 h-[calc(100vh-140px)] flex flex-col">
       <div>
         <h1 className="text-2xl md:text-3xl font-bold text-foreground">
-          {isAr ? "المحادثات" : "Messages"}
+          {(t.addedTranslations_2026?.['المحادثات'] || (t.addedTranslations_2026?.['المحادثات'] || 'المحادثات'))}
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          {isAr ? "تواصل مع الطلاب حول ملاحظات التلاوة والمواعيد" : "Communicate with students"}
+          {(t.addedTranslations_2026?.['تواصل مع الطلاب حول ملاحظات التلاوة والمواعيد'] || (t.addedTranslations_2026?.['تواصل مع الطلاب حول ملاحظات التلاوة والمواعيد'] || 'تواصل مع الطلاب حول ملاحظات التلاوة والمواعيد'))}
         </p>
       </div>
 
@@ -314,19 +314,19 @@ function ReaderChatContent() {
         <Card className="border-border lg:col-span-1 flex flex-col h-full overflow-hidden shadow-sm">
           <CardHeader className="pb-3 border-b border-border bg-muted flex flex-row items-center justify-between space-y-0">
             <CardTitle className="text-base font-bold text-foreground">
-              {isAr ? "قائمة المحادثات" : "Conversations"}
+              {(t.addedTranslations_2026?.['قائمة المحادثات'] || (t.addedTranslations_2026?.['قائمة المحادثات'] || 'قائمة المحادثات'))}
             </CardTitle>
             <Dialog open={isNewChatOpen} onOpenChange={setIsNewChatOpen}>
               <DialogTrigger asChild>
                 <Button size="sm" variant="outline" className="h-8 gap-2 bg-background">
                   <PlusCircle className="w-4 h-4" />
-                  <span className="hidden sm:inline">{isAr ? "محادثة جديدة" : "New"}</span>
+                  <span className="hidden sm:inline">{(t.addedTranslations_2026?.['محادثة جديدة'] || (t.addedTranslations_2026?.['محادثة جديدة'] || 'محادثة جديدة'))}</span>
                 </Button>
               </DialogTrigger>
               {isNewChatOpen && (
                 <DialogContent className="max-w-md" dir={isAr ? "rtl" : "ltr"}>
                   <DialogHeader>
-                    <DialogTitle>{isAr ? "بدء محادثة جديدة" : "Start New Conversation"}</DialogTitle>
+                    <DialogTitle>{(t.addedTranslations_2026?.['بدء محادثة جديدة'] || (t.addedTranslations_2026?.['بدء محادثة جديدة'] || 'بدء محادثة جديدة'))}</DialogTitle>
                   </DialogHeader>
 
                   <div className="flex bg-muted p-1 rounded-xl mb-4 mt-2">
@@ -334,14 +334,14 @@ function ReaderChatContent() {
                       className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${chatType === "student" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground hover:bg-muted-foreground/10"}`}
                       onClick={() => setChatType("student")}
                     >
-                      {isAr ? "مع طالب" : "With Student"}
+                      {(t.addedTranslations_2026?.['مع طالب'] || (t.addedTranslations_2026?.['مع طالب'] || 'مع طالب'))}
                     </button>
                     <button
                       className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-2 ${chatType === "admin" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground hover:bg-muted-foreground/10"}`}
                       onClick={() => setChatType("admin")}
                     >
                       <ShieldAlert className="w-4 h-4" />
-                      {isAr ? "تذكرة دعم فني" : "Support Ticket"}
+                      {(t.addedTranslations_2026?.['تذكرة دعم فني'] || (t.addedTranslations_2026?.['تذكرة دعم فني'] || 'تذكرة دعم فني'))}
                     </button>
                   </div>
 
@@ -350,7 +350,7 @@ function ReaderChatContent() {
                       <div className="relative">
                         <Search className="w-4 h-4 text-muted-foreground absolute right-3 top-3 rtl:right-3 ltr:left-3 rtl:translate-x-0 ltr:-translate-x-0" />
                         <Input
-                          placeholder={isAr ? "ابحث عن طالب بالاسم أو الإيميل..." : "Search for a student..."}
+                          placeholder={(t.addedTranslations_2026?.['ابحث عن طالب بالاسم أو الإيميل...'] || (t.addedTranslations_2026?.['ابحث عن طالب بالاسم أو الإيميل...'] || 'ابحث عن طالب بالاسم أو الإيميل...'))}
                           className="pl-9 rtl:pr-9 rtl:pl-3 bg-muted/50 border-border"
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
@@ -362,7 +362,7 @@ function ReaderChatContent() {
                           <div className="flex justify-center p-4"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
                         ) : searchResults.length === 0 ? (
                           <div className="text-center p-4 text-sm text-muted-foreground">
-                            {searchQuery ? (isAr ? "لا توجد نتائج" : "No results found") : (isAr ? "يرجى البحث باسم الطالب للبدء" : "Please search for a student")}
+                            {searchQuery ? ((t.addedTranslations_2026?.['لا توجد نتائج'] || (t.addedTranslations_2026?.['لا توجد نتائج'] || 'لا توجد نتائج'))) : ((t.addedTranslations_2026?.['يرجى البحث باسم الطالب للبدء'] || (t.addedTranslations_2026?.['يرجى البحث باسم الطالب للبدء'] || 'يرجى البحث باسم الطالب للبدء')))}
                           </div>
                         ) : (
                           searchResults.map(s => (
@@ -393,17 +393,17 @@ function ReaderChatContent() {
                         <ShieldAlert className="w-8 h-8" />
                       </div>
                       <h3 className="text-lg font-bold text-foreground mb-2">
-                        {isAr ? "تواصل مع الإدارة" : "Contact Administration"}
+                        {(t.addedTranslations_2026?.['تواصل مع الإدارة'] || (t.addedTranslations_2026?.['تواصل مع الإدارة'] || 'تواصل مع الإدارة'))}
                       </h3>
                       <p className="text-sm text-muted-foreground max-w-sm mx-auto mb-6 leading-relaxed">
-                        {isAr ? "سيتم فتح تذكرة دعم فني جديدة للتواصل مع مشرفي الموقع حول أي استفسارات أو مشاكل تقنية." : "A new support ticket will be opened to communicate with the site admins regarding any issues or inquiries."}
+                        {(t.addedTranslations_2026?.['سيتم فتح تذكرة دعم فني جديدة للتواصل مع مشرفي الموقع حول أي استفسارات أو مشاكل تقنية.'] || (t.addedTranslations_2026?.['سيتم فتح تذكرة دعم فني جديدة للتواصل مع مشرفي الموقع حول أي استفسارات أو مشاكل تقنية.'] || 'سيتم فتح تذكرة دعم فني جديدة للتواصل مع مشرفي الموقع حول أي استفسارات أو مشاكل تقنية.'))}
                       </p>
                       <Button 
                         onClick={() => startConversation(undefined, true)}
                         disabled={creating}
                         className="w-full max-w-xs mx-auto bg-blue-600 hover:bg-blue-700 text-white rounded-xl h-12"
                       >
-                        {creating ? <Loader2 className="w-5 h-5 animate-spin" /> : (isAr ? "فتح تذكرة الدعم المحادثة" : "Open Support Ticket")}
+                        {creating ? <Loader2 className="w-5 h-5 animate-spin" /> : ((t.addedTranslations_2026?.['فتح تذكرة الدعم المحادثة'] || (t.addedTranslations_2026?.['فتح تذكرة الدعم المحادثة'] || 'فتح تذكرة الدعم المحادثة')))}
                       </Button>
                     </div>
                   )}
@@ -419,7 +419,7 @@ function ReaderChatContent() {
             ) : conversations.length === 0 ? (
               <div className="p-8 text-center text-muted-foreground flex flex-col items-center">
                 <MessageSquare className="w-10 h-10 text-muted-foreground mb-2" />
-                <p>{isAr ? "لا توجد محادثات سابقة" : "No conversations yet"}</p>
+                <p>{(t.addedTranslations_2026?.['لا توجد محادثات سابقة'] || (t.addedTranslations_2026?.['لا توجد محادثات سابقة'] || 'لا توجد محادثات سابقة'))}</p>
               </div>
             ) : (
               <div className="divide-y divide-border">
@@ -438,7 +438,7 @@ function ReaderChatContent() {
                       <div className={`w-12 h-12 shrink-0 rounded-full flex items-center justify-center font-bold text-lg ${colorClass}`}>
                         {getOtherPartyAvatar(conv) ? (
                           <img src={getOtherPartyAvatar(conv)!} alt={getOtherPartyName(conv)} className="w-full h-full rounded-full object-cover" />
-                        ) : (getOtherPartyName(conv)[0] || "م")}
+                        ) : (getOtherPartyName(conv)[0] || (t.addedTranslations_2026?.['م'] || 'م'))}
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex justify-between items-baseline mb-1">
@@ -452,7 +452,7 @@ function ReaderChatContent() {
                           )}
                         </div>
                         <p className={`text-xs truncate ${hasUnread ? "font-medium text-slate-700" : "text-slate-500"}`}>
-                          {conv.last_message_preview || "بدء محادثة جديدة"}
+                          {conv.last_message_preview || (t.addedTranslations_2026?.['بدء محادثة جديدة'] || 'بدء محادثة جديدة')}
                         </p>
                       </div>
                       {hasUnread && (
@@ -474,7 +474,7 @@ function ReaderChatContent() {
                 <div className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center font-bold text-sm bg-emerald-100 text-emerald-600`}>
                   {getOtherPartyAvatar(currentConv) ? (
                     <img src={getOtherPartyAvatar(currentConv)!} alt={getOtherPartyName(currentConv)} className="w-full h-full rounded-full object-cover" />
-                  ) : (getOtherPartyName(currentConv)[0] || "م")}
+                  ) : (getOtherPartyName(currentConv)[0] || (t.addedTranslations_2026?.['م'] || 'م'))}
                 </div>
                 <div className="flex-1">
                   <CardTitle className="text-base text-slate-800">{getOtherPartyName(currentConv)}</CardTitle>
@@ -486,7 +486,7 @@ function ReaderChatContent() {
                   className="text-red-500 hover:text-red-700 hover:bg-red-50"
                   onClick={handleDeleteConversation}
                   disabled={deletingConvId === currentConv.id}
-                  title={isAr ? "حذف المحادثة" : "Delete Conversation"}
+                  title={(t.addedTranslations_2026?.['حذف المحادثة'] || (t.addedTranslations_2026?.['حذف المحادثة'] || 'حذف المحادثة'))}
                 >
                   {deletingConvId === currentConv.id ? <Loader2 className="w-5 h-5 animate-spin" /> : <Trash2 className="w-5 h-5" />}
                 </Button>
@@ -501,7 +501,7 @@ function ReaderChatContent() {
                 ) : messages.length === 0 ? (
                   <div className="h-full flex flex-col items-center justify-center text-slate-400">
                     <MessageSquare className="w-12 h-12 text-slate-200 mb-3" />
-                    <p>أرسل رسالة للترحيب بالطالب</p>
+                    <p>{(t.addedTranslations_2026?.['أرسل رسالة للترحيب بالطالب'] || (t.addedTranslations_2026?.['أرسل رسالة للترحيب بالطالب'] || 'أرسل رسالة للترحيب بالطالب'))}</p>
                   </div>
                 ) : (
                   <>
@@ -522,14 +522,14 @@ function ReaderChatContent() {
                                   setLinkText("")
                                 }}
                                 className="p-1.5 text-slate-400 hover:text-[#0B3D2E] hover:bg-slate-50 rounded transition-colors"
-                                title={isAr ? "تعديل" : "Edit"}
+                                title={(t.addedTranslations_2026?.['تعديل'] || (t.addedTranslations_2026?.['تعديل'] || 'تعديل'))}
                               >
                                 <Edit2 className="w-3.5 h-3.5" />
                               </button>
                               <button
                                 onClick={() => handleDeleteMessage(msg.id)}
                                 className="p-1.5 text-slate-400 hover:text-destructive hover:bg-destructive/10 rounded transition-colors"
-                                title={isAr ? "حذف" : "Delete"}
+                                title={(t.addedTranslations_2026?.['حذف'] || (t.addedTranslations_2026?.['حذف'] || 'حذف'))}
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>
@@ -545,7 +545,7 @@ function ReaderChatContent() {
                             <div className={`text-[10px] mt-2 flex items-center justify-between ${isReader ? "text-emerald-100/70" : "text-slate-400"
                               }`}>
                               <span>{new Date(msg.created_at).toLocaleTimeString(isAr ? "ar-SA" : "en-US", { hour: "2-digit", minute: "2-digit" })}</span>
-                              {msg.updated_at && <span className="ml-2 rtl:mr-2 rtl:ml-0 opacity-70 italic">{isAr ? "(مُعدلة)" : "(edited)"}</span>}
+                              {msg.updated_at && <span className="ml-2 rtl:mr-2 rtl:ml-0 opacity-70 italic">{(t.addedTranslations_2026?.['(مُعدلة)'] || (t.addedTranslations_2026?.['(مُعدلة)'] || '(مُعدلة)'))}</span>}
                             </div>
                           </div>
                         </div>
@@ -562,10 +562,10 @@ function ReaderChatContent() {
                   <div className="flex items-center justify-between bg-amber-50 dark:bg-amber-500/10 text-amber-800 dark:text-amber-500 p-2 rounded-lg text-xs mb-2 border border-amber-200/50 dark:border-amber-500/20">
                     <div className="flex items-center gap-2">
                       <Edit2 className="w-3.5 h-3.5" />
-                      <span>{isAr ? "تعديل الرسالة..." : "Editing message..."}</span>
+                      <span>{(t.addedTranslations_2026?.['تعديل الرسالة...'] || (t.addedTranslations_2026?.['تعديل الرسالة...'] || 'تعديل الرسالة...'))}</span>
                     </div>
                     <button onClick={() => { setEditingMessage(null); setMessageText(""); setLinkText("") }} className="hover:underline font-bold">
-                      {isAr ? "إلغاء" : "Cancel"}
+                      {(t.addedTranslations_2026?.['إلغاء'] || (t.addedTranslations_2026?.['إلغاء'] || 'إلغاء'))}
                     </button>
                   </div>
                 )}
@@ -573,7 +573,7 @@ function ReaderChatContent() {
                   <div className="flex items-center gap-2">
                     <Link2 className="w-4 h-4 text-slate-400 shrink-0" />
                     <Input
-                      placeholder={isAr ? "أضف رابطًا (ميت، زوم، إلخ) - اختياري" : "Add a link (optional)"}
+                      placeholder={(t.addedTranslations_2026?.['أضف رابطًا (ميت، زوم، إلخ) - اختياري'] || (t.addedTranslations_2026?.['أضف رابطًا (ميت، زوم، إلخ) - اختياري'] || 'أضف رابطًا (ميت، زوم، إلخ) - اختياري'))}
                       value={linkText}
                       onChange={(e) => setLinkText(e.target.value)}
                       className="h-9 text-xs bg-muted border-border flex-1"
@@ -583,7 +583,7 @@ function ReaderChatContent() {
                 )}
                 <div className="flex items-end gap-3">
                   <Textarea
-                    placeholder={isAr ? "اكتب رسالتك..." : "Type your message..."}
+                    placeholder={(t.addedTranslations_2026?.['اكتب رسالتك...'] || (t.addedTranslations_2026?.['اكتب رسالتك...'] || 'اكتب رسالتك...'))}
                     value={messageText}
                     onChange={(e) => setMessageText(e.target.value)}
                     rows={2}
@@ -600,7 +600,7 @@ function ReaderChatContent() {
                     className="h-11 w-11 shrink-0 bg-[#D4A843] hover:bg-[#C49A3A] text-white rounded-xl shadow-sm"
                     onClick={handleSend}
                     disabled={(!messageText.trim() && !linkText.trim()) || sending}
-                    aria-label="إرسال"
+                    aria-label={(t.addedTranslations_2026?.['إرسال'] || (t.addedTranslations_2026?.['إرسال'] || 'إرسال'))}
                   >
                     {sending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5 rtl:-scale-x-100" />}
                   </Button>
@@ -610,7 +610,7 @@ function ReaderChatContent() {
           ) : (
             <div className="h-full flex flex-col items-center justify-center text-muted-foreground bg-muted/30">
               <MessageSquare className="w-16 h-16 text-muted-foreground/50 mb-4" />
-              <p className="font-medium">اختر محادثة للبدء في التواصل</p>
+              <p className="font-medium">{(t.addedTranslations_2026?.['اختر محادثة للبدء في التواصل'] || (t.addedTranslations_2026?.['اختر محادثة للبدء في التواصل'] || 'اختر محادثة للبدء في التواصل'))}</p>
             </div>
           )}
         </Card>

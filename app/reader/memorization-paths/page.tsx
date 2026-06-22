@@ -58,10 +58,10 @@ type Preset = {
   level: string
 }
 const PRESETS: Preset[] = [
-  { key: "juz30", labelAr: "جزء عمّ", labelEn: "Juz Amma", descriptionAr: "السور القصيرة (النبأ → الناس)", descriptionEn: "Short Surahs (An-Naba → An-Nas)", unit_type: "surah", range_from: 78, range_to: 114, direction: "desc", level: "beginner" },
-  { key: "juz29", labelAr: "جزء تبارك", labelEn: "Juz Tabarak", descriptionAr: "من سورة الملك", descriptionEn: "From Surah Al-Mulk", unit_type: "surah", range_from: 67, range_to: 77, direction: "desc", level: "beginner" },
-  { key: "full_surah", labelAr: "المصحف كامل (بالسور)", labelEn: "Entire Quran (By Surah)", descriptionAr: "الفاتحة → الناس، 114 سورة", descriptionEn: "Al-Fatihah → An-Nas, 114 Surahs", unit_type: "surah", range_from: 1, range_to: 114, direction: "desc", level: "advanced" },
-  { key: "full_juz", labelAr: "المصحف كامل (بالأجزاء)", labelEn: "Entire Quran (By Juz)", descriptionAr: "30 جزءاً بالترتيب", descriptionEn: "30 Juz in order", unit_type: "juz", range_from: 1, range_to: 30, direction: "desc", level: "advanced" },
+  { key: "juz30", labelAr: (t.addedTranslations_2026?.['جزء عمّ'] || 'جزء عمّ'), labelEn: "Juz Amma", descriptionAr: (t.addedTranslations_2026?.['السور القصيرة (النبأ → الناس)'] || 'السور القصيرة (النبأ → الناس)'), descriptionEn: "Short Surahs (An-Naba → An-Nas)", unit_type: "surah", range_from: 78, range_to: 114, direction: "desc", level: "beginner" },
+  { key: "juz29", labelAr: (t.addedTranslations_2026?.['جزء تبارك'] || 'جزء تبارك'), labelEn: "Juz Tabarak", descriptionAr: (t.addedTranslations_2026?.['من سورة الملك'] || 'من سورة الملك'), descriptionEn: "From Surah Al-Mulk", unit_type: "surah", range_from: 67, range_to: 77, direction: "desc", level: "beginner" },
+  { key: "full_surah", labelAr: (t.addedTranslations_2026?.['المصحف كامل (بالسور)'] || 'المصحف كامل (بالسور)'), labelEn: "Entire Quran (By Surah)", descriptionAr: (t.addedTranslations_2026?.['الفاتحة → الناس، 114 سورة'] || 'الفاتحة → الناس، 114 سورة'), descriptionEn: "Al-Fatihah → An-Nas, 114 Surahs", unit_type: "surah", range_from: 1, range_to: 114, direction: "desc", level: "advanced" },
+  { key: "full_juz", labelAr: (t.addedTranslations_2026?.['المصحف كامل (بالأجزاء)'] || 'المصحف كامل (بالأجزاء)'), labelEn: "Entire Quran (By Juz)", descriptionAr: (t.addedTranslations_2026?.['30 جزءاً بالترتيب'] || '30 جزءاً بالترتيب'), descriptionEn: "30 Juz in order", unit_type: "juz", range_from: 1, range_to: 30, direction: "desc", level: "advanced" },
 ]
 
 export default function ReaderMemorizationPathsPage() {
@@ -192,7 +192,7 @@ export default function ReaderMemorizationPathsPage() {
       }
       toast.success(
         t.reader.memorizationPaths.successCreated + 
-        (data.total_units ? (isAr ? ` بـ ${data.total_units} وحدة` : ` with ${data.total_units} units`) : "") +
+        (data.total_units ? ((t.addedTranslations_2026?.[' بـ ${data.total_units} وحدة'] || (t.addedTranslations_2026?.[' بـ ${data.total_units} وحدة'] || ' بـ ${data.total_units} وحدة'))) : "") +
         (form.is_published 
           ? t.reader.memorizationPaths.successPublished 
           : t.reader.memorizationPaths.successDraft),
@@ -260,14 +260,14 @@ export default function ReaderMemorizationPathsPage() {
             <div>
               {schemaNotice.notice === "schema_prerequisite_missing" ? (
                 <>
-                  <strong>{isAr ? "اتصال قاعدة البيانات مش على schema التطبيق المطلوبة." : "Database schema missing prerequisite table."}</strong> {isAr ? "الجدول الأساسي" : "The table"}
+                  <strong>{(t.addedTranslations_2026?.['اتصال قاعدة البيانات مش على schema التطبيق المطلوبة.'] || (t.addedTranslations_2026?.['اتصال قاعدة البيانات مش على schema التطبيق المطلوبة.'] || 'اتصال قاعدة البيانات مش على schema التطبيق المطلوبة.'))}</strong> {(t.addedTranslations_2026?.['الجدول الأساسي'] || (t.addedTranslations_2026?.['الجدول الأساسي'] || 'الجدول الأساسي'))}
                   <code className="bg-amber-500/15 px-2 py-0.5 mx-1 rounded">{schemaNotice.missing_relation}</code>
-                  {isAr ? "غير موجود، فتأكد من DATABASE_URL/POSTGRES_URL أو شغّل السكريبتات الأساسية قبل" : "was not found. Please verify your connection or run"}
+                  {(t.addedTranslations_2026?.['غير موجود، فتأكد من DATABASE_URL/POSTGRES_URL أو شغّل السكريبتات الأساسية قبل'] || (t.addedTranslations_2026?.['غير موجود، فتأكد من DATABASE_URL/POSTGRES_URL أو شغّل السكريبتات الأساسية قبل'] || 'غير موجود، فتأكد من DATABASE_URL/POSTGRES_URL أو شغّل السكريبتات الأساسية قبل'))}
                   <code className="bg-amber-500/15 px-2 py-0.5 mx-1 rounded">scripts/022-memorization-paths.sql</code>
                 </>
               ) : (
                 <>
-                  <strong>{isAr ? "الميجريشن لسه ما اتشغّلش." : "Migrations not yet applied."}</strong> {isAr ? "راسل الإدارة لتشغيل" : "Please run or request running"}
+                  <strong>{(t.addedTranslations_2026?.['الميجريشن لسه ما اتشغّلش.'] || (t.addedTranslations_2026?.['الميجريشن لسه ما اتشغّلش.'] || 'الميجريشن لسه ما اتشغّلش.'))}</strong> {(t.addedTranslations_2026?.['راسل الإدارة لتشغيل'] || (t.addedTranslations_2026?.['راسل الإدارة لتشغيل'] || 'راسل الإدارة لتشغيل'))}
                   <code className="bg-amber-500/15 px-2 py-0.5 mx-1 rounded">scripts/022-memorization-paths.sql</code>
                 </>
               )}
@@ -538,7 +538,7 @@ export default function ReaderMemorizationPathsPage() {
                   <p className="text-sm">
                     {t.reader.memorizationPaths.willGenerateNote
                       .replace("{count}", String(unitCount))
-                      .replace("{unit}", unitCount === 1 ? unitWord : (isAr ? `${unitWord}اً` : `${unitWord}s`))
+                      .replace("{unit}", unitCount === 1 ? unitWord : ((t.addedTranslations_2026?.['${unitWord}اً'] || (t.addedTranslations_2026?.['${unitWord}اً'] || '${unitWord}اً'))))
                       .replace("{type}", TYPE_LABELS[form.unit_type])}
                   </p>
                 </div>
@@ -584,7 +584,7 @@ export default function ReaderMemorizationPathsPage() {
             <Button onClick={submit} disabled={creating || !canSubmit} className="gap-2">
               {creating && <Loader2 className="h-4 w-4 animate-spin" />}
               {rangeValid && unitCount > 0 
-                ? t.reader.memorizationPaths.createPathBtnWithCount.replace("{count}", String(unitCount)).replace("{unit}", unitCount === 1 ? unitWord : (isAr ? `${unitWord}اً` : `${unitWord}s`))
+                ? t.reader.memorizationPaths.createPathBtnWithCount.replace("{count}", String(unitCount)).replace("{unit}", unitCount === 1 ? unitWord : ((t.addedTranslations_2026?.['${unitWord}اً'] || (t.addedTranslations_2026?.['${unitWord}اً'] || '${unitWord}اً'))))
                 : t.reader.memorizationPaths.createPathBtn}
             </Button>
           </DialogFooter>

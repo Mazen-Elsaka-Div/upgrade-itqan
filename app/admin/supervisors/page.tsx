@@ -123,9 +123,7 @@ export default function AdminSupervisorsPage() {
             {a.svManage}
           </h1>
           <p className="text-sm text-muted-foreground">
-            {isAr
-              ? "حدّد نطاق إشراف كل مشرف على الطلاب أو المقرئين المُسندين له"
-              : "Define each supervisor's scope over assigned students or readers"}
+            {(t.addedTranslations_2026?.['حدّد نطاق إشراف كل مشرف على الطلاب أو المقرئين المُسندين له'] || 'حدّد نطاق إشراف كل مشرف على الطلاب أو المقرئين المُسندين له')}
           </p>
         </div>
       </header>
@@ -173,9 +171,7 @@ export default function AdminSupervisorsPage() {
                   ) : (
                     <span className="inline-flex items-center gap-1 text-foreground">
                       <CheckCircle2 className="h-4 w-4 text-primary" />
-                      {isAr
-                        ? `${count} ${isStudent ? "طالب" : "مقرئ"} مُسند`
-                        : `${count} assigned ${isStudent ? "student(s)" : "reader(s)"}`}
+                      {(t.addedTranslations_2026?.['${count} ${isStudent ? "طالب" : "مقرئ"} مُسند'] || '${count} ${isStudent ? "طالب" : "مقرئ"} مُسند')}
                     </span>
                   )}
                 </div>
@@ -202,9 +198,7 @@ export default function AdminSupervisorsPage() {
               {a.svSetScopeTitle} — {active?.name}
             </DialogTitle>
             <DialogDescription>
-              {isAr
-                ? "اختر المستخدمين المُسندين. ترك الكل بدون تحديد يعني نطاقاً كاملاً (يرى الجميع)."
-                : "Select assigned users. Leaving none selected means full scope (sees everyone)."}
+              {(t.addedTranslations_2026?.['اختر المستخدمين المُسندين. ترك الكل بدون تحديد يعني نطاقاً كاملاً (يرى الجميع).'] || 'اختر المستخدمين المُسندين. ترك الكل بدون تحديد يعني نطاقاً كاملاً (يرى الجميع).')}
             </DialogDescription>
           </DialogHeader>
 
@@ -252,9 +246,7 @@ export default function AdminSupervisorsPage() {
           </div>
 
           <p className="text-xs text-muted-foreground">
-            {isAr
-              ? `${selected.size} مُحدد`
-              : `${selected.size} selected`}
+            {(t.addedTranslations_2026?.['${selected.size} مُحدد'] || '${selected.size} مُحدد')}
           </p>
 
           <DialogFooter className="gap-2">

@@ -113,8 +113,8 @@ export default function ReaderProfilePage() {
               <Input id="reader-phone" value={phone} onChange={e => setPhone(e.target.value)} dir="ltr" placeholder={t.profile.phonePlaceholder} className="border-border bg-muted/30 rounded-xl focus:ring-primary/20" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="reader-bio" className="font-semibold text-xs text-muted-foreground uppercase tracking-wider">نبذة مختصرة</Label>
-              <Textarea id="reader-bio" value={bio} onChange={e => setBio(e.target.value)} rows={3} placeholder="أكتب نبذة عن تخصصك..." className="border-border bg-muted/30 rounded-xl focus:ring-primary/20" />
+              <Label htmlFor="reader-bio" className="font-semibold text-xs text-muted-foreground uppercase tracking-wider">{(t.addedTranslations_2026?.['نبذة مختصرة'] || (t.addedTranslations_2026?.['نبذة مختصرة'] || 'نبذة مختصرة'))}</Label>
+              <Textarea id="reader-bio" value={bio} onChange={e => setBio(e.target.value)} rows={3} placeholder={(t.addedTranslations_2026?.['أكتب نبذة عن تخصصك...'] || (t.addedTranslations_2026?.['أكتب نبذة عن تخصصك...'] || 'أكتب نبذة عن تخصصك...'))} className="border-border bg-muted/30 rounded-xl focus:ring-primary/20" />
             </div>
             <div className="flex items-center gap-3">
               <Button type="submit" disabled={saving} className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl font-bold">

@@ -1,3 +1,4 @@
+import { useI18n } from '@/lib/i18n/context';
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -38,15 +39,17 @@ interface Booking {
 }
 
 const STATUS: Record<string, { label: string; cls: string }> = {
-  pending:   { label: 'قيد الانتظار', cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' },
-  confirmed: { label: 'مؤكدة',        cls: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
-  completed: { label: 'مكتملة',       cls: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
-  cancelled: { label: 'ملغاة',        cls: 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400' },
+  pending:   { label: (t.addedTranslations_2026?.['قيد الانتظار'] || 'قيد الانتظار'), cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' },
+  confirmed: { label: (t.addedTranslations_2026?.['مؤكدة'] || 'مؤكدة'),        cls: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
+  completed: { label: (t.addedTranslations_2026?.['مكتملة'] || 'مكتملة'),       cls: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
+  cancelled: { label: (t.addedTranslations_2026?.['ملغاة'] || 'ملغاة'),        cls: 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400' },
 }
 
 interface Comment { id: string; author_name: string; comment_text: string; created_at: string }
 
 export default function ReaderSessionDetailPage() {
+  const { t } = useI18n();
+
   const params = useParams()
   const router = useRouter()
   const id = params.id as string
@@ -68,7 +71,7 @@ export default function ReaderSessionDetailPage() {
       try {
         const res = await fetch(`/api/bookings/${id}`)
         if (!res.ok) {
-          toast.error('تعذّر تحميل الجلسة')
+          toast.error((t.addedTranslations_2026?.['تعذّر تحميل الجلسة'] || 'تعذّر تحميل الجلسة'))
           router.push('/reader/sessions')
           return
         }
@@ -81,7 +84,7 @@ export default function ReaderSessionDetailPage() {
           setComments(cData.comments || [])
         }
       } catch {
-        toast.error('حدث خطأ')
+        toast.error((t.addedTranslations_2026?.['حدث خطأ'] || 'حدث خطأ'))
       } finally {
         setLoading(false)
       }
@@ -101,8 +104,8 @@ export default function ReaderSessionDetailPage() {
       if (res.ok) {
         setBooking((b) => (b ? { ...b, meeting_link: linkInput.trim() } : b))
         setLinkInput('')
-        toast.success('تم حفظ الرابط')
-      } else toast.error('تعذّر حفظ الرابط')
+        toast.success((t.addedTranslations_2026?.['تم حفظ الرابط'] || 'تم حفظ الرابط'))
+      } else toast.error((t.addedTranslations_2026?.['تعذّر حفظ الرابط'] || 'تعذّر حفظ الرابط'))
     } finally {
       setSavingLink(false)
     }
@@ -116,8 +119,8 @@ export default function ReaderSessionDetailPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ session_summary: summary }),
       })
-      if (res.ok) toast.success('تم حفظ ملخص الجلسة')
-      else toast.error('تعذّر الحفظ')
+      if (res.ok) toast.success((t.addedTranslations_2026?.['تم حفظ ملخص الجلسة'] || 'تم حفظ ملخص الجلسة'))
+      else toast.error((t.addedTranslations_2026?.['تعذّر الحفظ'] || 'تعذّر الحفظ'))
     } finally {
       setSavingSummary(false)
     }
@@ -135,8 +138,8 @@ export default function ReaderSessionDetailPage() {
       })
       if (res.ok) {
         setBooking((b) => (b ? { ...b, status: next } : b))
-        toast.success(next === 'completed' ? 'تم إنهاء الجلسة' : 'تم إعادة فتح الجلسة')
-      } else toast.error('تعذّر التحديث')
+        toast.success(next === 'completed' ? (t.addedTranslations_2026?.['تم إنهاء الجلسة'] || 'تم إنهاء الجلسة') : 'تم إعادة فتح الجلسة')
+      } else toast.error((t.addedTranslations_2026?.['تعذّر التحديث'] || 'تعذّر التحديث'))
     } finally {
       setTogglingStatus(false)
     }
@@ -155,7 +158,7 @@ export default function ReaderSessionDetailPage() {
         const d = await res.json()
         setComments((p) => [...p, d.comment])
         setCommentText('')
-      } else toast.error('تعذّر إرسال التعليق')
+      } else toast.error((t.addedTranslations_2026?.['تعذّر إرسال التعليق'] || 'تعذّر إرسال التعليق'))
     } finally {
       setSendingComment(false)
     }
@@ -184,8 +187,8 @@ export default function ReaderSessionDetailPage() {
         className="inline-flex items-center gap-2 text-sm font-bold text-muted-foreground hover:text-foreground transition-colors"
       >
         <ArrowRight className="w-4 h-4" />
-        العودة إلى الجلسات
-      </button>
+        {(t.addedTranslations_2026?.['العودة إلى الجلسات'] || 'العودة إلى الجلسات')}
+                    </button>
 
       {/* Header card */}
       <Card className="border-border rounded-3xl overflow-hidden">
@@ -197,14 +200,14 @@ export default function ReaderSessionDetailPage() {
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={booking.student_avatar || "/placeholder.svg"} alt={booking.student_name} className="w-full h-full object-cover" />
                 ) : (
-                  (booking.student_name || 'ط').charAt(0)
+                  (booking.student_name || (t.addedTranslations_2026?.['ط'] || 'ط')).charAt(0)
                 )}
               </div>
               <div>
                 <h1 className="text-xl md:text-2xl font-black text-foreground text-balance">{booking.student_name}</h1>
                 <p className="text-sm font-medium text-muted-foreground flex items-center gap-1.5 mt-1">
-                  <User className="w-3.5 h-3.5" /> جلسة تلاوة فردية
-                </p>
+                  <User className="w-3.5 h-3.5" /> {(t.addedTranslations_2026?.['جلسة تلاوة فردية'] || 'جلسة تلاوة فردية')}
+                                                  </p>
               </div>
             </div>
             <span className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold ${st.cls}`}>
@@ -216,13 +219,13 @@ export default function ReaderSessionDetailPage() {
           {/* Meta */}
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-6">
             <div className="bg-card/60 rounded-2xl p-4 border border-border/50">
-              <p className="text-xs font-bold text-muted-foreground flex items-center gap-1.5 mb-1"><Calendar className="w-3.5 h-3.5" /> التاريخ</p>
+              <p className="text-xs font-bold text-muted-foreground flex items-center gap-1.5 mb-1"><Calendar className="w-3.5 h-3.5" /> {(t.addedTranslations_2026?.['التاريخ'] || 'التاريخ')}</p>
               <p className="text-sm font-black text-foreground">
                 {start ? new Date(start).toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long' }) : '—'}
               </p>
             </div>
             <div className="bg-card/60 rounded-2xl p-4 border border-border/50">
-              <p className="text-xs font-bold text-muted-foreground flex items-center gap-1.5 mb-1"><Clock className="w-3.5 h-3.5" /> الوقت</p>
+              <p className="text-xs font-bold text-muted-foreground flex items-center gap-1.5 mb-1"><Clock className="w-3.5 h-3.5" /> {(t.addedTranslations_2026?.['الوقت'] || 'الوقت')}</p>
               <p className="text-sm font-black text-foreground">
                 {start ? new Date(start).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }) : '—'}
                 {booking.duration_minutes ? ` · ${booking.duration_minutes} د` : ''}
@@ -230,7 +233,7 @@ export default function ReaderSessionDetailPage() {
             </div>
             {booking.surah_name && (
               <div className="bg-card/60 rounded-2xl p-4 border border-border/50">
-                <p className="text-xs font-bold text-muted-foreground flex items-center gap-1.5 mb-1"><BookOpen className="w-3.5 h-3.5" /> التلاوة</p>
+                <p className="text-xs font-bold text-muted-foreground flex items-center gap-1.5 mb-1"><BookOpen className="w-3.5 h-3.5" /> {(t.addedTranslations_2026?.['التلاوة'] || 'التلاوة')}</p>
                 <p className="text-sm font-black text-foreground">
                   {booking.surah_name} {booking.ayah_from ? `(${booking.ayah_from}-${booking.ayah_to})` : ''}
                 </p>
@@ -245,8 +248,8 @@ export default function ReaderSessionDetailPage() {
         <Card className="border-border rounded-3xl">
           <CardContent className="p-6">
             <h3 className="text-sm font-black text-foreground flex items-center gap-2 mb-4">
-              <Mic className="w-4 h-4 text-emerald-600" /> التسجيل المرفق
-            </h3>
+              <Mic className="w-4 h-4 text-emerald-600" /> {(t.addedTranslations_2026?.['التسجيل المرفق'] || 'التسجيل المرفق')}
+                                      </h3>
             {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
             <audio controls src={booking.recitation_audio} className="w-full" />
           </CardContent>
@@ -258,20 +261,20 @@ export default function ReaderSessionDetailPage() {
         <Card className="border-border rounded-3xl">
           <CardContent className="p-6 space-y-4">
             <h3 className="text-sm font-black text-foreground flex items-center gap-2">
-              <Link2 className="w-4 h-4 text-emerald-600" /> رابط الجلسة
-            </h3>
+              <Link2 className="w-4 h-4 text-emerald-600" /> {(t.addedTranslations_2026?.['رابط الجلسة'] || 'رابط الجلسة')}
+                                      </h3>
             {isActive && (
               <a
                 href={`/reader/sessions/${booking.id}/live`}
                 className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3.5 rounded-2xl text-sm font-bold transition-all shadow-md"
               >
-                <Video className="w-5 h-5" /> ابدأ البث المباشر داخل المنصة
-              </a>
+                <Video className="w-5 h-5" /> {(t.addedTranslations_2026?.['ابدأ البث المباشر داخل المنصة'] || 'ابدأ البث المباشر داخل المنصة')}
+                                            </a>
             )}
             {isCompleted ? (
               <div className="flex items-center gap-3 bg-muted/50 rounded-2xl p-4 border border-border/50">
                 <VideoOff className="w-5 h-5 text-muted-foreground shrink-0" />
-                <p className="text-sm font-bold text-muted-foreground">انتهت الجلسة</p>
+                <p className="text-sm font-bold text-muted-foreground">{(t.addedTranslations_2026?.['انتهت الجلسة'] || 'انتهت الجلسة')}</p>
               </div>
             ) : booking.meeting_link ? (
               <div className="flex items-center rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-2 pr-4">
@@ -289,13 +292,13 @@ export default function ReaderSessionDetailPage() {
                     value={linkInput}
                     onChange={(e) => setLinkInput(e.target.value)}
                     onKeyDown={(e) => { if (e.key === 'Enter') saveLink() }}
-                    placeholder="الصق رابط جلسة خارجية (اختياري)"
+                    placeholder={(t.addedTranslations_2026?.['الصق رابط جلسة خارجية (اختياري)'] || 'الصق رابط جلسة خارجية (اختياري)')}
                     className="w-full h-9 border-none bg-transparent p-0 text-sm placeholder:text-muted-foreground focus:ring-0 focus:outline-none text-foreground font-semibold"
                   />
                 </div>
                 <Button onClick={saveLink} disabled={!linkInput || savingLink} className="rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold">
-                  {savingLink ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />} حفظ الرابط
-                </Button>
+                  {savingLink ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />} {(t.addedTranslations_2026?.['حفظ الرابط'] || 'حفظ الرابط')}
+                                                          </Button>
               </div>
             )}
           </CardContent>
@@ -305,14 +308,14 @@ export default function ReaderSessionDetailPage() {
         <Card className="border-border rounded-3xl">
           <CardContent className="p-6 space-y-4">
             <h3 className="text-sm font-black text-foreground flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-emerald-600" /> إدارة الجلسة
-            </h3>
+              <Sparkles className="w-4 h-4 text-emerald-600" /> {(t.addedTranslations_2026?.['إدارة الجلسة'] || 'إدارة الجلسة')}
+                                      </h3>
             <a
               href={`/reader/chat?with=${booking.student_id}`}
               className="w-full flex items-center justify-center gap-2 rounded-2xl border-2 border-amber-400/30 bg-amber-400/5 text-foreground px-6 py-3.5 text-sm font-bold hover:border-amber-400 transition-all"
             >
-              <MessageSquare className="w-5 h-5 text-amber-500" /> مراسلة الطالب
-            </a>
+              <MessageSquare className="w-5 h-5 text-amber-500" /> {(t.addedTranslations_2026?.['مراسلة الطالب'] || 'مراسلة الطالب')}
+                                      </a>
             <button
               onClick={toggleCompleted}
               disabled={togglingStatus}
@@ -323,8 +326,8 @@ export default function ReaderSessionDetailPage() {
                   {togglingStatus ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                 </div>
                 <div>
-                  <span className="block text-sm font-bold text-foreground">{isCompleted ? 'الجلسة مكتملة' : 'تأكيد اكتمال الجلسة'}</span>
-                  <span className="block text-xs font-medium text-muted-foreground mt-0.5">{isCompleted ? 'اضغط للتراجع' : 'وسم الجلسة كمنتهية بنجاح'}</span>
+                  <span className="block text-sm font-bold text-foreground">{isCompleted ? (t.addedTranslations_2026?.['الجلسة مكتملة'] || 'الجلسة مكتملة') : 'تأكيد اكتمال الجلسة'}</span>
+                  <span className="block text-xs font-medium text-muted-foreground mt-0.5">{isCompleted ? (t.addedTranslations_2026?.['اضغط للتراجع'] || 'اضغط للتراجع') : 'وسم الجلسة كمنتهية بنجاح'}</span>
                 </div>
               </div>
             </button>
@@ -336,17 +339,17 @@ export default function ReaderSessionDetailPage() {
       <Card className="border-border rounded-3xl">
         <CardContent className="p-6 space-y-4">
           <h3 className="text-sm font-black text-foreground flex items-center gap-2">
-            <BookOpen className="w-4 h-4 text-emerald-600" /> ملخص الجلسة وملاحظاتك
-          </h3>
+            <BookOpen className="w-4 h-4 text-emerald-600" /> {(t.addedTranslations_2026?.['ملخص الجلسة وملاحظاتك'] || 'ملخص الجلسة وملاحظاتك')}
+                                </h3>
           <Textarea
             value={summary}
             onChange={(e) => setSummary(e.target.value)}
-            placeholder="اكتب ملخص ما تم في الجلسة، نقاط القوة والملاحظات للطالب..."
+            placeholder={(t.addedTranslations_2026?.['اكتب ملخص ما تم في الجلسة، نقاط القوة والملاحظات للطالب...'] || 'اكتب ملخص ما تم في الجلسة، نقاط القوة والملاحظات للطالب...')}
             className="min-h-[120px] rounded-2xl resize-none"
           />
           <Button onClick={saveSummary} disabled={savingSummary} className="rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold">
-            {savingSummary ? <Loader2 className="w-4 h-4 animate-spin ml-1.5" /> : <Save className="w-4 h-4 ml-1.5" />} حفظ الملخص
-          </Button>
+            {savingSummary ? <Loader2 className="w-4 h-4 animate-spin ml-1.5" /> : <Save className="w-4 h-4 ml-1.5" />} {(t.addedTranslations_2026?.['حفظ الملخص'] || 'حفظ الملخص')}
+                                </Button>
         </CardContent>
       </Card>
 
@@ -354,8 +357,8 @@ export default function ReaderSessionDetailPage() {
       <Card className="border-border rounded-3xl">
         <CardContent className="p-6 space-y-5">
           <h3 className="text-sm font-black text-foreground flex items-center gap-2">
-            <MessageSquare className="w-4 h-4 text-emerald-600" /> التعليقات والملاحظات
-          </h3>
+            <MessageSquare className="w-4 h-4 text-emerald-600" /> {(t.addedTranslations_2026?.['التعليقات والملاحظات'] || 'التعليقات والملاحظات')}
+                                </h3>
           {comments.length > 0 && (
             <div className="space-y-3 max-h-[360px] overflow-y-auto pr-1">
               {comments.map((c) => (
@@ -381,11 +384,11 @@ export default function ReaderSessionDetailPage() {
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') sendComment() }}
-              placeholder="أضف تعليقاً..."
+              placeholder={(t.addedTranslations_2026?.['أضف تعليقاً...'] || 'أضف تعليقاً...')}
               className="flex-1 h-11 rounded-2xl border-2 border-border bg-card px-4 text-sm font-semibold focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none text-foreground"
             />
             <Button onClick={sendComment} disabled={!commentText.trim() || sendingComment} className="rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-11">
-              {sendingComment ? <Loader2 className="w-4 h-4 animate-spin" /> : 'إرسال'}
+              {sendingComment ? <Loader2 className="w-4 h-4 animate-spin" /> : (t.addedTranslations_2026?.['إرسال'] || 'إرسال')}
             </Button>
           </div>
         </CardContent>

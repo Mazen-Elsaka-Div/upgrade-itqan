@@ -41,6 +41,7 @@ let _qid = 0
 const newQuestionId = () => `q_${Date.now()}_${_qid++}`
 
 export default function NewTaskPage() {
+    const { t } = useI18n();
   const router = useRouter()
   const { locale } = useI18n()
   const isAr = locale === "ar"
@@ -54,38 +55,38 @@ export default function NewTaskPage() {
   }[] = [
     {
       key: "written",
-      title: isAr ? "مهمة كتابية" : "Written Task",
-      desc: isAr ? "إجابة نصية يكتبها الطالب" : "Text response written by the student",
+      title: (t.addedTranslations_2026?.['مهمة كتابية'] || (t.addedTranslations_2026?.['مهمة كتابية'] || 'مهمة كتابية')),
+      desc: (t.addedTranslations_2026?.['إجابة نصية يكتبها الطالب'] || (t.addedTranslations_2026?.['إجابة نصية يكتبها الطالب'] || 'إجابة نصية يكتبها الطالب')),
       Icon: FileText,
-      expects: isAr ? "نص + مرفق اختياري" : "Text + optional attachment",
+      expects: (t.addedTranslations_2026?.['نص + مرفق اختياري'] || (t.addedTranslations_2026?.['نص + مرفق اختياري'] || 'نص + مرفق اختياري')),
     },
     {
       key: "audio",
-      title: isAr ? "تسجيل صوتي" : "Audio Recording",
-      desc: isAr ? "تلاوة أو حفظ أو تسجيل شفهي" : "Recitation, memorization or oral recording",
+      title: (t.addedTranslations_2026?.['تسجيل صوتي'] || (t.addedTranslations_2026?.['تسجيل صوتي'] || 'تسجيل صوتي')),
+      desc: (t.addedTranslations_2026?.['تلاوة أو حفظ أو تسجيل شفهي'] || (t.addedTranslations_2026?.['تلاوة أو حفظ أو تسجيل شفهي'] || 'تلاوة أو حفظ أو تسجيل شفهي')),
       Icon: Mic,
-      expects: isAr ? "ملف صوتي مطلوب" : "Audio file required",
+      expects: (t.addedTranslations_2026?.['ملف صوتي مطلوب'] || (t.addedTranslations_2026?.['ملف صوتي مطلوب'] || 'ملف صوتي مطلوب')),
     },
     {
       key: "video",
-      title: isAr ? "مقطع فيديو" : "Video Clip",
-      desc: isAr ? "تسليم على هيئة مقطع فيديو" : "Submission as a video clip",
+      title: (t.addedTranslations_2026?.['مقطع فيديو'] || (t.addedTranslations_2026?.['مقطع فيديو'] || 'مقطع فيديو')),
+      desc: (t.addedTranslations_2026?.['تسليم على هيئة مقطع فيديو'] || (t.addedTranslations_2026?.['تسليم على هيئة مقطع فيديو'] || 'تسليم على هيئة مقطع فيديو')),
       Icon: Video,
-      expects: isAr ? "ملف فيديو مطلوب" : "Video file required",
+      expects: (t.addedTranslations_2026?.['ملف فيديو مطلوب'] || (t.addedTranslations_2026?.['ملف فيديو مطلوب'] || 'ملف فيديو مطلوب')),
     },
     {
       key: "project",
-      title: isAr ? "مشروع / ملف" : "Project / File",
-      desc: isAr ? "تقرير، عرض، أو ملف عملي" : "Report, presentation or practical file",
+      title: (t.addedTranslations_2026?.['مشروع / ملف'] || (t.addedTranslations_2026?.['مشروع / ملف'] || 'مشروع / ملف')),
+      desc: (t.addedTranslations_2026?.['تقرير، عرض، أو ملف عملي'] || (t.addedTranslations_2026?.['تقرير، عرض، أو ملف عملي'] || 'تقرير، عرض، أو ملف عملي')),
       Icon: Layers,
-      expects: isAr ? "ملف مرفق مطلوب" : "Attached file required",
+      expects: (t.addedTranslations_2026?.['ملف مرفق مطلوب'] || (t.addedTranslations_2026?.['ملف مرفق مطلوب'] || 'ملف مرفق مطلوب')),
     },
     {
       key: "quiz",
-      title: isAr ? "اختبار" : "Quiz",
-      desc: isAr ? "إجابة قصيرة على أسئلة" : "Short answers to questions",
+      title: (t.addedTranslations_2026?.['اختبار'] || (t.addedTranslations_2026?.['اختبار'] || 'اختبار')),
+      desc: (t.addedTranslations_2026?.['إجابة قصيرة على أسئلة'] || (t.addedTranslations_2026?.['إجابة قصيرة على أسئلة'] || 'إجابة قصيرة على أسئلة')),
       Icon: ListChecks,
-      expects: isAr ? "إجابة نصية" : "Text response",
+      expects: (t.addedTranslations_2026?.['إجابة نصية'] || (t.addedTranslations_2026?.['إجابة نصية'] || 'إجابة نصية')),
     },
   ]
 
@@ -193,19 +194,19 @@ export default function NewTaskPage() {
     e.preventDefault()
     setError("")
 
-    if (!formData.course_id) return setError(isAr ? "يجب اختيار دورة" : "Course must be selected")
-    if (!formData.title.trim()) return setError(isAr ? "عنوان المهمة مطلوب" : "Task title is required")
-    if (!formData.due_date) return setError(isAr ? "تاريخ التسليم مطلوب" : "Due date is required")
+    if (!formData.course_id) return setError((t.addedTranslations_2026?.['يجب اختيار دورة'] || (t.addedTranslations_2026?.['يجب اختيار دورة'] || 'يجب اختيار دورة')))
+    if (!formData.title.trim()) return setError((t.addedTranslations_2026?.['عنوان المهمة مطلوب'] || (t.addedTranslations_2026?.['عنوان المهمة مطلوب'] || 'عنوان المهمة مطلوب')))
+    if (!formData.due_date) return setError((t.addedTranslations_2026?.['تاريخ التسليم مطلوب'] || (t.addedTranslations_2026?.['تاريخ التسليم مطلوب'] || 'تاريخ التسليم مطلوب')))
 
     if (isQuiz) {
-      if (quizQuestions.length === 0) return setError(isAr ? "أضف سؤالاً واحداً على الأقل للاختبار" : "Add at least one question to the quiz")
+      if (quizQuestions.length === 0) return setError((t.addedTranslations_2026?.['أضف سؤالاً واحداً على الأقل للاختبار'] || (t.addedTranslations_2026?.['أضف سؤالاً واحداً على الأقل للاختبار'] || 'أضف سؤالاً واحداً على الأقل للاختبار')))
       for (const q of quizQuestions) {
-        if (!q.question.trim()) return setError(isAr ? "يوجد سؤال بدون نص. أكمل جميع الأسئلة" : "There is a question without text. Complete all questions")
+        if (!q.question.trim()) return setError((t.addedTranslations_2026?.['يوجد سؤال بدون نص. أكمل جميع الأسئلة'] || (t.addedTranslations_2026?.['يوجد سؤال بدون نص. أكمل جميع الأسئلة'] || 'يوجد سؤال بدون نص. أكمل جميع الأسئلة')))
         if (q.type === "mcq") {
           const filled = q.options.filter(o => o.trim()).length
-          if (filled < 2) return setError(isAr ? "أسئلة الاختيار يجب أن تحتوي على خيارين على الأقل" : "Multiple choice questions must have at least 2 options")
+          if (filled < 2) return setError((t.addedTranslations_2026?.['أسئلة الاختيار يجب أن تحتوي على خيارين على الأقل'] || (t.addedTranslations_2026?.['أسئلة الاختيار يجب أن تحتوي على خيارين على الأقل'] || 'أسئلة الاختيار يجب أن تحتوي على خيارين على الأقل')))
           if (!q.options[q.correct]?.trim())
-            return setError(isAr ? "حدّد الإجابة الصحيحة لكل سؤال اختيار من متعدد" : "Select correct answer for each multiple choice question")
+            return setError((t.addedTranslations_2026?.['حدّد الإجابة الصحيحة لكل سؤال اختيار من متعدد'] || (t.addedTranslations_2026?.['حدّد الإجابة الصحيحة لكل سؤال اختيار من متعدد'] || 'حدّد الإجابة الصحيحة لكل سؤال اختيار من متعدد')))
         }
       }
     }
@@ -238,11 +239,11 @@ export default function NewTaskPage() {
 
       const json = await res.json().catch(() => ({}))
       if (!res.ok) {
-        throw new Error(json.error || (isAr ? "حدث خطأ أثناء الإنشاء" : "An error occurred during creation"))
+        throw new Error(json.error || ((t.addedTranslations_2026?.['حدث خطأ أثناء الإنشاء'] || (t.addedTranslations_2026?.['حدث خطأ أثناء الإنشاء'] || 'حدث خطأ أثناء الإنشاء'))))
       }
       router.push("/academy/teacher/tasks")
     } catch (err) {
-      const msg = err instanceof Error ? err.message : (isAr ? "حدث خطأ غير متوقع" : "An unexpected error occurred")
+      const msg = err instanceof Error ? err.message : ((t.addedTranslations_2026?.['حدث خطأ غير متوقع'] || (t.addedTranslations_2026?.['حدث خطأ غير متوقع'] || 'حدث خطأ غير متوقع')))
       setError(msg)
       setLoading(false)
     }
@@ -257,18 +258,16 @@ export default function NewTaskPage() {
         <Link
           href="/academy/teacher/tasks"
           className="p-2 border border-border bg-card rounded-lg hover:bg-muted text-muted-foreground transition-colors"
-          aria-label={isAr ? "رجوع" : "Back"}
+          aria-label={(t.addedTranslations_2026?.['رجوع'] || (t.addedTranslations_2026?.['رجوع'] || 'رجوع'))}
         >
           <ArrowRight className="w-5 h-5 rtl:rotate-180" />
         </Link>
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-foreground">
-            {isAr ? "إنشاء مهمة جديدة" : "Create New Task"}
+            {(t.addedTranslations_2026?.['إنشاء مهمة جديدة'] || (t.addedTranslations_2026?.['إنشاء مهمة جديدة'] || 'إنشاء مهمة جديدة'))}
           </h1>
           <p className="text-muted-foreground text-sm mt-1">
-            {isAr 
-              ? "أضف مهمة لإحدى دوراتك وحدّد طريقة التسليم المطلوبة من الطلاب"
-              : "Add a task to one of your courses and specify the submission format required from students"}
+            {(t.addedTranslations_2026?.['أضف مهمة لإحدى دوراتك وحدّد طريقة التسليم المطلوبة من الطلاب'] || (t.addedTranslations_2026?.['أضف مهمة لإحدى دوراتك وحدّد طريقة التسليم المطلوبة من الطلاب'] || 'أضف مهمة لإحدى دوراتك وحدّد طريقة التسليم المطلوبة من الطلاب'))}
           </p>
         </div>
       </div>
@@ -286,14 +285,14 @@ export default function NewTaskPage() {
           <div className="flex items-center gap-2 pb-2 border-b border-border">
             <BookOpen className="w-4 h-4 text-muted-foreground" />
             <h2 className="text-sm font-bold uppercase tracking-wide text-muted-foreground">
-              {isAr ? "المعلومات الأساسية" : "Basic Information"}
+              {(t.addedTranslations_2026?.['المعلومات الأساسية'] || (t.addedTranslations_2026?.['المعلومات الأساسية'] || 'المعلومات الأساسية'))}
             </h2>
           </div>
 
           {/* Course Selection */}
           <div className="space-y-2">
             <label className="text-sm font-bold text-foreground" htmlFor="course_id">
-              {isAr ? "الدورة" : "Course"} <span className="text-red-500">*</span>
+              {(t.addedTranslations_2026?.['الدورة'] || (t.addedTranslations_2026?.['الدورة'] || 'الدورة'))} <span className="text-red-500">*</span>
             </label>
             <select
               id="course_id"
@@ -305,8 +304,8 @@ export default function NewTaskPage() {
             >
               <option value="">
                 {coursesLoading 
-                  ? (isAr ? "جاري تحميل الدورات..." : "Loading courses...") 
-                  : (isAr ? "اختر الدورة..." : "Select course...")}
+                  ? ((t.addedTranslations_2026?.['جاري تحميل الدورات...'] || (t.addedTranslations_2026?.['جاري تحميل الدورات...'] || 'جاري تحميل الدورات...'))) 
+                  : ((t.addedTranslations_2026?.['اختر الدورة...'] || (t.addedTranslations_2026?.['اختر الدورة...'] || 'اختر الدورة...')))}
               </option>
               {courses.map(c => (
                 <option key={c.id} value={c.id}>
@@ -316,12 +315,12 @@ export default function NewTaskPage() {
             </select>
             {!coursesLoading && courses.length === 0 && (
               <p className="text-xs text-amber-600 dark:text-amber-400">
-                {isAr ? "لا توجد دورات لديك بعد." : "You do not have any courses yet."}{" "}
+                {(t.addedTranslations_2026?.['لا توجد دورات لديك بعد.'] || (t.addedTranslations_2026?.['لا توجد دورات لديك بعد.'] || 'لا توجد دورات لديك بعد.'))}{" "}
                 <Link
                   href="/academy/teacher/courses/new"
                   className="underline font-medium"
                 >
-                  {isAr ? "أنشئ دورة أولاً" : "Create a course first"}
+                  {(t.addedTranslations_2026?.['أنشئ دورة أولاً'] || (t.addedTranslations_2026?.['أنشئ دورة أولاً'] || 'أنشئ دورة أولاً'))}
                 </Link>
                 .
               </p>
@@ -331,12 +330,12 @@ export default function NewTaskPage() {
           {/* Title */}
           <div className="space-y-2">
             <label className="text-sm font-bold text-foreground" htmlFor="title">
-              {isAr ? "عنوان المهمة" : "Task Title"} <span className="text-red-500">*</span>
+              {(t.addedTranslations_2026?.['عنوان المهمة'] || (t.addedTranslations_2026?.['عنوان المهمة'] || 'عنوان المهمة'))} <span className="text-red-500">*</span>
             </label>
             <input
               id="title"
               type="text"
-              placeholder={isAr ? "مثال: واجب تلاوة سورة البقرة" : "e.g. Surah Al-Baqarah Recitation Homework"}
+              placeholder={(t.addedTranslations_2026?.['مثال: واجب تلاوة سورة البقرة'] || (t.addedTranslations_2026?.['مثال: واجب تلاوة سورة البقرة'] || 'مثال: واجب تلاوة سورة البقرة'))}
               className="w-full p-3 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={formData.title}
               onChange={e => setFormData({ ...formData, title: e.target.value })}
@@ -348,12 +347,12 @@ export default function NewTaskPage() {
           {/* Description */}
           <div className="space-y-2">
             <label className="text-sm font-bold text-foreground" htmlFor="description">
-              {isAr ? "وصف المهمة" : "Task Description"}
+              {(t.addedTranslations_2026?.['وصف المهمة'] || (t.addedTranslations_2026?.['وصف المهمة'] || 'وصف المهمة'))}
             </label>
             <textarea
               id="description"
               rows={4}
-              placeholder={isAr ? "اشرح المطلوب من الطالب وما الهدف من هذه المهمة..." : "Explain what is required from the student and the goal of this task..."}
+              placeholder={(t.addedTranslations_2026?.['اشرح المطلوب من الطالب وما الهدف من هذه المهمة...'] || (t.addedTranslations_2026?.['اشرح المطلوب من الطالب وما الهدف من هذه المهمة...'] || 'اشرح المطلوب من الطالب وما الهدف من هذه المهمة...'))}
               className="w-full p-3 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
               value={formData.description}
               onChange={e => setFormData({ ...formData, description: e.target.value })}
@@ -366,7 +365,7 @@ export default function NewTaskPage() {
           <div className="flex items-center gap-2 pb-2 border-b border-border">
             <Layers className="w-4 h-4 text-muted-foreground" />
             <h2 className="text-sm font-bold uppercase tracking-wide text-muted-foreground">
-              {isAr ? "نوع المهمة وطريقة التسليم" : "Task Type & Submission Method"}
+              {(t.addedTranslations_2026?.['نوع المهمة وطريقة التسليم'] || (t.addedTranslations_2026?.['نوع المهمة وطريقة التسليم'] || 'نوع المهمة وطريقة التسليم'))}
             </h2>
           </div>
 
@@ -417,16 +416,16 @@ export default function NewTaskPage() {
               <div className="flex items-center justify-between gap-2 flex-wrap">
                 <div className="flex items-center gap-2">
                   <ListChecks className="w-4 h-4 text-blue-600" />
-                  <h3 className="text-sm font-bold text-foreground">{isAr ? "أسئلة الاختبار" : "Quiz Questions"}</h3>
+                  <h3 className="text-sm font-bold text-foreground">{(t.addedTranslations_2026?.['أسئلة الاختبار'] || (t.addedTranslations_2026?.['أسئلة الاختبار'] || 'أسئلة الاختبار'))}</h3>
                 </div>
                 <span className="text-xs font-bold text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/40 px-2.5 py-1 rounded-full">
-                  {quizQuestions.length} {isAr ? "سؤال" : "questions"} · {quizTotal} {isAr ? "درجة" : "points"}
+                  {quizQuestions.length} {(t.addedTranslations_2026?.['سؤال'] || (t.addedTranslations_2026?.['سؤال'] || 'سؤال'))} · {quizTotal} {(t.addedTranslations_2026?.['درجة'] || (t.addedTranslations_2026?.['درجة'] || 'درجة'))}
                 </span>
               </div>
 
               {quizQuestions.length === 0 && (
                 <p className="text-xs text-muted-foreground">
-                  {isAr ? "لم تُضِف أي أسئلة بعد. اختر نوع السؤال لإضافته." : "No questions added yet. Select a question type to add."}
+                  {(t.addedTranslations_2026?.['لم تُضِف أي أسئلة بعد. اختر نوع السؤال لإضافته.'] || (t.addedTranslations_2026?.['لم تُضِف أي أسئلة بعد. اختر نوع السؤال لإضافته.'] || 'لم تُضِف أي أسئلة بعد. اختر نوع السؤال لإضافته.'))}
                 </p>
               )}
 
@@ -452,16 +451,16 @@ export default function NewTaskPage() {
                           >
                             {q.type === "mcq" ? (
                               <>
-                                <CircleDot className="w-3 h-3" /> {isAr ? "اختيار من متعدد" : "Multiple Choice"}
+                                <CircleDot className="w-3 h-3" /> {(t.addedTranslations_2026?.['اختيار من متعدد'] || (t.addedTranslations_2026?.['اختيار من متعدد'] || 'اختيار من متعدد'))}
                               </>
                             ) : (
                               <>
-                                <PencilLine className="w-3 h-3" /> {isAr ? "سؤال مقالي" : "Essay Question"}
+                                <PencilLine className="w-3 h-3" /> {(t.addedTranslations_2026?.['سؤال مقالي'] || (t.addedTranslations_2026?.['سؤال مقالي'] || 'سؤال مقالي'))}
                               </>
                             )}
                           </span>
                           <div className="flex items-center gap-1.5 mr-auto">
-                            <label className="text-[11px] text-muted-foreground">{isAr ? "الدرجة" : "Points"}</label>
+                            <label className="text-[11px] text-muted-foreground">{(t.addedTranslations_2026?.['الدرجة'] || (t.addedTranslations_2026?.['الدرجة'] || 'الدرجة'))}</label>
                             <input
                               type="number"
                               min={1}
@@ -476,7 +475,7 @@ export default function NewTaskPage() {
                             type="button"
                             onClick={() => removeQuestion(q.id)}
                             className="p-1.5 rounded-md text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                            aria-label={isAr ? "حذف السؤال" : "Delete Question"}
+                            aria-label={(t.addedTranslations_2026?.['حذف السؤال'] || (t.addedTranslations_2026?.['حذف السؤال'] || 'حذف السؤال'))}
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -484,7 +483,7 @@ export default function NewTaskPage() {
 
                         <textarea
                           rows={2}
-                          placeholder={isAr ? "اكتب نص السؤال هنا..." : "Write question text here..."}
+                          placeholder={(t.addedTranslations_2026?.['اكتب نص السؤال هنا...'] || (t.addedTranslations_2026?.['اكتب نص السؤال هنا...'] || 'اكتب نص السؤال هنا...'))}
                           value={q.question}
                           onChange={e => updateQuestion(q.id, { question: e.target.value })}
                           className="w-full p-2.5 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm"
@@ -493,7 +492,7 @@ export default function NewTaskPage() {
                         {q.type === "mcq" && (
                           <div className="space-y-2">
                             <p className="text-[11px] text-muted-foreground">
-                              {isAr ? "اختر الدائرة بجانب الإجابة الصحيحة:" : "Select the circle next to the correct answer:"}
+                              {(t.addedTranslations_2026?.['اختر الدائرة بجانب الإجابة الصحيحة:'] || (t.addedTranslations_2026?.['اختر الدائرة بجانب الإجابة الصحيحة:'] || 'اختر الدائرة بجانب الإجابة الصحيحة:'))}
                             </p>
                             {q.options.map((opt, oIdx) => (
                               <div key={oIdx} className="flex items-center gap-2">
@@ -505,7 +504,7 @@ export default function NewTaskPage() {
                                       ? "border-emerald-500 bg-emerald-500"
                                       : "border-border"
                                   }`}
-                                  aria-label={isAr ? "تحديد كإجابة صحيحة" : "Set as correct answer"}
+                                  aria-label={(t.addedTranslations_2026?.['تحديد كإجابة صحيحة'] || (t.addedTranslations_2026?.['تحديد كإجابة صحيحة'] || 'تحديد كإجابة صحيحة'))}
                                 >
                                   {q.correct === oIdx && (
                                     <CheckCircle2 className="w-3 h-3 text-white" />
@@ -513,7 +512,7 @@ export default function NewTaskPage() {
                                 </button>
                                 <input
                                   type="text"
-                                  placeholder={isAr ? `الخيار ${oIdx + 1}` : `Option ${oIdx + 1}`}
+                                  placeholder={(t.addedTranslations_2026?.['الخيار ${oIdx + 1}'] || (t.addedTranslations_2026?.['الخيار ${oIdx + 1}'] || 'الخيار ${oIdx + 1}'))}
                                   value={opt}
                                   onChange={e => updateOption(q.id, oIdx, e.target.value)}
                                   className="flex-1 p-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
@@ -523,7 +522,7 @@ export default function NewTaskPage() {
                                     type="button"
                                     onClick={() => removeOption(q.id, oIdx)}
                                     className="p-1.5 rounded-md text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                                    aria-label={isAr ? "حذف الخيار" : "Delete Option"}
+                                    aria-label={(t.addedTranslations_2026?.['حذف الخيار'] || (t.addedTranslations_2026?.['حذف الخيار'] || 'حذف الخيار'))}
                                   >
                                     <Trash2 className="w-3.5 h-3.5" />
                                   </button>
@@ -535,16 +534,14 @@ export default function NewTaskPage() {
                               onClick={() => addOption(q.id)}
                               className="text-xs font-bold text-blue-600 hover:text-blue-700 inline-flex items-center gap-1 mt-1"
                             >
-                              <Plus className="w-3.5 h-3.5" /> {isAr ? "إضافة خيار" : "Add Option"}
+                              <Plus className="w-3.5 h-3.5" /> {(t.addedTranslations_2026?.['إضافة خيار'] || (t.addedTranslations_2026?.['إضافة خيار'] || 'إضافة خيار'))}
                             </button>
                           </div>
                         )}
 
                         {q.type === "essay" && (
                           <p className="text-[11px] text-muted-foreground italic">
-                            {isAr 
-                              ? "سيكتب الطالب إجابته نصياً، وتقوم أنت بتصحيحها ورصد درجتها يدوياً."
-                              : "The student will write their answer as text, and you will manually grade it."}
+                            {(t.addedTranslations_2026?.['سيكتب الطالب إجابته نصياً، وتقوم أنت بتصحيحها ورصد درجتها يدوياً.'] || (t.addedTranslations_2026?.['سيكتب الطالب إجابته نصياً، وتقوم أنت بتصحيحها ورصد درجتها يدوياً.'] || 'سيكتب الطالب إجابته نصياً، وتقوم أنت بتصحيحها ورصد درجتها يدوياً.'))}
                           </p>
                         )}
                       </div>
@@ -559,14 +556,14 @@ export default function NewTaskPage() {
                   onClick={() => addQuestion("mcq")}
                   className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-emerald-300 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 text-sm font-bold hover:bg-emerald-100 transition-colors"
                 >
-                  <Plus className="w-4 h-4" /> {isAr ? "سؤال اختيار من متعدد" : "Multiple Choice Question"}
+                  <Plus className="w-4 h-4" /> {(t.addedTranslations_2026?.['سؤال اختيار من متعدد'] || (t.addedTranslations_2026?.['سؤال اختيار من متعدد'] || 'سؤال اختيار من متعدد'))}
                 </button>
                 <button
                   type="button"
                   onClick={() => addQuestion("essay")}
                   className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 text-sm font-bold hover:bg-amber-100 transition-colors"
                 >
-                  <Plus className="w-4 h-4" /> {isAr ? "سؤال مقالي" : "Essay Question"}
+                  <Plus className="w-4 h-4" /> {(t.addedTranslations_2026?.['سؤال مقالي'] || (t.addedTranslations_2026?.['سؤال مقالي'] || 'سؤال مقالي'))}
                 </button>
               </div>
             </div>
@@ -578,17 +575,17 @@ export default function NewTaskPage() {
               className="text-sm font-bold text-foreground"
               htmlFor="submission_instructions"
             >
-              {isAr ? "تعليمات التسليم (اختياري)" : "Submission Instructions (Optional)"}
+              {(t.addedTranslations_2026?.['تعليمات التسليم (اختياري)'] || (t.addedTranslations_2026?.['تعليمات التسليم (اختياري)'] || 'تعليمات التسليم (اختياري)'))}
             </label>
             <textarea
               id="submission_instructions"
               rows={3}
               placeholder={
                 selectedType?.key === "audio"
-                  ? (isAr ? "مثال: سجل التلاوة بصوت واضح، وتأكد من جودة الميكروفون..." : "e.g., Record the recitation in a clear voice, check microphone quality...")
+                  ? ((t.addedTranslations_2026?.['مثال: سجل التلاوة بصوت واضح، وتأكد من جودة الميكروفون...'] || (t.addedTranslations_2026?.['مثال: سجل التلاوة بصوت واضح، وتأكد من جودة الميكروفون...'] || 'مثال: سجل التلاوة بصوت واضح، وتأكد من جودة الميكروفون...')))
                   : selectedType?.key === "video"
-                  ? (isAr ? "مثال: المدة لا تتجاوز 5 دقائق، وضع الإضاءة مناسبة..." : "e.g., Duration not exceeding 5 minutes, ensure proper lighting...")
-                  : (isAr ? "أي تعليمات إضافية تريد إخبار الطالب بها قبل التسليم" : "Any additional instructions for the student before submission")
+                  ? ((t.addedTranslations_2026?.['مثال: المدة لا تتجاوز 5 دقائق، وضع الإضاءة مناسبة...'] || (t.addedTranslations_2026?.['مثال: المدة لا تتجاوز 5 دقائق، وضع الإضاءة مناسبة...'] || 'مثال: المدة لا تتجاوز 5 دقائق، وضع الإضاءة مناسبة...')))
+                  : ((t.addedTranslations_2026?.['أي تعليمات إضافية تريد إخبار الطالب بها قبل التسليم'] || (t.addedTranslations_2026?.['أي تعليمات إضافية تريد إخبار الطالب بها قبل التسليم'] || 'أي تعليمات إضافية تريد إخبار الطالب بها قبل التسليم')))
               }
               className="w-full p-3 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm"
               value={formData.submission_instructions}
@@ -604,7 +601,7 @@ export default function NewTaskPage() {
           <div className="flex items-center gap-2 pb-2 border-b border-border">
             <CalendarClock className="w-4 h-4 text-muted-foreground" />
             <h2 className="text-sm font-bold uppercase tracking-wide text-muted-foreground">
-              {isAr ? "الجدولة والتقييم" : "Scheduling & Grading"}
+              {(t.addedTranslations_2026?.['الجدولة والتقييم'] || (t.addedTranslations_2026?.['الجدولة والتقييم'] || 'الجدولة والتقييم'))}
             </h2>
           </div>
 
@@ -613,7 +610,7 @@ export default function NewTaskPage() {
             <div className="space-y-2">
               <label className="text-sm font-bold text-foreground" htmlFor="due_date">
                 <CalendarClock className="w-4 h-4 inline ml-1" />
-                {isAr ? "تاريخ التسليم" : "Due Date"} <span className="text-red-500">*</span>
+                {(t.addedTranslations_2026?.['تاريخ التسليم'] || (t.addedTranslations_2026?.['تاريخ التسليم'] || 'تاريخ التسليم'))} <span className="text-red-500">*</span>
               </label>
               <input
                 id="due_date"
@@ -629,12 +626,12 @@ export default function NewTaskPage() {
             <div className="space-y-2">
               <label className="text-sm font-bold text-foreground" htmlFor="max_score">
                 <Trophy className="w-4 h-4 inline ml-1" />
-                {isAr ? "الدرجة القصوى" : "Max Score"}
+                {(t.addedTranslations_2026?.['الدرجة القصوى'] || (t.addedTranslations_2026?.['الدرجة القصوى'] || 'الدرجة القصوى'))}
               </label>
               {isQuiz ? (
                 <div className="w-full p-3 rounded-lg border border-dashed border-border bg-muted/40 text-sm text-muted-foreground">
-                  {isAr ? "تُحسب تلقائياً من مجموع درجات الأسئلة:" : "Calculated automatically from total question points:"}{" "}
-                  <span className="font-bold text-foreground">{quizTotal} {isAr ? "درجة" : "points"}</span>
+                  {(t.addedTranslations_2026?.['تُحسب تلقائياً من مجموع درجات الأسئلة:'] || (t.addedTranslations_2026?.['تُحسب تلقائياً من مجموع درجات الأسئلة:'] || 'تُحسب تلقائياً من مجموع درجات الأسئلة:'))}{" "}
+                  <span className="font-bold text-foreground">{quizTotal} {(t.addedTranslations_2026?.['درجة'] || (t.addedTranslations_2026?.['درجة'] || 'درجة'))}</span>
                 </div>
               ) : (
                 <input
@@ -657,7 +654,7 @@ export default function NewTaskPage() {
             href="/academy/teacher/tasks"
             className="px-6 py-3 border border-border bg-card hover:bg-muted text-foreground font-bold rounded-lg transition-colors text-center"
           >
-            {isAr ? "إلغاء" : "Cancel"}
+            {(t.addedTranslations_2026?.['إلغاء'] || (t.addedTranslations_2026?.['إلغاء'] || 'إلغاء'))}
           </Link>
           <button
             type="submit"
@@ -667,12 +664,12 @@ export default function NewTaskPage() {
             {loading ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                {isAr ? "جاري الحفظ..." : "Saving..."}
+                {(t.addedTranslations_2026?.['جاري الحفظ...'] || (t.addedTranslations_2026?.['جاري الحفظ...'] || 'جاري الحفظ...'))}
               </>
             ) : (
               <>
                 <CheckCircle2 className="w-4 h-4" />
-                {isAr ? "حفظ المهمة" : "Save Task"}
+                {(t.addedTranslations_2026?.['حفظ المهمة'] || (t.addedTranslations_2026?.['حفظ المهمة'] || 'حفظ المهمة'))}
               </>
             )}
           </button>

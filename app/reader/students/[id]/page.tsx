@@ -1,3 +1,4 @@
+import { useI18n } from '@/lib/i18n/context';
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -62,19 +63,21 @@ interface PathItem {
 }
 
 const RECIT_STATUS: Record<string, { label: string; cls: string }> = {
-  pending:   { label: 'بانتظار المراجعة', cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' },
-  reviewing: { label: 'قيد المراجعة',     cls: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
-  mastered:  { label: 'متقن',             cls: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
-  needs_work:{ label: 'يحتاج مراجعة',     cls: 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400' },
+  pending:   { label: (t.addedTranslations_2026?.['بانتظار المراجعة'] || 'بانتظار المراجعة'), cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' },
+  reviewing: { label: (t.addedTranslations_2026?.['قيد المراجعة'] || 'قيد المراجعة'),     cls: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
+  mastered:  { label: (t.addedTranslations_2026?.['متقن'] || 'متقن'),             cls: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
+  needs_work:{ label: (t.addedTranslations_2026?.['يحتاج مراجعة'] || 'يحتاج مراجعة'),     cls: 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400' },
 }
 const SESSION_STATUS: Record<string, { label: string; cls: string }> = {
-  scheduled: { label: 'مجدولة',  cls: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
-  completed: { label: 'مكتملة',  cls: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
-  cancelled: { label: 'ملغاة',   cls: 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400' },
-  in_progress:{ label: 'جارية', cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' },
+  scheduled: { label: (t.addedTranslations_2026?.['مجدولة'] || 'مجدولة'),  cls: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
+  completed: { label: (t.addedTranslations_2026?.['مكتملة'] || 'مكتملة'),  cls: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
+  cancelled: { label: (t.addedTranslations_2026?.['ملغاة'] || 'ملغاة'),   cls: 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400' },
+  in_progress:{ label: (t.addedTranslations_2026?.['جارية'] || 'جارية'), cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' },
 }
 
 export default function ReaderStudentDetailPage() {
+  const { t } = useI18n();
+
   const params = useParams()
   const router = useRouter()
   const studentId = params.id as string
@@ -92,7 +95,7 @@ export default function ReaderStudentDetailPage() {
     fetch(`/api/reader/students/${studentId}`)
       .then(async (r) => {
         const j = await r.json()
-        if (!r.ok) throw new Error(j.error || 'خطأ')
+        if (!r.ok) throw new Error(j.error || (t.addedTranslations_2026?.['خطأ'] || 'خطأ'))
         setStudent(j.student)
         setRecitations(j.recitations || [])
         setSessions(j.sessions || [])
@@ -100,7 +103,7 @@ export default function ReaderStudentDetailPage() {
         setMemorizationPaths(j.memorizationPaths || [])
         setMemStats(j.memStats || {})
       })
-      .catch((e) => toast.error(e.message || 'تعذر جلب بيانات الطالب'))
+      .catch((e) => toast.error(e.message || (t.addedTranslations_2026?.['تعذر جلب بيانات الطالب'] || 'تعذر جلب بيانات الطالب')))
       .finally(() => setLoading(false))
   }, [studentId])
 
@@ -111,11 +114,11 @@ export default function ReaderStudentDetailPage() {
       <Card className="max-w-md mx-auto mt-12 border-border rounded-3xl">
         <CardContent className="flex flex-col items-center justify-center p-12 text-center">
           <User className="w-16 h-16 text-muted-foreground mb-4 opacity-40" />
-          <h2 className="text-xl font-bold mb-2">الطالب غير موجود</h2>
-          <p className="text-muted-foreground mb-6">عذراً، هذا الطالب غير موجود أو ليس لديك صلاحية لرؤيته.</p>
+          <h2 className="text-xl font-bold mb-2">{(t.addedTranslations_2026?.['الطالب غير موجود'] || 'الطالب غير موجود')}</h2>
+          <p className="text-muted-foreground mb-6">{(t.addedTranslations_2026?.['عذراً، هذا الطالب غير موجود أو ليس لديك صلاحية لرؤيته.'] || 'عذراً، هذا الطالب غير موجود أو ليس لديك صلاحية لرؤيته.')}</p>
           <Button onClick={() => router.push('/reader/students')} variant="outline" className="rounded-xl">
-            العودة للقائمة
-          </Button>
+            {(t.addedTranslations_2026?.['العودة للقائمة'] || 'العودة للقائمة')}
+                              </Button>
         </CardContent>
       </Card>
     )
@@ -138,8 +141,8 @@ export default function ReaderStudentDetailPage() {
           <ArrowRight className="w-5 h-5" />
         </Button>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">ملف الطالب</h1>
-          <p className="text-sm text-muted-foreground font-medium">تلاوات الطالب وجلساته ومساراته معك</p>
+          <h1 className="text-2xl font-bold tracking-tight">{(t.addedTranslations_2026?.['ملف الطالب'] || 'ملف الطالب')}</h1>
+          <p className="text-sm text-muted-foreground font-medium">{(t.addedTranslations_2026?.['تلاوات الطالب وجلساته ومساراته معك'] || 'تلاوات الطالب وجلساته ومساراته معك')}</p>
         </div>
       </div>
 
@@ -168,8 +171,8 @@ export default function ReaderStudentDetailPage() {
                   onClick={() => router.push(`/reader/chat?studentId=${student.id}`)}
                 >
                   <Mail className="w-4 h-4 ml-2" />
-                  مراسلة
-                </Button>
+                  {(t.addedTranslations_2026?.['مراسلة'] || 'مراسلة')}
+                                                  </Button>
               </div>
 
               <div className="w-full space-y-3 text-sm text-right">
@@ -178,7 +181,7 @@ export default function ReaderStudentDetailPage() {
                 )}
                 <InfoRow
                   icon={<User className="w-4 h-4" />}
-                  text={student.gender === 'female' ? 'أنثى' : student.gender === 'male' ? 'ذكر' : 'غير محدد'}
+                  text={student.gender === 'female' ? (t.addedTranslations_2026?.['أنثى'] || 'أنثى') : student.gender === 'male' ? (t.addedTranslations_2026?.['ذكر'] || 'ذكر') : 'غير محدد'}
                 />
                 {student.memorized_parts != null && (
                   <InfoRow icon={<BookOpen className="w-4 h-4" />} text={`${student.memorized_parts} أجزاء محفوظة`} />
@@ -210,10 +213,10 @@ export default function ReaderStudentDetailPage() {
         {/* Stats + tabs */}
         <div className="lg:col-span-8 space-y-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <StatCard icon={<Mic className="w-5 h-5" />} tint="amber" value={pendingCount} label="تلاوات معلقة" />
-            <StatCard icon={<CheckCircle2 className="w-5 h-5" />} tint="emerald" value={masteredCount} label="تلاوات متقنة" />
-            <StatCard icon={<Calendar className="w-5 h-5" />} tint="blue" value={completedSessions} label="جلسات مكتملة" />
-            <StatCard icon={<TrendingUp className="w-5 h-5" />} tint="violet" value={memStats.week_new_verses ?? 0} label="آيات هذا الأسبوع" />
+            <StatCard icon={<Mic className="w-5 h-5" />} tint="amber" value={pendingCount} label={(t.addedTranslations_2026?.['تلاوات معلقة'] || 'تلاوات معلقة')} />
+            <StatCard icon={<CheckCircle2 className="w-5 h-5" />} tint="emerald" value={masteredCount} label={(t.addedTranslations_2026?.['تلاوات متقنة'] || 'تلاوات متقنة')} />
+            <StatCard icon={<Calendar className="w-5 h-5" />} tint="blue" value={completedSessions} label={(t.addedTranslations_2026?.['جلسات مكتملة'] || 'جلسات مكتملة')} />
+            <StatCard icon={<TrendingUp className="w-5 h-5" />} tint="violet" value={memStats.week_new_verses ?? 0} label={(t.addedTranslations_2026?.['آيات هذا الأسبوع'] || 'آيات هذا الأسبوع')} />
           </div>
 
           <Card className="border-border rounded-3xl overflow-hidden">
@@ -223,7 +226,7 @@ export default function ReaderStudentDetailPage() {
                   <TabTrigger value="recitations" label={`التلاوات (${recitations.length})`} />
                   <TabTrigger value="sessions" label={`الجلسات (${sessions.length})`} />
                   <TabTrigger value="paths" label={`المسارات (${tajweedPaths.length + memorizationPaths.length})`} />
-                  <TabTrigger value="memorization" label="الحفظ" />
+                  <TabTrigger value="memorization" label={(t.addedTranslations_2026?.['الحفظ'] || 'الحفظ')} />
                 </TabsList>
               </div>
 
@@ -262,7 +265,7 @@ export default function ReaderStudentDetailPage() {
                     })}
                   </div>
                 ) : (
-                  <EmptyState icon={<Mic />} text="لا توجد تلاوات لهذا الطالب بعد" />
+                  <EmptyState icon={<Mic />} text={(t.addedTranslations_2026?.['لا توجد تلاوات لهذا الطالب بعد'] || 'لا توجد تلاوات لهذا الطالب بعد')} />
                 )}
               </TabsContent>
 
@@ -284,10 +287,10 @@ export default function ReaderStudentDetailPage() {
                             </div>
                             <div className="min-w-0">
                               <h3 className="font-bold text-foreground truncate">
-                                {s.scheduled_at ? new Date(s.scheduled_at).toLocaleString('ar-EG', { dateStyle: 'medium', timeStyle: 'short' }) : 'غير محددة'}
+                                {s.scheduled_at ? new Date(s.scheduled_at).toLocaleString('ar-EG', { dateStyle: 'medium', timeStyle: 'short' }) : (t.addedTranslations_2026?.['غير محددة'] || 'غير محددة')}
                               </h3>
                               <div className="flex items-center flex-wrap gap-2 mt-1 text-xs text-muted-foreground">
-                                {s.duration_minutes && <span>{s.duration_minutes} دقيقة</span>}
+                                {s.duration_minutes && <span>{s.duration_minutes} {(t.addedTranslations_2026?.['دقيقة'] || 'دقيقة')}</span>}
                                 {s.meeting_platform && (
                                   <>
                                     <span className="w-1 h-1 rounded-full bg-border" />
@@ -305,7 +308,7 @@ export default function ReaderStudentDetailPage() {
                     })}
                   </div>
                 ) : (
-                  <EmptyState icon={<Calendar />} text="لا توجد جلسات مع هذا الطالب بعد" />
+                  <EmptyState icon={<Calendar />} text={(t.addedTranslations_2026?.['لا توجد جلسات مع هذا الطالب بعد'] || 'لا توجد جلسات مع هذا الطالب بعد')} />
                 )}
               </TabsContent>
 
@@ -318,7 +321,7 @@ export default function ReaderStudentDetailPage() {
                         key={p.enrollment_id}
                         title={p.title}
                         thumbnail={p.thumbnail_url}
-                        kind="تجويد"
+                        kind={(t.addedTranslations_2026?.['تجويد'] || 'تجويد')}
                         done={p.stages_completed || 0}
                         total={p.total_stages || 0}
                         status={p.status}
@@ -330,7 +333,7 @@ export default function ReaderStudentDetailPage() {
                         key={p.enrollment_id}
                         title={p.title}
                         thumbnail={p.thumbnail_url}
-                        kind="حفظ"
+                        kind={(t.addedTranslations_2026?.['حفظ'] || 'حفظ')}
                         done={p.units_completed || 0}
                         total={p.total_units || 0}
                         status={p.status}
@@ -339,18 +342,18 @@ export default function ReaderStudentDetailPage() {
                     ))}
                   </div>
                 ) : (
-                  <EmptyState icon={<Route />} text="الطالب غير مسجل في أي من مساراتك" />
+                  <EmptyState icon={<Route />} text={(t.addedTranslations_2026?.['الطالب غير مسجل في أي من مساراتك'] || 'الطالب غير مسجل في أي من مساراتك')} />
                 )}
               </TabsContent>
 
               {/* Memorization */}
               <TabsContent value="memorization" className="p-6 m-0 outline-none">
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                  <MemTile icon={<Sparkles className="w-5 h-5" />} value={memStats.total_new_verses ?? 0} label="إجمالي الآيات الجديدة" />
-                  <MemTile icon={<PlayCircle className="w-5 h-5" />} value={memStats.total_revised_verses ?? 0} label="إجمالي المراجعة" />
-                  <MemTile icon={<TrendingUp className="w-5 h-5" />} value={memStats.week_new_verses ?? 0} label="آيات هذا الأسبوع" />
-                  <MemTile icon={<Calendar className="w-5 h-5" />} value={memStats.active_days_30 ?? 0} label="أيام نشطة (30 يوم)" />
-                  <MemTile icon={<Star className="w-5 h-5" />} value={memStats.avg_quality ?? '—'} label="متوسط الجودة" />
+                  <MemTile icon={<Sparkles className="w-5 h-5" />} value={memStats.total_new_verses ?? 0} label={(t.addedTranslations_2026?.['إجمالي الآيات الجديدة'] || 'إجمالي الآيات الجديدة')} />
+                  <MemTile icon={<PlayCircle className="w-5 h-5" />} value={memStats.total_revised_verses ?? 0} label={(t.addedTranslations_2026?.['إجمالي المراجعة'] || 'إجمالي المراجعة')} />
+                  <MemTile icon={<TrendingUp className="w-5 h-5" />} value={memStats.week_new_verses ?? 0} label={(t.addedTranslations_2026?.['آيات هذا الأسبوع'] || 'آيات هذا الأسبوع')} />
+                  <MemTile icon={<Calendar className="w-5 h-5" />} value={memStats.active_days_30 ?? 0} label={(t.addedTranslations_2026?.['أيام نشطة (30 يوم)'] || 'أيام نشطة (30 يوم)')} />
+                  <MemTile icon={<Star className="w-5 h-5" />} value={memStats.avg_quality ?? '—'} label={(t.addedTranslations_2026?.['متوسط الجودة'] || 'متوسط الجودة')} />
                 </div>
               </TabsContent>
             </Tabs>
@@ -425,7 +428,7 @@ function PathRow({
           <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
             <span className="px-2 py-0.5 rounded-full bg-muted font-medium">{kind}</span>
             <span>{done}/{total}</span>
-            <span>{status === 'completed' ? '· مكتمل' : status === 'active' ? '· نشط' : ''}</span>
+            <span>{status === 'completed' ? (t.addedTranslations_2026?.['· مكتمل'] || '· مكتمل') : status === 'active' ? (t.addedTranslations_2026?.['· نشط'] || '· نشط') : ''}</span>
           </div>
         </div>
       </div>

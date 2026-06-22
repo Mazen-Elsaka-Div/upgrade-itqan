@@ -97,7 +97,7 @@ export default function BookDetailPage() {
         const res = await fetch(`/api/library/books/${id}`)
         if (!res.ok) {
           const data = await res.json().catch(() => ({}))
-          throw new Error(data.error || "تعذر تحميل الكتاب")
+          throw new Error(data.error || (t.addedTranslations_2026?.['تعذر تحميل الكتاب'] || 'تعذر تحميل الكتاب'))
         }
         const data = await res.json()
         if (cancelled) return
@@ -108,7 +108,7 @@ export default function BookDetailPage() {
           setActiveLanguage(data.files[0].language)
         }
       } catch (err: any) {
-        if (!cancelled) setError(err?.message || "حدث خطأ")
+        if (!cancelled) setError(err?.message || (t.addedTranslations_2026?.['حدث خطأ'] || 'حدث خطأ'))
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -142,11 +142,11 @@ export default function BookDetailPage() {
       <div className="container mx-auto px-4 py-12" dir="rtl">
         <Card className="border-destructive/30">
           <CardContent className="p-8 text-center space-y-4">
-            <p className="text-destructive font-bold">{error || (isAr ? "الكتاب غير موجود" : "Book not found")}</p>
+            <p className="text-destructive font-bold">{error || ((t.addedTranslations_2026?.['الكتاب غير موجود'] || (t.addedTranslations_2026?.['الكتاب غير موجود'] || 'الكتاب غير موجود')))}</p>
             <Link href="/library">
               <Button variant="outline">
                 <ArrowLeft className="w-4 h-4 ml-2 rtl:rotate-180" />
-                {lib?.backToLibrary || (isAr ? "العودة للمكتبة" : "Back to library")}
+                {lib?.backToLibrary || ((t.addedTranslations_2026?.['العودة للمكتبة'] || (t.addedTranslations_2026?.['العودة للمكتبة'] || 'العودة للمكتبة')))}
               </Button>
             </Link>
           </CardContent>
@@ -160,7 +160,7 @@ export default function BookDetailPage() {
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <Link href="/library" className="hover:text-primary transition-colors">
-          {lib?.title || (isAr ? "مكتبة الكتب" : "Library")}
+          {lib?.title || ((t.addedTranslations_2026?.['مكتبة الكتب'] || (t.addedTranslations_2026?.['مكتبة الكتب'] || 'مكتبة الكتب')))}
         </Link>
         <span>/</span>
         <span className="text-foreground font-medium truncate">{book.title}</span>
@@ -207,7 +207,7 @@ export default function BookDetailPage() {
                 {book.pages_count != null && (
                   <span className="inline-flex items-center gap-1.5">
                     <FileText className="w-4 h-4" />
-                    {book.pages_count} {lib?.pages || (isAr ? "صفحة" : "pages")}
+                    {book.pages_count} {lib?.pages || ((t.addedTranslations_2026?.['صفحة'] || (t.addedTranslations_2026?.['صفحة'] || 'صفحة')))}
                   </span>
                 )}
                 {book.publish_date && (
@@ -218,7 +218,7 @@ export default function BookDetailPage() {
                 )}
                 <span className="inline-flex items-center gap-1.5">
                   <Globe className="w-4 h-4" />
-                  {files.length} {lib?.languages || (isAr ? "لغة" : "languages")}
+                  {files.length} {lib?.languages || ((t.addedTranslations_2026?.['لغة'] || (t.addedTranslations_2026?.['لغة'] || 'لغة')))}
                 </span>
               </div>
 
@@ -232,7 +232,7 @@ export default function BookDetailPage() {
                 <div className="space-y-3 pt-2">
                   <div className="flex items-center gap-2 text-sm font-bold">
                     <Globe className="w-4 h-4 text-primary" />
-                    {lib?.selectLanguage || (isAr ? "اختر اللغة" : "Select language")}
+                    {lib?.selectLanguage || ((t.addedTranslations_2026?.['اختر اللغة'] || (t.addedTranslations_2026?.['اختر اللغة'] || 'اختر اللغة')))}
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {files.map((f) => {
@@ -268,7 +268,7 @@ export default function BookDetailPage() {
                         onClick={() => setViewerOpen(true)}
                       >
                         <Eye className="w-4 h-4" />
-                        {isAr ? "عرض الكتاب" : "View book"}
+                        {(t.addedTranslations_2026?.['عرض الكتاب'] || (t.addedTranslations_2026?.['عرض الكتاب'] || 'عرض الكتاب'))}
                       </Button>
                       <a
                         href={activeFile.pdf_url}
@@ -278,7 +278,7 @@ export default function BookDetailPage() {
                       >
                         <Button variant="outline" className="gap-2 font-bold">
                           <Download className="w-4 h-4" />
-                          {lib?.downloadFile || (isAr ? "تحميل الملف" : "Download")}
+                          {lib?.downloadFile || ((t.addedTranslations_2026?.['تحميل الملف'] || (t.addedTranslations_2026?.['تحميل الملف'] || 'تحميل الملف')))}
                           {" "}(
                           {getLanguageDisplay(activeFile.language, activeFile.language_label, isAr ? "ar" : "en")}
                           )
@@ -293,12 +293,12 @@ export default function BookDetailPage() {
         </CardContent>
       </Card>
 
-      {/* PDF Viewer modal — opens when the user clicks "عرض الكتاب" */}
+      {/* PDF Viewer modal — opens when the user clicks (t.addedTranslations_2026?.['عرض الكتاب'] || 'عرض الكتاب') */}
       {!activeFile && (
         <Card className="border-dashed">
           <CardContent className="p-10 text-center text-muted-foreground">
             <FileText className="w-10 h-10 mx-auto mb-2 opacity-40" />
-            {lib?.noFiles || (isAr ? "لا توجد نسخة للعرض حالياً" : "No file to preview yet")}
+            {lib?.noFiles || ((t.addedTranslations_2026?.['لا توجد نسخة للعرض حالياً'] || (t.addedTranslations_2026?.['لا توجد نسخة للعرض حالياً'] || 'لا توجد نسخة للعرض حالياً')))}
           </CardContent>
         </Card>
       )}
@@ -318,7 +318,7 @@ export default function BookDetailPage() {
             <button
               type="button"
               onClick={() => setViewerOpen(false)}
-              aria-label={isAr ? "إغلاق" : "Close"}
+              aria-label={(t.addedTranslations_2026?.['إغلاق'] || (t.addedTranslations_2026?.['إغلاق'] || 'إغلاق'))}
               className="shrink-0 rounded-md p-1 hover:bg-muted transition-colors"
             >
               <X className="w-4 h-4" />
@@ -339,7 +339,7 @@ export default function BookDetailPage() {
       {/* Related */}
       {related.length > 0 && (
         <div className="space-y-3">
-          <h2 className="text-xl font-black">{lib?.relatedBooks || (isAr ? "كتب مقترحة" : "Related books")}</h2>
+          <h2 className="text-xl font-black">{lib?.relatedBooks || ((t.addedTranslations_2026?.['كتب مقترحة'] || (t.addedTranslations_2026?.['كتب مقترحة'] || 'كتب مقترحة')))}</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
             {related.map((r) => (
               <Link key={r.id} href={`/library/${r.id}`} className="group">

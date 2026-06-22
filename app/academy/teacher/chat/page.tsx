@@ -124,7 +124,7 @@ function ChatContent() {
         // Refresh conversations and select the new one
         const updatedConvs = await fetchConversations()
         const newConv = updatedConvs.find((c: any) => c.id === data.conversationId) ||
-          { id: data.conversationId, other_user_id: studentId, other_user_name: students.find(s => s.id === studentId)?.name || 'طالب', other_user_avatar: null, last_message: null, last_message_at: null, unread_count: 0 }
+          { id: data.conversationId, other_user_id: studentId, other_user_name: students.find(s => s.id === studentId)?.name || (t.addedTranslations_2026?.['طالب'] || (t.addedTranslations_2026?.['طالب'] || 'طالب')), other_user_avatar: null, last_message: null, last_message_at: null, unread_count: 0 }
         
         // Update local list instantly if missing
         if (!updatedConvs.find((c: any) => c.id === data.conversationId)) {
@@ -175,7 +175,7 @@ function ChatContent() {
       })
       const data = await res.json()
       if (!res.ok) {
-        alert(data?.error || (isAr ? 'تعذر فتح التذكرة' : 'Could not open ticket'))
+        alert(data?.error || ((t.addedTranslations_2026?.['تعذر فتح التذكرة'] || (t.addedTranslations_2026?.['تعذر فتح التذكرة'] || 'تعذر فتح التذكرة'))))
         return
       }
       const newConvs = await fetchConversations()
@@ -189,7 +189,7 @@ function ChatContent() {
   }
 
   const handleDeleteConversation = async (convId: string) => {
-    if (!confirm(isAr ? 'هل تريد حذف هذه المحادثة نهائياً؟' : 'Delete this conversation permanently?')) return
+    if (!confirm((t.addedTranslations_2026?.['هل تريد حذف هذه المحادثة نهائياً؟'] || (t.addedTranslations_2026?.['هل تريد حذف هذه المحادثة نهائياً؟'] || 'هل تريد حذف هذه المحادثة نهائياً؟')))) return
     setDeletingConvId(convId)
     try {
       const res = await fetch(`/api/academy/conversations/${convId}`, { method: 'DELETE' })
@@ -198,7 +198,7 @@ function ChatContent() {
         setActiveConv(prev => (prev?.id === convId ? null : prev))
       } else {
         const data = await res.json().catch(() => ({}))
-        alert(data?.error || (isAr ? 'تعذر حذف المحادثة' : 'Could not delete conversation'))
+        alert(data?.error || ((t.addedTranslations_2026?.['تعذر حذف المحادثة'] || (t.addedTranslations_2026?.['تعذر حذف المحادثة'] || 'تعذر حذف المحادثة'))))
       }
     } catch {
       // ignore
@@ -284,10 +284,10 @@ function ChatContent() {
     <div className="max-w-6xl mx-auto space-y-6 pb-12 h-[calc(100vh-100px)] flex flex-col" dir={isAr ? "rtl" : "ltr"}>
       <div className="space-y-1 shrink-0">
         <h1 className="text-3xl font-black tracking-tight text-foreground">
-          {isAr ? "تواصل مع الطلاب" : "Student Messages"}
+          {(t.addedTranslations_2026?.['تواصل مع الطلاب'] || (t.addedTranslations_2026?.['تواصل مع الطلاب'] || 'تواصل مع الطلاب'))}
         </h1>
         <p className="text-muted-foreground font-medium">
-          {isAr ? "أجب على استفسارات طلابك." : "Reply to your students' questions."}
+          {(t.addedTranslations_2026?.['أجب على استفسارات طلابك.'] || (t.addedTranslations_2026?.['أجب على استفسارات طلابك.'] || 'أجب على استفسارات طلابك.'))}
         </p>
       </div>
 
@@ -299,7 +299,7 @@ function ChatContent() {
             <div className="relative">
               <Search className={`absolute ${isAr ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground`} />
               <Input
-                placeholder={isAr ? "ابحث عن طالب..." : "Search student..."}
+                placeholder={(t.addedTranslations_2026?.['ابحث عن طالب...'] || (t.addedTranslations_2026?.['ابحث عن طالب...'] || 'ابحث عن طالب...'))}
                 className={`pl-9 pr-9 h-10 rounded-xl bg-muted/30 border-border/50 focus:bg-card`}
               />
             </div>
@@ -309,7 +309,7 @@ function ChatContent() {
                 className="flex-1 justify-center rounded-xl h-10 gap-2 font-bold px-2"
               >
                 <UserPlus className="w-4 h-4" />
-                <span className="truncate">{isAr ? "محادثة" : "Chat"}</span>
+                <span className="truncate">{(t.addedTranslations_2026?.['محادثة'] || (t.addedTranslations_2026?.['محادثة'] || 'محادثة'))}</span>
               </Button>
               <Button
                 onClick={handleCreateTicket}
@@ -318,7 +318,7 @@ function ChatContent() {
                 className="flex-1 justify-center rounded-xl h-10 gap-2 font-bold px-2 border-blue-200 text-blue-700 hover:bg-blue-50 dark:border-blue-900 dark:text-blue-300 dark:hover:bg-blue-950"
               >
                 <Shield className="w-4 h-4" />
-                <span className="truncate">{isAr ? "الدعم" : "Support"}</span>
+                <span className="truncate">{(t.addedTranslations_2026?.['الدعم'] || (t.addedTranslations_2026?.['الدعم'] || 'الدعم'))}</span>
               </Button>
             </div>
           </div>
@@ -328,7 +328,7 @@ function ChatContent() {
               <div className="flex justify-center p-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
             ) : conversations.length === 0 ? (
               <div className="text-center p-8 text-muted-foreground text-sm font-medium">
-                {isAr ? "لا توجد أي محادثات حالياً" : "No conversations yet"}
+                {(t.addedTranslations_2026?.['لا توجد أي محادثات حالياً'] || (t.addedTranslations_2026?.['لا توجد أي محادثات حالياً'] || 'لا توجد أي محادثات حالياً'))}
               </div>
             ) : (
               conversations.map(conv => (
@@ -351,12 +351,12 @@ function ChatContent() {
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-center mb-0.5">
                       <h4 className="font-bold text-sm text-foreground truncate">
-                        {conv.is_ticket ? (isAr ? "الدعم الفني" : "Support") : conv.other_user_name}
+                        {conv.is_ticket ? ((t.addedTranslations_2026?.['الدعم الفني'] || (t.addedTranslations_2026?.['الدعم الفني'] || 'الدعم الفني'))) : conv.other_user_name}
                       </h4>
                       <span className="text-[10px] text-muted-foreground font-medium shrink-0">{formatTime(conv.last_message_at)}</span>
                     </div>
                     <p className={`text-xs truncate ${conv.unread_count > 0 ? 'text-foreground font-bold' : 'text-muted-foreground font-medium'}`}>
-                      {conv.last_message || (isAr ? 'بدء محادثة جديدة' : 'Start a new conversation')}
+                      {conv.last_message || ((t.addedTranslations_2026?.['بدء محادثة جديدة'] || (t.addedTranslations_2026?.['بدء محادثة جديدة'] || 'بدء محادثة جديدة')))}
                     </p>
                   </div>
                 </button>
@@ -372,7 +372,7 @@ function ChatContent() {
               <div className="w-20 h-20 rounded-full bg-muted/20 flex items-center justify-center mb-4">
                 <Send className="w-8 h-8 opacity-20" />
               </div>
-              <p className="font-bold text-lg">{isAr ? "اختر محادثة للبدء" : "Select a conversation to start"}</p>
+              <p className="font-bold text-lg">{(t.addedTranslations_2026?.['اختر محادثة للبدء'] || (t.addedTranslations_2026?.['اختر محادثة للبدء'] || 'اختر محادثة للبدء'))}</p>
             </div>
           ) : (
             <>
@@ -386,15 +386,15 @@ function ChatContent() {
                 </div>
                 <div>
                   <h3 className="font-bold text-foreground">
-                    {activeConv.is_ticket ? (isAr ? "الدعم الفني" : "Support") : activeConv.other_user_name}
+                    {activeConv.is_ticket ? ((t.addedTranslations_2026?.['الدعم الفني'] || (t.addedTranslations_2026?.['الدعم الفني'] || 'الدعم الفني'))) : activeConv.other_user_name}
                   </h3>
                   {activeConv.is_ticket ? (
                     <span className="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-500/10 px-2 rounded-full hidden sm:inline-block">
-                      {isAr ? "تذكرة دعم فني" : "Support Ticket"}
+                      {(t.addedTranslations_2026?.['تذكرة دعم فني'] || (t.addedTranslations_2026?.['تذكرة دعم فني'] || 'تذكرة دعم فني'))}
                     </span>
                   ) : (
                     <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 rounded-full hidden sm:inline-block">
-                      {isAr ? "طالب بالأكاديمية" : "Academy Student"}
+                      {(t.addedTranslations_2026?.['طالب بالأكاديمية'] || (t.addedTranslations_2026?.['طالب بالأكاديمية'] || 'طالب بالأكاديمية'))}
                     </span>
                   )}
                 </div>
@@ -403,7 +403,7 @@ function ChatContent() {
                   size="icon"
                   onClick={() => handleDeleteConversation(activeConv.id)}
                   disabled={deletingConvId === activeConv.id}
-                  title={isAr ? 'حذف المحادثة' : 'Delete conversation'}
+                  title={(t.addedTranslations_2026?.['حذف المحادثة'] || (t.addedTranslations_2026?.['حذف المحادثة'] || 'حذف المحادثة'))}
                   className={`${isAr ? 'mr-auto' : 'ml-auto'} shrink-0 text-muted-foreground hover:text-red-600 hover:bg-red-500/10`}
                 >
                   {deletingConvId === activeConv.id ? <Loader2 className="w-5 h-5 animate-spin" /> : <Trash2 className="w-5 h-5" />}
@@ -444,7 +444,7 @@ function ChatContent() {
               <div className="p-4 border-t border-border/50 shrink-0 bg-card">
                 <form onSubmit={handleSend} className="flex gap-2">
                   <Input
-                    placeholder={isAr ? "اكتب رسالتك هنا..." : "Type your message..."}
+                    placeholder={(t.addedTranslations_2026?.['اكتب رسالتك هنا...'] || (t.addedTranslations_2026?.['اكتب رسالتك هنا...'] || 'اكتب رسالتك هنا...'))}
                     value={reply}
                     onChange={(e) => setReply(e.target.value)}
                     className="flex-1 rounded-2xl h-12 bg-muted/30 border-border/50 focus:bg-card"
@@ -469,7 +469,7 @@ function ChatContent() {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowNewConv(false)}>
           <Card className="w-full max-w-md max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
             <div className="p-4 border-b border-border flex items-center justify-between shrink-0">
-              <h3 className="font-bold text-lg">{isAr ? "بدء محادثة جديدة" : "Start New Conversation"}</h3>
+              <h3 className="font-bold text-lg">{(t.addedTranslations_2026?.['بدء محادثة جديدة'] || (t.addedTranslations_2026?.['بدء محادثة جديدة'] || 'بدء محادثة جديدة'))}</h3>
               <Button variant="ghost" size="icon" onClick={() => setShowNewConv(false)}>
                 <X className="w-5 h-5" />
               </Button>
@@ -478,7 +478,7 @@ function ChatContent() {
               <div className="relative">
                 <Search className={`absolute ${isAr ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground`} />
                 <Input
-                  placeholder={isAr ? "ابحث عن طالب..." : "Search student..."}
+                  placeholder={(t.addedTranslations_2026?.['ابحث عن طالب...'] || (t.addedTranslations_2026?.['ابحث عن طالب...'] || 'ابحث عن طالب...'))}
                   value={studentSearch}
                   onChange={(e) => setStudentSearch(e.target.value)}
                   className={`${isAr ? 'pr-9' : 'pl-9'} h-10 rounded-xl`}
@@ -493,8 +493,8 @@ function ChatContent() {
               ) : filteredStudents.length === 0 ? (
                 <div className="text-center p-8 text-muted-foreground text-sm">
                   {students.length === 0
-                    ? (isAr ? "لا يوجد طلاب مسجلين لديك" : "No students enrolled")
-                    : (isAr ? "لا توجد نتائج" : "No results found")
+                    ? ((t.addedTranslations_2026?.['لا يوجد طلاب مسجلين لديك'] || (t.addedTranslations_2026?.['لا يوجد طلاب مسجلين لديك'] || 'لا يوجد طلاب مسجلين لديك')))
+                    : ((t.addedTranslations_2026?.['لا توجد نتائج'] || (t.addedTranslations_2026?.['لا توجد نتائج'] || 'لا توجد نتائج')))
                   }
                 </div>
               ) : (
@@ -525,6 +525,7 @@ function ChatContent() {
 }
 
 export default function TeacherChatPage() {
+    const { t } = useI18n();
   return (
     <Suspense fallback={<PageLoadingSkeleton />}>
       <ChatContent />

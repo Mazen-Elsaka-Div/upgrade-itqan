@@ -1,3 +1,4 @@
+import { useI18n } from '@/lib/i18n/context';
 'use client'
 
 import { useState, useEffect, use } from 'react'
@@ -41,13 +42,13 @@ interface Question {
 }
 
 const STATUS_TEXT: Record<string, string> = {
-  pending: 'في الانتظار',
-  assigned: 'مُسند إليك',
-  in_progress: 'قيد العمل',
-  awaiting_consent: 'بانتظار موافقة السائل',
-  published: 'منشور في المكتبة',
-  declined: 'لم يُنشر (رفض السائل)',
-  closed: 'مغلق',
+  pending: (t.addedTranslations_2026?.['في الانتظار'] || 'في الانتظار'),
+  assigned: (t.addedTranslations_2026?.['مُسند إليك'] || 'مُسند إليك'),
+  in_progress: (t.addedTranslations_2026?.['قيد العمل'] || 'قيد العمل'),
+  awaiting_consent: (t.addedTranslations_2026?.['بانتظار موافقة السائل'] || 'بانتظار موافقة السائل'),
+  published: (t.addedTranslations_2026?.['منشور في المكتبة'] || 'منشور في المكتبة'),
+  declined: (t.addedTranslations_2026?.['لم يُنشر (رفض السائل)'] || 'لم يُنشر (رفض السائل)'),
+  closed: (t.addedTranslations_2026?.['مغلق'] || 'مغلق'),
 }
 
 export default function FiqhSupervisorQuestionDetailPage({
@@ -55,6 +56,8 @@ export default function FiqhSupervisorQuestionDetailPage({
 }: {
   params: Promise<{ id: string }>
 }) {
+  const { t } = useI18n();
+
   const { id } = use(params)
 
   const [question, setQuestion] = useState<Question | null>(null)
@@ -98,7 +101,7 @@ export default function FiqhSupervisorQuestionDetailPage({
       })
       if (!res.ok) {
         const d = await res.json().catch(() => ({}))
-        setError(d?.error || 'حدث خطأ أثناء حفظ الإجابة')
+        setError(d?.error || (t.addedTranslations_2026?.['حدث خطأ أثناء حفظ الإجابة'] || 'حدث خطأ أثناء حفظ الإجابة'))
         return
       }
       await load()
@@ -106,7 +109,7 @@ export default function FiqhSupervisorQuestionDetailPage({
       setSaved(true)
       setTimeout(() => setSaved(false), 3000)
     } catch {
-      setError('تعذّر الاتصال بالخادم')
+      setError((t.addedTranslations_2026?.['تعذّر الاتصال بالخادم'] || 'تعذّر الاتصال بالخادم'))
     } finally {
       setSaving(false)
     }
@@ -120,7 +123,7 @@ export default function FiqhSupervisorQuestionDetailPage({
           <div className="absolute inset-0 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
           <Loader2 className="absolute inset-0 m-auto w-10 h-10 animate-spin text-primary opacity-50" />
         </div>
-        <p className="text-xl font-black text-muted-foreground animate-pulse">جاري تحميل السؤال...</p>
+        <p className="text-xl font-black text-muted-foreground animate-pulse">{(t.addedTranslations_2026?.['جاري تحميل السؤال...'] || 'جاري تحميل السؤال...')}</p>
       </div>
     )
   }
@@ -131,14 +134,14 @@ export default function FiqhSupervisorQuestionDetailPage({
         <div className="w-24 h-24 bg-destructive/10 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner border border-destructive/20">
           <AlertCircle className="w-12 h-12 text-destructive" />
         </div>
-        <h2 className="text-3xl font-black text-foreground mb-4">السؤال غير موجود</h2>
-        <p className="text-muted-foreground font-medium mb-8 max-w-sm mx-auto">يبدو أن هذا السؤال قد تم حذفه أو لا تملك صلاحية الوصول إليه.</p>
+        <h2 className="text-3xl font-black text-foreground mb-4">{(t.addedTranslations_2026?.['السؤال غير موجود'] || 'السؤال غير موجود')}</h2>
+        <p className="text-muted-foreground font-medium mb-8 max-w-sm mx-auto">{(t.addedTranslations_2026?.['يبدو أن هذا السؤال قد تم حذفه أو لا تملك صلاحية الوصول إليه.'] || 'يبدو أن هذا السؤال قد تم حذفه أو لا تملك صلاحية الوصول إليه.')}</p>
         <Link
           href="/academy/fiqh-supervisor/questions"
           className="inline-flex items-center justify-center px-8 py-4 bg-primary text-primary-foreground font-black rounded-2xl hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20 hover:shadow-xl hover:-translate-y-1"
         >
-          العودة لصندوق الوارد
-        </Link>
+          {(t.addedTranslations_2026?.['العودة لصندوق الوارد'] || 'العودة لصندوق الوارد')}
+                        </Link>
       </div>
     )
   }
@@ -146,8 +149,8 @@ export default function FiqhSupervisorQuestionDetailPage({
   const isAnswered = question.answer !== null
   const showForm = !isAnswered || editing
   const askerLabel = question.is_anonymous
-    ? 'سائل مجهول'
-    : question.asker_name || 'سائل'
+    ? (t.addedTranslations_2026?.['سائل مجهول'] || 'سائل مجهول')
+    : question.asker_name || (t.addedTranslations_2026?.['سائل'] || 'سائل')
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 relative min-h-screen pb-20" dir="rtl">
@@ -165,8 +168,8 @@ export default function FiqhSupervisorQuestionDetailPage({
           <ArrowRight className="w-5 h-5" />
         </Link>
         <div>
-          <h2 className="font-black text-lg text-foreground">العودة للصندوق</h2>
-          <p className="text-xs font-bold text-muted-foreground">تفاصيل السؤال رقم #{question.id.substring(0, 6)}</p>
+          <h2 className="font-black text-lg text-foreground">{(t.addedTranslations_2026?.['العودة للصندوق'] || 'العودة للصندوق')}</h2>
+          <p className="text-xs font-bold text-muted-foreground">{(t.addedTranslations_2026?.['تفاصيل السؤال رقم #'] || 'تفاصيل السؤال رقم #')}{question.id.substring(0, 6)}</p>
         </div>
       </div>
 
@@ -226,7 +229,7 @@ export default function FiqhSupervisorQuestionDetailPage({
                 {question.is_published && (
                   <div className="flex items-center gap-2 bg-emerald-500/10 px-4 py-2 rounded-xl border border-emerald-500/20">
                     <Eye className="w-4 h-4 text-emerald-600" />
-                    <span className="text-sm font-black text-emerald-700">{question.views_count || 0} مشاهدة</span>
+                    <span className="text-sm font-black text-emerald-700">{question.views_count || 0} {(t.addedTranslations_2026?.['مشاهدة'] || 'مشاهدة')}</span>
                   </div>
                 )}
               </div>
@@ -249,16 +252,16 @@ export default function FiqhSupervisorQuestionDetailPage({
               <div className="flex-1 min-w-0 space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <h2 className="font-black text-2xl text-emerald-900 dark:text-emerald-300 flex items-center gap-3">
-                    الإجابة الفقهية
-                  </h2>
+                    {(t.addedTranslations_2026?.['الإجابة الفقهية'] || 'الإجابة الفقهية')}
+                                                        </h2>
                   <button
                     type="button"
                     onClick={() => setEditing(true)}
                     className="flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 rounded-xl text-sm font-black text-emerald-700 dark:text-emerald-400 transition-all hover:scale-105"
                   >
                     <Pencil className="w-4 h-4" />
-                    تعديل الإجابة
-                  </button>
+                    {(t.addedTranslations_2026?.['تعديل الإجابة'] || 'تعديل الإجابة')}
+                                                        </button>
                 </div>
                 
                 <div className="bg-white/60 dark:bg-black/20 rounded-3xl p-6 md:p-8 border border-white/40 dark:border-white/5 shadow-inner">
@@ -286,17 +289,17 @@ export default function FiqhSupervisorQuestionDetailPage({
                     {question.is_published ? (
                       <>
                         <CheckCircle2 className="w-4 h-4 text-emerald-700 dark:text-emerald-400" /> 
-                        <span className="text-sm font-black text-emerald-800 dark:text-emerald-300">منشور في المكتبة العامة</span>
+                        <span className="text-sm font-black text-emerald-800 dark:text-emerald-300">{(t.addedTranslations_2026?.['منشور في المكتبة العامة'] || 'منشور في المكتبة العامة')}</span>
                       </>
                     ) : question.status === 'awaiting_consent' ? (
                       <>
                         <Clock className="w-4 h-4 text-emerald-700 dark:text-emerald-400" /> 
-                        <span className="text-sm font-black text-emerald-800 dark:text-emerald-300">بانتظار موافقة السائل</span>
+                        <span className="text-sm font-black text-emerald-800 dark:text-emerald-300">{(t.addedTranslations_2026?.['بانتظار موافقة السائل'] || 'بانتظار موافقة السائل')}</span>
                       </>
                     ) : (
                       <>
                         <EyeOff className="w-4 h-4 text-emerald-700 dark:text-emerald-400" /> 
-                        <span className="text-sm font-black text-emerald-800 dark:text-emerald-300">لم يُنشر</span>
+                        <span className="text-sm font-black text-emerald-800 dark:text-emerald-300">{(t.addedTranslations_2026?.['لم يُنشر'] || 'لم يُنشر')}</span>
                       </>
                     )}
                   </div>
@@ -320,9 +323,9 @@ export default function FiqhSupervisorQuestionDetailPage({
               </div>
               <div>
                 <h2 className="font-black text-2xl text-foreground">
-                  {isAnswered ? 'تعديل الإجابة' : 'كتابة الإجابة'}
+                  {isAnswered ? (t.addedTranslations_2026?.['تعديل الإجابة'] || 'تعديل الإجابة') : 'كتابة الإجابة'}
                 </h2>
-                <p className="text-sm font-bold text-muted-foreground mt-1">اكتب إجابتك الفقهية بوضوح وتفصيل.</p>
+                <p className="text-sm font-bold text-muted-foreground mt-1">{(t.addedTranslations_2026?.['اكتب إجابتك الفقهية بوضوح وتفصيل.'] || 'اكتب إجابتك الفقهية بوضوح وتفصيل.')}</p>
               </div>
             </div>
 
@@ -333,7 +336,7 @@ export default function FiqhSupervisorQuestionDetailPage({
                   value={answer}
                   onChange={(e) => setAnswer(e.target.value)}
                   rows={10}
-                  placeholder="ابدأ بكتابة الإجابة هنا..."
+                  placeholder={(t.addedTranslations_2026?.['ابدأ بكتابة الإجابة هنا...'] || 'ابدأ بكتابة الإجابة هنا...')}
                   required
                   className="relative w-full bg-background border-2 border-border focus:border-transparent rounded-3xl px-6 py-6 text-lg font-medium text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-4 focus:ring-primary/20 resize-none leading-loose shadow-inner transition-all"
                 />
@@ -344,8 +347,8 @@ export default function FiqhSupervisorQuestionDetailPage({
                   <Sparkles className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                 </div>
                 <div className="pt-1 text-sm leading-loose font-bold text-amber-900 dark:text-amber-200">
-                  بعد حفظ الإجابة سيُرسل طلب موافقة على النشر إلى السائل تلقائياً. لن تظهر الإجابة في المكتبة العامة قبل قبول السائل. تأكد من مراجعة الإجابة لغوياً وفقهياً قبل الإرسال.
-                </div>
+                  {(t.addedTranslations_2026?.['بعد حفظ الإجابة سيُرسل طلب موافقة على النشر إلى السائل تلقائياً. لن تظهر الإجابة في المكتبة العامة قبل قبول السائل. تأكد من مراجعة الإجابة لغوياً وفقهياً قبل الإرسال.'] || 'بعد حفظ الإجابة سيُرسل طلب موافقة على النشر إلى السائل تلقائياً. لن تظهر الإجابة في المكتبة العامة قبل قبول السائل. تأكد من مراجعة الإجابة لغوياً وفقهياً قبل الإرسال.')}
+                                                  </div>
               </div>
 
               {error && (
@@ -362,8 +365,8 @@ export default function FiqhSupervisorQuestionDetailPage({
                   <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center shrink-0">
                     <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                   </div>
-                  تم حفظ الإجابة وإرسال طلب الموافقة للسائل بنجاح.
-                </div>
+                  {(t.addedTranslations_2026?.['تم حفظ الإجابة وإرسال طلب الموافقة للسائل بنجاح.'] || 'تم حفظ الإجابة وإرسال طلب الموافقة للسائل بنجاح.')}
+                                                  </div>
               )}
 
               <div className="flex flex-col sm:flex-row items-center justify-end gap-4 pt-6 border-t border-border/50">
@@ -376,8 +379,8 @@ export default function FiqhSupervisorQuestionDetailPage({
                     }}
                     className="w-full sm:w-auto px-8 py-4 bg-muted hover:bg-muted/80 text-foreground rounded-2xl font-black text-base transition-all hover:scale-105"
                   >
-                    إلغاء التعديل
-                  </button>
+                    {(t.addedTranslations_2026?.['إلغاء التعديل'] || 'إلغاء التعديل')}
+                                                        </button>
                 )}
                 <button
                   type="submit"
@@ -392,7 +395,7 @@ export default function FiqhSupervisorQuestionDetailPage({
                   ) : (
                     <Send className="w-5 h-5 -translate-x-1" />
                   )}
-                  {saving ? 'جاري الحفظ...' : isAnswered ? 'حفظ التعديلات' : 'إرسال الإجابة لاعتمادها'}
+                  {saving ? (t.addedTranslations_2026?.['جاري الحفظ...'] || 'جاري الحفظ...') : isAnswered ? (t.addedTranslations_2026?.['حفظ التعديلات'] || 'حفظ التعديلات') : 'إرسال الإجابة لاعتمادها'}
                 </button>
               </div>
             </div>

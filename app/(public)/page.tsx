@@ -352,7 +352,7 @@ export default function LandingPage() {
                </div>
                <span className="hidden md:block opacity-20">|</span>
                <a href={`https://wa.me/${contactInfo.phone.replace(/[\s+]/g, '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-[#25D366] transition-all">
-                 <span className="text-[#D4A843]/60 font-black">واتساب:</span>
+                 <span className="text-[#D4A843]/60 font-black">{(t.addedTranslations_2026?.['واتساب:'] || (t.addedTranslations_2026?.['واتساب:'] || 'واتساب:'))}</span>
                  <span dir="ltr">{contactInfo.phone}</span>
                </a>
             </div>
