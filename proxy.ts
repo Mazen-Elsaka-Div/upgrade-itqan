@@ -99,18 +99,31 @@ export default async function middleware(req: NextRequest) {
                         // HTML page, which made res.json() throw "Unexpected token '<'". A direct
                         // query always targets the real live DB and never returns HTML.
                         const { queryOne } = await import("@/lib/db")
-                        const userRow = await queryOne<{
-                            role: string
-                            is_active: boolean
-                            is_disabled: boolean
-                            has_academy_access: boolean
-                            has_quran_access: boolean
-                            approval_status: string
-                            must_change_password: boolean
-                        }>(
-                            `SELECT role, is_active, is_disabled, has_academy_access, has_quran_access, approval_status, must_change_password FROM users WHERE id = $1 LIMIT 1`,
-                            [sessionPayload.sub]
+                        // The pool can take up to connectionTimeoutMillis (8s) just to
+                        // hand out a connection, and a query has no built-in timeout. On
+                        // every sensitive-route navigation that risk compounds: a slow or
+                        // exhausted pool would stall the request (manifesting to users as a
+                        // blank "page couldn't load" / multi-minute timeout). Race the check
+                        // against a short timeout so a struggling DB falls through to the
+                        // cached-session path below instead of hanging navigation.
+                        const dbCheckTimeout = new Promise<never>((_, reject) =>
+                            setTimeout(() => reject(new Error("middleware db check timed out")), 3000)
                         )
+                        const userRow = await Promise.race([
+                            queryOne<{
+                                role: string
+                                is_active: boolean
+                                is_disabled: boolean
+                                has_academy_access: boolean
+                                has_quran_access: boolean
+                                approval_status: string
+                                must_change_password: boolean
+                            }>(
+                                `SELECT role, is_active, is_disabled, has_academy_access, has_quran_access, approval_status, must_change_password FROM users WHERE id = $1 LIMIT 1`,
+                                [sessionPayload.sub]
+                            ),
+                            dbCheckTimeout,
+                        ])
 
                         // User deleted or disabled - invalidate session (#14: real-time suspension)
                         if (!userRow || userRow.is_disabled === true) {
