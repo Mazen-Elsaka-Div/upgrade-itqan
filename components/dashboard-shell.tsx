@@ -70,7 +70,7 @@ const getRoleConfig = (t: any): Record<'student' | 'reader' | 'admin' | 'student
           { href: '/reader/recitations', label: t.reader.reviewList, icon: ClipboardList },
           { href: '/reader/students', label: t.admin.sidebarMyStudents, icon: Users },
           { href: '/reader/enrollment-requests', label: t.admin.sidebarEnrollmentRequests, icon: UserCheck },
-          { href: '/reader/memorization-paths', label: t.reader.memorizationPaths || t.admin.sidebarMemorizationPaths, icon: Route },
+          { href: '/reader/memorization-paths', label: t.reader.memorizationPaths?.title || t.admin.sidebarMemorizationPaths, icon: Route },
           { href: '/reader/learning-paths', label: t.admin.sidebarLearningPaths, icon: GraduationCap },
           { href: '/reader/competitions', label: t.admin.sidebarJudgeCompetitions, icon: Trophy },
           { href: '/reader/sessions', label: t.reader.sessions || t.admin.sidebarMySessions, icon: Calendar },

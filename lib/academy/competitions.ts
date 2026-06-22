@@ -4,12 +4,17 @@ import { awardPoints } from '@/lib/academy/gamification'
 export async function getCompetitions(filters: { status?: string; type?: string; userId?: string; scope?: string } = {}) {
   let sql = `SELECT * FROM competitions WHERE 1=1`
   const params: any[] = []
-  
-  if (filters.status) {
+
+  // 'all' (and empty) is a client sentinel meaning "no filter". No competition
+  // ever has a literal status/type of 'all', so without this guard a request
+  // like `?status=all` would filter `status = 'all'` and match nothing — which
+  // silently broke the student detail page (it fetches the list with
+  // `status=all` then finds by id, so every competition showed "not found").
+  if (filters.status && filters.status !== 'all') {
     params.push(filters.status)
     sql += ` AND status = $${params.length}`
   }
-  if (filters.type) {
+  if (filters.type && filters.type !== 'all') {
     params.push(filters.type)
     sql += ` AND type = $${params.length}`
   }
