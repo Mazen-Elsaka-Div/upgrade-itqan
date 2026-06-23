@@ -1,6 +1,8 @@
 
 import { query, queryOne, withTransaction } from '@/lib/db'
 import { awardPoints } from '@/lib/academy/gamification'
+import { createNotification } from '@/lib/notifications'
+import { createEligibilityRequest } from '@/lib/certificate/eligibility'
 import { en } from '@/lib/i18n/locales/en';
 
 export async function getCompetitions(filters: { status?: string; type?: string; userId?: string; scope?: string } = {}) {
@@ -362,6 +364,72 @@ export async function getEntryJudgeScores(entryId: string) {
  * Idempotent: if this student was already awarded competition points for this
  * competition we skip, so re-saving an evaluation never double-pays.
  */
+/**
+ * Tell a top-N finisher they placed, and (if the competition issues
+ * certificates) create their certificate-issuance request so it appears in
+ * "أكمل بيانات الشهادة" — auto-issuing when the admin enabled that setting.
+ *
+ * Both writes are idempotent (notification dedupKey + the eligibility request's
+ * unique index), and every failure is swallowed so the surrounding points/award
+ * flow is never interrupted.
+ */
+async function notifyAndCertifyCompetitionRank(opts: {
+  competitionId: string
+  studentId: string
+  rank: number
+  title: string | null
+  scope: string | null
+  certificateEnabled: boolean | null
+  awardTopN: number | null
+}): Promise<void> {
+  const { competitionId, studentId, rank, title } = opts
+  const topN = Math.max(3, Number(opts.awardTopN || 10))
+  if (rank > topN) return // only people who actually placed are notified
+
+  const compTitle = title || 'المسابقة'
+  const rankWord =
+    rank === 1 ? 'المركز الأول 🥇'
+    : rank === 2 ? 'المركز الثاني 🥈'
+    : rank === 3 ? 'المركز الثالث 🥉'
+    : `المركز ${rank}`
+  const isPodium = rank <= 3
+  const studentLink = opts.scope === 'academy' ? '/academy/student/competitions' : '/student/competitions'
+
+  // 1. Result notification (idempotent per student per competition).
+  try {
+    await createNotification({
+      userId: studentId,
+      type: 'general',
+      title: isPodium ? `مبارك! حصلت على ${rankWord} 🎉` : `نتيجة المسابقة: ${rankWord}`,
+      message: `لقد حصلت على ${rankWord} في «${compTitle}». اضغط لعرض النتيجة.`,
+      category: 'system',
+      link: studentLink,
+      dedupKey: `competition-result:${competitionId}:${studentId}`,
+    })
+  } catch (err) {
+    console.error('[competitions] result notification failed', err)
+  }
+
+  // 2. Certificate eligibility (only when the competition issues certificates).
+  if (opts.certificateEnabled === false) return
+  try {
+    const certScope: 'academy' | 'maqraa' = opts.scope === 'academy' ? 'academy' : 'maqraa'
+    await createEligibilityRequest({
+      scope: certScope,
+      kind: 'competition',
+      studentId,
+      sourceTable: 'competitions',
+      sourceId: competitionId,
+      sourceLabel: compTitle,
+      rank,
+      reason: `${rankWord} في ${compTitle}`,
+      language: 'ar',
+    })
+  } catch (err) {
+    console.error('[competitions] certificate eligibility failed', err)
+  }
+}
+
 export async function awardCompetitionRank(
   competitionId: string,
   studentId: string,
@@ -370,12 +438,16 @@ export async function awardCompetitionRank(
   try {
     const comp = await queryOne<{
       title: string | null
+      scope: string | null
+      certificate_enabled: boolean | null
+      award_top_n: number | null
       points_multiplier: number | null
       points_first: number | null
       points_second: number | null
       points_third: number | null
     }>(
-      `SELECT title, points_multiplier, points_first, points_second, points_third
+      `SELECT title, scope, certificate_enabled, award_top_n,
+              points_multiplier, points_first, points_second, points_third
          FROM competitions WHERE id = $1`,
       [competitionId],
     )
@@ -392,6 +464,21 @@ export async function awardCompetitionRank(
         [competitionId, studentId],
       )
     }
+
+    // Notify the student of their result and (when enabled) open the
+    // certificate-issuance flow. Best-effort and idempotent, so it runs for
+    // every awarded rank (top-N) regardless of whether the rank earns points,
+    // and never blocks the points award below. This is the single place both
+    // the reader-finalize flow and the admin manual-award flow pass through.
+    await notifyAndCertifyCompetitionRank({
+      competitionId,
+      studentId,
+      rank,
+      title: comp.title,
+      scope: comp.scope,
+      certificateEnabled: comp.certificate_enabled,
+      awardTopN: comp.award_top_n,
+    })
 
     const rankPoints: Record<number, number> = {
       1: Number(comp.points_first ?? 500),
