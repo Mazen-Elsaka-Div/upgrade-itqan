@@ -1,5 +1,5 @@
 
-import { query, queryOne } from '@/lib/db'
+import { query, queryOne, withTransaction } from '@/lib/db'
 import { awardPoints } from '@/lib/academy/gamification'
 import { en } from '@/lib/i18n/locales/en';
 
