@@ -1,8 +1,13 @@
 "use client"
 
 import { useState, useEffect } from 'react'
-import { Users, Search, BookOpen, GraduationCap, TrendingUp, Filter, MoreVertical, Mail, Calendar, User, Activity } from 'lucide-react'
+import { Users, Search, BookOpen, GraduationCap, TrendingUp, Filter, MoreVertical, Mail, Calendar, User, Activity, Edit, Loader2 } from 'lucide-react'
 import { useI18n } from '@/lib/i18n/context'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
 interface Student {
   id: string
@@ -22,6 +27,50 @@ export default function AcademyAdminStudentsPage() {
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [filterGender, setFilterGender] = useState<'all' | 'male' | 'female'>('all')
+
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null)
+  const [editForm, setEditForm] = useState({ name: '', password: '' })
+  const [submitting, setSubmitting] = useState(false)
+
+  const openEditModal = (student: Student) => {
+    setSelectedStudent(student)
+    setEditForm({ name: student.name || '', password: '' })
+    setIsEditModalOpen(true)
+  }
+
+  const handleEditSubmit = async () => {
+    if (!selectedStudent) return
+    setSubmitting(true)
+    try {
+      const body: any = { userId: selectedStudent.id }
+      if (editForm.name && editForm.name !== selectedStudent.name) body.name = editForm.name
+      if (editForm.password) body.password = editForm.password
+
+      if (!body.name && !body.password) {
+        setIsEditModalOpen(false)
+        return
+      }
+
+      const res = await fetch("/api/admin/users", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      })
+
+      if (res.ok) {
+        setIsEditModalOpen(false)
+        setStudents(prev => prev.map(s => s.id === selectedStudent.id ? { ...s, name: editForm.name || s.name } : s))
+      } else {
+        const err = await res.json()
+        alert(err.error || "Failed to update student")
+      }
+    } catch (err) {
+      alert("Connection error")
+    } finally {
+      setSubmitting(false)
+    }
+  }
 
   useEffect(() => {
     async function fetchStudents() {
@@ -257,9 +306,19 @@ export default function AcademyAdminStudentsPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 text-center">
-                      <button className="p-2 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100">
-                        <MoreVertical className="w-4 h-4" />
-                      </button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button className="p-2 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100">
+                            <MoreVertical className="w-4 h-4" />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                          <DropdownMenuItem onClick={() => openEditModal(student)} className="cursor-pointer gap-2">
+                            <Edit className="w-4 h-4" />
+                            {language === 'ar' ? (t.addedTranslations_2026?.['تعديل البيانات'] || 'تعديل البيانات') : 'Edit Info'}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </td>
                   </tr>
                 ))}
@@ -277,6 +336,42 @@ export default function AcademyAdminStudentsPage() {
           </div>
         )}
       </div>
+
+      {/* Edit Student Modal */}
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent className="rounded-3xl border-none shadow-2xl bg-card max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-black text-foreground">{language === 'ar' ? (t.addedTranslations_2026?.['تعديل بيانات الطالب'] || 'تعديل بيانات الطالب') : 'Edit Student Info'}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground">{t.auth.fullName}</Label>
+              <Input
+                className="rounded-2xl h-11 bg-muted/30 border-border focus:bg-card font-bold"
+                value={editForm.name}
+                onChange={e => setEditForm({ ...editForm, name: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground">{t.admin.passwordLeaveBlank}</Label>
+              <Input
+                className="rounded-2xl h-11 bg-muted/30 border-border focus:bg-card font-bold"
+                type="password"
+                value={editForm.password}
+                onChange={e => setEditForm({ ...editForm, password: e.target.value })}
+                dir="ltr"
+              />
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setIsEditModalOpen(false)} className="rounded-2xl font-black">{t.cancel}</Button>
+            <Button onClick={handleEditSubmit} disabled={submitting} className="rounded-2xl font-black bg-primary text-primary-foreground hover:bg-primary/90">
+              {submitting && <Loader2 className="w-4 h-4 ml-2 animate-spin" />}
+              {t.profile.saveChanges}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
