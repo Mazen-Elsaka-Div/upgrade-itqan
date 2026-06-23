@@ -1,5 +1,5 @@
-import { useI18n } from '@/lib/i18n/context';
 'use client'
+
 
 import { useRouter } from 'next/navigation'
 import { PublicLessonForm } from '@/components/academy/public-lesson-form'

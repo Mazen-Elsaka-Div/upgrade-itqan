@@ -1,7 +1,5 @@
-
-const t: any = new Proxy({}, { get: () => new Proxy({}, { get: () => undefined }) });
-import { useI18n } from "@/lib/i18n/context";
 'use client'
+
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
