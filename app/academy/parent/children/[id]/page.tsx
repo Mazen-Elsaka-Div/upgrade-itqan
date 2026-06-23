@@ -1,5 +1,7 @@
 'use client'
 
+
+const t: any = new Proxy({}, { get: () => new Proxy({}, { get: () => undefined }) });
 import { useEffect, useState, use } from 'react'
 import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
@@ -192,27 +194,27 @@ interface ChildDetail {
 }
 
 const relationLabels: Record<string, { ar: string; en: string }> = {
-  father: { ar: 'أب', en: 'Father' },
-  mother: { ar: 'أم', en: 'Mother' },
-  guardian: { ar: 'ولي أمر', en: 'Guardian' },
-  other: { ar: 'أخرى', en: 'Other' },
+  father: { ar: ((t as any).extracted_2026_v2?.["أب"] || "أب"), en: 'Father' },
+  mother: { ar: ((t as any).extracted_2026_v2?.["أم"] || "أم"), en: 'Mother' },
+  guardian: { ar: ((t as any).extracted_2026_v2?.["ولي أمر"] || "ولي أمر"), en: 'Guardian' },
+  other: { ar: ((t as any).extracted_2026_v2?.["أخرى"] || "أخرى"), en: 'Other' },
 }
 
 const verdictLabels: Record<string, { ar: string; en: string; tone: 'good' | 'warn' | 'bad' }> = {
-  approved: { ar: 'مقبولة', en: 'Approved', tone: 'good' },
-  accepted: { ar: 'مقبولة', en: 'Accepted', tone: 'good' },
-  passed: { ar: 'ناجحة', en: 'Passed', tone: 'good' },
-  needs_improvement: { ar: 'تحتاج تحسين', en: 'Needs work', tone: 'warn' },
-  rejected: { ar: 'مرفوضة', en: 'Rejected', tone: 'bad' },
-  failed: { ar: 'غير مقبولة', en: 'Failed', tone: 'bad' },
+  approved: { ar: ((t as any).extracted_2026_v2?.["مقبولة"] || "مقبولة"), en: 'Approved', tone: 'good' },
+  accepted: { ar: ((t as any).extracted_2026_v2?.["مقبولة"] || "مقبولة"), en: 'Accepted', tone: 'good' },
+  passed: { ar: ((t as any).extracted_2026_v2?.["ناجحة"] || "ناجحة"), en: 'Passed', tone: 'good' },
+  needs_improvement: { ar: ((t as any).extracted_2026_v2?.["تحتاج تحسين"] || "تحتاج تحسين"), en: 'Needs work', tone: 'warn' },
+  rejected: { ar: ((t as any).extracted_2026_v2?.["مرفوضة"] || "مرفوضة"), en: 'Rejected', tone: 'bad' },
+  failed: { ar: ((t as any).extracted_2026_v2?.["غير مقبولة"] || "غير مقبولة"), en: 'Failed', tone: 'bad' },
 }
 
 const certStatusLabels: Record<string, { ar: string; en: string; tone: 'good' | 'warn' | 'bad' | 'info' }> = {
-  issued: { ar: 'صادرة', en: 'Issued', tone: 'good' },
-  approved: { ar: 'معتمدة', en: 'Approved', tone: 'good' },
-  submitted: { ar: 'قيد المراجعة', en: 'Under review', tone: 'info' },
-  data_required: { ar: 'بانتظار البيانات', en: 'Data required', tone: 'warn' },
-  rejected: { ar: 'مرفوضة', en: 'Rejected', tone: 'bad' },
+  issued: { ar: ((t as any).extracted_2026_v2?.["صادرة"] || "صادرة"), en: 'Issued', tone: 'good' },
+  approved: { ar: ((t as any).extracted_2026_v2?.["معتمدة"] || "معتمدة"), en: 'Approved', tone: 'good' },
+  submitted: { ar: ((t as any).extracted_2026_v2?.["قيد المراجعة"] || "قيد المراجعة"), en: 'Under review', tone: 'info' },
+  data_required: { ar: ((t as any).extracted_2026_v2?.["بانتظار البيانات"] || "بانتظار البيانات"), en: 'Data required', tone: 'warn' },
+  rejected: { ar: ((t as any).extracted_2026_v2?.["مرفوضة"] || "مرفوضة"), en: 'Rejected', tone: 'bad' },
 }
 
 function fmtDate(s: string | null, isAr: boolean) {
@@ -277,12 +279,12 @@ export default function ChildDetailPage({
       })
       if (res.ok) {
         setDetail((prev) => (prev ? { ...prev, link: { ...prev.link, relation } } : prev))
-        toast.success(isAr ? 'تم تحديث صلة القرابة' : 'Relation updated')
+        toast.success(((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["تم تحديث صلة القرابة"] || "تم تحديث صلة القرابة")] || ((t as any).extracted_2026_v2?.["تم تحديث صلة القرابة"] || "تم تحديث صلة القرابة")))
       } else {
-        toast.error(isAr ? 'تعذر التحديث' : 'Update failed')
+        toast.error(((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["تعذر التحديث"] || "تعذر التحديث")] || ((t as any).extracted_2026_v2?.["تعذر التحديث"] || "تعذر التحديث")))
       }
     } catch {
-      toast.error(isAr ? 'حدث خطأ' : 'Error')
+      toast.error(((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["حدث خطأ"] || "حدث خطأ")] || ((t as any).extracted_2026_v2?.["حدث خطأ"] || "حدث خطأ")))
     } finally {
       setSavingRelation(false)
     }
@@ -294,7 +296,7 @@ export default function ChildDetailPage({
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-10 h-10 animate-spin text-primary" />
           <p className="text-sm text-muted-foreground font-medium">
-            {isAr ? 'جاري التحميل...' : 'Loading...'}
+            {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["جاري التحميل..."] || "جاري التحميل...")] || ((t as any).extracted_2026_v2?.["جاري التحميل..."] || "جاري التحميل..."))}
           </p>
         </div>
       </div>
@@ -307,7 +309,7 @@ export default function ChildDetailPage({
         <Card className="rounded-2xl">
           <CardContent className="p-12 text-center">
             <p className="text-muted-foreground">
-              {isAr ? 'الطالب غير موجود أو غير مربوط بحسابك.' : 'Student not found or not linked.'}
+              {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["الطالب غير موجود أو غير مربوط بحسابك."] || "الطالب غير موجود أو غير مربوط بحسابك.")] || ((t as any).extracted_2026_v2?.["الطالب غير موجود أو غير مربوط بحسابك."] || "الطالب غير موجود أو غير مربوط بحسابك."))}
             </p>
           </CardContent>
         </Card>
@@ -338,10 +340,10 @@ export default function ChildDetailPage({
   const showQuran = hasQuran
 
   const accountTypeLabel = isMixed
-    ? isAr ? 'أكاديمية ومقرأة' : 'Academy & Maqraa'
+    ? ((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["أكاديمية ومقرأة"] || "أكاديمية ومقرأة")] || ((t as any).extracted_2026_v2?.["أكاديمية ومقرأة"] || "أكاديمية ومقرأة"))
     : showQuran && !hasAcademy
-      ? isAr ? 'مقرأة' : 'Maqraa'
-      : isAr ? 'أكاديمية' : 'Academy'
+      ? ((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["مقرأة"] || "مقرأة")] || ((t as any).extracted_2026_v2?.["مقرأة"] || "مقرأة"))
+      : ((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["أكاديمية"] || "أكاديمية")] || ((t as any).extracted_2026_v2?.["أكاديمية"] || "أكاديمية"))
 
   // Chart data with real weekday labels (offset 6 = oldest, 0 = today)
   const chartData = [...weekly_activity]
@@ -370,15 +372,15 @@ export default function ChildDetailPage({
   const ChevronIcon = isAr ? ChevronLeft : ChevronRight
 
   const tabs: Array<{ value: string; label: string }> = [
-    { value: 'overview', label: isAr ? 'نظرة' : 'Overview' },
-    { value: 'courses', label: isAr ? 'الدورات' : 'Courses' },
-    { value: 'tasks', label: isAr ? 'الواجبات والدرجات' : 'Tasks & Grades' },
-    { value: 'series', label: isAr ? 'السلاسل والمسارات' : 'Series & Paths' },
-    { value: 'schedule', label: isAr ? 'المواعيد' : 'Schedule' },
-    { value: 'certificates', label: isAr ? 'الشهادات' : 'Certificates' },
-    ...(showQuran ? [{ value: 'competitions', label: isAr ? 'المسابقات' : 'Competitions' }] : []),
-    ...(showQuran ? [{ value: 'recitations', label: isAr ? 'التلاوات' : 'Recitations' }] : []),
-    { value: 'badges', label: isAr ? 'الشارات' : 'Badges' },
+    { value: 'overview', label: ((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["نظرة"] || "نظرة")] || ((t as any).extracted_2026_v2?.["نظرة"] || "نظرة")) },
+    { value: 'courses', label: ((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["الدورات"] || "الدورات")] || ((t as any).extracted_2026_v2?.["الدورات"] || "الدورات")) },
+    { value: 'tasks', label: ((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["الواجبات والدرجات"] || "الواجبات والدرجات")] || ((t as any).extracted_2026_v2?.["الواجبات والدرجات"] || "الواجبات والدرجات")) },
+    { value: 'series', label: ((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["السلاسل والمسارات"] || "السلاسل والمسارات")] || ((t as any).extracted_2026_v2?.["السلاسل والمسارات"] || "السلاسل والمسارات")) },
+    { value: 'schedule', label: ((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["المواعيد"] || "المواعيد")] || ((t as any).extracted_2026_v2?.["المواعيد"] || "المواعيد")) },
+    { value: 'certificates', label: ((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["الشهادات"] || "الشهادات")] || ((t as any).extracted_2026_v2?.["الشهادات"] || "الشهادات")) },
+    ...(showQuran ? [{ value: 'competitions', label: ((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["المسابقات"] || "المسابقات")] || ((t as any).extracted_2026_v2?.["المسابقات"] || "المسابقات")) }] : []),
+    ...(showQuran ? [{ value: 'recitations', label: ((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["التلاوات"] || "التلاوات")] || ((t as any).extracted_2026_v2?.["التلاوات"] || "التلاوات")) }] : []),
+    { value: 'badges', label: ((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["الشارات"] || "الشارات")] || ((t as any).extracted_2026_v2?.["الشارات"] || "الشارات")) },
   ]
 
   return (
@@ -389,7 +391,7 @@ export default function ChildDetailPage({
         className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors"
       >
         <ChevronIcon className="w-4 h-4" />
-        {isAr ? 'العودة لقائمة الأبناء' : 'Back to children'}
+        {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["العودة لقائمة الأبناء"] || "العودة لقائمة الأبناء")] || ((t as any).extracted_2026_v2?.["العودة لقائمة الأبناء"] || "العودة لقائمة الأبناء"))}
       </Link>
 
       {/* Hero Profile */}
@@ -426,7 +428,7 @@ export default function ChildDetailPage({
             <div className="flex items-center gap-2 mt-3">
               <Pencil className="w-3.5 h-3.5 text-muted-foreground" />
               <span className="text-xs text-muted-foreground">
-                {isAr ? 'صلة القرابة:' : 'Relation:'}
+                {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["صلة القرابة:"] || "صلة القرابة:")] || ((t as any).extracted_2026_v2?.["صلة القرابة:"] || "صلة القرابة:"))}
               </span>
               <Select
                 value={link.relation}
@@ -447,7 +449,7 @@ export default function ChildDetailPage({
               {savingRelation && <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />}
             </div>
             <p className="text-xs text-muted-foreground mt-2">
-              {isAr ? 'ربط منذ' : 'Linked since'} {fmtDate(link.linked_at, isAr)}
+              {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["ربط منذ"] || "ربط منذ")] || ((t as any).extracted_2026_v2?.["ربط منذ"] || "ربط منذ"))} {fmtDate(link.linked_at, isAr)}
             </p>
           </div>
 
@@ -455,13 +457,13 @@ export default function ChildDetailPage({
             <Link href={`/academy/parent/messages?child_id=${id}`}>
               <Button variant="outline" size="sm" className="rounded-xl font-bold">
                 <MessageSquare className="w-4 h-4 me-1.5" />
-                {isAr ? 'مراسلة' : 'Message'}
+                {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["مراسلة"] || "مراسلة")] || ((t as any).extracted_2026_v2?.["مراسلة"] || "مراسلة"))}
               </Button>
             </Link>
             <Link href={`/academy/parent/children/${id}/restrictions`}>
               <Button variant="outline" size="sm" className="rounded-xl font-bold">
                 <Shield className="w-4 h-4 me-1.5" />
-                {isAr ? 'تقييد' : 'Restrict'}
+                {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["تقييد"] || "تقييد")] || ((t as any).extracted_2026_v2?.["تقييد"] || "تقييد"))}
               </Button>
             </Link>
           </div>
@@ -474,9 +476,9 @@ export default function ChildDetailPage({
           <StatCard
             icon={<BookOpen className="w-5 h-5 text-emerald-500" />}
             tint="bg-emerald-500/10"
-            label={isAr ? 'الدورات' : 'Courses'}
+            label={((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["الدورات"] || "الدورات")] || ((t as any).extracted_2026_v2?.["الدورات"] || "الدورات"))}
             value={progress.total_courses}
-            sub={`${progress.active_courses} ${isAr ? 'نشط' : 'active'} · ${progress.completed_courses} ${isAr ? 'مكتمل' : 'done'}`}
+            sub={`${progress.active_courses} ${((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["نشط"] || "نشط")] || ((t as any).extracted_2026_v2?.["نشط"] || "نشط"))} · ${progress.completed_courses} ${((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["مكتمل"] || "مكتمل")] || ((t as any).extracted_2026_v2?.["مكتمل"] || "مكتمل"))}`}
           />
         )}
         {showAcademy && (
@@ -487,7 +489,7 @@ export default function ChildDetailPage({
                   <TrendingUp className="w-5 h-5 text-blue-500" />
                 </div>
                 <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                  {isAr ? 'التقدم' : 'Progress'}
+                  {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["التقدم"] || "التقدم")] || ((t as any).extracted_2026_v2?.["التقدم"] || "التقدم"))}
                 </span>
               </div>
               <div className="text-3xl font-black text-foreground">{progress.avg_progress}%</div>
@@ -499,17 +501,17 @@ export default function ChildDetailPage({
           <StatCard
             icon={<BarChart3 className="w-5 h-5 text-violet-500" />}
             tint="bg-violet-500/10"
-            label={isAr ? 'تلاوات' : 'Recitations'}
+            label={((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["تلاوات"] || "تلاوات")] || ((t as any).extracted_2026_v2?.["تلاوات"] || "تلاوات"))}
             value={progress.total_recitations_30d}
-            sub={isAr ? 'آخر ٣٠ يوم' : 'Last 30 days'}
+            sub={((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["آخر ٣٠ يوم"] || "آخر ٣٠ يوم")] || ((t as any).extracted_2026_v2?.["آخر ٣٠ يوم"] || "آخر ٣٠ يوم"))}
           />
         )}
         <StatCard
           icon={<Award className="w-5 h-5 text-amber-500" />}
           tint="bg-amber-500/10"
-          label={isAr ? 'الشهادات' : 'Certificates'}
+          label={((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["الشهادات"] || "الشهادات")] || ((t as any).extracted_2026_v2?.["الشهادات"] || "الشهادات"))}
           value={issuedCerts.length}
-          sub={isAr ? 'شهادة صادرة' : 'issued'}
+          sub={((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["شهادة صادرة"] || "شهادة صادرة")] || ((t as any).extracted_2026_v2?.["شهادة صادرة"] || "شهادة صادرة"))}
         />
       </div>
 
@@ -531,10 +533,10 @@ export default function ChildDetailPage({
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-bold text-foreground">
-                  {isAr ? 'نشاط الأسبوع' : 'Weekly Activity'}
+                  {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["نشاط الأسبوع"] || "نشاط الأسبوع")] || ((t as any).extracted_2026_v2?.["نشاط الأسبوع"] || "نشاط الأسبوع"))}
                 </h3>
                 <Badge variant="secondary" className="text-xs">
-                  {weeklyTotal} {isAr ? 'نشاط' : 'activities'}
+                  {weeklyTotal} {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["نشاط"] || "نشاط")] || ((t as any).extracted_2026_v2?.["نشاط"] || "نشاط"))}
                 </Badge>
               </div>
               {hasWeeklyActivity ? (
@@ -569,7 +571,7 @@ export default function ChildDetailPage({
                         dataKey="count"
                         fill="hsl(var(--primary))"
                         radius={[6, 6, 0, 0]}
-                        name={isAr ? 'النشاط' : 'Activity'}
+                        name={((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["النشاط"] || "النشاط")] || ((t as any).extracted_2026_v2?.["النشاط"] || "النشاط"))}
                       />
                     </BarChart>
                   </ResponsiveContainer>
@@ -577,7 +579,7 @@ export default function ChildDetailPage({
               ) : (
                 <div className="h-64 flex flex-col items-center justify-center text-muted-foreground text-sm gap-2">
                   <BarChart3 className="w-8 h-8 text-muted-foreground/30" />
-                  {isAr ? 'لا يوجد نشاط هذا الأسبوع' : 'No activity this week'}
+                  {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["لا يوجد نشاط هذا الأسبوع"] || "لا يوجد نشاط هذا الأسبوع")] || ((t as any).extracted_2026_v2?.["لا يوجد نشاط هذا الأسبوع"] || "لا يوجد نشاط هذا الأسبوع"))}
                 </div>
               )}
             </CardContent>
@@ -587,11 +589,11 @@ export default function ChildDetailPage({
           <Card className="rounded-2xl border-border/50">
             <CardContent className="p-6">
               <h3 className="text-lg font-bold text-foreground mb-4">
-                {isAr ? 'أقرب المواعيد' : 'Next Sessions'}
+                {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["أقرب المواعيد"] || "أقرب المواعيد")] || ((t as any).extracted_2026_v2?.["أقرب المواعيد"] || "أقرب المواعيد"))}
               </h3>
               {upcomingSchedule.length === 0 ? (
                 <p className="py-6 text-center text-sm text-muted-foreground">
-                  {isAr ? 'لا توجد مواعيد قادمة.' : 'No upcoming sessions.'}
+                  {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["لا توجد مواعيد قادمة."] || "لا توجد مواعيد قادمة.")] || ((t as any).extracted_2026_v2?.["لا توجد مواعيد قادمة."] || "لا توجد مواعيد قادمة."))}
                 </p>
               ) : (
                 <div className="space-y-2">
@@ -609,12 +611,12 @@ export default function ChildDetailPage({
           <Card className="rounded-2xl border-border/50">
             <CardContent className="p-6">
               <h3 className="text-lg font-bold text-foreground mb-4">
-                {isAr ? 'الدورات المسجَّلة' : 'Enrolled Courses'}
+                {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["الدورات المسجَّلة"] || "الدورات المسجَّلة")] || ((t as any).extracted_2026_v2?.["الدورات المسجَّلة"] || "الدورات المسجَّلة"))}
               </h3>
               {enrollments.length === 0 ? (
                 <EmptyState
                   icon={<GraduationCap className="w-10 h-10 text-muted-foreground/30" />}
-                  text={isAr ? 'لا يوجد دورات مسجلة.' : 'No enrolled courses.'}
+                  text={((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["لا يوجد دورات مسجلة."] || "لا يوجد دورات مسجلة.")] || ((t as any).extracted_2026_v2?.["لا يوجد دورات مسجلة."] || "لا يوجد دورات مسجلة."))}
                 />
               ) : (
                 <div className="space-y-3">
@@ -642,10 +644,10 @@ export default function ChildDetailPage({
                         className="text-[10px] shrink-0"
                       >
                         {e.status === 'completed'
-                          ? isAr ? 'مكتمل' : 'Done'
+                          ? ((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["مكتمل"] || "مكتمل")] || ((t as any).extracted_2026_v2?.["مكتمل"] || "مكتمل"))
                           : e.status === 'pending'
-                            ? isAr ? 'قيد الانتظار' : 'Pending'
-                            : isAr ? 'نشط' : 'Active'}
+                            ? ((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["قيد الانتظار"] || "قيد الانتظار")] || ((t as any).extracted_2026_v2?.["قيد الانتظار"] || "قيد الانتظار"))
+                            : ((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["نشط"] || "نشط")] || ((t as any).extracted_2026_v2?.["نشط"] || "نشط"))}
                       </Badge>
                     </div>
                   ))}
@@ -676,16 +678,16 @@ export default function ChildDetailPage({
                 <StatCard
                   icon={<ClipboardList className="w-5 h-5 text-blue-500" />}
                   tint="bg-blue-500/10"
-                  label={isAr ? 'الواجبات' : 'Tasks'}
+                  label={((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["الواجبات"] || "الواجبات")] || ((t as any).extracted_2026_v2?.["الواجبات"] || "الواجبات"))}
                   value={task_grades.length}
-                  sub={isAr ? 'إجمالي' : 'total'}
+                  sub={((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["إجمالي"] || "إجمالي")] || ((t as any).extracted_2026_v2?.["إجمالي"] || "إجمالي"))}
                 />
                 <StatCard
                   icon={<Award className="w-5 h-5 text-emerald-500" />}
                   tint="bg-emerald-500/10"
-                  label={isAr ? 'مُصححة' : 'Graded'}
+                  label={((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["مُصححة"] || "مُصححة")] || ((t as any).extracted_2026_v2?.["مُصححة"] || "مُصححة"))}
                   value={graded.length}
-                  sub={isAr ? 'تم تقييمها' : 'evaluated'}
+                  sub={((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["تم تقييمها"] || "تم تقييمها")] || ((t as any).extracted_2026_v2?.["تم تقييمها"] || "تم تقييمها"))}
                 />
                 <Card className="rounded-2xl border-border/50">
                   <CardContent className="p-5">
@@ -694,7 +696,7 @@ export default function ChildDetailPage({
                         <TrendingUp className="w-5 h-5 text-amber-500" />
                       </div>
                       <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                        {isAr ? 'المعدل' : 'Average'}
+                        {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["المعدل"] || "المعدل")] || ((t as any).extracted_2026_v2?.["المعدل"] || "المعدل"))}
                       </span>
                     </div>
                     <div className="text-3xl font-black text-foreground">
@@ -710,12 +712,12 @@ export default function ChildDetailPage({
             <CardContent className="p-6">
               <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
                 <ClipboardList className="w-5 h-5 text-primary" />
-                {isAr ? 'الواجبات المُسلَّمة ودرجاتها' : 'Submitted Tasks & Grades'}
+                {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["الواجبات المُسلَّمة ودرجاتها"] || "الواجبات المُسلَّمة ودرجاتها")] || ((t as any).extracted_2026_v2?.["الواجبات المُسلَّمة ودرجاتها"] || "الواجبات المُسلَّمة ودرجاتها"))}
               </h3>
               {task_grades.length === 0 ? (
                 <EmptyState
                   icon={<ClipboardList className="w-10 h-10 text-muted-foreground/30" />}
-                  text={isAr ? 'لا توجد واجبات مُسلَّمة بعد.' : 'No submitted tasks yet.'}
+                  text={((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["لا توجد واجبات مُسلَّمة بعد."] || "لا توجد واجبات مُسلَّمة بعد.")] || ((t as any).extracted_2026_v2?.["لا توجد واجبات مُسلَّمة بعد."] || "لا توجد واجبات مُسلَّمة بعد."))}
                 />
               ) : (
                 <div className="space-y-3">
@@ -744,7 +746,7 @@ export default function ChildDetailPage({
                           </div>
                           <div className="flex-1 min-w-0">
                             <h4 className="font-bold text-sm text-foreground truncate">
-                              {t.task_title || (isAr ? 'واجب' : 'Task')}
+                              {t.task_title || (((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["واجب"] || "واجب")] || ((t as any).extracted_2026_v2?.["واجب"] || "واجب")))}
                             </h4>
                             <p className="text-[11px] text-muted-foreground mt-0.5 truncate">
                               {t.course_title ? `${t.course_title} · ` : ''}
@@ -768,7 +770,7 @@ export default function ChildDetailPage({
                               </>
                             ) : (
                               <Badge variant="secondary" className="text-[10px]">
-                                {isAr ? 'بانتظار التصحيح' : 'Awaiting grade'}
+                                {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["بانتظار التصحيح"] || "بانتظار التصحيح")] || ((t as any).extracted_2026_v2?.["بانتظار التصحيح"] || "بانتظار التصحيح"))}
                               </Badge>
                             )}
                           </div>
@@ -777,7 +779,7 @@ export default function ChildDetailPage({
                           <div className="mt-3">
                             <p className="text-xs text-muted-foreground bg-muted/40 rounded-lg p-2.5 leading-relaxed">
                               <span className="font-bold text-foreground">
-                                {isAr ? 'ملاحظة المعلم: ' : 'Teacher note: '}
+                                {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["ملاحظة المعلم: "] || "ملاحظة المعلم: ")] || ((t as any).extracted_2026_v2?.["ملاحظة المعلم: "] || "ملاحظة المعلم: "))}
                               </span>
                               {t.feedback}
                             </p>
@@ -785,9 +787,9 @@ export default function ChildDetailPage({
                         )}
                         <p className="text-[10px] text-muted-foreground/60 mt-2">
                           {isGraded && t.graded_at
-                            ? `${isAr ? 'صُححت' : 'Graded'} ${fmtDate(t.graded_at, isAr)}`
+                            ? `${((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["صُححت"] || "صُححت")] || ((t as any).extracted_2026_v2?.["صُححت"] || "صُححت"))} ${fmtDate(t.graded_at, isAr)}`
                             : t.submitted_at
-                              ? `${isAr ? 'سُلِّمت' : 'Submitted'} ${fmtDate(t.submitted_at, isAr)}`
+                              ? `${((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["سُلِّمت"] || "سُلِّمت")] || ((t as any).extracted_2026_v2?.["سُلِّمت"] || "سُلِّمت"))} ${fmtDate(t.submitted_at, isAr)}`
                               : ''}
                         </p>
                       </div>
@@ -806,12 +808,12 @@ export default function ChildDetailPage({
             <CardContent className="p-6">
               <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
                 <GraduationCap className="w-5 h-5 text-primary" />
-                {isAr ? 'مسارات الحفظ والتجويد' : 'Memorization & Tajweed Paths'}
+                {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["مسارات الحفظ والتجويد"] || "مسارات الحفظ والتجويد")] || ((t as any).extracted_2026_v2?.["مسارات الحفظ والتجويد"] || "مسارات الحفظ والتجويد"))}
               </h3>
               {paths.length === 0 ? (
                 <EmptyState
                   icon={<GraduationCap className="w-10 h-10 text-muted-foreground/30" />}
-                  text={isAr ? 'غير مشترك في أي مسار.' : 'Not enrolled in any path.'}
+                  text={((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["غير مشترك في أي مسار."] || "غير مشترك في أي مسار.")] || ((t as any).extracted_2026_v2?.["غير مشترك في أي مسار."] || "غير مشترك في أي مسار."))}
                 />
               ) : (
                 <div className="grid sm:grid-cols-2 gap-3">
@@ -845,8 +847,8 @@ export default function ChildDetailPage({
                             </h4>
                             <p className="text-[11px] text-muted-foreground">
                               {p.type === 'memorization'
-                                ? isAr ? 'حفظ' : 'Memorization'
-                                : isAr ? 'تجويد' : 'Tajweed'}
+                                ? ((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["حفظ"] || "حفظ")] || ((t as any).extracted_2026_v2?.["حفظ"] || "حفظ"))
+                                : ((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["تجويد"] || "تجويد")] || ((t as any).extracted_2026_v2?.["تجويد"] || "تجويد"))}
                               {p.level ? ` · ${p.level}` : ''}
                             </p>
                           </div>
@@ -870,12 +872,12 @@ export default function ChildDetailPage({
             <CardContent className="p-6">
               <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
                 <Layers className="w-5 h-5 text-primary" />
-                {isAr ? 'السلاسل التعليمية' : 'Learning Series'}
+                {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["السلاسل التعليمية"] || "السلاسل التعليمية")] || ((t as any).extracted_2026_v2?.["السلاسل التعليمية"] || "السلاسل التعليمية"))}
               </h3>
               {series.length === 0 ? (
                 <EmptyState
                   icon={<Layers className="w-10 h-10 text-muted-foreground/30" />}
-                  text={isAr ? 'غير مشترك في أي سلسلة.' : 'Not part of any series.'}
+                  text={((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["غير مشترك في أي سلسلة."] || "غير مشترك في أي سلسلة.")] || ((t as any).extracted_2026_v2?.["غير مشترك في أي سلسلة."] || "غير مشترك في أي سلسلة."))}
                 />
               ) : (
                 <div className="grid sm:grid-cols-2 gap-3">
@@ -891,7 +893,7 @@ export default function ChildDetailPage({
                         <h4 className="font-bold text-sm text-foreground truncate">{s.title}</h4>
                         <p className="text-[11px] text-muted-foreground">
                           {s.subject ? `${s.subject} · ` : ''}
-                          {s.item_count} {isAr ? 'عنصر' : 'items'}
+                          {s.item_count} {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["عنصر"] || "عنصر")] || ((t as any).extracted_2026_v2?.["عنصر"] || "عنصر"))}
                         </p>
                       </div>
                     </div>
@@ -907,12 +909,12 @@ export default function ChildDetailPage({
           <Card className="rounded-2xl border-border/50">
             <CardContent className="p-6">
               <h3 className="text-lg font-bold text-foreground mb-4">
-                {isAr ? 'المواعيد القادمة' : 'Upcoming Sessions'}
+                {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["المواعيد القادمة"] || "المواعيد القادمة")] || ((t as any).extracted_2026_v2?.["المواعيد القادمة"] || "المواعيد القادمة"))}
               </h3>
               {upcomingSchedule.length === 0 ? (
                 <EmptyState
                   icon={<Calendar className="w-10 h-10 text-muted-foreground/30" />}
-                  text={isAr ? 'لا توجد مواعيد قادمة.' : 'No upcoming sessions.'}
+                  text={((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["لا توجد مواعيد قادمة."] || "لا توجد مواعيد قادمة.")] || ((t as any).extracted_2026_v2?.["لا توجد مواعيد قادمة."] || "لا توجد مواعيد قادمة."))}
                 />
               ) : (
                 <div className="space-y-2">
@@ -928,7 +930,7 @@ export default function ChildDetailPage({
             <Card className="rounded-2xl border-border/50">
               <CardContent className="p-6">
                 <h3 className="text-lg font-bold text-foreground mb-4">
-                  {isAr ? 'مواعيد سابقة' : 'Past Sessions'}
+                  {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["مواعيد سابقة"] || "مواعيد سابقة")] || ((t as any).extracted_2026_v2?.["مواعيد سابقة"] || "مواعيد سابقة"))}
                 </h3>
                 <div className="space-y-2">
                   {pastSchedule.slice(0, 20).map((s) => (
@@ -945,12 +947,12 @@ export default function ChildDetailPage({
           <Card className="rounded-2xl border-border/50">
             <CardContent className="p-6">
               <h3 className="text-lg font-bold text-foreground mb-4">
-                {isAr ? 'الشهادات الصادرة' : 'Issued Certificates'}
+                {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["الشهادات الصادرة"] || "الشهادات الصادرة")] || ((t as any).extracted_2026_v2?.["الشهادات الصادرة"] || "الشهادات الصادرة"))}
               </h3>
               {issuedCerts.length === 0 ? (
                 <EmptyState
                   icon={<Award className="w-10 h-10 text-muted-foreground/30" />}
-                  text={isAr ? 'لا توجد شهادات صادرة بعد.' : 'No certificates issued yet.'}
+                  text={((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["لا توجد شهادات صادرة بعد."] || "لا توجد شهادات صادرة بعد.")] || ((t as any).extracted_2026_v2?.["لا توجد شهادات صادرة بعد."] || "لا توجد شهادات صادرة بعد."))}
                 />
               ) : (
                 <div className="space-y-3">
@@ -964,7 +966,7 @@ export default function ChildDetailPage({
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4 className="font-bold text-sm text-foreground truncate">
-                          {c.source_label || (isAr ? 'شهادة' : 'Certificate')}
+                          {c.source_label || (((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["شهادة"] || "شهادة")] || ((t as any).extracted_2026_v2?.["شهادة"] || "شهادة")))}
                         </h4>
                         <p className="text-[11px] text-muted-foreground mt-0.5">
                           {c.certificate_number ? `${c.certificate_number} · ` : ''}
@@ -980,7 +982,7 @@ export default function ChildDetailPage({
                         >
                           <a href={c.pdf_url} target="_blank" rel="noopener noreferrer">
                             <Download className="w-3.5 h-3.5 me-1" />
-                            {isAr ? 'تحميل' : 'Download'}
+                            {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["تحميل"] || "تحميل")] || ((t as any).extracted_2026_v2?.["تحميل"] || "تحميل"))}
                           </a>
                         </Button>
                       )}
@@ -995,7 +997,7 @@ export default function ChildDetailPage({
             <Card className="rounded-2xl border-border/50">
               <CardContent className="p-6">
                 <h3 className="text-lg font-bold text-foreground mb-4">
-                  {isAr ? 'قيد الإصدار' : 'In Progress'}
+                  {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["قيد الإصدار"] || "قيد الإصدار")] || ((t as any).extracted_2026_v2?.["قيد الإصدار"] || "قيد الإصدار"))}
                 </h3>
                 <div className="space-y-2">
                   {otherCerts.map((c) => {
@@ -1018,7 +1020,7 @@ export default function ChildDetailPage({
                             <Award className="w-4 h-4 text-muted-foreground" />
                           </div>
                           <span className="font-medium text-sm text-foreground truncate">
-                            {c.source_label || (isAr ? 'شهادة' : 'Certificate')}
+                            {c.source_label || (((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["شهادة"] || "شهادة")] || ((t as any).extracted_2026_v2?.["شهادة"] || "شهادة")))}
                           </span>
                         </div>
                         <span className={`text-[11px] font-bold px-2 py-1 rounded-lg shrink-0 ${cls}`}>
@@ -1040,12 +1042,12 @@ export default function ChildDetailPage({
               <CardContent className="p-6">
                 <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
                   <Trophy className="w-5 h-5 text-amber-500" />
-                  {isAr ? 'المسابقات المُشارَك بها' : 'Competitions Joined'}
+                  {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["المسابقات المُشارَك بها"] || "المسابقات المُشارَك بها")] || ((t as any).extracted_2026_v2?.["المسابقات المُشارَك بها"] || "المسابقات المُشارَك بها"))}
                 </h3>
                 {competitions.length === 0 ? (
                   <EmptyState
                     icon={<Trophy className="w-10 h-10 text-muted-foreground/30" />}
-                    text={isAr ? 'لم يشارك في أي مسابقة بعد.' : 'No competitions joined yet.'}
+                    text={((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["لم يشارك في أي مسابقة بعد."] || "لم يشارك في أي مسابقة بعد.")] || ((t as any).extracted_2026_v2?.["لم يشارك في أي مسابقة بعد."] || "لم يشارك في أي مسابقة بعد."))}
                   />
                 ) : (
                   <div className="space-y-3">
@@ -1080,12 +1082,12 @@ export default function ChildDetailPage({
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 flex-wrap">
                                 <h4 className="font-bold text-sm text-foreground truncate">
-                                  {c.competition_title || (isAr ? 'مسابقة' : 'Competition')}
+                                  {c.competition_title || (((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["مسابقة"] || "مسابقة")] || ((t as any).extracted_2026_v2?.["مسابقة"] || "مسابقة")))}
                                 </h4>
                                 {c.is_winner && (
                                   <Badge className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/20 text-[9px] gap-1">
                                     <Trophy className="w-2.5 h-2.5" />
-                                    {isAr ? 'الفائز' : 'Winner'}
+                                    {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["الفائز"] || "الفائز")] || ((t as any).extracted_2026_v2?.["الفائز"] || "الفائز"))}
                                   </Badge>
                                 )}
                               </div>
@@ -1094,9 +1096,9 @@ export default function ChildDetailPage({
                                 {c.comp_status
                                   ? ` · ${
                                       c.comp_status === 'active'
-                                        ? isAr ? 'جارية' : 'Active'
+                                        ? ((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["جارية"] || "جارية")] || ((t as any).extracted_2026_v2?.["جارية"] || "جارية"))
                                         : c.comp_status === 'completed' || c.comp_status === 'ended'
-                                          ? isAr ? 'منتهية' : 'Ended'
+                                          ? ((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["منتهية"] || "منتهية")] || ((t as any).extracted_2026_v2?.["منتهية"] || "منتهية"))
                                           : c.comp_status
                                     }`
                                   : ''}
@@ -1117,14 +1119,14 @@ export default function ChildDetailPage({
                                       {Number(c.score)}
                                       <span className="text-[10px] text-muted-foreground font-medium">
                                         {' '}
-                                        {isAr ? 'نقطة' : 'pts'}
+                                        {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["نقطة"] || "نقطة")] || ((t as any).extracted_2026_v2?.["نقطة"] || "نقطة"))}
                                       </span>
                                     </div>
                                   )}
                                 </>
                               ) : (
                                 <Badge variant="secondary" className="text-[10px]">
-                                  {isAr ? 'قيد التقييم' : 'Pending'}
+                                  {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["قيد التقييم"] || "قيد التقييم")] || ((t as any).extracted_2026_v2?.["قيد التقييم"] || "قيد التقييم"))}
                                 </Badge>
                               )}
                             </div>
@@ -1132,7 +1134,7 @@ export default function ChildDetailPage({
                           {c.feedback && (
                             <p className="text-xs text-muted-foreground bg-muted/40 rounded-lg p-2.5 leading-relaxed mt-3">
                               <span className="font-bold text-foreground">
-                                {isAr ? 'ملاحظة المحكّم: ' : 'Judge note: '}
+                                {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["ملاحظة المحكّم: "] || "ملاحظة المحكّم: ")] || ((t as any).extracted_2026_v2?.["ملاحظة المحكّم: "] || "ملاحظة المحكّم: "))}
                               </span>
                               {c.feedback}
                             </p>
@@ -1153,12 +1155,12 @@ export default function ChildDetailPage({
             <Card className="rounded-2xl border-border/50">
               <CardContent className="p-6">
                 <h3 className="text-lg font-bold text-foreground mb-4">
-                  {isAr ? 'التلاوات الأخيرة' : 'Recent Recitations'}
+                  {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["التلاوات الأخيرة"] || "التلاوات الأخيرة")] || ((t as any).extracted_2026_v2?.["التلاوات الأخيرة"] || "التلاوات الأخيرة"))}
                 </h3>
                 {recent_recitations.length === 0 ? (
                   <EmptyState
                     icon={<Sparkles className="w-10 h-10 text-muted-foreground/30" />}
-                    text={isAr ? 'لا توجد تلاوات بعد.' : 'No recitations yet.'}
+                    text={((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["لا توجد تلاوات بعد."] || "لا توجد تلاوات بعد.")] || ((t as any).extracted_2026_v2?.["لا توجد تلاوات بعد."] || "لا توجد تلاوات بعد."))}
                   />
                 ) : (
                   <div className="space-y-2">
@@ -1215,12 +1217,12 @@ export default function ChildDetailPage({
           <Card className="rounded-2xl border-border/50">
             <CardContent className="p-6">
               <h3 className="text-lg font-bold text-foreground mb-4">
-                {isAr ? 'الشارات المكتسبة' : 'Earned Badges'}
+                {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["الشارات المكتسبة"] || "الشارات المكتسبة")] || ((t as any).extracted_2026_v2?.["الشارات المكتسبة"] || "الشارات المكتسبة"))}
               </h3>
               {badges.length === 0 ? (
                 <EmptyState
                   icon={<Trophy className="w-10 h-10 text-muted-foreground/30" />}
-                  text={isAr ? 'لم يحصل على شارات بعد.' : 'No badges earned yet.'}
+                  text={((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["لم يحصل على شارات بعد."] || "لم يحصل على شارات بعد.")] || ((t as any).extracted_2026_v2?.["لم يحصل على شارات بعد."] || "لم يحصل على شارات بعد."))}
                 />
               ) : (
                 <div className="grid sm:grid-cols-2 gap-3">
@@ -1306,8 +1308,8 @@ function ScheduleRow({
 }) {
   const isBooking = item.type === 'booking'
   const title = isBooking
-    ? `${isAr ? 'حجز تلاوة' : 'Recitation'}${item.counterpart_name ? ' — ' + item.counterpart_name : ''}`
-    : item.title || item.course_title || (isAr ? 'حصة' : 'Session')
+    ? `${((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["حجز تلاوة"] || "حجز تلاوة")] || ((t as any).extracted_2026_v2?.["حجز تلاوة"] || "حجز تلاوة"))}${item.counterpart_name ? ' — ' + item.counterpart_name : ''}`
+    : item.title || item.course_title || (((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["حصة"] || "حصة")] || ((t as any).extracted_2026_v2?.["حصة"] || "حصة")))
   const statusCancelled = item.status === 'cancelled'
   return (
     <div className="flex items-center justify-between gap-3 p-3 rounded-xl hover:bg-muted/30 transition-colors">
@@ -1339,16 +1341,16 @@ function ScheduleRow({
           <Button variant="outline" size="sm" className="rounded-xl h-8 text-xs" asChild>
             <a href={item.meeting_link} target="_blank" rel="noopener noreferrer">
               <ArrowUpRight className="w-3 h-3 me-1" />
-              {isAr ? 'انضمام' : 'Join'}
+              {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["انضمام"] || "انضمام")] || ((t as any).extracted_2026_v2?.["انضمام"] || "انضمام"))}
             </a>
           </Button>
         )}
         <Badge variant={statusCancelled ? 'destructive' : past ? 'outline' : 'secondary'} className="text-[10px]">
           {statusCancelled
-            ? isAr ? 'ملغاة' : 'Cancelled'
+            ? ((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["ملغاة"] || "ملغاة")] || ((t as any).extracted_2026_v2?.["ملغاة"] || "ملغاة"))
             : past
-              ? isAr ? 'منتهية' : 'Done'
-              : isAr ? 'قادم' : 'Upcoming'}
+              ? ((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["منتهية"] || "منتهية")] || ((t as any).extracted_2026_v2?.["منتهية"] || "منتهية"))
+              : ((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["قادم"] || "قادم")] || ((t as any).extracted_2026_v2?.["قادم"] || "قادم"))}
         </Badge>
       </div>
     </div>

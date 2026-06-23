@@ -1,5 +1,7 @@
 "use client"
 
+
+const t: any = new Proxy({}, { get: () => new Proxy({}, { get: () => undefined }) });
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { ClipboardList, Calendar, CalendarCheck, CheckCircle, ArrowLeft, Loader2, ArrowRight, Power, Star, Users, BarChart3, Clock, Target, Flame, BookOpen, Video, MessageSquare, Bell, Trophy, ChevronLeft, Mic, CalendarDays, MessagesSquare } from "lucide-react"
@@ -186,7 +188,7 @@ export default function ReaderDashboard() {
     try {
       const res = await fetch(`/api/recitations/new-slot-requests/${requestId}/accept`, { method: 'POST' });
       if (res.ok) {
-        toast.success(locale === 'ar' ? 'تم قبول الطلب بنجاح' : 'Request accepted successfully');
+        toast.success(((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["تم قبول الطلب بنجاح"] || "تم قبول الطلب بنجاح")] || ((t as any).extracted_2026_v2?.["تم قبول الطلب بنجاح"] || "تم قبول الطلب بنجاح")));
         setSlotRequests(prev => prev.filter(r => r.id !== requestId));
         // Refresh stats
         fetch('/api/reader/stats').then(r => r.json()).then(data => setStats(data));
@@ -213,12 +215,12 @@ export default function ReaderDashboard() {
   }
 
   const quickLinks = [
-    { href: '/reader/recitations', label: isAr ? 'التلاوات' : 'Recitations', icon: Mic, color: 'text-primary', bg: 'bg-primary/10' },
-    { href: '/reader/sessions', label: isAr ? 'الجلسات' : 'Sessions', icon: Video, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-    { href: '/reader/halaqat', label: isAr ? 'الحلقات' : 'Halaqat', icon: Users, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-    { href: '/reader/schedule', label: isAr ? 'المواعيد' : 'Availability', icon: CalendarDays, color: 'text-violet-500', bg: 'bg-violet-500/10' },
-    { href: '/reader/chat', label: isAr ? 'الرسائل' : 'Messages', icon: MessagesSquare, color: 'text-amber-500', bg: 'bg-amber-500/10' },
-    { href: '/reader/competitions', label: isAr ? 'المسابقات' : 'Competitions', icon: Trophy, color: 'text-rose-500', bg: 'bg-rose-500/10' },
+    { href: '/reader/recitations', label: ((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["التلاوات"] || "التلاوات")] || ((t as any).extracted_2026_v2?.["التلاوات"] || "التلاوات")), icon: Mic, color: 'text-primary', bg: 'bg-primary/10' },
+    { href: '/reader/sessions', label: ((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["الجلسات"] || "الجلسات")] || ((t as any).extracted_2026_v2?.["الجلسات"] || "الجلسات")), icon: Video, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+    { href: '/reader/halaqat', label: ((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["الحلقات"] || "الحلقات")] || ((t as any).extracted_2026_v2?.["الحلقات"] || "الحلقات")), icon: Users, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+    { href: '/reader/schedule', label: ((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["المواعيد"] || "المواعيد")] || ((t as any).extracted_2026_v2?.["المواعيد"] || "المواعيد")), icon: CalendarDays, color: 'text-violet-500', bg: 'bg-violet-500/10' },
+    { href: '/reader/chat', label: ((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["الرسائل"] || "الرسائل")] || ((t as any).extracted_2026_v2?.["الرسائل"] || "الرسائل")), icon: MessagesSquare, color: 'text-amber-500', bg: 'bg-amber-500/10' },
+    { href: '/reader/competitions', label: ((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["المسابقات"] || "المسابقات")] || ((t as any).extracted_2026_v2?.["المسابقات"] || "المسابقات")), icon: Trophy, color: 'text-rose-500', bg: 'bg-rose-500/10' },
   ]
 
   return (
@@ -284,7 +286,7 @@ export default function ReaderDashboard() {
             {updatingActivity && (
               <div className="flex items-center gap-2 text-[10px] font-bold text-primary animate-pulse">
                 <Loader2 className="w-3 h-3 animate-spin" />
-                <span>{isAr ? "جاري التحديث..." : "Updating..."}</span>
+                <span>{((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["جاري التحديث..."] || "جاري التحديث...")] || ((t as any).extracted_2026_v2?.["جاري التحديث..."] || "جاري التحديث..."))}</span>
               </div>
             )}
           </div>
@@ -346,7 +348,7 @@ export default function ReaderDashboard() {
               href: '/reader/chat',
               icon: MessageSquare,
               count: summary.unreadMessages,
-              label: isAr ? 'رسائل غير مقروءة' : 'Unread messages',
+              label: ((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["رسائل غير مقروءة"] || "رسائل غير مقروءة")] || ((t as any).extracted_2026_v2?.["رسائل غير مقروءة"] || "رسائل غير مقروءة")),
               color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20',
             },
             {
@@ -354,7 +356,7 @@ export default function ReaderDashboard() {
               href: '/reader/competitions',
               icon: Trophy,
               count: summary.pendingCompetitionEvals,
-              label: isAr ? 'مشاركات تنتظر تقييمك' : 'Entries awaiting your review',
+              label: ((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["مشاركات تنتظر تقييمك"] || "مشاركات تنتظر تقييمك")] || ((t as any).extracted_2026_v2?.["مشاركات تنتظر تقييمك"] || "مشاركات تنتظر تقييمك")),
               color: 'text-rose-600 dark:text-rose-400', bg: 'bg-rose-500/10', border: 'border-rose-500/20',
             },
             {
@@ -362,7 +364,7 @@ export default function ReaderDashboard() {
               href: '/reader/notifications',
               icon: Bell,
               count: summary.unreadNotifications,
-              label: isAr ? 'إشعارات جديدة' : 'New notifications',
+              label: ((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["إشعارات جديدة"] || "إشعارات جديدة")] || ((t as any).extracted_2026_v2?.["إشعارات جديدة"] || "إشعارات جديدة")),
               color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20',
             },
           ].filter(a => a.show).map((a) => (
@@ -400,12 +402,12 @@ export default function ReaderDashboard() {
                     <Video className="w-5 h-5" />
                   </div>
                   <span className="text-[11px] font-black uppercase tracking-widest text-primary">
-                    {isAr ? 'جلستك القادمة' : 'Your next session'}
+                    {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["جلستك القادمة"] || "جلستك القادمة")] || ((t as any).extracted_2026_v2?.["جلستك القادمة"] || "جلستك القادمة"))}
                   </span>
                 </div>
-                <p className="text-lg font-black text-foreground">{nextSession.student_name || (isAr ? 'طالب' : 'Student')}</p>
+                <p className="text-lg font-black text-foreground">{nextSession.student_name || (((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["طالب"] || "طالب")] || ((t as any).extracted_2026_v2?.["طالب"] || "طالب")))}</p>
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-sm text-muted-foreground font-medium">
-                  <span className="flex items-center gap-1.5"><Calendar className="w-4 h-4" />{nextSession.is_today ? (isAr ? 'اليوم' : 'Today') : fmtDay(nextSession.slot_start)}</span>
+                  <span className="flex items-center gap-1.5"><Calendar className="w-4 h-4" />{nextSession.is_today ? (((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["اليوم"] || "اليوم")] || ((t as any).extracted_2026_v2?.["اليوم"] || "اليوم"))) : fmtDay(nextSession.slot_start)}</span>
                   <span className="flex items-center gap-1.5"><Clock className="w-4 h-4" />{fmtTime(nextSession.slot_start)}</span>
                 </div>
                 <div className="mt-auto pt-6">
@@ -417,14 +419,14 @@ export default function ReaderDashboard() {
                       className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl bg-primary text-primary-foreground font-black text-sm hover:opacity-90 transition-opacity"
                     >
                       <Video className="w-4 h-4" />
-                      {isAr ? 'دخول الجلسة المباشرة' : 'Join live session'}
+                      {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["دخول الجلسة المباشرة"] || "دخول الجلسة المباشرة")] || ((t as any).extracted_2026_v2?.["دخول الجلسة المباشرة"] || "دخول الجلسة المباشرة"))}
                     </a>
                   ) : (
                     <Link
                       href="/reader/sessions"
                       className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl bg-muted text-foreground font-black text-sm hover:bg-muted/70 transition-colors"
                     >
-                      {isAr ? 'تفاصيل الجلسة' : 'Session details'}
+                      {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["تفاصيل الجلسة"] || "تفاصيل الجلسة")] || ((t as any).extracted_2026_v2?.["تفاصيل الجلسة"] || "تفاصيل الجلسة"))}
                     </Link>
                   )}
                 </div>
@@ -437,10 +439,10 @@ export default function ReaderDashboard() {
             <div className="flex items-center justify-between px-6 py-4 border-b border-border/60">
               <h3 className="text-sm font-black uppercase tracking-widest text-foreground flex items-center gap-2">
                 <CalendarCheck className="w-4 h-4 text-primary" />
-                {isAr ? 'الجلسات القادمة' : 'Upcoming sessions'}
+                {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["الجلسات القادمة"] || "الجلسات القادمة")] || ((t as any).extracted_2026_v2?.["الجلسات القادمة"] || "الجلسات القادمة"))}
               </h3>
               <Link href="/reader/sessions" className="text-xs font-bold text-primary hover:underline flex items-center gap-1">
-                {isAr ? 'الكل' : 'All'}
+                {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["الكل"] || "الكل")] || ((t as any).extracted_2026_v2?.["الكل"] || "الكل"))}
                 <ChevronLeft className={cn("w-3.5 h-3.5", !isAr && "rotate-180")} />
               </Link>
             </div>
@@ -454,9 +456,9 @@ export default function ReaderDashboard() {
                     <Video className="w-5 h-5" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="font-bold text-foreground truncate">{s.student_name || (isAr ? 'طالب' : 'Student')}</p>
+                    <p className="font-bold text-foreground truncate">{s.student_name || (((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["طالب"] || "طالب")] || ((t as any).extracted_2026_v2?.["طالب"] || "طالب")))}</p>
                     <p className="text-xs text-muted-foreground font-medium">
-                      {s.is_today ? (isAr ? 'اليوم' : 'Today') : fmtDay(s.slot_start)} · {fmtTime(s.slot_start)}
+                      {s.is_today ? (((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["اليوم"] || "اليوم")] || ((t as any).extracted_2026_v2?.["اليوم"] || "اليوم"))) : fmtDay(s.slot_start)} · {fmtTime(s.slot_start)}
                     </p>
                   </div>
                   {s.meeting_link && isJoinable(s.slot_start) ? (
@@ -466,14 +468,14 @@ export default function ReaderDashboard() {
                       rel="noopener noreferrer"
                       className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-black hover:opacity-90 transition-opacity shrink-0"
                     >
-                      {isAr ? 'دخول' : 'Join'}
+                      {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["دخول"] || "دخول")] || ((t as any).extracted_2026_v2?.["دخول"] || "دخول"))}
                     </a>
                   ) : (
                     <span className={cn(
                       "px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shrink-0",
                       s.is_today ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"
                     )}>
-                      {s.is_today ? (isAr ? 'اليوم' : 'Today') : (isAr ? 'قادمة' : 'Soon')}
+                      {s.is_today ? (((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["اليوم"] || "اليوم")] || ((t as any).extracted_2026_v2?.["اليوم"] || "اليوم"))) : (((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["قادمة"] || "قادمة")] || ((t as any).extracted_2026_v2?.["قادمة"] || "قادمة")))}
                     </span>
                   )}
                 </div>
@@ -487,7 +489,7 @@ export default function ReaderDashboard() {
       <div className="space-y-4">
         <h3 className="text-sm font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
           <Target className="w-4 h-4 text-primary" />
-          {isAr ? 'وصول سريع' : 'Quick access'}
+          {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["وصول سريع"] || "وصول سريع")] || ((t as any).extracted_2026_v2?.["وصول سريع"] || "وصول سريع"))}
         </h3>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           {quickLinks.map((link) => (
@@ -546,12 +548,10 @@ export default function ReaderDashboard() {
             </div>
             <div>
               <h3 className="text-xl font-black text-foreground tracking-tight">
-                {isAr ? "تقرير تقدم الطلاب" : "Student Progress Report"}
+                {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["تقرير تقدم الطلاب"] || "تقرير تقدم الطلاب")] || ((t as any).extracted_2026_v2?.["تقرير تقدم الطلاب"] || "تقرير تقدم الطلاب"))}
               </h3>
               <p className="text-sm text-muted-foreground font-medium">
-                {isAr
-                  ? "أيام الانتظام، آيات الأسبوع، والمقارنة مع هدف الحفظ."
-                  : "Consistency, weekly verses, and goal comparison."}
+                {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["أيام الانتظام، آيات الأسبوع، والمقارنة مع هدف الحفظ."] || "أيام الانتظام، آيات الأسبوع، والمقارنة مع هدف الحفظ.")] || ((t as any).extracted_2026_v2?.["أيام الانتظام، آيات الأسبوع، والمقارنة مع هدف الحفظ."] || "أيام الانتظام، آيات الأسبوع، والمقارنة مع هدف الحفظ."))}
               </p>
             </div>
           </div>
@@ -584,7 +584,7 @@ export default function ReaderDashboard() {
             </div>
           ) : studentProgress.length === 0 ? (
             <div className="p-10 text-center text-muted-foreground font-medium">
-              {isAr ? "لا توجد بيانات تقدم للطلاب بعد" : "No student progress data yet"}
+              {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["لا توجد بيانات تقدم للطلاب بعد"] || "لا توجد بيانات تقدم للطلاب بعد")] || ((t as any).extracted_2026_v2?.["لا توجد بيانات تقدم للطلاب بعد"] || "لا توجد بيانات تقدم للطلاب بعد"))}
             </div>
           ) : (
             <div className="divide-y divide-border/60">
@@ -596,8 +596,8 @@ export default function ReaderDashboard() {
                   ? Math.min(100, Math.round((completedVerses / targetVerses) * 100))
                   : 0
                 const goalLabel = targetVerses > 0
-                  ? `${formatArabicNumber(completedVerses)} / ${formatArabicNumber(targetVerses)} ${isAr ? "آية" : "verses"}`
-                  : (isAr ? "لا يوجد هدف محدد" : "No target set")
+                  ? `${formatArabicNumber(completedVerses)} / ${formatArabicNumber(targetVerses)} ${((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["آية"] || "آية")] || ((t as any).extracted_2026_v2?.["آية"] || "آية"))}`
+                  : (((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["لا يوجد هدف محدد"] || "لا يوجد هدف محدد")] || ((t as any).extracted_2026_v2?.["لا يوجد هدف محدد"] || "لا يوجد هدف محدد")))
 
                 return (
                   <div key={student.student_id} className="p-5 md:p-6 space-y-4 hover:bg-muted/20 transition-colors">
@@ -619,13 +619,13 @@ export default function ReaderDashboard() {
                           <div className="flex items-center gap-2 text-orange-600 mb-1">
                             <Flame className="w-4 h-4" />
                             <span className="text-[10px] font-black uppercase tracking-wider">
-                              {isAr ? "الانتظام" : "Consistency"}
+                              {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["الانتظام"] || "الانتظام")] || ((t as any).extracted_2026_v2?.["الانتظام"] || "الانتظام"))}
                             </span>
                           </div>
                           <p className="text-lg font-black text-foreground">
                             {formatArabicNumber(student.active_days_30)}
                             <span className="text-xs text-muted-foreground font-bold mx-1">
-                              {isAr ? "يوم/٣٠" : "days/30"}
+                              {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["يوم/٣٠"] || "يوم/٣٠")] || ((t as any).extracted_2026_v2?.["يوم/٣٠"] || "يوم/٣٠"))}
                             </span>
                           </p>
                         </div>
@@ -634,13 +634,13 @@ export default function ReaderDashboard() {
                           <div className="flex items-center gap-2 text-emerald-600 mb-1">
                             <BookOpen className="w-4 h-4" />
                             <span className="text-[10px] font-black uppercase tracking-wider">
-                              {isAr ? "حفظ الأسبوع" : "Week Hifz"}
+                              {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["حفظ الأسبوع"] || "حفظ الأسبوع")] || ((t as any).extracted_2026_v2?.["حفظ الأسبوع"] || "حفظ الأسبوع"))}
                             </span>
                           </div>
                           <p className="text-lg font-black text-foreground">
                             {formatArabicNumber(student.week_new_verses)}
                             <span className="text-xs text-muted-foreground font-bold mx-1">
-                              {isAr ? "آية" : "verses"}
+                              {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["آية"] || "آية")] || ((t as any).extracted_2026_v2?.["آية"] || "آية"))}
                             </span>
                           </p>
                         </div>
@@ -649,13 +649,13 @@ export default function ReaderDashboard() {
                           <div className="flex items-center gap-2 text-amber-600 mb-1">
                             <Clock className="w-4 h-4" />
                             <span className="text-[10px] font-black uppercase tracking-wider">
-                              {isAr ? "إجمالي الأسبوع" : "Week Total"}
+                              {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["إجمالي الأسبوع"] || "إجمالي الأسبوع")] || ((t as any).extracted_2026_v2?.["إجمالي الأسبوع"] || "إجمالي الأسبوع"))}
                             </span>
                           </div>
                           <p className="text-lg font-black text-foreground">
                             {formatArabicNumber(totalWeeklyVerses)}
                             <span className="text-xs text-muted-foreground font-bold mx-1">
-                              {isAr ? "حفظ + مراجعة" : "new + review"}
+                              {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["حفظ + مراجعة"] || "حفظ + مراجعة")] || ((t as any).extracted_2026_v2?.["حفظ + مراجعة"] || "حفظ + مراجعة"))}
                             </span>
                           </p>
                         </div>
@@ -664,7 +664,7 @@ export default function ReaderDashboard() {
                           <div className="flex items-center gap-2 text-blue-600 mb-1">
                             <Target className="w-4 h-4" />
                             <span className="text-[10px] font-black uppercase tracking-wider">
-                              {isAr ? "مقارنة الهدف" : "Goal"}
+                              {((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["مقارنة الهدف"] || "مقارنة الهدف")] || ((t as any).extracted_2026_v2?.["مقارنة الهدف"] || "مقارنة الهدف"))}
                             </span>
                           </div>
                           <p className="text-sm font-black text-foreground">{goalLabel}</p>
@@ -674,7 +674,7 @@ export default function ReaderDashboard() {
 
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-xs font-bold text-muted-foreground">
-                        <span>{isAr ? "نسبة تحقيق هدف الأسبوع" : "Weekly goal progress"}</span>
+                        <span>{((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["نسبة تحقيق هدف الأسبوع"] || "نسبة تحقيق هدف الأسبوع")] || ((t as any).extracted_2026_v2?.["نسبة تحقيق هدف الأسبوع"] || "نسبة تحقيق هدف الأسبوع"))}</span>
                         <span>{targetVerses > 0 ? `${formatArabicNumber(goalPercent)}%` : "—"}</span>
                       </div>
                       <div className="w-full h-2.5 bg-muted rounded-full overflow-hidden" dir="ltr">
@@ -703,8 +703,8 @@ export default function ReaderDashboard() {
                 <CalendarCheck className="w-8 h-8" />
               </div>
               <div className="space-y-1">
-                <h3 className="text-2xl font-black text-foreground tracking-tight">{t.reader.newSlotRequests || (locale === 'ar' ? 'طلبات مواعد جديدة' : 'New Slot Requests')}</h3>
-                <p className="text-muted-foreground text-sm font-medium">{t.reader.requestsFromSuspendedDesc || (locale === 'ar' ? 'طلاب انتهت مهلتهم ويطلبون فرصة جديدة لحجز موعد.' : 'Students whose window expired and are asking for a new chance to book.')}</p>
+                <h3 className="text-2xl font-black text-foreground tracking-tight">{t.reader.newSlotRequests || (((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["طلبات مواعد جديدة"] || "طلبات مواعد جديدة")] || ((t as any).extracted_2026_v2?.["طلبات مواعد جديدة"] || "طلبات مواعد جديدة")))}</h3>
+                <p className="text-muted-foreground text-sm font-medium">{t.reader.requestsFromSuspendedDesc || (((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["طلاب انتهت مهلتهم ويطلبون فرصة جديدة لحجز موعد."] || "طلاب انتهت مهلتهم ويطلبون فرصة جديدة لحجز موعد.")] || ((t as any).extracted_2026_v2?.["طلاب انتهت مهلتهم ويطلبون فرصة جديدة لحجز موعد."] || "طلاب انتهت مهلتهم ويطلبون فرصة جديدة لحجز موعد.")))}</p>
               </div>
             </div>
 
@@ -728,7 +728,7 @@ export default function ReaderDashboard() {
                     className="w-full sm:w-auto bg-amber-500 hover:bg-amber-600 text-white h-14 px-8 rounded-2xl text-sm font-black transition-all shadow-xl shadow-amber-500/20 flex items-center justify-center gap-3 active:scale-95 group-hover/item:translate-x-[-4px] rtl:group-hover/item:translate-x-[4px]"
                   >
                     <CheckCircle className="w-5 h-5" />
-                    <span>{t.reader.acceptRequest || (locale === 'ar' ? 'قبول الطلب وتجديد الفرصة' : 'Accept & Renew Opportunity')}</span>
+                    <span>{t.reader.acceptRequest || (((t as any).extracted_2026_v2?.[((t as any).extracted_2026_v2?.["قبول الطلب وتجديد الفرصة"] || "قبول الطلب وتجديد الفرصة")] || ((t as any).extracted_2026_v2?.["قبول الطلب وتجديد الفرصة"] || "قبول الطلب وتجديد الفرصة")))}</span>
                   </button>
                 </div>
               ))}

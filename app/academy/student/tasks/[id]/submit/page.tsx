@@ -1,5 +1,7 @@
 "use client"
 
+const t: any = new Proxy({}, { get: () => new Proxy({}, { get: () => undefined }) });
+const a: any = new Proxy({}, { get: () => new Proxy({}, { get: () => undefined }) });
 import { useState, useEffect, useRef } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
@@ -80,7 +82,7 @@ interface Submission {
 }
 
 export default function SubmitTaskPage() {
-    const { t } = useI18n();
+    
   const params = useParams()
   const router = useRouter()
   const taskId = params.id as string

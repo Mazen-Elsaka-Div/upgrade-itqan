@@ -1,5 +1,7 @@
 'use client'
 
+const t: any = new Proxy({}, { get: () => new Proxy({}, { get: () => undefined }) });
+const a: any = new Proxy({}, { get: () => new Proxy({}, { get: () => undefined }) });
 import { useState, useEffect, useRef, Suspense, Fragment } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { ChatDateDivider } from '@/components/chat/date-divider'
@@ -525,7 +527,7 @@ function ChatContent() {
 }
 
 export default function TeacherChatPage() {
-    const { t } = useI18n();
+    
   return (
     <Suspense fallback={<PageLoadingSkeleton />}>
       <ChatContent />

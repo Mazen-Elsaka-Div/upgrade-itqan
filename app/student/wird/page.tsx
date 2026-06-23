@@ -49,7 +49,7 @@ const TYPE_ICONS: Record<WirdItemType, React.ElementType> = {
 }
 
 function toArabicDigits(n: number | string): string {
-  return String(n).replace(/\d/g, d => (t.addedTranslations_2026?.['٠١٢٣٤٥٦٧٨٩'] || '٠١٢٣٤٥٦٧٨٩')[Number(d)])
+  return String(n).replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[Number(d)])
 }
 
 // ─── Add item form ────────────────────────────────────────────────────────────
@@ -81,7 +81,7 @@ function AddItemForm({ onAdd }: { onAdd: (item: WirdItem) => void }) {
     }
     if (type === "pages") {
       const detail = pageFrom === pageTo ? `صفحة ${pageFrom}` : `صفحات ${pageFrom}–${pageTo}`
-      return { id, type, label: (t.addedTranslations_2026?.['قراءة صفحات'] || 'قراءة صفحات'), detail }
+      return { id, type, label: 'قراءة صفحات', detail }
     }
     if (type === "juz") {
       return { id, type, label: `الجزء ${juzNum}`, detail: `جزء ${juzNum} من القرآن الكريم` }
@@ -91,7 +91,7 @@ function AddItemForm({ onAdd }: { onAdd: (item: WirdItem) => void }) {
       const detail = ayahFrom === ayahTo ? `آية ${ayahFrom}` : `الآيات ${ayahFrom}–${ayahTo}`
       return { id, type, label: s.name, detail }
     }
-    return { id, type: "custom", label: customLabel || (t.addedTranslations_2026?.['ورد مخصص'] || 'ورد مخصص'), detail: "" }
+    return { id, type: "custom", label: customLabel || 'ورد مخصص', detail: "" }
   }
 
   const handleAdd = () => {
@@ -232,7 +232,7 @@ function AddItemForm({ onAdd }: { onAdd: (item: WirdItem) => void }) {
             <Input
               value={customLabel}
               onChange={(e) => setCustomLabel(e.target.value)}
-              placeholder={t.student.wirdPage.customWirdPlaceholder || (t.addedTranslations_2026?.['مثال: قراءة الأذكار، حفظ سورة...'] || 'مثال: قراءة الأذكار، حفظ سورة...')}
+              placeholder={t.student.wirdPage.customWirdPlaceholder || 'مثال: قراءة الأذكار، حفظ سورة...'}
               className="h-10 rounded-xl font-bold"
             />
           </div>
@@ -381,7 +381,7 @@ export default function WirdSettingsPage() {
       return { label, detail }
     }
     // custom
-    const label = item.label === (t.addedTranslations_2026?.['ورد مخصص'] || 'ورد مخصص') || item.label === "Custom Wird"
+    const label = item.label === 'ورد مخصص' || item.label === "Custom Wird"
       ? (t.wirdPage.customWirdDefault || t.addedTranslations_2026?.["ورد مخصص"] || "ورد مخصص")
       : item.label
     return { label, detail: item.detail }
@@ -592,7 +592,7 @@ export default function WirdSettingsPage() {
       {/* Daily goal note */}
       <Card className="border-border rounded-3xl shadow-sm bg-card/70">
         <CardHeader className="p-6 pb-4">
-          <CardTitle className="text-base font-bold">{t.student.wirdPage.personalGoalTitle || (t.addedTranslations_2026?.['ملاحظة / هدف شخصي'] || 'ملاحظة / هدف شخصي')}</CardTitle>
+          <CardTitle className="text-base font-bold">{t.student.wirdPage.personalGoalTitle || 'ملاحظة / هدف شخصي'}</CardTitle>
           <CardDescription className="text-sm">{t.wirdPage.personalGoalDesc || t.addedTranslations_2026?.["اكتب هدفك أو تذكيراً شخصياً لنفسك."] || "اكتب هدفك أو تذكيراً شخصياً لنفسك."}</CardDescription>
         </CardHeader>
         <CardContent className="p-6 pt-0">
@@ -600,7 +600,7 @@ export default function WirdSettingsPage() {
             value={settings.daily_goal_note ?? ""}
             onChange={(e) => update({ daily_goal_note: e.target.value || null })}
             rows={3}
-            placeholder={t.student.wirdPage.personalGoalPlaceholder || (t.addedTranslations_2026?.['مثال: أريد ختم القرآن خلال شهر رمضان...'] || 'مثال: أريد ختم القرآن خلال شهر رمضان...')}
+            placeholder={t.student.wirdPage.personalGoalPlaceholder || 'مثال: أريد ختم القرآن خلال شهر رمضان...'}
             className="w-full bg-muted/40 border border-border rounded-2xl px-4 py-3 text-sm font-bold text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none text-right"
           />
         </CardContent>

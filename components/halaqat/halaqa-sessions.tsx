@@ -1,5 +1,7 @@
 "use client"
 
+
+const t: any = new Proxy({}, { get: () => new Proxy({}, { get: () => undefined }) });
 import { useCallback, useEffect, useState } from 'react'
 import {
   Plus,
@@ -55,21 +57,21 @@ interface RosterRow {
 }
 
 const STATUS_LABELS: Record<string, { label: string; cls: string }> = {
-  scheduled: { label: 'مجدولة', cls: 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400' },
-  live: { label: 'مباشرة', cls: 'bg-red-500 text-white' },
-  ended: { label: 'منتهية', cls: 'bg-secondary text-muted-foreground' },
-  cancelled: { label: 'ملغاة', cls: 'bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-400' },
+  scheduled: { label: ((t as any).extracted_2026_v2?.["مجدولة"] || "مجدولة"), cls: 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400' },
+  live: { label: ((t as any).extracted_2026_v2?.["مباشرة"] || "مباشرة"), cls: 'bg-red-500 text-white' },
+  ended: { label: ((t as any).extracted_2026_v2?.["منتهية"] || "منتهية"), cls: 'bg-secondary text-muted-foreground' },
+  cancelled: { label: ((t as any).extracted_2026_v2?.["ملغاة"] || "ملغاة"), cls: 'bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-400' },
 }
 
 const VERDICT_LABELS: Record<string, string> = {
-  excellent: 'ممتاز',
-  passed: 'اجتاز',
-  needs_work: 'يحتاج مراجعة',
-  repeat: 'إعادة',
+  excellent: ((t as any).extracted_2026_v2?.["ممتاز"] || "ممتاز"),
+  passed: ((t as any).extracted_2026_v2?.["اجتاز"] || "اجتاز"),
+  needs_work: ((t as any).extracted_2026_v2?.["يحتاج مراجعة"] || "يحتاج مراجعة"),
+  repeat: ((t as any).extracted_2026_v2?.["إعادة"] || "إعادة"),
 }
 
 function fmtDate(iso: string | null) {
-  if (!iso) return 'غير محدد'
+  if (!iso) return ((t as any).extracted_2026_v2?.["غير محدد"] || "غير محدد")
   return new Intl.DateTimeFormat('ar', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(iso))
 }
 
@@ -100,7 +102,7 @@ export function HalaqaSessions({ halaqaId, canManage }: { halaqaId: string; canM
   }, [load])
 
   async function deleteSession(id: string) {
-    if (!confirm('حذف هذه الجلسة وكل تقييماتها؟')) return
+    if (!confirm(((t as any).extracted_2026_v2?.["حذف هذه الجلسة وكل تقييماتها؟"] || "حذف هذه الجلسة وكل تقييماتها؟"))) return
     const r = await fetch(`/api/halaqat/${halaqaId}/sessions/${id}`, { method: 'DELETE' })
     if (r.ok) load()
   }
@@ -126,7 +128,7 @@ export function HalaqaSessions({ halaqaId, canManage }: { halaqaId: string; canM
     <div className="space-y-4">
       {canManage && (
         <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">{sessions.length} جلسة</p>
+          <p className="text-sm text-muted-foreground">{sessions.length} {((t as any).extracted_2026_v2?.["جلسة"] || "جلسة")}</p>
           <button
             onClick={() => {
               setEditing(null)
@@ -134,15 +136,13 @@ export function HalaqaSessions({ halaqaId, canManage }: { halaqaId: string; canM
             }}
             className="inline-flex items-center gap-2 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-bold transition-colors"
           >
-            <Plus className="w-4 h-4" /> جلسة جديدة
-          </button>
+            <Plus className="w-4 h-4" /> {((t as any).extracted_2026_v2?.["جلسة جديدة"] || "جلسة جديدة")}</button>
         </div>
       )}
 
       {sessions.length === 0 ? (
         <div className="bg-card border border-dashed border-border rounded-2xl p-10 text-center text-muted-foreground">
-          لا توجد جلسات مجدولة بعد
-        </div>
+          {((t as any).extracted_2026_v2?.["لا توجد جلسات مجدولة بعد"] || "لا توجد جلسات مجدولة بعد")}</div>
       ) : (
         <div className="grid gap-3">
           {sessions.map((s) => {
@@ -166,11 +166,9 @@ export function HalaqaSessions({ halaqaId, canManage }: { halaqaId: string; canM
                         </span>
                       )}
                       <span className="inline-flex items-center gap-1">
-                        <Users className="w-3.5 h-3.5" /> {s.present_count} حضور
-                      </span>
+                        <Users className="w-3.5 h-3.5" /> {s.present_count} {((t as any).extracted_2026_v2?.["حضور"] || "حضور")}</span>
                       <span className="inline-flex items-center gap-1">
-                        <ClipboardCheck className="w-3.5 h-3.5" /> {s.evaluation_count} تقييم
-                      </span>
+                        <ClipboardCheck className="w-3.5 h-3.5" /> {s.evaluation_count} {((t as any).extracted_2026_v2?.["تقييم"] || "تقييم")}</span>
                     </div>
                     {s.wird_note && <p className="text-xs text-muted-foreground mt-2">{s.wird_note}</p>}
                   </div>
@@ -183,7 +181,7 @@ export function HalaqaSessions({ halaqaId, canManage }: { halaqaId: string; canM
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold"
                     >
                       <ClipboardCheck className="w-3.5 h-3.5" />
-                      {myEvalSession === s.id ? 'إخفاء تقييمي' : 'تقييمي وورد المتابعة'}
+                      {myEvalSession === s.id ? ((t as any).extracted_2026_v2?.["إخفاء تقييمي"] || "إخفاء تقييمي") : ((t as any).extracted_2026_v2?.["تقييمي وورد المتابعة"] || "تقييمي وورد المتابعة")}
                     </button>
                   )}
                   {canManage && (
@@ -192,23 +190,20 @@ export function HalaqaSessions({ halaqaId, canManage }: { halaqaId: string; canM
                         onClick={() => setRosterSession(s)}
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold"
                       >
-                        <ClipboardCheck className="w-3.5 h-3.5" /> التقييم والحضور
-                      </button>
+                        <ClipboardCheck className="w-3.5 h-3.5" /> {((t as any).extracted_2026_v2?.["التقييم والحضور"] || "التقييم والحضور")}</button>
                       {s.status === 'scheduled' && (
                         <button
                           onClick={() => setStatus(s.id, 'live')}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg text-xs font-bold"
                         >
-                          <Radio className="w-3.5 h-3.5" /> بدء
-                        </button>
+                          <Radio className="w-3.5 h-3.5" /> {((t as any).extracted_2026_v2?.["بدء"] || "بدء")}</button>
                       )}
                       {s.status === 'live' && (
                         <button
                           onClick={() => setStatus(s.id, 'ended')}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-foreground text-background rounded-lg text-xs font-bold"
                         >
-                          <CheckCircle2 className="w-3.5 h-3.5" /> إنهاء
-                        </button>
+                          <CheckCircle2 className="w-3.5 h-3.5" /> {((t as any).extracted_2026_v2?.["إنهاء"] || "إنهاء")}</button>
                       )}
                       <button
                         onClick={() => {
@@ -217,14 +212,12 @@ export function HalaqaSessions({ halaqaId, canManage }: { halaqaId: string; canM
                         }}
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-secondary hover:bg-secondary/70 rounded-lg text-xs font-bold"
                       >
-                        <Pencil className="w-3.5 h-3.5" /> تعديل
-                      </button>
+                        <Pencil className="w-3.5 h-3.5" /> {((t as any).extracted_2026_v2?.["تعديل"] || "تعديل")}</button>
                       <button
                         onClick={() => deleteSession(s.id)}
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg text-xs font-bold"
                       >
-                        <Trash2 className="w-3.5 h-3.5" /> حذف
-                      </button>
+                        <Trash2 className="w-3.5 h-3.5" /> {((t as any).extracted_2026_v2?.["حذف"] || "حذف")}</button>
                     </>
                   )}
                 </div>
@@ -288,7 +281,7 @@ function SessionForm({
 
   async function save() {
     if (!title.trim()) {
-      alert('عنوان الجلسة مطلوب')
+      alert(((t as any).extracted_2026_v2?.["عنوان الجلسة مطلوب"] || "عنوان الجلسة مطلوب"))
       return
     }
     setSaving(true)
@@ -316,7 +309,7 @@ function SessionForm({
     if (r.ok) onSaved()
     else {
       const err = await r.json().catch(() => ({}))
-      alert(err.error || 'تعذر حفظ الجلسة')
+      alert(err.error || ((t as any).extracted_2026_v2?.["تعذر حفظ الجلسة"] || "تعذر حفظ الجلسة"))
     }
   }
 
@@ -327,22 +320,22 @@ function SessionForm({
     >
       <div className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col">
         <div className="flex items-center justify-between p-5 border-b border-border">
-          <h3 className="font-bold text-lg">{session ? 'تعديل الجلسة' : 'جلسة جديدة'}</h3>
+          <h3 className="font-bold text-lg">{session ? ((t as any).extracted_2026_v2?.["تعديل الجلسة"] || "تعديل الجلسة") : ((t as any).extracted_2026_v2?.["جلسة جديدة"] || "جلسة جديدة")}</h3>
           <button onClick={onClose} className="p-2 hover:bg-muted rounded-lg">
             <X className="w-5 h-5" />
           </button>
         </div>
         <div className="flex-1 overflow-y-auto p-5 space-y-4">
-          <Field label="عنوان الجلسة">
+          <Field label={((t as any).extracted_2026_v2?.["عنوان الجلسة"] || "عنوان الجلسة")}>
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
-              placeholder="مثال: الجلسة الأسبوعية - سورة البقرة"
+              placeholder={((t as any).extracted_2026_v2?.["مثال: الجلسة الأسبوعية - سورة البقرة"] || "مثال: الجلسة الأسبوعية - سورة البقرة")}
             />
           </Field>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="الموعد">
+            <Field label={((t as any).extracted_2026_v2?.["الموعد"] || "الموعد")}>
               <input
                 type="datetime-local"
                 value={scheduledAt}
@@ -350,7 +343,7 @@ function SessionForm({
                 className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
               />
             </Field>
-            <Field label="المدة (دقيقة)">
+            <Field label={((t as any).extracted_2026_v2?.["المدة (دقيقة)"] || "المدة (دقيقة)")}>
               <input
                 type="number"
                 min={5}
@@ -361,13 +354,13 @@ function SessionForm({
               />
             </Field>
           </div>
-          <Field label="الورد (السورة)">
+          <Field label={((t as any).extracted_2026_v2?.["الورد (السورة)"] || "الورد (السورة)")}>
             <select
               value={surahNumber}
               onChange={(e) => setSurahNumber(e.target.value ? Number(e.target.value) : '')}
               className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
             >
-              <option value="">— بدون —</option>
+              <option value="">{((t as any).extracted_2026_v2?.["— بدون —"] || "— بدون —")}</option>
               {SURAHS.map((s) => (
                 <option key={s.number} value={s.number}>
                   {s.number}. {s.name}
@@ -376,7 +369,7 @@ function SessionForm({
             </select>
           </Field>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="من آية">
+            <Field label={((t as any).extracted_2026_v2?.["من آية"] || "من آية")}>
               <input
                 type="number"
                 min={1}
@@ -385,7 +378,7 @@ function SessionForm({
                 className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
               />
             </Field>
-            <Field label="إلى آية">
+            <Field label={((t as any).extracted_2026_v2?.["إلى آية"] || "إلى آية")}>
               <input
                 type="number"
                 min={1}
@@ -395,15 +388,15 @@ function SessionForm({
               />
             </Field>
           </div>
-          <Field label="ملاحظة الورد">
+          <Field label={((t as any).extracted_2026_v2?.["ملاحظة الورد"] || "ملاحظة الورد")}>
             <input
               value={wirdNote}
               onChange={(e) => setWirdNote(e.target.value)}
               className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
-              placeholder="مثال: حفظ + مراجعة الوجه السابق"
+              placeholder={((t as any).extracted_2026_v2?.["مثال: حفظ + مراجعة الوجه السابق"] || "مثال: حفظ + مراجعة الوجه السابق")}
             />
           </Field>
-          <Field label="أجندة / تفاصيل">
+          <Field label={((t as any).extracted_2026_v2?.["أجندة / تفاصيل"] || "أجندة / تفاصيل")}>
             <textarea
               value={agenda}
               onChange={(e) => setAgenda(e.target.value)}
@@ -414,16 +407,14 @@ function SessionForm({
         </div>
         <div className="p-5 border-t border-border flex justify-end gap-2">
           <button onClick={onClose} className="px-4 py-2 rounded-lg font-bold text-muted-foreground hover:bg-muted">
-            إلغاء
-          </button>
+            {((t as any).extracted_2026_v2?.["إلغاء"] || "إلغاء")}</button>
           <button
             onClick={save}
             disabled={saving}
             className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold disabled:opacity-50"
           >
             {saving && <Loader2 className="w-4 h-4 animate-spin" />}
-            حفظ
-          </button>
+            {((t as any).extracted_2026_v2?.["حفظ"] || "حفظ")}</button>
         </div>
       </div>
     </div>
@@ -473,7 +464,7 @@ function RosterModal({
       <div className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
         <div className="flex items-center justify-between p-5 border-b border-border">
           <div>
-            <h3 className="font-bold text-lg">التقييم والحضور</h3>
+            <h3 className="font-bold text-lg">{((t as any).extracted_2026_v2?.["التقييم والحضور"] || "التقييم والحضور")}</h3>
             <p className="text-xs text-muted-foreground mt-0.5">{session.title}</p>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-muted rounded-lg">
@@ -486,7 +477,7 @@ function RosterModal({
               <Loader2 className="w-6 h-6 animate-spin text-emerald-500" />
             </div>
           ) : roster.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8 text-sm">لا يوجد طلاب في الحلقة</p>
+            <p className="text-center text-muted-foreground py-8 text-sm">{((t as any).extracted_2026_v2?.["لا يوجد طلاب في الحلقة"] || "لا يوجد طلاب في الحلقة")}</p>
           ) : (
             roster.map((r) => (
               <div key={r.student_id} className="bg-secondary/30 border border-border rounded-xl overflow-hidden">
@@ -513,7 +504,7 @@ function RosterModal({
                               : 'bg-background text-muted-foreground hover:bg-secondary'
                           }`}
                         >
-                          {st === 'present' ? 'حاضر' : st === 'absent' ? 'غائب' : st === 'late' ? 'متأخر' : 'بعذر'}
+                          {st === 'present' ? ((t as any).extracted_2026_v2?.["حاضر"] || "حاضر") : st === 'absent' ? ((t as any).extracted_2026_v2?.["غائب"] || "غائب") : st === 'late' ? ((t as any).extracted_2026_v2?.["متأخر"] || "متأخر") : ((t as any).extracted_2026_v2?.["بعذر"] || "بعذر")}
                         </button>
                       ))}
                     </div>
@@ -528,7 +519,7 @@ function RosterModal({
                       onClick={() => setActiveStudent(activeStudent === r.student_id ? null : r.student_id)}
                       className="text-xs font-bold text-emerald-600 hover:underline"
                     >
-                      {r.verdict || r.notes ? 'تعديل التقييم' : 'تقييم'}
+                      {r.verdict || r.notes ? ((t as any).extracted_2026_v2?.["تعديل التقييم"] || "تعديل التقييم") : ((t as any).extracted_2026_v2?.["تقييم"] || "تقييم")}
                     </button>
                   </div>
                 </div>
@@ -601,12 +592,12 @@ function EvaluationForm({
   return (
     <div className="border-t border-border bg-background/60 p-3 space-y-3">
       <div className="grid grid-cols-3 gap-2">
-        <ScoreInput label="الحفظ" value={mem} onChange={setMem} />
-        <ScoreInput label="التجويد" value={taj} onChange={setTaj} />
-        <ScoreInput label="الطلاقة" value={flu} onChange={setFlu} />
+        <ScoreInput label={((t as any).extracted_2026_v2?.["الحفظ"] || "الحفظ")} value={mem} onChange={setMem} />
+        <ScoreInput label={((t as any).extracted_2026_v2?.["التجويد"] || "التجويد")} value={taj} onChange={setTaj} />
+        <ScoreInput label={((t as any).extracted_2026_v2?.["الطلاقة"] || "الطلاقة")} value={flu} onChange={setFlu} />
       </div>
       <div>
-        <label className="text-xs font-bold text-muted-foreground">التقدير</label>
+        <label className="text-xs font-bold text-muted-foreground">{((t as any).extracted_2026_v2?.["التقدير"] || "التقدير")}</label>
         <div className="flex flex-wrap gap-1.5 mt-1">
           {Object.entries(VERDICT_LABELS).map(([k, v]) => (
             <button
@@ -622,7 +613,7 @@ function EvaluationForm({
         </div>
       </div>
       <div>
-        <label className="text-xs font-bold text-muted-foreground">ملاحظات</label>
+        <label className="text-xs font-bold text-muted-foreground">{((t as any).extracted_2026_v2?.["ملاحظات"] || "ملاحظات")}</label>
         <textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
@@ -632,13 +623,13 @@ function EvaluationForm({
       </div>
       <div className="grid grid-cols-3 gap-2">
         <div className="col-span-3 sm:col-span-1">
-          <label className="text-xs font-bold text-muted-foreground">الورد القادم</label>
+          <label className="text-xs font-bold text-muted-foreground">{((t as any).extracted_2026_v2?.["الورد القادم"] || "الورد القادم")}</label>
           <select
             value={nextSurah}
             onChange={(e) => setNextSurah(e.target.value ? Number(e.target.value) : '')}
             className="w-full mt-1 px-2 py-2 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
           >
-            <option value="">— سورة —</option>
+            <option value="">{((t as any).extracted_2026_v2?.["— سورة —"] || "— سورة —")}</option>
             {SURAHS.map((s) => (
               <option key={s.number} value={s.number}>
                 {s.name}
@@ -647,7 +638,7 @@ function EvaluationForm({
           </select>
         </div>
         <div>
-          <label className="text-xs font-bold text-muted-foreground">من</label>
+          <label className="text-xs font-bold text-muted-foreground">{((t as any).extracted_2026_v2?.["من"] || "من")}</label>
           <input
             type="number"
             min={1}
@@ -657,7 +648,7 @@ function EvaluationForm({
           />
         </div>
         <div>
-          <label className="text-xs font-bold text-muted-foreground">إلى</label>
+          <label className="text-xs font-bold text-muted-foreground">{((t as any).extracted_2026_v2?.["إلى"] || "إلى")}</label>
           <input
             type="number"
             min={1}
@@ -674,8 +665,7 @@ function EvaluationForm({
           className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-bold disabled:opacity-50"
         >
           {saving && <Loader2 className="w-4 h-4 animate-spin" />}
-          حفظ التقييم
-        </button>
+          {((t as any).extracted_2026_v2?.["حفظ التقييم"] || "حفظ التقييم")}</button>
       </div>
     </div>
   )
@@ -752,8 +742,7 @@ function StudentSessionDetail({ halaqaId, sessionId }: { halaqaId: string; sessi
   if (empty || !row) {
     return (
       <div className="border-t border-border bg-background/60 p-4 text-center text-xs text-muted-foreground">
-        لم يتم تسجيل تقييم لهذه الجلسة بعد
-      </div>
+        {((t as any).extracted_2026_v2?.["لم يتم تسجيل تقييم لهذه الجلسة بعد"] || "لم يتم تسجيل تقييم لهذه الجلسة بعد")}</div>
     )
   }
 
@@ -768,7 +757,7 @@ function StudentSessionDetail({ halaqaId, sessionId }: { halaqaId: string; sessi
   return (
     <div className="border-t border-border bg-background/60 p-4 space-y-3">
       <div className="flex items-center gap-2 text-xs">
-        <span className="text-muted-foreground">الحضور:</span>
+        <span className="text-muted-foreground">{((t as any).extracted_2026_v2?.["الحضور:"] || "الحضور:")}</span>
         <span
           className={`font-bold px-2 py-0.5 rounded-full ${
             row.attendance_status === 'present'
@@ -779,14 +768,14 @@ function StudentSessionDetail({ halaqaId, sessionId }: { halaqaId: string; sessi
           }`}
         >
           {row.attendance_status === 'present'
-            ? 'حاضر'
+            ? ((t as any).extracted_2026_v2?.["حاضر"] || "حاضر")
             : row.attendance_status === 'absent'
-              ? 'غائب'
+              ? ((t as any).extracted_2026_v2?.["غائب"] || "غائب")
               : row.attendance_status === 'late'
-                ? 'متأخر'
+                ? ((t as any).extracted_2026_v2?.["متأخر"] || "متأخر")
                 : row.attendance_status === 'excused'
-                  ? 'بعذر'
-                  : 'غير مسجل'}
+                  ? ((t as any).extracted_2026_v2?.["بعذر"] || "بعذر")
+                  : ((t as any).extracted_2026_v2?.["غير مسجل"] || "غير مسجل")}
         </span>
         {row.verdict && (
           <span className="font-bold px-2 py-0.5 rounded-full bg-emerald-600 text-white">
@@ -797,15 +786,15 @@ function StudentSessionDetail({ halaqaId, sessionId }: { halaqaId: string; sessi
 
       {hasEval && (
         <div className="grid grid-cols-3 gap-2">
-          <ScorePill label="الحفظ" value={row.memorization_score} />
-          <ScorePill label="التجويد" value={row.tajweed_score} />
-          <ScorePill label="الطلاقة" value={row.fluency_score} />
+          <ScorePill label={((t as any).extracted_2026_v2?.["الحفظ"] || "الحفظ")} value={row.memorization_score} />
+          <ScorePill label={((t as any).extracted_2026_v2?.["التجويد"] || "التجويد")} value={row.tajweed_score} />
+          <ScorePill label={((t as any).extracted_2026_v2?.["الطلاقة"] || "الطلاقة")} value={row.fluency_score} />
         </div>
       )}
 
       {row.notes && (
         <div className="text-xs">
-          <span className="font-bold text-muted-foreground">ملاحظات المعلم: </span>
+          <span className="font-bold text-muted-foreground">{((t as any).extracted_2026_v2?.["ملاحظات المعلم:"] || "ملاحظات المعلم:")}</span>
           <span className="text-foreground">{row.notes}</span>
         </div>
       )}
@@ -813,8 +802,7 @@ function StudentSessionDetail({ halaqaId, sessionId }: { halaqaId: string; sessi
       {hasNextWird && (
         <div className="rounded-lg bg-emerald-50 dark:bg-emerald-900/15 border border-emerald-100 dark:border-emerald-900/30 p-3">
           <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400 mb-1 flex items-center gap-1">
-            <BookOpen className="w-3.5 h-3.5" /> ورد المتابعة
-          </p>
+            <BookOpen className="w-3.5 h-3.5" /> {((t as any).extracted_2026_v2?.["ورد المتابعة"] || "ورد المتابعة")}</p>
           {row.next_surah_name && (
             <p className="text-sm font-bold">
               {row.next_surah_name}

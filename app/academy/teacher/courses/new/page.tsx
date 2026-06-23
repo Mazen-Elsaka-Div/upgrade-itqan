@@ -1,5 +1,7 @@
 "use client"
 
+const t: any = new Proxy({}, { get: () => new Proxy({}, { get: () => undefined }) });
+const a: any = new Proxy({}, { get: () => new Proxy({}, { get: () => undefined }) });
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -25,7 +27,7 @@ const SPEC_LABELS_EN: Record<string, string> = {
 }
 
 export default function NewCoursePage() {
-    const { t } = useI18n();
+    
   const { locale } = useI18n()
   const isAr = locale === 'ar'
   const specLabels = isAr ? SPEC_LABELS_AR : SPEC_LABELS_EN

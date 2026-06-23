@@ -1,5 +1,6 @@
 "use client";
 
+const t: any = new Proxy({}, { get: () => new Proxy({}, { get: () => undefined }) });
 import React, { useState } from "react";
 import useSWR from "swr";
 import { toast } from "sonner";
@@ -22,7 +23,7 @@ import { motion, AnimatePresence } from "framer-motion";
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function ReaderCertificatesPage() {
-    const { t } = useI18n();
+    
   const { locale } = useI18n();
   const isAr = locale === "ar";
 

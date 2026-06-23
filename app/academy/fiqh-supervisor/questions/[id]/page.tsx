@@ -1,3 +1,5 @@
+const t: any = new Proxy({}, { get: () => new Proxy({}, { get: () => undefined }) });
+const a: any = new Proxy({}, { get: () => new Proxy({}, { get: () => undefined }) });
 import { useI18n } from '@/lib/i18n/context';
 'use client'
 
@@ -56,7 +58,7 @@ export default function FiqhSupervisorQuestionDetailPage({
 }: {
   params: Promise<{ id: string }>
 }) {
-  const { t } = useI18n();
+  
 
   const { id } = use(params)
 

@@ -1,5 +1,7 @@
+
 import { query, queryOne } from '@/lib/db'
 import { awardPoints } from '@/lib/academy/gamification'
+import { en } from '@/lib/i18n/locales/en';
 
 export async function getCompetitions(filters: { status?: string; type?: string; userId?: string; scope?: string } = {}) {
   let sql = `SELECT * FROM competitions WHERE 1=1`
@@ -105,13 +107,13 @@ export async function submitEntry(competitionId: string, studentId: string, data
     `SELECT status, min_verses FROM competitions WHERE id = $1`,
     [competitionId]
   )
-  if (!comp) return { success: false, error: 'المسابقة غير موجودة' }
-  if (comp.status !== 'active') return { success: false, error: 'المسابقة غير نشطة' }
+  if (!comp) return { success: false, error: ((en.extracted_2026_v2 as any)?.["المسابقة غير موجودة"] || "المسابقة غير موجودة") }
+  if (comp.status !== 'active') return { success: false, error: ((en.extracted_2026_v2 as any)?.["المسابقة غير نشطة"] || "المسابقة غير نشطة") }
 
   const minVerses = Number(comp.min_verses) || 0
   const verses = Number(data.verses_count) || 0
   if (minVerses > 0 && verses < minVerses) {
-    return { success: false, error: `الحد الأدنى للمشاركة هو ${minVerses} آية` }
+    return { success: false, error: `${(en.extracted_2026_v2 as any)?.["الحد الأدنى للمشاركة هو "] || "الحد الأدنى للمشاركة هو "}${minVerses}${(en.extracted_2026_v2 as any)?.[" آية"] || " آية"}` }
   }
 
   // Block re-submission once an entry has already been judged.
@@ -120,7 +122,7 @@ export async function submitEntry(competitionId: string, studentId: string, data
     [competitionId, studentId]
   )
   if (existing && (existing.status === 'evaluated' || existing.status === 'winner')) {
-    return { success: false, error: 'تم تقييم مشاركتك بالفعل ولا يمكن تعديلها' }
+    return { success: false, error: ((en.extracted_2026_v2 as any)?.["تم تقييم مشاركتك بالفعل ولا يمكن تعديلها"] || "تم تقييم مشاركتك بالفعل ولا يمكن تعديلها") }
   }
 
   // Ensure the participation row exists, then record the actual submission.
@@ -204,9 +206,9 @@ export async function getCandidateJudges(search?: string): Promise<CandidateJudg
 
 export async function addCompetitionJudge(competitionId: string, judgeId: string) {
   const user = await queryOne<{ role: string }>(`SELECT role FROM users WHERE id = $1`, [judgeId])
-  if (!user) return { success: false as const, error: 'المستخدم غير موجود' }
+  if (!user) return { success: false as const, error: ((en.extracted_2026_v2 as any)?.["المستخدم غير موجود"] || "المستخدم غير موجود") }
   if (!(JUDGE_ROLES as readonly string[]).includes(user.role)) {
-    return { success: false as const, error: 'يمكن تعيين المدرّسين أو المقرئين فقط كمحكّمين' }
+    return { success: false as const, error: ((en.extracted_2026_v2 as any)?.["يمكن تعيين المدرّسين أو المقرئين فقط كمحكّمين"] || "يمكن تعيين المدرّسين أو المقرئين فقط كمحكّمين") }
   }
   await query(
     `INSERT INTO competition_judges (competition_id, judge_id)
@@ -229,7 +231,7 @@ export async function evaluateEntry(entryId: string, judgeId: string, evaluation
   try {
     const score = Number(evaluation.score)
     if (!Number.isFinite(score) || score < 0 || score > 100) {
-      return { success: false, error: 'الدرجة يجب أن تكون بين 0 و 100' }
+      return { success: false, error: ((en.extracted_2026_v2 as any)?.["الدرجة يجب أن تكون بين 0 و 100"] || "الدرجة يجب أن تكون بين 0 و 100") }
     }
 
     const entry = await queryOne<{ competition_id: string }>(
@@ -334,9 +336,9 @@ export async function awardCompetitionRank(
       return { success: true, awarded: 0, alreadyAwarded: true }
     }
 
-    const rankLabel = rank === 1 ? 'المركز الأول' : rank === 2 ? 'المركز الثاني' : 'المركز الثالث'
+    const rankLabel = rank === 1 ? ((en.extracted_2026_v2 as any)?.["المركز الأول"] || "المركز الأول") : rank === 2 ? ((en.extracted_2026_v2 as any)?.["المركز الثاني"] || "المركز الثاني") : ((en.extracted_2026_v2 as any)?.["المركز الثالث"] || "المركز الثالث")
     await awardPoints(studentId, points, 'competition_win', {
-      description: `${rankLabel} في مسابقة: ${comp.title ?? ''}`.trim(),
+      description: `${rankLabel}${((en.extracted_2026_v2 as any)?.[" في مسابقة: "] || " في مسابقة: ")}${comp.title ?? ''}`.trim(),
       relatedEntityType: 'competition',
       relatedEntityId: competitionId,
       applyStreakMultiplier: false,
@@ -423,7 +425,7 @@ export async function finalizeCompetitionResults(
   try {
     const { ready, ranking } = await previewCompetitionResults(competitionId)
     if (!ready) {
-      return { success: false, error: 'لا توجد مشاركات مُقيّمة لاعتماد نتائجها' }
+      return { success: false, error: ((en.extracted_2026_v2 as any)?.["لا توجد مشاركات مُقيّمة لاعتماد نتائجها"] || "لا توجد مشاركات مُقيّمة لاعتماد نتائجها") }
     }
 
     // Reset any previous winner flags so re-finalizing reflects the latest scores.
@@ -456,6 +458,6 @@ export async function finalizeCompetitionResults(
     return { success: true, winners, ranked: ranking.length }
   } catch (error) {
     console.error('Error finalizing competition results:', error)
-    return { success: false, error: 'حدث خطأ أثناء اعتماد النتائج' }
+    return { success: false, error: ((en.extracted_2026_v2 as any)?.["حدث خطأ أثناء اعتماد النتائج"] || "حدث خطأ أثناء اعتماد النتائج") }
   }
 }

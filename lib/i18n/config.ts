@@ -12,7 +12,7 @@ export function getRoleConfig(t: Translations) {
           title: '',
           items: [
             { label: t.shell.studentPortal, href: '/admin', icon: Home },
-            { label: 'التلاوات', href: '/admin/recitations', icon: BookOpen },
+            { label: (t as any).addedTranslations_2026?.['التلاوات'] || 'التلاوات', href: '/admin/recitations', icon: BookOpen },
             { label: t.shell.certifiedReader, href: '/admin/readers', icon: Users },
             { label: t.shell.settings, href: '/admin/settings', icon: Settings },
             { label: t.shell.reports, href: '/admin/reports', icon: BarChart3 },
@@ -22,7 +22,7 @@ export function getRoleConfig(t: Translations) {
           title: t.shell.generalSupervisor,
           items: [
             { label: t.shell.users, href: '/admin/users', icon: Users },
-            { label: 'الإعلانات', href: '/admin/announcements', icon: FileText },
+            { label: (t as any).addedTranslations_2026?.['الإعلانات'] || 'الإعلانات', href: '/admin/announcements', icon: FileText },
             { label: t.shell.conversations, href: '/admin/conversations', icon: MessageSquare },
           ]
         },
@@ -42,8 +42,8 @@ export function getRoleConfig(t: Translations) {
         {
           title: '',
           items: [
-            { label: 'التلاوات', href: '/reader/recitations', icon: BookOpen },
-            { label: 'الجلسات', href: '/reader/sessions', icon: MessageSquare },
+            { label: (t as any).addedTranslations_2026?.['التلاوات'] || 'التلاوات', href: '/reader/recitations', icon: BookOpen },
+            { label: (t as any).addedTranslations_2026?.['الجلسات'] || 'الجلسات', href: '/reader/sessions', icon: MessageSquare },
             { label: t.shell.settings, href: '/reader/settings', icon: Settings },
             { label: t.shell.reports, href: '/reader/reports', icon: BarChart3 },
           ]
@@ -64,8 +64,8 @@ export function getRoleConfig(t: Translations) {
         {
           title: '',
           items: [
-            { label: 'التلاوات', href: '/student/recitations', icon: BookOpen },
-            { label: 'الجلسات', href: '/student/sessions', icon: MessageSquare },
+            { label: (t as any).addedTranslations_2026?.['التلاوات'] || 'التلاوات', href: '/student/recitations', icon: BookOpen },
+            { label: (t as any).addedTranslations_2026?.['الجلسات'] || 'الجلسات', href: '/student/sessions', icon: MessageSquare },
             { label: t.shell.settings, href: '/student/settings', icon: Settings },
             { label: t.shell.statsAndReports, href: '/student/stats', icon: BarChart3 },
           ]

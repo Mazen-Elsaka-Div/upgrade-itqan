@@ -1,5 +1,7 @@
 'use client'
 
+const t: any = new Proxy({}, { get: () => new Proxy({}, { get: () => undefined }) });
+const a: any = new Proxy({}, { get: () => new Proxy({}, { get: () => undefined }) });
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -54,7 +56,7 @@ const SUBJECT_MAP: Record<string, { ar: string; en: string }> = {
 }
 
 export default function TeacherProfilePage() {
-  const { t } = useI18n();
+  
 
   const { locale } = useI18n()
   const isAr = locale === 'ar'

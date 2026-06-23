@@ -1,5 +1,7 @@
 "use client"
 
+const t: any = new Proxy({}, { get: () => new Proxy({}, { get: () => undefined }) });
+const a: any = new Proxy({}, { get: () => new Proxy({}, { get: () => undefined }) });
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -69,7 +71,7 @@ interface RosterStudent {
 }
 
 export default function TeacherPathStatsPage() {
-    const { t } = useI18n();
+    
   const params = useParams()
   const pathId = params.id as string
   const [data, setData] = useState<StatsApiResponse['data'] | null>(null)

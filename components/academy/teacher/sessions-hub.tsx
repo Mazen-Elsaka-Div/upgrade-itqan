@@ -1,3 +1,6 @@
+
+const t: any = new Proxy({}, { get: () => new Proxy({}, { get: () => undefined }) });
+import { useI18n } from "@/lib/i18n/context";
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -99,9 +102,9 @@ interface RecordingRow {
 }
 
 const KIND_LABEL: Record<string, string> = {
-  halaqa: 'حلقة',
-  booking: 'جلسة فردية',
-  course_session: 'درس دورة',
+  halaqa: ((t as any).extracted_2026_v2?.["حلقة"] || "حلقة"),
+  booking: ((t as any).extracted_2026_v2?.["جلسة فردية"] || "جلسة فردية"),
+  course_session: ((t as any).extracted_2026_v2?.["درس دورة"] || "درس دورة"),
 }
 
 /* ------------------------------------------------------------------ */
@@ -131,8 +134,10 @@ function fmtDateTime(s: string) {
 }
 
 function Stars({ value }: { value: number | null }) {
+  const { t } = useI18n();
+
   if (value === null || value === undefined) {
-    return <span className="text-xs text-muted-foreground">لا يوجد تقييم</span>
+    return <span className="text-xs text-muted-foreground">{((t as any).extracted_2026_v2?.["لا يوجد تقييم"] || "لا يوجد تقييم")}</span>
   }
   return (
     <div className="flex items-center gap-0.5" aria-label={`متوسط التقييم ${value}`}>
@@ -155,6 +160,8 @@ const TABS = ['live', 'history', 'recordings'] as const
 type TabId = (typeof TABS)[number]
 
 export function TeacherSessionsHub() {
+  const { t } = useI18n();
+
   const router = useRouter()
   const searchParams = useSearchParams()
   const initialTab = (searchParams.get('tab') as TabId) || 'live'
@@ -302,18 +309,18 @@ export function TeacherSessionsHub() {
         body: JSON.stringify({ status: 'in_progress' }),
       })
       if (res.ok) {
-        toast.success('تم تفعيل الجلسة، جاري فتح غرفة البث...')
+        toast.success(((t as any).extracted_2026_v2?.["تم تفعيل الجلسة، جاري فتح غرفة البث..."] || "تم تفعيل الجلسة، جاري فتح غرفة البث..."))
         enterRoom(id)
       } else {
-        toast.error('تعذّر بدء الجلسة')
+        toast.error(((t as any).extracted_2026_v2?.["تعذّر بدء الجلسة"] || "تعذّر بدء الجلسة"))
       }
     } catch {
-      toast.error('فشل الاتصال بالخادم')
+      toast.error(((t as any).extracted_2026_v2?.["فشل الاتصال بالخادم"] || "فشل الاتصال بالخادم"))
     }
   }
 
   const endSession = async (id: string) => {
-    if (!confirm('هل أنت متأكد من إنهاء هذه الجلسة؟ لن يتمكن الطلاب من الدخول بعدها.')) return
+    if (!confirm(((t as any).extracted_2026_v2?.["هل أنت متأكد من إنهاء هذه الجلسة؟ لن يتمكن الطلاب من الدخول بعدها."] || "هل أنت متأكد من إنهاء هذه الجلسة؟ لن يتمكن الطلاب من الدخول بعدها."))) return
     try {
       const res = await fetch(`/api/academy/teacher/sessions/${id}`, {
         method: 'PATCH',
@@ -321,29 +328,29 @@ export function TeacherSessionsHub() {
         body: JSON.stringify({ status: 'completed' }),
       })
       if (res.ok) {
-        toast.success('تم إنهاء الجلسة')
+        toast.success(((t as any).extracted_2026_v2?.["تم إنهاء الجلسة"] || "تم إنهاء الجلسة"))
         fetchSessions()
         fetchHistory()
       } else {
-        toast.error('تعذّر إنهاء الجلسة')
+        toast.error(((t as any).extracted_2026_v2?.["تعذّر إنهاء الجلسة"] || "تعذّر إنهاء الجلسة"))
       }
     } catch {
-      toast.error('فشل الاتصال بالخادم')
+      toast.error(((t as any).extracted_2026_v2?.["فشل الاتصال بالخادم"] || "فشل الاتصال بالخادم"))
     }
   }
 
   const deleteSession = async (id: string) => {
-    if (!confirm('هل أنت متأكد من حذف هذه الجلسة نهائياً؟')) return
+    if (!confirm(((t as any).extracted_2026_v2?.["هل أنت متأكد من حذف هذه الجلسة نهائياً؟"] || "هل أنت متأكد من حذف هذه الجلسة نهائياً؟"))) return
     try {
       const res = await fetch(`/api/academy/teacher/sessions/${id}`, { method: 'DELETE' })
       if (res.ok) {
-        toast.success('تم حذف الجلسة')
+        toast.success(((t as any).extracted_2026_v2?.["تم حذف الجلسة"] || "تم حذف الجلسة"))
         fetchSessions()
       } else {
-        toast.error('تعذّر الحذف')
+        toast.error(((t as any).extracted_2026_v2?.["تعذّر الحذف"] || "تعذّر الحذف"))
       }
     } catch {
-      toast.error('فشل الاتصال بالخادم')
+      toast.error(((t as any).extracted_2026_v2?.["فشل الاتصال بالخادم"] || "فشل الاتصال بالخادم"))
     }
   }
 
@@ -351,15 +358,15 @@ export function TeacherSessionsHub() {
     try {
       const res = await fetch(`/api/video/recordings/${id}`, { method: 'DELETE' })
       if (res.ok) {
-        toast.success('تم حذف التسجيل')
+        toast.success(((t as any).extracted_2026_v2?.["تم حذف التسجيل"] || "تم حذف التسجيل"))
         setRecordings((prev) => prev.filter((r) => r.id !== id))
         fetchHistory()
       } else {
         const j = await res.json().catch(() => ({}))
-        toast.error(j.error || 'تعذّر حذف التسجيل')
+        toast.error(j.error || ((t as any).extracted_2026_v2?.["تعذّر حذف التسجيل"] || "تعذّر حذف التسجيل"))
       }
     } catch {
-      toast.error('فشل الاتصال بالخادم')
+      toast.error(((t as any).extracted_2026_v2?.["فشل الاتصال بالخادم"] || "فشل الاتصال بالخادم"))
     }
   }
 
@@ -379,25 +386,22 @@ export function TeacherSessionsHub() {
         <div className="space-y-1">
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-2">
             <Radio className="w-7 h-7 text-primary" />
-            الجلسات والبث المباشر
-          </h1>
+            {((t as any).extracted_2026_v2?.["الجلسات والبث المباشر"] || "الجلسات والبث المباشر")}</h1>
           <p className="text-muted-foreground text-sm">
-            أنشئ بثاً مباشراً، أدر جلساتك المجدولة، وراجع سجلك وتسجيلاتك من مكان واحد.
-          </p>
+            {((t as any).extracted_2026_v2?.["أنشئ بثاً مباشراً، أدر جلساتك المجدولة، وراجع سجلك وتسجيلاتك من مكان واحد."] || "أنشئ بثاً مباشراً، أدر جلساتك المجدولة، وراجع سجلك وتسجيلاتك من مكان واحد.")}</p>
         </div>
         <Button size="lg" onClick={openNew} className="shrink-0 shadow-md gap-2">
           <Plus className="w-5 h-5" />
-          بث مباشر جديد
-        </Button>
+          {((t as any).extracted_2026_v2?.["بث مباشر جديد"] || "بث مباشر جديد")}</Button>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <StatBox label="مباشر الآن" value={String(stats.liveNow)} icon={<Radio className="w-4 h-4 text-red-500" />} highlight={stats.liveNow > 0} />
-        <StatBox label="جلسات مجدولة" value={String(stats.upcoming)} icon={<CalendarClock className="w-4 h-4 text-blue-500" />} />
-        <StatBox label="دقائق بث" value={String(stats.minutes)} icon={<Clock className="w-4 h-4 text-emerald-500" />} />
+        <StatBox label={((t as any).extracted_2026_v2?.["مباشر الآن"] || "مباشر الآن")} value={String(stats.liveNow)} icon={<Radio className="w-4 h-4 text-red-500" />} highlight={stats.liveNow > 0} />
+        <StatBox label={((t as any).extracted_2026_v2?.["جلسات مجدولة"] || "جلسات مجدولة")} value={String(stats.upcoming)} icon={<CalendarClock className="w-4 h-4 text-blue-500" />} />
+        <StatBox label={((t as any).extracted_2026_v2?.["دقائق بث"] || "دقائق بث")} value={String(stats.minutes)} icon={<Clock className="w-4 h-4 text-emerald-500" />} />
         <StatBox
-          label="متوسط تقييمك"
+          label={((t as any).extracted_2026_v2?.["متوسط تقييمك"] || "متوسط تقييمك")}
           value={stats.avg !== null ? stats.avg.toFixed(1) : '—'}
           icon={<Star className="w-4 h-4 text-amber-500" />}
         />
@@ -407,16 +411,13 @@ export function TeacherSessionsHub() {
         <TabsList className="grid w-full md:w-auto md:inline-grid grid-cols-3 mb-2">
           <TabsTrigger value="live" className="gap-1.5">
             <Radio className="w-4 h-4" />
-            البث والجلسات
-          </TabsTrigger>
+            {((t as any).extracted_2026_v2?.["البث والجلسات"] || "البث والجلسات")}</TabsTrigger>
           <TabsTrigger value="history" className="gap-1.5">
             <History className="w-4 h-4" />
-            السجل
-          </TabsTrigger>
+            {((t as any).extracted_2026_v2?.["السجل"] || "السجل")}</TabsTrigger>
           <TabsTrigger value="recordings" className="gap-1.5">
             <Video className="w-4 h-4" />
-            التسجيلات
-          </TabsTrigger>
+            {((t as any).extracted_2026_v2?.["التسجيلات"] || "التسجيلات")}</TabsTrigger>
         </TabsList>
 
         {/* ---- TAB: live & sessions ---- */}
@@ -429,8 +430,7 @@ export function TeacherSessionsHub() {
                 <section className="space-y-3">
                   <h2 className="text-sm font-bold text-muted-foreground flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                    مباشر الآن
-                  </h2>
+                    {((t as any).extracted_2026_v2?.["مباشر الآن"] || "مباشر الآن")}</h2>
                   <div className="grid gap-3">
                     {liveNow.map((s) => (
                       <LiveSessionCard key={s.id} s={s} onEnter={enterRoom} onEnd={endSession} />
@@ -442,8 +442,7 @@ export function TeacherSessionsHub() {
               <section className="space-y-3">
                 <h2 className="text-sm font-bold text-muted-foreground flex items-center gap-2">
                   <CalendarClock className="w-4 h-4" />
-                  الجلسات المجدولة
-                </h2>
+                  {((t as any).extracted_2026_v2?.["الجلسات المجدولة"] || "الجلسات المجدولة")}</h2>
                 {upcoming.length > 0 ? (
                   <div className="grid gap-3">
                     {upcoming.map((s) => (
@@ -459,13 +458,12 @@ export function TeacherSessionsHub() {
                 ) : (
                   <EmptyState
                     icon={<Calendar className="w-7 h-7" />}
-                    title="لا توجد جلسات مجدولة"
-                    body="ابدأ بثاً مباشراً فورياً أو جدول جلسة قادمة للتواصل مع طلابك."
+                    title={((t as any).extracted_2026_v2?.["لا توجد جلسات مجدولة"] || "لا توجد جلسات مجدولة")}
+                    body={((t as any).extracted_2026_v2?.["ابدأ بثاً مباشراً فورياً أو جدول جلسة قادمة للتواصل مع طلابك."] || "ابدأ بثاً مباشراً فورياً أو جدول جلسة قادمة للتواصل مع طلابك.")}
                     action={
                       <Button onClick={openNew} className="gap-2">
                         <Plus className="w-4 h-4" />
-                        إنشاء جلسة
-                      </Button>
+                        {((t as any).extracted_2026_v2?.["إنشاء جلسة"] || "إنشاء جلسة")}</Button>
                     }
                   />
                 )}
@@ -475,8 +473,7 @@ export function TeacherSessionsHub() {
                 <section className="space-y-3">
                   <h2 className="text-sm font-bold text-muted-foreground flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4" />
-                    الجلسات السابقة
-                  </h2>
+                    {((t as any).extracted_2026_v2?.["الجلسات السابقة"] || "الجلسات السابقة")}</h2>
                   <div className="grid gap-3">
                     {past.map((s) => (
                       <PastSessionCard key={s.id} s={s} onDelete={deleteSession} />
@@ -495,8 +492,8 @@ export function TeacherSessionsHub() {
           ) : history.length === 0 ? (
             <EmptyState
               icon={<History className="w-7 h-7" />}
-              title="لا يوجد سجل بعد"
-              body="بمجرد أن تبدأ بثاً مباشراً ستظهر تفاصيله هنا تلقائياً مع الحضور والتقييمات."
+              title={((t as any).extracted_2026_v2?.["لا يوجد سجل بعد"] || "لا يوجد سجل بعد")}
+              body={((t as any).extracted_2026_v2?.["بمجرد أن تبدأ بثاً مباشراً ستظهر تفاصيله هنا تلقائياً مع الحضور والتقييمات."] || "بمجرد أن تبدأ بثاً مباشراً ستظهر تفاصيله هنا تلقائياً مع الحضور والتقييمات.")}
             />
           ) : (
             history.map((row) => <HistoryCard key={row.id} row={row} />)
@@ -514,8 +511,8 @@ export function TeacherSessionsHub() {
           ) : recordings.length === 0 ? (
             <EmptyState
               icon={<Video className="w-7 h-7" />}
-              title="لا توجد تسجيلات بعد"
-              body="ستظهر هنا تسجيلات الجلسات بعد انتهائها مباشرة (عند تفعيل التسجيل في إعدادات الأكاديمية)."
+              title={((t as any).extracted_2026_v2?.["لا توجد تسجيلات بعد"] || "لا توجد تسجيلات بعد")}
+              body={((t as any).extracted_2026_v2?.["ستظهر هنا تسجيلات الجلسات بعد انتهائها مباشرة (عند تفعيل التسجيل في إعدادات الأكاديمية)."] || "ستظهر هنا تسجيلات الجلسات بعد انتهائها مباشرة (عند تفعيل التسجيل في إعدادات الأكاديمية).")}
             />
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -557,6 +554,8 @@ function StatBox({
   icon: React.ReactNode
   highlight?: boolean
 }) {
+  const { t } = useI18n();
+
   return (
     <Card className={highlight ? 'border-red-500/40 bg-red-500/5' : ''}>
       <CardContent className="pt-4 pb-3">
@@ -573,6 +572,8 @@ function StatBox({
 }
 
 function MetaRow({ s }: { s: SessionRow }) {
+  const { t } = useI18n();
+
   return (
     <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
       <span className="inline-flex items-center gap-1.5">
@@ -581,12 +582,10 @@ function MetaRow({ s }: { s: SessionRow }) {
       </span>
       <span className="inline-flex items-center gap-1.5">
         <Clock className="w-3.5 h-3.5" />
-        {s.duration_minutes || 60} دقيقة
-      </span>
+        {s.duration_minutes || 60} {((t as any).extracted_2026_v2?.["دقيقة"] || "دقيقة")}</span>
       <span className="inline-flex items-center gap-1.5">
         <Users className="w-3.5 h-3.5" />
-        حتى {s.max_students || 20} طالب
-      </span>
+        {((t as any).extracted_2026_v2?.["حتى"] || "حتى")}{s.max_students || 20} {((t as any).extracted_2026_v2?.["طالب"] || "طالب")}</span>
     </div>
   )
 }
@@ -608,8 +607,7 @@ function LiveSessionCard({
             <h3 className="text-lg font-bold truncate">{s.title}</h3>
             <Badge className="bg-red-600 hover:bg-red-700 animate-pulse gap-1">
               <Radio className="w-3 h-3" />
-              مباشر الآن
-            </Badge>
+              {((t as any).extracted_2026_v2?.["مباشر الآن"] || "مباشر الآن")}</Badge>
           </div>
           {s.course_name && <p className="text-sm text-muted-foreground">{s.course_name}</p>}
           <MetaRow s={s} />
@@ -617,11 +615,9 @@ function LiveSessionCard({
         <div className="flex gap-2 shrink-0">
           <Button onClick={() => onEnter(s.id)} className="bg-red-600 hover:bg-red-700 text-white gap-2">
             <Radio className="w-4 h-4 animate-pulse" />
-            دخول الغرفة
-          </Button>
+            {((t as any).extracted_2026_v2?.["دخول الغرفة"] || "دخول الغرفة")}</Button>
           <Button variant="outline" onClick={() => onEnd(s.id)} className="border-red-200 text-red-600 hover:bg-red-50">
-            إنهاء
-          </Button>
+            {((t as any).extracted_2026_v2?.["إنهاء"] || "إنهاء")}</Button>
         </div>
       </CardContent>
     </Card>
@@ -648,12 +644,11 @@ function ScheduledSessionCard({
             {s.is_public && (
               <Badge variant="outline" className="text-emerald-700 border-emerald-200 bg-emerald-50 gap-1">
                 <Globe2 className="w-3 h-3" />
-                عامة
-              </Badge>
+                {((t as any).extracted_2026_v2?.["عامة"] || "عامة")}</Badge>
             )}
             {s.series_title && (
               <Badge variant="secondary" className="gap-1">
-                سلسلة: {s.series_title}
+                {((t as any).extracted_2026_v2?.["سلسلة:"] || "سلسلة:")}{s.series_title}
               </Badge>
             )}
           </div>
@@ -663,13 +658,11 @@ function ScheduledSessionCard({
         <div className="flex flex-col gap-2 lg:min-w-[200px]">
           <Button onClick={() => onStart(s.id)} className="font-bold gap-2 shadow-sm">
             <PlayCircle className="w-4 h-4" />
-            بدء البث الآن
-          </Button>
+            {((t as any).extracted_2026_v2?.["بدء البث الآن"] || "بدء البث الآن")}</Button>
           <div className="grid grid-cols-2 gap-2">
             <Button size="sm" variant="outline" onClick={() => onEdit(s.id)} className="gap-1">
               <Edit2 className="w-3.5 h-3.5" />
-              تعديل
-            </Button>
+              {((t as any).extracted_2026_v2?.["تعديل"] || "تعديل")}</Button>
             <Button
               size="sm"
               variant="outline"
@@ -677,8 +670,7 @@ function ScheduledSessionCard({
               className="gap-1 text-destructive border-red-200 hover:bg-red-50"
             >
               <Trash2 className="w-3.5 h-3.5" />
-              حذف
-            </Button>
+              {((t as any).extracted_2026_v2?.["حذف"] || "حذف")}</Button>
           </div>
         </div>
       </CardContent>
@@ -699,8 +691,7 @@ function PastSessionCard({ s, onDelete }: { s: SessionRow; onDelete: (id: string
               <h3 className="font-bold truncate">{s.title}</h3>
               <Badge variant="secondary" className="gap-1 text-xs">
                 <CheckCircle2 className="w-3 h-3" />
-                مكتملة
-              </Badge>
+                {((t as any).extracted_2026_v2?.["مكتملة"] || "مكتملة")}</Badge>
             </div>
             {s.course_name && <p className="text-sm text-muted-foreground">{s.course_name}</p>}
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
@@ -710,8 +701,7 @@ function PastSessionCard({ s, onDelete }: { s: SessionRow; onDelete: (id: string
               </span>
               <span className="inline-flex items-center gap-1.5 text-emerald-700">
                 <Users className="w-3.5 h-3.5" />
-                {s.attendance_count || 0} حضور مسجل
-              </span>
+                {s.attendance_count || 0} {((t as any).extracted_2026_v2?.["حضور مسجل"] || "حضور مسجل")}</span>
             </div>
           </div>
         </div>
@@ -719,18 +709,17 @@ function PastSessionCard({ s, onDelete }: { s: SessionRow; onDelete: (id: string
           <Button asChild size="sm" variant="default" className="gap-1">
             <Link href={`/academy/teacher/sessions/${s.id}`}>
               <BarChart3 className="w-3.5 h-3.5" />
-              تقرير الحضور
-            </Link>
+              {((t as any).extracted_2026_v2?.["تقرير الحضور"] || "تقرير الحضور")}</Link>
           </Button>
           <Button
             size="icon"
             variant="ghost"
             onClick={() => onDelete(s.id)}
             className="text-destructive hover:bg-destructive/10"
-            title="حذف السجل"
+            title={((t as any).extracted_2026_v2?.["حذف السجل"] || "حذف السجل")}
           >
             <Trash2 className="w-4 h-4" />
-            <span className="sr-only">حذف السجل</span>
+            <span className="sr-only">{((t as any).extracted_2026_v2?.["حذف السجل"] || "حذف السجل")}</span>
           </Button>
         </div>
       </CardContent>
@@ -757,6 +746,8 @@ interface RatingSummary {
 }
 
 function MiniStars({ value }: { value: number | null }) {
+  const { t } = useI18n();
+
   if (value === null || value === undefined) return <span className="text-xs text-muted-foreground">—</span>
   return (
     <span className="inline-flex items-center gap-0.5" aria-label={`${value} من 5`}>
@@ -796,7 +787,7 @@ function SessionRatingsDialog({
     fetch(`/api/video/sessions/${sessionId}/ratings`)
       .then(async (res) => {
         const json = await res.json()
-        if (!res.ok) throw new Error(json.error || 'تعذّر تحميل التقييمات')
+        if (!res.ok) throw new Error(json.error || ((t as any).extracted_2026_v2?.["تعذّر تحميل التقييمات"] || "تعذّر تحميل التقييمات"))
         return json
       })
       .then((json) => {
@@ -821,8 +812,7 @@ function SessionRatingsDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <MessageSquare className="w-5 h-5 text-primary" />
-            تقييمات الطلاب
-          </DialogTitle>
+            {((t as any).extracted_2026_v2?.["تقييمات الطلاب"] || "تقييمات الطلاب")}</DialogTitle>
           <DialogDescription className="truncate">{title}</DialogDescription>
         </DialogHeader>
 
@@ -839,39 +829,35 @@ function SessionRatingsDialog({
               <div className="grid grid-cols-2 gap-2 rounded-lg border bg-muted/30 p-3 text-sm">
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-muted-foreground inline-flex items-center gap-1">
-                    <Star className="w-3.5 h-3.5" /> عام
-                  </span>
+                    <Star className="w-3.5 h-3.5" /> {((t as any).extracted_2026_v2?.["عام"] || "عام")}</span>
                   <MiniStars value={summary.avg_rating !== null ? Number(summary.avg_rating) : null} />
                 </div>
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-muted-foreground inline-flex items-center gap-1">
-                    <GraduationCap className="w-3.5 h-3.5" /> المعلّم
-                  </span>
+                    <GraduationCap className="w-3.5 h-3.5" /> {((t as any).extracted_2026_v2?.["المعلّم"] || "المعلّم")}</span>
                   <MiniStars value={summary.avg_teacher !== null ? Number(summary.avg_teacher) : null} />
                 </div>
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-muted-foreground inline-flex items-center gap-1">
-                    <Mic className="w-3.5 h-3.5" /> الصوت
-                  </span>
+                    <Mic className="w-3.5 h-3.5" /> {((t as any).extracted_2026_v2?.["الصوت"] || "الصوت")}</span>
                   <MiniStars value={summary.avg_audio !== null ? Number(summary.avg_audio) : null} />
                 </div>
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-muted-foreground inline-flex items-center gap-1">
-                    <Video className="w-3.5 h-3.5" /> الفيديو
-                  </span>
+                    <Video className="w-3.5 h-3.5" /> {((t as any).extracted_2026_v2?.["الفيديو"] || "الفيديو")}</span>
                   <MiniStars value={summary.avg_video !== null ? Number(summary.avg_video) : null} />
                 </div>
               </div>
             )}
 
             {details.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-4 text-center">لا توجد تقييمات بعد.</p>
+              <p className="text-sm text-muted-foreground py-4 text-center">{((t as any).extracted_2026_v2?.["لا توجد تقييمات بعد."] || "لا توجد تقييمات بعد.")}</p>
             ) : (
               <ul className="space-y-3">
                 {details.map((d, idx) => (
                   <li key={idx} className="rounded-lg border p-3 space-y-1.5">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="font-semibold text-sm truncate">{d.student_name || 'طالب'}</span>
+                      <span className="font-semibold text-sm truncate">{d.student_name || ((t as any).extracted_2026_v2?.["طالب"] || "طالب")}</span>
                       <MiniStars value={d.rating} />
                     </div>
                     {d.comment && (
@@ -887,8 +873,7 @@ function SessionRatingsDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            إغلاق
-          </Button>
+            {((t as any).extracted_2026_v2?.["إغلاق"] || "إغلاق")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -896,6 +881,8 @@ function SessionRatingsDialog({
 }
 
 function HistoryCard({ row }: { row: HistoryRow }) {
+  const { t } = useI18n();
+
   const [ratingsOpen, setRatingsOpen] = useState(false)
   return (
     <Card className="hover:shadow-md transition-shadow">
@@ -908,8 +895,7 @@ function HistoryCard({ row }: { row: HistoryRow }) {
             </span>
             {!row.ended_at && (
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 animate-pulse">
-                مباشر الآن
-              </span>
+                {((t as any).extracted_2026_v2?.["مباشر الآن"] || "مباشر الآن")}</span>
             )}
           </div>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
@@ -923,7 +909,7 @@ function HistoryCard({ row }: { row: HistoryRow }) {
             </span>
             <span className="inline-flex items-center gap-1">
               <Users className="w-3.5 h-3.5" />
-              {row.participants_count} (ذروة {row.peak_participants})
+              {row.participants_count} {((t as any).extracted_2026_v2?.["(ذروة"] || "(ذروة")}{row.peak_participants})
             </span>
           </div>
           <Stars value={row.avg_rating !== null ? Number(row.avg_rating) : null} />
@@ -933,12 +919,11 @@ function HistoryCard({ row }: { row: HistoryRow }) {
             <VideoPlayerModal url={row.recording_url} title={row.title || KIND_LABEL[row.kind] || row.kind}>
               <Button size="sm" variant="outline" className="gap-1">
                 <PlayCircle className="w-4 h-4" />
-                شاهد التسجيل
-              </Button>
+                {((t as any).extracted_2026_v2?.["شاهد التسجيل"] || "شاهد التسجيل")}</Button>
             </VideoPlayerModal>
           ) : (
             <span className="text-[11px] text-muted-foreground">
-              {row.recording_status === 'recording' ? 'جاري التسجيل...' : 'لا يوجد تسجيل'}
+              {row.recording_status === 'recording' ? ((t as any).extracted_2026_v2?.["جاري التسجيل..."] || "جاري التسجيل...") : ((t as any).extracted_2026_v2?.["لا يوجد تسجيل"] || "لا يوجد تسجيل")}
             </span>
           )}
           {row.ratings_count > 0 && (
@@ -954,7 +939,7 @@ function HistoryCard({ row }: { row: HistoryRow }) {
           )}
           {row.kind === 'course_session' && (
             <Button asChild size="sm" variant="ghost" className="gap-1">
-              <Link href={`/academy/teacher/sessions/${row.ref_id}`}>تفاصيل الدرس</Link>
+              <Link href={`/academy/teacher/sessions/${row.ref_id}`}>{((t as any).extracted_2026_v2?.["تفاصيل الدرس"] || "تفاصيل الدرس")}</Link>
             </Button>
           )}
         </div>
@@ -1050,7 +1035,7 @@ function RecordingCard({ r, onDelete }: { r: RecordingRow; onDelete: (id: string
           variant="destructive"
           onClick={() => setConfirmOpen(true)}
           className="absolute top-2 left-2 h-8 w-8 opacity-90 hover:opacity-100 shadow-md"
-          aria-label="حذف التسجيل"
+          aria-label={((t as any).extracted_2026_v2?.["حذف التسجيل"] || "حذف التسجيل")}
         >
           <Trash2 className="w-4 h-4" />
         </Button>
@@ -1059,19 +1044,16 @@ function RecordingCard({ r, onDelete }: { r: RecordingRow; onDelete: (id: string
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent dir="rtl">
           <DialogHeader>
-            <DialogTitle>حذف التسجيل</DialogTitle>
+            <DialogTitle>{((t as any).extracted_2026_v2?.["حذف التسجيل"] || "حذف التسجيل")}</DialogTitle>
             <DialogDescription>
-              سيتم حذف هذا التسجيل نهائياً من التخزين ولن يمكن استرجاعه. هل أنت متأكد؟
-            </DialogDescription>
+              {((t as any).extracted_2026_v2?.["سيتم حذف هذا التسجيل نهائياً من التخزين ولن يمكن استرجاعه. هل أنت متأكد؟"] || "سيتم حذف هذا التسجيل نهائياً من التخزين ولن يمكن استرجاعه. هل أنت متأكد؟")}</DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-2">
             <Button variant="outline" onClick={() => setConfirmOpen(false)} disabled={deleting}>
-              إلغاء
-            </Button>
+              {((t as any).extracted_2026_v2?.["إلغاء"] || "إلغاء")}</Button>
             <Button variant="destructive" onClick={handleDelete} disabled={deleting} className="gap-2">
               {deleting && <Loader2 className="w-4 h-4 animate-spin" />}
-              حذف نهائي
-            </Button>
+              {((t as any).extracted_2026_v2?.["حذف نهائي"] || "حذف نهائي")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -1095,11 +1077,10 @@ function RecordingCard({ r, onDelete }: { r: RecordingRow; onDelete: (id: string
           <VideoPlayerModal url={r.recording_url} title={title}>
             <button className="text-sm text-primary hover:underline font-medium inline-flex items-center gap-1">
               <PlayCircle className="w-4 h-4" />
-              مشاهدة التسجيل
-            </button>
+              {((t as any).extracted_2026_v2?.["مشاهدة التسجيل"] || "مشاهدة التسجيل")}</button>
           </VideoPlayerModal>
         ) : (
-          <span className="text-xs text-muted-foreground">لا يوجد رابط</span>
+          <span className="text-xs text-muted-foreground">{((t as any).extracted_2026_v2?.["لا يوجد رابط"] || "لا يوجد رابط")}</span>
         )}
       </CardContent>
     </Card>
@@ -1117,6 +1098,8 @@ function EmptyState({
   body: string
   action?: React.ReactNode
 }) {
+  const { t } = useI18n();
+
   return (
     <Card className="border-dashed">
       <CardContent className="py-14 text-center space-y-3">
@@ -1132,6 +1115,8 @@ function EmptyState({
 }
 
 function SessionSkeletons() {
+  const { t } = useI18n();
+
   return (
     <div className="space-y-3">
       {[1, 2, 3].map((i) => (
@@ -1224,11 +1209,11 @@ function SessionDialog({
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!courseId || !title) {
-      toast.error('يرجى اختيار الدورة وإدخال عنوان الجلسة')
+      toast.error(((t as any).extracted_2026_v2?.["يرجى اختيار الدورة وإدخال عنوان الجلسة"] || "يرجى اختيار الدورة وإدخال عنوان الجلسة"))
       return
     }
     if (!isInstant && (!date || !time)) {
-      toast.error('يرجى تحديد تاريخ ووقت الجلسة')
+      toast.error(((t as any).extracted_2026_v2?.["يرجى تحديد تاريخ ووقت الجلسة"] || "يرجى تحديد تاريخ ووقت الجلسة"))
       return
     }
 
@@ -1258,7 +1243,7 @@ function SessionDialog({
 
       if (!res.ok) {
         const d = await res.json().catch(() => ({}))
-        toast.error(d.error || 'تعذّر حفظ الجلسة')
+        toast.error(d.error || ((t as any).extracted_2026_v2?.["تعذّر حفظ الجلسة"] || "تعذّر حفظ الجلسة"))
         return
       }
 
@@ -1268,13 +1253,13 @@ function SessionDialog({
 
       if (isInstant) {
         const newId = data?.data?.id
-        toast.success('تم إنشاء البث، جاري فتح الغرفة...')
+        toast.success(((t as any).extracted_2026_v2?.["تم إنشاء البث، جاري فتح الغرفة..."] || "تم إنشاء البث، جاري فتح الغرفة..."))
         if (newId) onStartedNow(newId)
       } else {
-        toast.success(editing ? 'تم تعديل الجلسة' : 'تمت جدولة الجلسة')
+        toast.success(editing ? ((t as any).extracted_2026_v2?.["تم تعديل الجلسة"] || "تم تعديل الجلسة") : ((t as any).extracted_2026_v2?.["تمت جدولة الجلسة"] || "تمت جدولة الجلسة"))
       }
     } catch {
-      toast.error('فشل الاتصال بالخادم')
+      toast.error(((t as any).extracted_2026_v2?.["فشل الاتصال بالخادم"] || "فشل الاتصال بالخادم"))
     } finally {
       setSubmitting(false)
     }
@@ -1285,12 +1270,12 @@ function SessionDialog({
       <DialogContent className="sm:max-w-[560px] max-h-[90vh] overflow-y-auto" dir="rtl">
         <DialogHeader>
           <DialogTitle className="text-xl">
-            {editing ? 'تعديل بيانات الجلسة' : 'بث مباشر جديد'}
+            {editing ? ((t as any).extracted_2026_v2?.["تعديل بيانات الجلسة"] || "تعديل بيانات الجلسة") : ((t as any).extracted_2026_v2?.["بث مباشر جديد"] || "بث مباشر جديد")}
           </DialogTitle>
           <DialogDescription>
             {editing
-              ? 'حدّث تفاصيل الجلسة المجدولة.'
-              : 'ابدأ بثاً فورياً يفتح غرفة مباشرة الآن، أو جدول جلسة لوقت لاحق.'}
+              ? ((t as any).extracted_2026_v2?.["حدّث تفاصيل الجلسة المجدولة."] || "حدّث تفاصيل الجلسة المجدولة.")
+              : ((t as any).extracted_2026_v2?.["ابدأ بثاً فورياً يفتح غرفة مباشرة الآن، أو جدول جلسة لوقت لاحق."] || "ابدأ بثاً فورياً يفتح غرفة مباشرة الآن، أو جدول جلسة لوقت لاحق.")}
           </DialogDescription>
         </DialogHeader>
 
@@ -1306,8 +1291,7 @@ function SessionDialog({
                 }`}
               >
                 <Zap className="w-4 h-4" />
-                ابدأ الآن
-              </button>
+                {((t as any).extracted_2026_v2?.["ابدأ الآن"] || "ابدأ الآن")}</button>
               <button
                 type="button"
                 onClick={() => setMode('schedule')}
@@ -1316,14 +1300,13 @@ function SessionDialog({
                 }`}
               >
                 <CalendarClock className="w-4 h-4" />
-                جدولة لاحقاً
-              </button>
+                {((t as any).extracted_2026_v2?.["جدولة لاحقاً"] || "جدولة لاحقاً")}</button>
             </div>
           )}
 
           <div className="space-y-2">
             <Label htmlFor="course">
-              الدورة التدريبية <span className="text-destructive">*</span>
+              {((t as any).extracted_2026_v2?.["الدورة التدريبية"] || "الدورة التدريبية")}<span className="text-destructive">*</span>
             </Label>
             <select
               id="course"
@@ -1333,7 +1316,7 @@ function SessionDialog({
               required
             >
               <option value="" disabled>
-                {courses.length === 0 ? 'لا توجد دورات متاحة' : 'اختر الدورة...'}
+                {courses.length === 0 ? ((t as any).extracted_2026_v2?.["لا توجد دورات متاحة"] || "لا توجد دورات متاحة") : ((t as any).extracted_2026_v2?.["اختر الدورة..."] || "اختر الدورة...")}
               </option>
               {courses.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -1345,7 +1328,7 @@ function SessionDialog({
 
           <div className="space-y-2">
             <Label htmlFor="title">
-              عنوان الجلسة <span className="text-destructive">*</span>
+              {((t as any).extracted_2026_v2?.["عنوان الجلسة"] || "عنوان الجلسة")}<span className="text-destructive">*</span>
             </Label>
             <Input
               id="title"
@@ -1353,7 +1336,7 @@ function SessionDialog({
               onChange={(e) => setTitle(e.target.value)}
               required
               className="h-11"
-              placeholder="مثال: مراجعة الوحدة الأولى وتطبيقات عملية"
+              placeholder={((t as any).extracted_2026_v2?.["مثال: مراجعة الوحدة الأولى وتطبيقات عملية"] || "مثال: مراجعة الوحدة الأولى وتطبيقات عملية")}
             />
           </div>
 
@@ -1361,13 +1344,13 @@ function SessionDialog({
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="date">
-                  التاريخ <span className="text-destructive">*</span>
+                  {((t as any).extracted_2026_v2?.["التاريخ"] || "التاريخ")}<span className="text-destructive">*</span>
                 </Label>
                 <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="h-11" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="time">
-                  الوقت <span className="text-destructive">*</span>
+                  {((t as any).extracted_2026_v2?.["الوقت"] || "الوقت")}<span className="text-destructive">*</span>
                 </Label>
                 <Input id="time" type="time" value={time} onChange={(e) => setTime(e.target.value)} className="h-11" />
               </div>
@@ -1376,7 +1359,7 @@ function SessionDialog({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="duration">المدة (دقيقة)</Label>
+              <Label htmlFor="duration">{((t as any).extracted_2026_v2?.["المدة (دقيقة)"] || "المدة (دقيقة)")}</Label>
               <Input
                 id="duration"
                 type="number"
@@ -1388,7 +1371,7 @@ function SessionDialog({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="max">عدد الطلاب (الحد الأقصى)</Label>
+              <Label htmlFor="max">{((t as any).extracted_2026_v2?.["عدد الطلاب (الحد الأقصى)"] || "عدد الطلاب (الحد الأقصى)")}</Label>
               <Input
                 id="max"
                 type="number"
@@ -1402,13 +1385,13 @@ function SessionDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="desc">محاور الجلسة (اختياري)</Label>
+            <Label htmlFor="desc">{((t as any).extracted_2026_v2?.["محاور الجلسة (اختياري)"] || "محاور الجلسة (اختياري)")}</Label>
             <Input
               id="desc"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="h-11"
-              placeholder="نبذة عمّا سيتم تغطيته"
+              placeholder={((t as any).extracted_2026_v2?.["نبذة عمّا سيتم تغطيته"] || "نبذة عمّا سيتم تغطيته")}
             />
           </div>
 
@@ -1418,8 +1401,8 @@ function SessionDialog({
               <div className="flex items-start gap-2">
                 <Megaphone className="w-4 h-4 text-primary mt-0.5" />
                 <div>
-                  <div className="text-sm font-bold">إشعار الطلاب</div>
-                  <p className="text-xs text-muted-foreground">تنبيه جميع المسجلين في الدورة بهذه الجلسة</p>
+                  <div className="text-sm font-bold">{((t as any).extracted_2026_v2?.["إشعار الطلاب"] || "إشعار الطلاب")}</div>
+                  <p className="text-xs text-muted-foreground">{((t as any).extracted_2026_v2?.["تنبيه جميع المسجلين في الدورة بهذه الجلسة"] || "تنبيه جميع المسجلين في الدورة بهذه الجلسة")}</p>
                 </div>
               </div>
               <Switch checked={announce} onCheckedChange={setAnnounce} />
@@ -1430,8 +1413,8 @@ function SessionDialog({
                 <div className="flex items-start gap-2">
                   <Globe2 className="w-4 h-4 text-emerald-600 mt-0.5" />
                   <div>
-                    <div className="text-sm font-bold">جلسة عامة</div>
-                    <p className="text-xs text-muted-foreground">إنشاء رابط للدخول كضيف بدون تسجيل</p>
+                    <div className="text-sm font-bold">{((t as any).extracted_2026_v2?.["جلسة عامة"] || "جلسة عامة")}</div>
+                    <p className="text-xs text-muted-foreground">{((t as any).extracted_2026_v2?.["إنشاء رابط للدخول كضيف بدون تسجيل"] || "إنشاء رابط للدخول كضيف بدون تسجيل")}</p>
                   </div>
                 </div>
                 <Switch checked={isPublic} onCheckedChange={setIsPublic} />
@@ -1440,7 +1423,7 @@ function SessionDialog({
                 <Input
                   value={seriesTitle}
                   onChange={(e) => setSeriesTitle(e.target.value)}
-                  placeholder="اسم السلسلة / التصنيف (اختياري)"
+                  placeholder={((t as any).extracted_2026_v2?.["اسم السلسلة / التصنيف (اختياري)"] || "اسم السلسلة / التصنيف (اختياري)")}
                   className="h-10 text-sm"
                 />
               )}
@@ -1449,15 +1432,13 @@ function SessionDialog({
             <div className="flex items-start gap-2 p-4 bg-muted/30">
               <Video className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" />
               <p className="text-xs text-muted-foreground">
-                يتم تسجيل الجلسة تلقائياً وحفظها في "التسجيلات" عند تفعيل خاصية التسجيل من إعدادات الأكاديمية.
-              </p>
+                {((t as any).extracted_2026_v2?.["يتم تسجيل الجلسة تلقائياً وحفظها في \"التسجيلات\" عند تفعيل خاصية التسجيل من إعدادات الأكاديمية."] || "يتم تسجيل الجلسة تلقائياً وحفظها في \"التسجيلات\" عند تفعيل خاصية التسجيل من إعدادات الأكاديمية.")}</p>
             </div>
           </div>
 
           <DialogFooter className="gap-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              إلغاء
-            </Button>
+              {((t as any).extracted_2026_v2?.["إلغاء"] || "إلغاء")}</Button>
             <Button type="submit" disabled={submitting} className="min-w-[140px] gap-2">
               {submitting ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -1466,7 +1447,7 @@ function SessionDialog({
               ) : (
                 <CalendarClock className="w-4 h-4" />
               )}
-              {submitting ? 'جاري الحفظ...' : editing ? 'حفظ التعديلات' : isInstant ? 'ابدأ البث الآن' : 'جدولة الجلسة'}
+              {submitting ? ((t as any).extracted_2026_v2?.["جاري الحفظ..."] || "جاري الحفظ...") : editing ? ((t as any).extracted_2026_v2?.["حفظ التعديلات"] || "حفظ التعديلات") : isInstant ? ((t as any).extracted_2026_v2?.["ابدأ البث الآن"] || "ابدأ البث الآن") : ((t as any).extracted_2026_v2?.["جدولة الجلسة"] || "جدولة الجلسة")}
             </Button>
           </DialogFooter>
         </form>

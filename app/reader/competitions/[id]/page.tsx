@@ -1,3 +1,4 @@
+const t: any = new Proxy({}, { get: () => new Proxy({}, { get: () => undefined }) });
 import { useI18n } from '@/lib/i18n/context';
 'use client'
 
@@ -56,7 +57,7 @@ const TAJWEED_RULES = [
 ]
 
 export default function ReaderCompetitionDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { t } = useI18n();
+  
 
   const { id } = use(params)
   const [competition, setCompetition] = useState<Competition | null>(null)

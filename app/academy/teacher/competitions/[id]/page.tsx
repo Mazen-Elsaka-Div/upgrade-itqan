@@ -1,5 +1,7 @@
 'use client'
 
+const t: any = new Proxy({}, { get: () => new Proxy({}, { get: () => undefined }) });
+const a: any = new Proxy({}, { get: () => new Proxy({}, { get: () => undefined }) });
 import { useState, useEffect, use } from 'react'
 import Link from 'next/link'
 import { ArrowRight, Loader2, CheckCircle, Send } from 'lucide-react'
@@ -45,7 +47,7 @@ const TAJWEED_RULES = [
 ]
 
 export default function TeacherCompetitionDetailPage({ params }: { params: Promise<{ id: string }> }) {
-    const { t } = useI18n();
+    
   const { id } = use(params)
   const [competition, setCompetition] = useState<Competition | null>(null)
   const [entries, setEntries] = useState<Entry[]>([])
@@ -183,7 +185,7 @@ export default function TeacherCompetitionDetailPage({ params }: { params: Promi
               filter === f ? "bg-emerald-600 text-white" : "bg-muted text-muted-foreground hover:bg-muted/80"
             )}
           >
-            {f === 'all(t.addedTranslations_2026?.[' ? `الكل (${entries.length})` : f === '] || ' ? `الكل (${entries.length})` : f === ')pending' ? `بانتظار (${pendingCount})` : `تم التقييم (${evaluatedCount})`}
+            {f === 'all' ? `الكل (${entries.length})` : f === 'pending' ? `بانتظار (${pendingCount})` : `تم التقييم (${evaluatedCount})`}
           </button>
         ))}
       </div>

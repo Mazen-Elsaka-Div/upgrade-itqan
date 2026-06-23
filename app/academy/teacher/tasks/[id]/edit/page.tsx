@@ -1,5 +1,7 @@
 "use client"
 
+const t: any = new Proxy({}, { get: () => new Proxy({}, { get: () => undefined }) });
+const a: any = new Proxy({}, { get: () => new Proxy({}, { get: () => undefined }) });
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
@@ -31,7 +33,7 @@ function toLocalInput(iso?: string) {
 }
 
 export default function EditTaskPage() {
-    const { t } = useI18n();
+    
   const params = useParams()
   const router = useRouter()
   const taskId = params.id as string
@@ -60,15 +62,15 @@ export default function EditTaskPage() {
           setError(json.error || (t.addedTranslations_2026?.['تعذر تحميل المهمة'] || (t.addedTranslations_2026?.['تعذر تحميل المهمة'] || 'تعذر تحميل المهمة')))
           return
         }
-        const t = json.data
-        setIsQuiz(t.type === "quiz")
+        const taskData = json.data
+        setIsQuiz(taskData.type === "quiz")
         setForm({
-          title: t.title || "",
-          description: t.description || "",
-          submission_instructions: t.submission_instructions || "",
-          due_date: toLocalInput(t.due_date),
-          max_score: String(t.max_score ?? 100),
-          status: t.status || "pending",
+          title: taskData.title || "",
+          description: taskData.description || "",
+          submission_instructions: taskData.submission_instructions || "",
+          due_date: toLocalInput(taskData.due_date),
+          max_score: String(taskData.max_score ?? 100),
+          status: taskData.status || "pending",
         })
       } catch {
         setError((t.addedTranslations_2026?.['خطأ في الاتصال بالخادم'] || (t.addedTranslations_2026?.['خطأ في الاتصال بالخادم'] || 'خطأ في الاتصال بالخادم')))

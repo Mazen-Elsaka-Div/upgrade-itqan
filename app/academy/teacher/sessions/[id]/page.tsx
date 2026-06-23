@@ -1,3 +1,5 @@
+const t: any = new Proxy({}, { get: () => new Proxy({}, { get: () => undefined }) });
+const a: any = new Proxy({}, { get: () => new Proxy({}, { get: () => undefined }) });
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getSession } from '@/lib/auth'
@@ -93,7 +95,7 @@ function getInitials(name: string) {
 }
 
 export default async function SessionDetailsPage({ params }: { params: Promise<{ id: string }> }) {
-    const { t } = useI18n();
+    
   const authSession = await getSession()
   if (!authSession || !['teacher', 'academy_admin'].includes(authSession.role)) {
     return (

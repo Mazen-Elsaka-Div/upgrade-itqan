@@ -13,32 +13,32 @@ import { PageLoadingSkeleton } from "@/components/ui/page-loading-skeleton"
 
 // Major Arab/Islamic cities for prayer times
 const PRAYER_CITIES = [
-  { value: 'Makkah',     countryAr: (t.addedTranslations_2026?.['المملكة العربية السعودية'] || 'المملكة العربية السعودية'), countryEn: 'Saudi Arabia', labelAr: (t.addedTranslations_2026?.['مكة المكرمة'] || 'مكة المكرمة'), labelEn: 'Makkah' },
-  { value: 'Madinah',    countryAr: (t.addedTranslations_2026?.['المملكة العربية السعودية'] || 'المملكة العربية السعودية'), countryEn: 'Saudi Arabia', labelAr: (t.addedTranslations_2026?.['المدينة المنورة'] || 'المدينة المنورة'), labelEn: 'Madinah' },
-  { value: 'Riyadh',     countryAr: (t.addedTranslations_2026?.['المملكة العربية السعودية'] || 'المملكة العربية السعودية'), countryEn: 'Saudi Arabia', labelAr: (t.addedTranslations_2026?.['الرياض'] || 'الرياض'), labelEn: 'Riyadh' },
-  { value: 'Jeddah',     countryAr: (t.addedTranslations_2026?.['المملكة العربية السعودية'] || 'المملكة العربية السعودية'), countryEn: 'Saudi Arabia', labelAr: (t.addedTranslations_2026?.['جدة'] || 'جدة'), labelEn: 'Jeddah' },
-  { value: 'Dammam',     countryAr: (t.addedTranslations_2026?.['المملكة العربية السعودية'] || 'المملكة العربية السعودية'), countryEn: 'Saudi Arabia', labelAr: (t.addedTranslations_2026?.['الدمام'] || 'الدمام'), labelEn: 'Dammam' },
-  { value: 'Cairo',      countryAr: (t.addedTranslations_2026?.['مصر'] || 'مصر'),        countryEn: 'Egypt',        labelAr: (t.addedTranslations_2026?.['القاهرة'] || 'القاهرة'), labelEn: 'Cairo' },
-  { value: 'Alexandria', countryAr: (t.addedTranslations_2026?.['مصر'] || 'مصر'),        countryEn: 'Egypt',        labelAr: (t.addedTranslations_2026?.['الإسكندرية'] || 'الإسكندرية'), labelEn: 'Alexandria' },
-  { value: 'Giza',       countryAr: (t.addedTranslations_2026?.['مصر'] || 'مصر'),        countryEn: 'Egypt',        labelAr: (t.addedTranslations_2026?.['الجيزة'] || 'الجيزة'), labelEn: 'Giza' },
-  { value: 'Dubai',      countryAr: (t.addedTranslations_2026?.['الإمارات'] || 'الإمارات'),   countryEn: 'UAE',          labelAr: (t.addedTranslations_2026?.['دبي'] || 'دبي'), labelEn: 'Dubai' },
-  { value: 'Abu Dhabi',  countryAr: (t.addedTranslations_2026?.['الإمارات'] || 'الإمارات'),   countryEn: 'UAE',          labelAr: (t.addedTranslations_2026?.['أبوظبي'] || 'أبوظبي'), labelEn: 'Abu Dhabi' },
-  { value: 'Kuwait City',countryAr: (t.addedTranslations_2026?.['الكويت'] || 'الكويت'),     countryEn: 'Kuwait',       labelAr: (t.addedTranslations_2026?.['الكويت'] || 'الكويت'), labelEn: 'Kuwait City' },
-  { value: 'Doha',       countryAr: (t.addedTranslations_2026?.['قطر'] || 'قطر'),        countryEn: 'Qatar',        labelAr: (t.addedTranslations_2026?.['الدوحة'] || 'الدوحة'), labelEn: 'Doha' },
-  { value: 'Manama',     countryAr: (t.addedTranslations_2026?.['البحرين'] || 'البحرين'),    countryEn: 'Bahrain',      labelAr: (t.addedTranslations_2026?.['المنامة'] || 'المنامة'), labelEn: 'Manama' },
-  { value: 'Muscat',     countryAr: (t.addedTranslations_2026?.['عمان'] || 'عمان'),       countryEn: 'Oman',         labelAr: (t.addedTranslations_2026?.['مسقط'] || 'مسقط'), labelEn: 'Muscat' },
-  { value: 'Amman',      countryAr: (t.addedTranslations_2026?.['الأردن'] || 'الأردن'),     countryEn: 'Jordan',       labelAr: (t.addedTranslations_2026?.['عمّان'] || 'عمّان'), labelEn: 'Amman' },
-  { value: 'Beirut',     countryAr: (t.addedTranslations_2026?.['لبنان'] || 'لبنان'),      countryEn: 'Lebanon',      labelAr: (t.addedTranslations_2026?.['بيروت'] || 'بيروت'), labelEn: 'Beirut' },
-  { value: 'Damascus',   countryAr: (t.addedTranslations_2026?.['سوريا'] || 'سوريا'),      countryEn: 'Syria',        labelAr: (t.addedTranslations_2026?.['دمشق'] || 'دمشق'), labelEn: 'Damascus' },
-  { value: 'Baghdad',    countryAr: (t.addedTranslations_2026?.['العراق'] || 'العراق'),     countryEn: 'Iraq',         labelAr: (t.addedTranslations_2026?.['بغداد'] || 'بغداد'), labelEn: 'Baghdad' },
-  { value: 'Tunis',      countryAr: (t.addedTranslations_2026?.['تونس'] || 'تونس'),       countryEn: 'Tunisia',      labelAr: (t.addedTranslations_2026?.['تونس'] || 'تونس'), labelEn: 'Tunis' },
-  { value: 'Algiers',    countryAr: (t.addedTranslations_2026?.['الجزائر'] || 'الجزائر'),    countryEn: 'Algeria',      labelAr: (t.addedTranslations_2026?.['الجزائر'] || 'الجزائر'), labelEn: 'Algiers' },
-  { value: 'Casablanca', countryAr: (t.addedTranslations_2026?.['المغرب'] || 'المغرب'),     countryEn: 'Morocco',      labelAr: (t.addedTranslations_2026?.['الدار البيضاء'] || 'الدار البيضاء'), labelEn: 'Casablanca' },
-  { value: 'Rabat',      countryAr: (t.addedTranslations_2026?.['المغرب'] || 'المغرب'),     countryEn: 'Morocco',      labelAr: (t.addedTranslations_2026?.['الرباط'] || 'الرباط'), labelEn: 'Rabat' },
-  { value: 'Khartoum',   countryAr: (t.addedTranslations_2026?.['السودان'] || 'السودان'),    countryEn: 'Sudan',        labelAr: (t.addedTranslations_2026?.['الخرطوم'] || 'الخرطوم'), labelEn: 'Khartoum' },
-  { value: 'Istanbul',   countryAr: (t.addedTranslations_2026?.['تركيا'] || 'تركيا'),      countryEn: 'Turkey',       labelAr: (t.addedTranslations_2026?.['إسطنبول'] || 'إسطنبول'), labelEn: 'Istanbul' },
-  { value: 'London',     countryAr: (t.addedTranslations_2026?.['المملكة المتحدة'] || 'المملكة المتحدة'), countryEn: 'United Kingdom', labelAr: (t.addedTranslations_2026?.['لندن'] || 'لندن'), labelEn: 'London' },
-  { value: 'Paris',      countryAr: (t.addedTranslations_2026?.['فرنسا'] || 'فرنسا'),      countryEn: 'France',       labelAr: (t.addedTranslations_2026?.['باريس'] || 'باريس'), labelEn: 'Paris' },
+  { value: 'Makkah',     countryAr: 'المملكة العربية السعودية', countryEn: 'Saudi Arabia', labelAr: 'مكة المكرمة', labelEn: 'Makkah' },
+  { value: 'Madinah',    countryAr: 'المملكة العربية السعودية', countryEn: 'Saudi Arabia', labelAr: 'المدينة المنورة', labelEn: 'Madinah' },
+  { value: 'Riyadh',     countryAr: 'المملكة العربية السعودية', countryEn: 'Saudi Arabia', labelAr: 'الرياض', labelEn: 'Riyadh' },
+  { value: 'Jeddah',     countryAr: 'المملكة العربية السعودية', countryEn: 'Saudi Arabia', labelAr: 'جدة', labelEn: 'Jeddah' },
+  { value: 'Dammam',     countryAr: 'المملكة العربية السعودية', countryEn: 'Saudi Arabia', labelAr: 'الدمام', labelEn: 'Dammam' },
+  { value: 'Cairo',      countryAr: 'مصر',        countryEn: 'Egypt',        labelAr: 'القاهرة', labelEn: 'Cairo' },
+  { value: 'Alexandria', countryAr: 'مصر',        countryEn: 'Egypt',        labelAr: 'الإسكندرية', labelEn: 'Alexandria' },
+  { value: 'Giza',       countryAr: 'مصر',        countryEn: 'Egypt',        labelAr: 'الجيزة', labelEn: 'Giza' },
+  { value: 'Dubai',      countryAr: 'الإمارات',   countryEn: 'UAE',          labelAr: 'دبي', labelEn: 'Dubai' },
+  { value: 'Abu Dhabi',  countryAr: 'الإمارات',   countryEn: 'UAE',          labelAr: 'أبوظبي', labelEn: 'Abu Dhabi' },
+  { value: 'Kuwait City',countryAr: 'الكويت',     countryEn: 'Kuwait',       labelAr: 'الكويت', labelEn: 'Kuwait City' },
+  { value: 'Doha',       countryAr: 'قطر',        countryEn: 'Qatar',        labelAr: 'الدوحة', labelEn: 'Doha' },
+  { value: 'Manama',     countryAr: 'البحرين',    countryEn: 'Bahrain',      labelAr: 'المنامة', labelEn: 'Manama' },
+  { value: 'Muscat',     countryAr: 'عمان',       countryEn: 'Oman',         labelAr: 'مسقط', labelEn: 'Muscat' },
+  { value: 'Amman',      countryAr: 'الأردن',     countryEn: 'Jordan',       labelAr: 'عمّان', labelEn: 'Amman' },
+  { value: 'Beirut',     countryAr: 'لبنان',      countryEn: 'Lebanon',      labelAr: 'بيروت', labelEn: 'Beirut' },
+  { value: 'Damascus',   countryAr: 'سوريا',      countryEn: 'Syria',        labelAr: 'دمشق', labelEn: 'Damascus' },
+  { value: 'Baghdad',    countryAr: 'العراق',     countryEn: 'Iraq',         labelAr: 'بغداد', labelEn: 'Baghdad' },
+  { value: 'Tunis',      countryAr: 'تونس',       countryEn: 'Tunisia',      labelAr: 'تونس', labelEn: 'Tunis' },
+  { value: 'Algiers',    countryAr: 'الجزائر',    countryEn: 'Algeria',      labelAr: 'الجزائر', labelEn: 'Algiers' },
+  { value: 'Casablanca', countryAr: 'المغرب',     countryEn: 'Morocco',      labelAr: 'الدار البيضاء', labelEn: 'Casablanca' },
+  { value: 'Rabat',      countryAr: 'المغرب',     countryEn: 'Morocco',      labelAr: 'الرباط', labelEn: 'Rabat' },
+  { value: 'Khartoum',   countryAr: 'السودان',    countryEn: 'Sudan',        labelAr: 'الخرطوم', labelEn: 'Khartoum' },
+  { value: 'Istanbul',   countryAr: 'تركيا',      countryEn: 'Turkey',       labelAr: 'إسطنبول', labelEn: 'Istanbul' },
+  { value: 'London',     countryAr: 'المملكة المتحدة', countryEn: 'United Kingdom', labelAr: 'لندن', labelEn: 'London' },
+  { value: 'Paris',      countryAr: 'فرنسا',      countryEn: 'France',       labelAr: 'باريس', labelEn: 'Paris' },
 ]
 import { useI18n } from '@/lib/i18n/context'
 
@@ -172,12 +172,12 @@ export default function ProfilePage() {
   const [specSaving, setSpecSaving] = useState<string | null>(null)
 
   const SPECIALIZATIONS = [
-    { key: 'sira',    labelAr: (t.addedTranslations_2026?.['السيرة النبوية'] || 'السيرة النبوية'), labelEn: 'Prophetic Biography' },
-    { key: 'fiqh',    labelAr: (t.addedTranslations_2026?.['الفقه'] || 'الفقه'), labelEn: 'Jurisprudence (Fiqh)' },
-    { key: 'aqeedah', labelAr: (t.addedTranslations_2026?.['العقيدة'] || 'العقيدة'), labelEn: 'Creed (Aqeedah)' },
-    { key: 'tajweed', labelAr: (t.addedTranslations_2026?.['التجويد'] || 'التجويد'), labelEn: 'Tajweed' },
-    { key: 'tafseer', labelAr: (t.addedTranslations_2026?.['التفسير'] || 'التفسير'), labelEn: 'Interpretation (Tafseer)' },
-    { key: 'arabic',  labelAr: (t.addedTranslations_2026?.['اللغة العربية'] || 'اللغة العربية'), labelEn: 'Arabic Language' },
+    { key: 'sira',    labelAr: 'السيرة النبوية', labelEn: 'Prophetic Biography' },
+    { key: 'fiqh',    labelAr: 'الفقه', labelEn: 'Jurisprudence (Fiqh)' },
+    { key: 'aqeedah', labelAr: 'العقيدة', labelEn: 'Creed (Aqeedah)' },
+    { key: 'tajweed', labelAr: 'التجويد', labelEn: 'Tajweed' },
+    { key: 'tafseer', labelAr: 'التفسير', labelEn: 'Interpretation (Tafseer)' },
+    { key: 'arabic',  labelAr: 'اللغة العربية', labelEn: 'Arabic Language' },
   ]
 
   useEffect(() => {
@@ -241,7 +241,7 @@ export default function ProfilePage() {
               {t.profile.title}
             </div>
             <h1 className="text-3xl md:text-4xl font-black text-foreground tracking-tight leading-none">
-              {isAr ? (t.addedTranslations_2026?.['الملف الشخصي'] || 'الملف الشخصي') : "Student Profile"}
+              {isAr ? 'الملف الشخصي' : "Student Profile"}
             </h1>
             <p className="text-muted-foreground font-medium max-w-md">
               {t.profile.subtitle}
@@ -283,17 +283,17 @@ export default function ProfilePage() {
             <div className="bg-primary/5 border border-primary/10 p-6 rounded-3xl space-y-3 backdrop-blur-md">
               <h3 className="font-bold text-primary flex items-center gap-2 text-sm">
                 <CheckCircle className="w-4 h-4" />
-                {isAr ? (t.addedTranslations_2026?.['حساب موثق'] || 'حساب موثق') : "Verified Account"}
+                {isAr ? 'حساب موثق' : "Verified Account"}
               </h3>
               <p className="text-xs text-muted-foreground leading-relaxed font-bold">
-                {isAr ? (t.addedTranslations_2026?.['بياناتك الشخصية محمية ومشفرة. لا نشارك معلوماتك مع أي جهة خارجية.'] || 'بياناتك الشخصية محمية ومشفرة. لا نشارك معلوماتك مع أي جهة خارجية.') : "Your personal data is protected and encrypted. We do not share your information with third parties."}
+                {isAr ? 'بياناتك الشخصية محمية ومشفرة. لا نشارك معلوماتك مع أي جهة خارجية.' : "Your personal data is protected and encrypted. We do not share your information with third parties."}
               </p>
             </div>
 
             <div className="bg-card border border-border p-6 rounded-3xl space-y-4 backdrop-blur-md">
               <h3 className="font-bold flex items-center gap-2 text-sm">
                 <Award className="w-4 h-4 text-yellow-500" />
-                {isAr ? (t.addedTranslations_2026?.['الشارات العامة'] || 'الشارات العامة') : 'Public Badges'}
+                {isAr ? 'الشارات العامة' : 'Public Badges'}
               </h3>
               {earnedBadges.length > 0 ? (
                 <div className="grid grid-cols-4 gap-3">
@@ -313,7 +313,7 @@ export default function ProfilePage() {
                   ))}
                 </div>
               ) : (
-                <p className="text-xs text-muted-foreground">{isAr ? (t.addedTranslations_2026?.['لم تحصل على شارات بعد.'] || 'لم تحصل على شارات بعد.') : 'No earned badges yet.'}</p>
+                <p className="text-xs text-muted-foreground">{isAr ? 'لم تحصل على شارات بعد.' : 'No earned badges yet.'}</p>
               )}
             </div>
           </div>
@@ -363,11 +363,11 @@ export default function ProfilePage() {
                   <div className="space-y-2">
                     <Label className="text-xs font-bold text-muted-foreground uppercase tracking-widest px-1 flex items-center gap-1.5">
                       <MapPin className="w-3.5 h-3.5" />
-                      {isAr ? (t.addedTranslations_2026?.['مدينة مواقيت الصلاة'] || 'مدينة مواقيت الصلاة') : "Prayer Times City"}
+                      {isAr ? 'مدينة مواقيت الصلاة' : "Prayer Times City"}
                     </Label>
                     <Select value={city} onValueChange={setCity}>
                       <SelectTrigger className="h-12 border-border bg-muted/30 rounded-2xl focus:ring-2 focus:ring-primary/20 transition-all border font-medium">
-                        <SelectValue placeholder={isAr ? (t.addedTranslations_2026?.['اختر مدينتك...'] || 'اختر مدينتك...') : "Select your city..."} />
+                        <SelectValue placeholder={isAr ? 'اختر مدينتك...' : "Select your city..."} />
                       </SelectTrigger>
                       <SelectContent className="max-h-72">
                         {PRAYER_CITIES.map(c => (
@@ -379,14 +379,14 @@ export default function ProfilePage() {
                       </SelectContent>
                     </Select>
                     <p className="text-[10px] text-muted-foreground px-1">
-                      {isAr ? (t.addedTranslations_2026?.['ستُستخدم هذه المدينة لعرض مواقيت الصلاة الخاصة بك.'] || 'ستُستخدم هذه المدينة لعرض مواقيت الصلاة الخاصة بك.') : "This city will be used to show your prayer times."}
+                      {isAr ? 'ستُستخدم هذه المدينة لعرض مواقيت الصلاة الخاصة بك.' : "This city will be used to show your prayer times."}
                     </p>
                   </div>
 
                   {profile?.has_quran_access && profile?.has_academy_access && (
                     <div className="space-y-2">
                        <Label htmlFor="platform_preference" className="text-xs font-bold text-muted-foreground uppercase tracking-widest px-1">
-                         {isAr ? (t.addedTranslations_2026?.['المنصة المفضلة'] || 'المنصة المفضلة') : "Preferred Platform"}
+                         {isAr ? 'المنصة المفضلة' : "Preferred Platform"}
                        </Label>
                        <select 
                          id="platform_preference" 
@@ -394,9 +394,9 @@ export default function ProfilePage() {
                          onChange={e => setPlatformPreference(e.target.value)} 
                          className="w-full h-12 px-4 border-border bg-muted/30 rounded-2xl focus:ring-2 focus:ring-primary/20 transition-all border font-medium appearance-none"
                        >
-                         <option value="both">{isAr ? (t.addedTranslations_2026?.['الاثنان معاً'] || 'الاثنان معاً') : "Both"}</option>
-                         <option value="quran">{isAr ? (t.addedTranslations_2026?.['المقرأة'] || 'المقرأة') : "Quran Library"}</option>
-                         <option value="academy">{isAr ? (t.addedTranslations_2026?.['الأكاديمية'] || 'الأكاديمية') : "Academy"}</option>
+                         <option value="both">{isAr ? 'الاثنان معاً' : "Both"}</option>
+                         <option value="quran">{isAr ? 'المقرأة' : "Quran Library"}</option>
+                         <option value="academy">{isAr ? 'الأكاديمية' : "Academy"}</option>
                        </select>
                     </div>
                   )}
@@ -412,7 +412,7 @@ export default function ProfilePage() {
                       readOnly 
                     />
                     <p className="text-[10px] text-muted-foreground px-1 italic">
-                      {isAr ? (t.addedTranslations_2026?.['* لا يمكن تغيير البريد الإلكتروني حالياً لمعايير الأمان.'] || '* لا يمكن تغيير البريد الإلكتروني حالياً لمعايير الأمان.') : "* Email cannot be changed for security reasons."}
+                      {isAr ? '* لا يمكن تغيير البريد الإلكتروني حالياً لمعايير الأمان.' : "* Email cannot be changed for security reasons."}
                     </p>
                   </div>
 
@@ -443,11 +443,11 @@ export default function ProfilePage() {
                   </div>
                   <div>
                     <CardTitle className="text-lg font-bold text-foreground">
-                      {isAr ? (t.addedTranslations_2026?.['التخصصات الدراسية'] || 'التخصصات الدراسية') : "Academic Specializations"}
+                      {isAr ? 'التخصصات الدراسية' : "Academic Specializations"}
                     </CardTitle>
                     <CardDescription className="text-muted-foreground font-medium text-sm">
                       {isAr 
-                        ? (t.addedTranslations_2026?.['اختر التخصصات التي تريد أن تظهر لك الدورات المرتبطة بها. اتركها فارغة لعرض كل الدورات.'] || 'اختر التخصصات التي تريد أن تظهر لك الدورات المرتبطة بها. اتركها فارغة لعرض كل الدورات.') 
+                        ? 'اختر التخصصات التي تريد أن تظهر لك الدورات المرتبطة بها. اتركها فارغة لعرض كل الدورات.' 
                         : "Select the specializations you want to see associated courses for. Leave empty to show all courses."}
                     </CardDescription>
                   </div>
@@ -482,7 +482,7 @@ export default function ProfilePage() {
                             <Loader2 className="w-3.5 h-3.5 animate-spin" />
                           ) : active ? (
                             locked
-                              ? <span className="text-[10px] opacity-70">{isAr ? (t.addedTranslations_2026?.['مقيّد'] || 'مقيّد') : "Restricted"}</span>
+                              ? <span className="text-[10px] opacity-70">{isAr ? 'مقيّد' : "Restricted"}</span>
                               : <X className="w-3.5 h-3.5" />
                           ) : (
                             <Plus className="w-3.5 h-3.5" />
@@ -495,7 +495,7 @@ export default function ProfilePage() {
                 )}
                 {specs.length === 0 && !specsLoading && (
                   <p className="text-xs text-muted-foreground mt-4">
-                    {isAr ? (t.addedTranslations_2026?.['لم تختر أي تخصص — ستظهر لك جميع الدورات المتاحة.'] || 'لم تختر أي تخصص — ستظهر لك جميع الدورات المتاحة.') : "You have not selected any specializations — all available courses will be shown."}
+                    {isAr ? 'لم تختر أي تخصص — ستظهر لك جميع الدورات المتاحة.' : "You have not selected any specializations — all available courses will be shown."}
                   </p>
                 )}
               </CardContent>

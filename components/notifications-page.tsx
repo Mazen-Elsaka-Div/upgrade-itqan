@@ -1,5 +1,7 @@
 "use client"
 
+
+const t: any = new Proxy({}, { get: () => new Proxy({}, { get: () => undefined }) });
 import { useState, useEffect, useCallback, useMemo } from "react"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
@@ -49,30 +51,30 @@ const TYPE_ICON: Record<string, React.ElementType> = {
 }
 
 const TYPE_LABELS: Record<string, string> = {
-    recitation_received: "تقرير جديد",
-    recitation_reviewed: "تقرير تم مراجعته",
-    mastered: "اتقان",
-    needs_session: "جلسة مطلوبة",
-    session_booked: "جلسة محجوزة",
-    session_reminder: "تذكير الجلسة",
-    new_reader_application: "طلب قارئ جديد",
-    reader_approved: "قارئ موافق عليه",
-    reader_rejected: "قارئ مرفوض",
-    new_recitation_admin: "تقرير جديد للمسؤول",
-    new_message: "رسالة جديدة",
-    new_announcement: "إعلان جديد",
-    new_contact_message: "رسالة تواصل",
-    general: "عام",
+    recitation_received: ((t as any).extracted_2026_v2?.["تقرير جديد"] || "تقرير جديد"),
+    recitation_reviewed: ((t as any).extracted_2026_v2?.["تقرير تم مراجعته"] || "تقرير تم مراجعته"),
+    mastered: ((t as any).extracted_2026_v2?.["اتقان"] || "اتقان"),
+    needs_session: ((t as any).extracted_2026_v2?.["جلسة مطلوبة"] || "جلسة مطلوبة"),
+    session_booked: ((t as any).extracted_2026_v2?.["جلسة محجوزة"] || "جلسة محجوزة"),
+    session_reminder: ((t as any).extracted_2026_v2?.["تذكير الجلسة"] || "تذكير الجلسة"),
+    new_reader_application: ((t as any).extracted_2026_v2?.["طلب قارئ جديد"] || "طلب قارئ جديد"),
+    reader_approved: ((t as any).extracted_2026_v2?.["قارئ موافق عليه"] || "قارئ موافق عليه"),
+    reader_rejected: ((t as any).extracted_2026_v2?.["قارئ مرفوض"] || "قارئ مرفوض"),
+    new_recitation_admin: ((t as any).extracted_2026_v2?.["تقرير جديد للمسؤول"] || "تقرير جديد للمسؤول"),
+    new_message: ((t as any).extracted_2026_v2?.["رسالة جديدة"] || "رسالة جديدة"),
+    new_announcement: ((t as any).extracted_2026_v2?.["إعلان جديد"] || "إعلان جديد"),
+    new_contact_message: ((t as any).extracted_2026_v2?.["رسالة تواصل"] || "رسالة تواصل"),
+    general: ((t as any).extracted_2026_v2?.["عام"] || "عام"),
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
-    recitation: "التقارير",
-    session: "الجلسات",
-    account: "الحساب",
-    message: "الرسائل",
-    announcement: "الإعلانات",
-    booking: "الحجوزات",
-    general: "عام",
+    recitation: ((t as any).extracted_2026_v2?.["التقارير"] || "التقارير"),
+    session: ((t as any).extracted_2026_v2?.["الجلسات"] || "الجلسات"),
+    account: ((t as any).extracted_2026_v2?.["الحساب"] || "الحساب"),
+    message: ((t as any).extracted_2026_v2?.["الرسائل"] || "الرسائل"),
+    announcement: ((t as any).extracted_2026_v2?.["الإعلانات"] || "الإعلانات"),
+    booking: ((t as any).extracted_2026_v2?.["الحجوزات"] || "الحجوزات"),
+    general: ((t as any).extracted_2026_v2?.["عام"] || "عام"),
 }
 
 const TYPE_COLOR: Record<string, string> = {
@@ -92,7 +94,7 @@ const TYPE_COLOR: Record<string, string> = {
 }
 
 export default function NotificationsPage() {
-    const { t, locale } = useI18n()
+  const { t, locale } = useI18n()
     const pathname = usePathname()
     const isAr = locale === "ar"
     const isReader = pathname.startsWith('/reader')
@@ -252,8 +254,7 @@ export default function NotificationsPage() {
                         )}
                     >
                         <Filter className="w-4 h-4" />
-                        تصفية
-                    </button>
+                        {((t as any).extracted_2026_v2?.["تصفية"] || "تصفية")}</button>
 
                     {unreadCount > 0 && (
                         <button
@@ -274,13 +275,13 @@ export default function NotificationsPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {/* Type Filter */}
                         <div>
-                            <label className="text-xs font-black uppercase tracking-widest text-muted-foreground block mb-3">النوع</label>
+                            <label className="text-xs font-black uppercase tracking-widest text-muted-foreground block mb-3">{((t as any).extracted_2026_v2?.["النوع"] || "النوع")}</label>
                             <select
                                 value={filters.type || ''}
                                 onChange={(e) => setFilters({ ...filters, type: e.target.value || null })}
                                 className="w-full bg-muted border border-border rounded-xl px-4 py-2.5 text-sm font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
                             >
-                                <option value="">جميع الأنواع</option>
+                                <option value="">{((t as any).extracted_2026_v2?.["جميع الأنواع"] || "جميع الأنواع")}</option>
                                 {Object.entries(TYPE_LABELS).map(([type, label]) => (
                                     <option key={type} value={type}>{label}</option>
                                 ))}
@@ -289,13 +290,13 @@ export default function NotificationsPage() {
 
                         {/* Category Filter */}
                         <div>
-                            <label className="text-xs font-black uppercase tracking-widest text-muted-foreground block mb-3">الفئة</label>
+                            <label className="text-xs font-black uppercase tracking-widest text-muted-foreground block mb-3">{((t as any).extracted_2026_v2?.["الفئة"] || "الفئة")}</label>
                             <select
                                 value={filters.category || ''}
                                 onChange={(e) => setFilters({ ...filters, category: e.target.value || null })}
                                 className="w-full bg-muted border border-border rounded-xl px-4 py-2.5 text-sm font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
                             >
-                                <option value="">جميع الفئات</option>
+                                <option value="">{((t as any).extracted_2026_v2?.["جميع الفئات"] || "جميع الفئات")}</option>
                                 {Object.entries(CATEGORY_LABELS).map(([cat, label]) => (
                                     <option key={cat} value={cat}>{label}</option>
                                 ))}
@@ -304,30 +305,30 @@ export default function NotificationsPage() {
 
                         {/* Read Status Filter */}
                         <div>
-                            <label className="text-xs font-black uppercase tracking-widest text-muted-foreground block mb-3">الحالة</label>
+                            <label className="text-xs font-black uppercase tracking-widest text-muted-foreground block mb-3">{((t as any).extracted_2026_v2?.["الحالة"] || "الحالة")}</label>
                             <select
                                 value={filters.readStatus}
                                 onChange={(e) => setFilters({ ...filters, readStatus: e.target.value as any })}
                                 className="w-full bg-muted border border-border rounded-xl px-4 py-2.5 text-sm font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
                             >
-                                <option value="all">الكل</option>
-                                <option value="unread">غير المقروءة</option>
-                                <option value="read">المقروءة</option>
+                                <option value="all">{((t as any).extracted_2026_v2?.["الكل"] || "الكل")}</option>
+                                <option value="unread">{((t as any).extracted_2026_v2?.["غير المقروءة"] || "غير المقروءة")}</option>
+                                <option value="read">{((t as any).extracted_2026_v2?.["المقروءة"] || "المقروءة")}</option>
                             </select>
                         </div>
 
                         {/* Date Range Filter */}
                         <div>
-                            <label className="text-xs font-black uppercase tracking-widest text-muted-foreground block mb-3">النطاق الزمني</label>
+                            <label className="text-xs font-black uppercase tracking-widest text-muted-foreground block mb-3">{((t as any).extracted_2026_v2?.["النطاق الزمني"] || "النطاق الزمني")}</label>
                             <select
                                 value={filters.dateRange}
                                 onChange={(e) => setFilters({ ...filters, dateRange: e.target.value as any })}
                                 className="w-full bg-muted border border-border rounded-xl px-4 py-2.5 text-sm font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
                             >
-                                <option value="all">كل الفترات</option>
-                                <option value="today">اليوم</option>
-                                <option value="week">هذا الأسبوع</option>
-                                <option value="month">هذا الشهر</option>
+                                <option value="all">{((t as any).extracted_2026_v2?.["كل الفترات"] || "كل الفترات")}</option>
+                                <option value="today">{((t as any).extracted_2026_v2?.["اليوم"] || "اليوم")}</option>
+                                <option value="week">{((t as any).extracted_2026_v2?.["هذا الأسبوع"] || "هذا الأسبوع")}</option>
+                                <option value="month">{((t as any).extracted_2026_v2?.["هذا الشهر"] || "هذا الشهر")}</option>
                             </select>
                         </div>
                     </div>
@@ -338,8 +339,7 @@ export default function NotificationsPage() {
                             className="mt-6 w-full flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest text-muted-foreground bg-muted/30 border-2 border-dashed border-border px-6 py-3 rounded-xl hover:border-primary/50 hover:text-primary transition-all"
                         >
                             <X className="w-4 h-4" />
-                            إعادة تعيين الفلاتر
-                        </button>
+                            {((t as any).extracted_2026_v2?.["إعادة تعيين الفلاتر"] || "إعادة تعيين الفلاتر")}</button>
                     )}
                 </div>
             )}
@@ -348,14 +348,12 @@ export default function NotificationsPage() {
             {hasActiveFilters && (
                 <div className="mb-6 flex items-center justify-between bg-primary/5 border border-primary/20 rounded-2xl px-6 py-3">
                     <p className="text-sm font-bold text-foreground">
-                        {filteredNotifications.length} من {notifications.length} إشعار
-                    </p>
+                        {filteredNotifications.length} {((t as any).extracted_2026_v2?.["من"] || "من")}{notifications.length} {((t as any).extracted_2026_v2?.["إشعار"] || "إشعار")}</p>
                     <button
                         onClick={resetFilters}
                         className="text-xs font-bold text-primary hover:underline"
                     >
-                        مسح الفلاتر
-                    </button>
+                        {((t as any).extracted_2026_v2?.["مسح الفلاتر"] || "مسح الفلاتر")}</button>
                 </div>
             )}
 
@@ -366,11 +364,11 @@ export default function NotificationsPage() {
                         <Bell className="w-10 h-10 text-muted-foreground opacity-20" />
                     </div>
                     <h3 className="text-2xl font-black text-foreground mb-3 tracking-tight uppercase tracking-widest">
-                        {hasActiveFilters ? "لا توجد إشعارات مطابقة" : t.notifications.noNotifications}
+                        {hasActiveFilters ? ((t as any).extracted_2026_v2?.["لا توجد إشعارات مطابقة"] || "لا توجد إشعارات مطابقة") : t.notifications.noNotifications}
                     </h3>
                     <p className="text-muted-foreground font-bold max-w-sm mx-auto leading-relaxed">
                         {hasActiveFilters 
-                            ? "جرب تغيير الفلاتر للعثور على الإشعارات" 
+                            ? ((t as any).extracted_2026_v2?.["جرب تغيير الفلاتر للعثور على الإشعارات"] || "جرب تغيير الفلاتر للعثور على الإشعارات") 
                             : t.notifications.noNotificationsDesc}
                     </p>
                 </div>

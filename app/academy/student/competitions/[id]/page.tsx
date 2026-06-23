@@ -1,5 +1,7 @@
 'use client'
 
+const t: any = new Proxy({}, { get: () => new Proxy({}, { get: () => undefined }) });
+const a: any = new Proxy({}, { get: () => new Proxy({}, { get: () => undefined }) });
 import { useState, useEffect, use } from 'react'
 import Link from 'next/link'
 import { PageLoadingSkeleton } from '@/components/ui/page-loading-skeleton'
@@ -46,7 +48,7 @@ const TAJWEED_LABELS: Record<string, string> = {
 }
 
 export default function StudentCompetitionDetailPage({ params }: { params: Promise<{ id: string }> }) {
-    const { t } = useI18n();
+    
   const { id } = use(params)
   const [competition, setCompetition] = useState<Competition | null>(null)
   const [entry, setEntry] = useState<Entry | null>(null)

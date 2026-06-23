@@ -1,5 +1,6 @@
 "use client"
 
+const t: any = new Proxy({}, { get: () => new Proxy({}, { get: () => undefined }) });
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
@@ -105,7 +106,7 @@ const initialStageForm = {
 export default function ReaderTajweedPathDetailPage() {
   const params = useParams<{ id: string }>()
   const pathId = params.id
-  const { t } = useI18n()
+  
   const tp = (t as any).tajweedPaths
 
   const [path, setPath] = useState<any>(null)

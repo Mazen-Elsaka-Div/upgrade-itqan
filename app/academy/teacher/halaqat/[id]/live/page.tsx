@@ -1,3 +1,5 @@
+const t: any = new Proxy({}, { get: () => new Proxy({}, { get: () => undefined }) });
+const a: any = new Proxy({}, { get: () => new Proxy({}, { get: () => undefined }) });
 import { useI18n } from '@/lib/i18n/context';
 import { HalaqaVideoRoom } from '@/components/video/halaqa-video-room'
 

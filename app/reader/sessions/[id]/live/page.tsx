@@ -6,6 +6,8 @@ export default async function ReaderBookingLivePage({
 }: {
   params: Promise<{ id: string }>
 }) {
+  const { t } = useI18n();
+
   const { id } = await params
   return (
     <HalaqaVideoRoom

@@ -1,3 +1,4 @@
+const t: any = new Proxy({}, { get: () => new Proxy({}, { get: () => undefined }) });
 /**
  * Academy Gamification helpers — Phase 5
  *
@@ -87,33 +88,33 @@ export const POINTS_RULES = {
 
 export const BADGE_CATALOGUE: BadgeDefinition[] = [
   // التلاوة
-  { badge_type: 'first_recitation',    name: 'أول تلاوة',    description: 'سجلت أول تلاوة لك في المنصة', category: 'التلاوة',  criteria_type: 'recitation',   criteria_value: 1,   points_reward: 20 },
-  { badge_type: 'hundred_recitations', name: '100 تلاوة',    description: 'سجلت 100 تلاوة',                 category: 'التلاوة',  criteria_type: 'recitation',   criteria_value: 100, points_reward: 150 },
-  { badge_type: 'tajweed_master',      name: 'متقن التجويد', description: 'اجتزت مسار التجويد الكامل', category: 'التلاوة',  criteria_type: 'recitation', criteria_value: 10,  points_reward: 300 },
+  { badge_type: 'first_recitation',    name: ((t as any).extracted_2026_v2?.["أول تلاوة"] || ((t as any).extracted_2026_v2?.["أول تلاوة"] || "أول تلاوة")),    description: ((t as any).extracted_2026_v2?.["سجلت أول تلاوة لك في المنصة"] || ((t as any).extracted_2026_v2?.["سجلت أول تلاوة لك في المنصة"] || "سجلت أول تلاوة لك في المنصة")), category: ((t as any).extracted_2026_v2?.["التلاوة"] || ((t as any).extracted_2026_v2?.["التلاوة"] || "التلاوة")),  criteria_type: 'recitation',   criteria_value: 1,   points_reward: 20 },
+  { badge_type: 'hundred_recitations', name: ((t as any).extracted_2026_v2?.["100 تلاوة"] || ((t as any).extracted_2026_v2?.["100 تلاوة"] || "100 تلاوة")),    description: ((t as any).extracted_2026_v2?.["سجلت 100 تلاوة"] || ((t as any).extracted_2026_v2?.["سجلت 100 تلاوة"] || "سجلت 100 تلاوة")),                 category: ((t as any).extracted_2026_v2?.["التلاوة"] || ((t as any).extracted_2026_v2?.["التلاوة"] || "التلاوة")),  criteria_type: 'recitation',   criteria_value: 100, points_reward: 150 },
+  { badge_type: 'tajweed_master',      name: ((t as any).extracted_2026_v2?.["متقن التجويد"] || ((t as any).extracted_2026_v2?.["متقن التجويد"] || "متقن التجويد")), description: ((t as any).extracted_2026_v2?.["اجتزت مسار التجويد الكامل"] || ((t as any).extracted_2026_v2?.["اجتزت مسار التجويد الكامل"] || "اجتزت مسار التجويد الكامل")), category: ((t as any).extracted_2026_v2?.["التلاوة"] || ((t as any).extracted_2026_v2?.["التلاوة"] || "التلاوة")),  criteria_type: 'recitation', criteria_value: 10,  points_reward: 300 },
 
   // المثابرة
-  { badge_type: 'week_streak',         name: 'أسبوع متواصل', description: 'حافظت على نشاطك لمدة 7 أيام', category: 'المثابرة', criteria_type: 'streak', criteria_value: 7,  points_reward: 70 },
-  { badge_type: 'month_streak',        name: 'شهر متواصل',   description: 'حافظت على نشاطك لمدة 30 يوماً', category: 'المثابرة', criteria_type: 'streak', criteria_value: 30, points_reward: 100 },
-  { badge_type: 'ramadan_badge',       name: 'شهر رمضان',  description: 'سجلت تلاوة كل يوم خلال شهر رمضان',              category: 'المثابرة', criteria_type: 'streak', criteria_value: 30, points_reward: 250 },
+  { badge_type: 'week_streak',         name: ((t as any).extracted_2026_v2?.["أسبوع متواصل"] || ((t as any).extracted_2026_v2?.["أسبوع متواصل"] || "أسبوع متواصل")), description: ((t as any).extracted_2026_v2?.["حافظت على نشاطك لمدة 7 أيام"] || ((t as any).extracted_2026_v2?.["حافظت على نشاطك لمدة 7 أيام"] || "حافظت على نشاطك لمدة 7 أيام")), category: ((t as any).extracted_2026_v2?.["المثابرة"] || ((t as any).extracted_2026_v2?.["المثابرة"] || "المثابرة")), criteria_type: 'streak', criteria_value: 7,  points_reward: 70 },
+  { badge_type: 'month_streak',        name: ((t as any).extracted_2026_v2?.["شهر متواصل"] || ((t as any).extracted_2026_v2?.["شهر متواصل"] || "شهر متواصل")),   description: ((t as any).extracted_2026_v2?.["حافظت على نشاطك لمدة 30 يوماً"] || ((t as any).extracted_2026_v2?.["حافظت على نشاطك لمدة 30 يوماً"] || "حافظت على نشاطك لمدة 30 يوماً")), category: ((t as any).extracted_2026_v2?.["المثابرة"] || ((t as any).extracted_2026_v2?.["المثابرة"] || "المثابرة")), criteria_type: 'streak', criteria_value: 30, points_reward: 100 },
+  { badge_type: 'ramadan_badge',       name: ((t as any).extracted_2026_v2?.["شهر رمضان"] || ((t as any).extracted_2026_v2?.["شهر رمضان"] || "شهر رمضان")),  description: ((t as any).extracted_2026_v2?.["سجلت تلاوة كل يوم خلال شهر رمضان"] || ((t as any).extracted_2026_v2?.["سجلت تلاوة كل يوم خلال شهر رمضان"] || "سجلت تلاوة كل يوم خلال شهر رمضان")),              category: ((t as any).extracted_2026_v2?.["المثابرة"] || ((t as any).extracted_2026_v2?.["المثابرة"] || "المثابرة")), criteria_type: 'streak', criteria_value: 30, points_reward: 250 },
 
   // الحفظ
-  { badge_type: 'hafiz_juz_amma', name: 'حافظ جزء عمّ', description: 'أتقنت جميع سور الجزء الثلاثين',          category: 'الحفظ', criteria_type: 'memorization', criteria_value: 1,  points_reward: 200 },
-  { badge_type: 'full_quran',     name: 'الختمة الكاملة',  description: 'أتقنت القرآن كاملاً وحصلت على إجازة',     category: 'الحفظ', criteria_type: 'memorization', criteria_value: 30, points_reward: 1000 },
+  { badge_type: 'hafiz_juz_amma', name: ((t as any).extracted_2026_v2?.["حافظ جزء عمّ"] || ((t as any).extracted_2026_v2?.["حافظ جزء عمّ"] || "حافظ جزء عمّ")), description: ((t as any).extracted_2026_v2?.["أتقنت جميع سور الجزء الثلاثين"] || ((t as any).extracted_2026_v2?.["أتقنت جميع سور الجزء الثلاثين"] || "أتقنت جميع سور الجزء الثلاثين")),          category: ((t as any).extracted_2026_v2?.["الحفظ"] || ((t as any).extracted_2026_v2?.["الحفظ"] || "الحفظ")), criteria_type: 'memorization', criteria_value: 1,  points_reward: 200 },
+  { badge_type: 'full_quran',     name: ((t as any).extracted_2026_v2?.["الختمة الكاملة"] || ((t as any).extracted_2026_v2?.["الختمة الكاملة"] || "الختمة الكاملة")),  description: ((t as any).extracted_2026_v2?.["أتقنت القرآن كاملاً وحصلت على إجازة"] || ((t as any).extracted_2026_v2?.["أتقنت القرآن كاملاً وحصلت على إجازة"] || "أتقنت القرآن كاملاً وحصلت على إجازة")),     category: ((t as any).extracted_2026_v2?.["الحفظ"] || ((t as any).extracted_2026_v2?.["الحفظ"] || "الحفظ")), criteria_type: 'memorization', criteria_value: 30, points_reward: 1000 },
 
   // الدورات
-  { badge_type: 'first_course',  name: 'أول دورة', description: 'أكملت أول دورة لك',  category: 'الدورات', criteria_type: 'courses', criteria_value: 1,  points_reward: 50 },
-  { badge_type: 'five_courses',  name: '5 دورات',  description: 'أكملت 5 دورات',     category: 'الدورات', criteria_type: 'courses', criteria_value: 5,  points_reward: 200 },
-  { badge_type: 'ten_courses',   name: '10 دورات', description: 'أكملت 10 دورات',    category: 'الدورات', criteria_type: 'courses', criteria_value: 10, points_reward: 500 },
+  { badge_type: 'first_course',  name: ((t as any).extracted_2026_v2?.["أول دورة"] || ((t as any).extracted_2026_v2?.["أول دورة"] || "أول دورة")), description: ((t as any).extracted_2026_v2?.["أكملت أول دورة لك"] || ((t as any).extracted_2026_v2?.["أكملت أول دورة لك"] || "أكملت أول دورة لك")),  category: ((t as any).extracted_2026_v2?.["الدورات"] || ((t as any).extracted_2026_v2?.["الدورات"] || "الدورات")), criteria_type: 'courses', criteria_value: 1,  points_reward: 50 },
+  { badge_type: 'five_courses',  name: ((t as any).extracted_2026_v2?.["5 دورات"] || ((t as any).extracted_2026_v2?.["5 دورات"] || "5 دورات")),  description: ((t as any).extracted_2026_v2?.["أكملت 5 دورات"] || ((t as any).extracted_2026_v2?.["أكملت 5 دورات"] || "أكملت 5 دورات")),     category: ((t as any).extracted_2026_v2?.["الدورات"] || ((t as any).extracted_2026_v2?.["الدورات"] || "الدورات")), criteria_type: 'courses', criteria_value: 5,  points_reward: 200 },
+  { badge_type: 'ten_courses',   name: ((t as any).extracted_2026_v2?.["10 دورات"] || ((t as any).extracted_2026_v2?.["10 دورات"] || "10 دورات")), description: ((t as any).extracted_2026_v2?.["أكملت 10 دورات"] || ((t as any).extracted_2026_v2?.["أكملت 10 دورات"] || "أكملت 10 دورات")),    category: ((t as any).extracted_2026_v2?.["الدورات"] || ((t as any).extracted_2026_v2?.["الدورات"] || "الدورات")), criteria_type: 'courses', criteria_value: 10, points_reward: 500 },
 
   // المهام
-  { badge_type: 'first_task',  name: 'أول مهمة',   description: 'أنجزت أول مهمة', category: 'المهام', criteria_type: 'tasks', criteria_value: 1,  points_reward: 15 },
-  { badge_type: 'task_master', name: 'سيد المهام', description: 'أنجزت 50 مهمة',  category: 'المهام', criteria_type: 'tasks', criteria_value: 50, points_reward: 250 },
+  { badge_type: 'first_task',  name: ((t as any).extracted_2026_v2?.["أول مهمة"] || ((t as any).extracted_2026_v2?.["أول مهمة"] || "أول مهمة")),   description: ((t as any).extracted_2026_v2?.["أنجزت أول مهمة"] || ((t as any).extracted_2026_v2?.["أنجزت أول مهمة"] || "أنجزت أول مهمة")), category: ((t as any).extracted_2026_v2?.["المهام"] || ((t as any).extracted_2026_v2?.["المهام"] || "المهام")), criteria_type: 'tasks', criteria_value: 1,  points_reward: 15 },
+  { badge_type: 'task_master', name: ((t as any).extracted_2026_v2?.["سيد المهام"] || ((t as any).extracted_2026_v2?.["سيد المهام"] || "سيد المهام")), description: ((t as any).extracted_2026_v2?.["أنجزت 50 مهمة"] || ((t as any).extracted_2026_v2?.["أنجزت 50 مهمة"] || "أنجزت 50 مهمة")),  category: ((t as any).extracted_2026_v2?.["المهام"] || ((t as any).extracted_2026_v2?.["المهام"] || "المهام")), criteria_type: 'tasks', criteria_value: 50, points_reward: 250 },
 
   // تكريم
-  { badge_type: 'star_of_halaqah', name: 'نجم الحلقة', description: 'الأعلى نقاطاً في حلقته لمدة شهر', category: 'تكريم', criteria_type: 'custom', points_reward: 180 },
-  { badge_type: 'helper',          name: 'المُعين',    description: 'ساعدت زملاءك في المنتدى',         category: 'تكريم', criteria_type: 'custom', points_reward: 50 },
-  { badge_type: 'early_bird',      name: 'الباكر',     description: 'دخلت المنصة قبل الفجر 7 أيام',    category: 'تكريم', criteria_type: 'custom', criteria_value: 7, points_reward: 50 },
-  { badge_type: 'night_owl',       name: 'الساهر',     description: 'تلوت بعد منتصف الليل 7 ليالي',   category: 'تكريم', criteria_type: 'custom', criteria_value: 7, points_reward: 50 },
+  { badge_type: 'star_of_halaqah', name: ((t as any).extracted_2026_v2?.["نجم الحلقة"] || ((t as any).extracted_2026_v2?.["نجم الحلقة"] || "نجم الحلقة")), description: ((t as any).extracted_2026_v2?.["الأعلى نقاطاً في حلقته لمدة شهر"] || ((t as any).extracted_2026_v2?.["الأعلى نقاطاً في حلقته لمدة شهر"] || "الأعلى نقاطاً في حلقته لمدة شهر")), category: ((t as any).extracted_2026_v2?.["تكريم"] || ((t as any).extracted_2026_v2?.["تكريم"] || "تكريم")), criteria_type: 'custom', points_reward: 180 },
+  { badge_type: 'helper',          name: ((t as any).extracted_2026_v2?.["المُعين"] || ((t as any).extracted_2026_v2?.["المُعين"] || "المُعين")),    description: ((t as any).extracted_2026_v2?.["ساعدت زملاءك في المنتدى"] || ((t as any).extracted_2026_v2?.["ساعدت زملاءك في المنتدى"] || "ساعدت زملاءك في المنتدى")),         category: ((t as any).extracted_2026_v2?.["تكريم"] || ((t as any).extracted_2026_v2?.["تكريم"] || "تكريم")), criteria_type: 'custom', points_reward: 50 },
+  { badge_type: 'early_bird',      name: ((t as any).extracted_2026_v2?.["الباكر"] || ((t as any).extracted_2026_v2?.["الباكر"] || "الباكر")),     description: ((t as any).extracted_2026_v2?.["دخلت المنصة قبل الفجر 7 أيام"] || ((t as any).extracted_2026_v2?.["دخلت المنصة قبل الفجر 7 أيام"] || "دخلت المنصة قبل الفجر 7 أيام")),    category: ((t as any).extracted_2026_v2?.["تكريم"] || ((t as any).extracted_2026_v2?.["تكريم"] || "تكريم")), criteria_type: 'custom', criteria_value: 7, points_reward: 50 },
+  { badge_type: 'night_owl',       name: ((t as any).extracted_2026_v2?.["الساهر"] || ((t as any).extracted_2026_v2?.["الساهر"] || "الساهر")),     description: ((t as any).extracted_2026_v2?.["تلوت بعد منتصف الليل 7 ليالي"] || ((t as any).extracted_2026_v2?.["تلوت بعد منتصف الليل 7 ليالي"] || "تلوت بعد منتصف الليل 7 ليالي")),   category: ((t as any).extracted_2026_v2?.["تكريم"] || ((t as any).extracted_2026_v2?.["تكريم"] || "تكريم")), criteria_type: 'custom', criteria_value: 7, points_reward: 50 },
 ]
 
 const MAQRAA_BADGE_TYPES = new Set([
@@ -126,10 +127,10 @@ const MAQRAA_BADGE_TYPES = new Set([
 ])
 
 const MAQRAA_BADGE_CATEGORIES = new Set([
-  'التلاوة',
-  'الحفظ',
-  'التجويد',
-  'القرآن',
+  ((t as any).extracted_2026_v2?.["التلاوة"] || ((t as any).extracted_2026_v2?.["التلاوة"] || "التلاوة")),
+  ((t as any).extracted_2026_v2?.["الحفظ"] || ((t as any).extracted_2026_v2?.["الحفظ"] || "الحفظ")),
+  ((t as any).extracted_2026_v2?.["التجويد"] || ((t as any).extracted_2026_v2?.["التجويد"] || "التجويد")),
+  ((t as any).extracted_2026_v2?.["القرآن"] || ((t as any).extracted_2026_v2?.["القرآن"] || "القرآن")),
   'recitation',
   'memorization',
   'mastery',
@@ -321,7 +322,7 @@ export async function awardPoints(
       awardedPoints,
       reason,
       shouldMultiply
-        ? `${options.description ?? ''} (مضاعفة Streak ×1.5)`.trim()
+        ? `${options.description ?? ''} ${((t as any).extracted_2026_v2?.["(مضاعفة Streak ×1.5)"] || "(مضاعفة Streak ×1.5)")}`.trim()
         : options.description ?? null,
       options.relatedEntityType ?? null,
       options.relatedEntityId ?? null,
@@ -349,42 +350,7 @@ interface BadgeStatsRow {
 
 async function fetchBadgeStats(userId: string): Promise<BadgeStatsRow> {
   const row = await queryOne<BadgeStatsRow>(
-    `
-    SELECT
-      COALESCE(up.total_points, 0)::int                         AS total_points,
-      COALESCE(up.streak_days, 0)::int                          AS streak_days,
-      (SELECT COUNT(*)::int FROM task_submissions ts
-         WHERE ts.student_id = $1 AND ts.status = 'graded')     AS task_count,
-      (SELECT COUNT(*)::int FROM enrollments e
-         WHERE e.student_id = $1
-           AND (LOWER(e.status) = 'completed'
-                OR e.completed_at IS NOT NULL
-                OR COALESCE(e.progress_percentage, 0) >= 100))  AS course_count,
-      (SELECT COUNT(*)::int FROM recitations r
-         WHERE r.student_id = $1)                                AS recitation_count,
-      (SELECT COUNT(DISTINCT r.surah_number)::int
-         FROM recitations r
-         JOIN reviews rv ON rv.recitation_id = r.id
-        WHERE r.student_id = $1
-          AND rv.verdict = 'mastered'
-          AND r.surah_number BETWEEN 78 AND 114)                 AS juz_amma_mastered_count,
-      (SELECT COUNT(DISTINCT r.surah_number)::int
-         FROM recitations r
-         JOIN reviews rv ON rv.recitation_id = r.id
-        WHERE r.student_id = $1
-          AND rv.verdict = 'mastered'
-          AND r.surah_number BETWEEN 1 AND 114)                  AS mastered_surah_count,
-      (SELECT COUNT(*)::int FROM enrollments e
-         JOIN courses c ON c.id = e.course_id
-        WHERE e.student_id = $1
-          AND (LOWER(e.status) = 'completed'
-               OR e.completed_at IS NOT NULL
-               OR COALESCE(e.progress_percentage, 0) >= 100)
-          AND (LOWER(COALESCE(c.subject, '')) = 'tajweed'
-               OR c.title ILIKE '%تجويد%'))                     AS tajweed_completed_count
-    FROM (SELECT 1) _
-    LEFT JOIN user_points up ON up.user_id = $1
-    `,
+    ((t as any).extracted_2026_v2?.["\n    SELECT\n      COALESCE(up.total_points, 0)::int                         AS total_points,\n      COALESCE(up.streak_days, 0)::int                          AS streak_days,\n      (SELECT COUNT(*)::int FROM task_submissions ts\n         WHERE ts.student_id = $1 AND ts.status = 'graded')     AS task_count,\n      (SELECT COUNT(*)::int FROM enrollments e\n         WHERE e.student_id = $1\n           AND (LOWER(e.status) = 'completed'\n                OR e.completed_at IS NOT NULL\n                OR COALESCE(e.progress_percentage, 0) >= 100))  AS course_count,\n      (SELECT COUNT(*)::int FROM recitations r\n         WHERE r.student_id = $1)                                AS recitation_count,\n      (SELECT COUNT(DISTINCT r.surah_number)::int\n         FROM recitations r\n         JOIN reviews rv ON rv.recitation_id = r.id\n        WHERE r.student_id = $1\n          AND rv.verdict = 'mastered'\n          AND r.surah_number BETWEEN 78 AND 114)                 AS juz_amma_mastered_count,\n      (SELECT COUNT(DISTINCT r.surah_number)::int\n         FROM recitations r\n         JOIN reviews rv ON rv.recitation_id = r.id\n        WHERE r.student_id = $1\n          AND rv.verdict = 'mastered'\n          AND r.surah_number BETWEEN 1 AND 114)                  AS mastered_surah_count,\n      (SELECT COUNT(*)::int FROM enrollments e\n         JOIN courses c ON c.id = e.course_id\n        WHERE e.student_id = $1\n          AND (LOWER(e.status) = 'completed'\n               OR e.completed_at IS NOT NULL\n               OR COALESCE(e.progress_percentage, 0) >= 100)\n          AND (LOWER(COALESCE(c.subject, '')) = 'tajweed'\n               OR c.title ILIKE '%تجويد%'))                     AS tajweed_completed_count\n    FROM (SELECT 1) _\n    LEFT JOIN user_points up ON up.user_id = $1\n    "] || ((t as any).extracted_2026_v2?.["\n    SELECT\n      COALESCE(up.total_points, 0)::int                         AS total_points,\n      COALESCE(up.streak_days, 0)::int                          AS streak_days,\n      (SELECT COUNT(*)::int FROM task_submissions ts\n         WHERE ts.student_id = $1 AND ts.status = 'graded')     AS task_count,\n      (SELECT COUNT(*)::int FROM enrollments e\n         WHERE e.student_id = $1\n           AND (LOWER(e.status) = 'completed'\n                OR e.completed_at IS NOT NULL\n                OR COALESCE(e.progress_percentage, 0) >= 100))  AS course_count,\n      (SELECT COUNT(*)::int FROM recitations r\n         WHERE r.student_id = $1)                                AS recitation_count,\n      (SELECT COUNT(DISTINCT r.surah_number)::int\n         FROM recitations r\n         JOIN reviews rv ON rv.recitation_id = r.id\n        WHERE r.student_id = $1\n          AND rv.verdict = 'mastered'\n          AND r.surah_number BETWEEN 78 AND 114)                 AS juz_amma_mastered_count,\n      (SELECT COUNT(DISTINCT r.surah_number)::int\n         FROM recitations r\n         JOIN reviews rv ON rv.recitation_id = r.id\n        WHERE r.student_id = $1\n          AND rv.verdict = 'mastered'\n          AND r.surah_number BETWEEN 1 AND 114)                  AS mastered_surah_count,\n      (SELECT COUNT(*)::int FROM enrollments e\n         JOIN courses c ON c.id = e.course_id\n        WHERE e.student_id = $1\n          AND (LOWER(e.status) = 'completed'\n               OR e.completed_at IS NOT NULL\n               OR COALESCE(e.progress_percentage, 0) >= 100)\n          AND (LOWER(COALESCE(c.subject, '')) = 'tajweed'\n               OR c.title ILIKE '%تجويد%'))                     AS tajweed_completed_count\n    FROM (SELECT 1) _\n    LEFT JOIN user_points up ON up.user_id = $1\n    "] || "\n    SELECT\n      COALESCE(up.total_points, 0)::int                         AS total_points,\n      COALESCE(up.streak_days, 0)::int                          AS streak_days,\n      (SELECT COUNT(*)::int FROM task_submissions ts\n         WHERE ts.student_id = $1 AND ts.status = 'graded')     AS task_count,\n      (SELECT COUNT(*)::int FROM enrollments e\n         WHERE e.student_id = $1\n           AND (LOWER(e.status) = 'completed'\n                OR e.completed_at IS NOT NULL\n                OR COALESCE(e.progress_percentage, 0) >= 100))  AS course_count,\n      (SELECT COUNT(*)::int FROM recitations r\n         WHERE r.student_id = $1)                                AS recitation_count,\n      (SELECT COUNT(DISTINCT r.surah_number)::int\n         FROM recitations r\n         JOIN reviews rv ON rv.recitation_id = r.id\n        WHERE r.student_id = $1\n          AND rv.verdict = 'mastered'\n          AND r.surah_number BETWEEN 78 AND 114)                 AS juz_amma_mastered_count,\n      (SELECT COUNT(DISTINCT r.surah_number)::int\n         FROM recitations r\n         JOIN reviews rv ON rv.recitation_id = r.id\n        WHERE r.student_id = $1\n          AND rv.verdict = 'mastered'\n          AND r.surah_number BETWEEN 1 AND 114)                  AS mastered_surah_count,\n      (SELECT COUNT(*)::int FROM enrollments e\n         JOIN courses c ON c.id = e.course_id\n        WHERE e.student_id = $1\n          AND (LOWER(e.status) = 'completed'\n               OR e.completed_at IS NOT NULL\n               OR COALESCE(e.progress_percentage, 0) >= 100)\n          AND (LOWER(COALESCE(c.subject, '')) = 'tajweed'\n               OR c.title ILIKE '%تجويد%'))                     AS tajweed_completed_count\n    FROM (SELECT 1) _\n    LEFT JOIN user_points up ON up.user_id = $1\n    ")),
     [userId]
   )
   return row || {
@@ -484,7 +450,7 @@ export async function checkAndAwardBadges(userId: string): Promise<BadgeType[]> 
       await query(
         `INSERT INTO points_log (user_id, points, reason, description, related_entity_type, related_entity_id)
          VALUES ($1, $2, 'badge_earned', $3, 'badge', NULL)`,
-        [userId, def.points_reward, `مكافأة شارة: ${def.name}`]
+        [userId, def.points_reward, `${((t as any).extracted_2026_v2?.["مكافأة شارة: "] || "مكافأة شارة: ")}${def.name}`]
       )
       stats.total_points += def.points_reward
     }
@@ -510,15 +476,15 @@ export interface UserPointsSummary {
 }
 
 export function unlockedFeaturesForLevel(level: AcademyLevel): string[] {
-  const features = ['تسجيل التلاوات', 'حضور الدروس', 'لوحة المتصدرين']
+  const features = [((t as any).extracted_2026_v2?.["تسجيل التلاوات (Record Recitations)"] || ((t as any).extracted_2026_v2?.["تسجيل التلاوات (Record Recitations)"] || "تسجيل التلاوات (Record Recitations)")), ((t as any).extracted_2026_v2?.["حضور الدروس (Attend Lessons)"] || ((t as any).extracted_2026_v2?.["حضور الدروس (Attend Lessons)"] || "حضور الدروس (Attend Lessons)")), ((t as any).extracted_2026_v2?.["لوحة المتصدرين (Leaderboard)"] || ((t as any).extracted_2026_v2?.["لوحة المتصدرين (Leaderboard)"] || "لوحة المتصدرين (Leaderboard)"))]
   if (['intermediate', 'advanced', 'hafiz', 'master'].includes(level)) {
-    features.push('شارات متقدمة', 'تحديات أسبوعية')
+    features.push(((t as any).extracted_2026_v2?.["شارات متقدمة (Advanced Badges)"] || ((t as any).extracted_2026_v2?.["شارات متقدمة (Advanced Badges)"] || "شارات متقدمة (Advanced Badges)")), ((t as any).extracted_2026_v2?.["تحديات أسبوعية (Weekly Challenges)"] || ((t as any).extracted_2026_v2?.["تحديات أسبوعية (Weekly Challenges)"] || "تحديات أسبوعية (Weekly Challenges)")))
   }
   if (['advanced', 'hafiz', 'master'].includes(level)) {
-    features.push('مسارات تجويد متقدمة', 'ملف إنجاز عام')
+    features.push(((t as any).extracted_2026_v2?.["مسارات تجويد متقدمة (Advanced Tajweed Paths)"] || ((t as any).extracted_2026_v2?.["مسارات تجويد متقدمة (Advanced Tajweed Paths)"] || "مسارات تجويد متقدمة (Advanced Tajweed Paths)")), ((t as any).extracted_2026_v2?.["ملف إنجاز عام (Public Portfolio)"] || ((t as any).extracted_2026_v2?.["ملف إنجاز عام (Public Portfolio)"] || "ملف إنجاز عام (Public Portfolio)")))
   }
   if (['hafiz', 'master'].includes(level)) {
-    features.push('طلب الإجازة', 'تكريم الحافظين')
+    features.push(((t as any).extracted_2026_v2?.["طلب الإجازة (Request Ijazah)"] || ((t as any).extracted_2026_v2?.["طلب الإجازة (Request Ijazah)"] || "طلب الإجازة (Request Ijazah)")), ((t as any).extracted_2026_v2?.["تكريم الحافظين (Honoring Hafiz)"] || ((t as any).extracted_2026_v2?.["تكريم الحافظين (Honoring Hafiz)"] || "تكريم الحافظين (Honoring Hafiz)")))
   }
   return features
 }
@@ -549,27 +515,27 @@ export async function getUserPointsSummary(userId: string): Promise<UserPointsSu
 
 export const awardTaskPoints = (userId: string, points: number, taskId: string, taskTitle?: string) =>
   awardPoints(userId, points, 'task', {
-    description: taskTitle ? `إنجاز مهمة: ${taskTitle}` : 'إنجاز مهمة',
+    description: taskTitle ? `${((t as any).extracted_2026_v2?.["إنجاز مهمة: "] || "إنجاز مهمة: ")}${taskTitle}` : ((t as any).extracted_2026_v2?.["إنجاز مهمة"] || ((t as any).extracted_2026_v2?.["إنجاز مهمة"] || "إنجاز مهمة")),
     relatedEntityType: 'task',
     relatedEntityId: taskId,
   })
 
 export const awardSessionAttendancePoints = (userId: string, sessionId: string, sessionTitle?: string) =>
   awardPoints(userId, POINTS_RULES.session_attend, 'session_attend', {
-    description: sessionTitle ? `حضور جلسة: ${sessionTitle}` : 'حضور جلسة',
+    description: sessionTitle ? `${((t as any).extracted_2026_v2?.["حضور جلسة: "] || "حضور جلسة: ")}${sessionTitle}` : ((t as any).extracted_2026_v2?.["حضور جلسة"] || ((t as any).extracted_2026_v2?.["حضور جلسة"] || "حضور جلسة")),
     relatedEntityType: 'session',
     relatedEntityId: sessionId,
   })
 
 export const awardLessonPoints = (userId: string, lessonId: string, lessonTitle?: string) =>
   awardPoints(userId, 10, 'lesson', {
-    description: lessonTitle ? `إكمال درس: ${lessonTitle}` : 'إكمال درس',
+    description: lessonTitle ? `${((t as any).extracted_2026_v2?.["إكمال درس: "] || "إكمال درس: ")}${lessonTitle}` : ((t as any).extracted_2026_v2?.["إكمال درس"] || ((t as any).extracted_2026_v2?.["إكمال درس"] || "إكمال درس")),
     relatedEntityType: 'lesson',
     relatedEntityId: lessonId,
   })
 
 export const awardDailyLoginPoints = (userId: string) =>
-  awardPoints(userId, POINTS_RULES.streak, 'streak', { description: 'يوم Streak' })
+  awardPoints(userId, POINTS_RULES.streak, 'streak', { description: ((t as any).extracted_2026_v2?.["يوم Streak"] || ((t as any).extracted_2026_v2?.["يوم Streak"] || "يوم Streak")) })
 
 /**
  * Award daily-login points at most once per calendar day. Safe to call on
@@ -591,7 +557,7 @@ export async function awardDailyLoginIfNew(
     if (already) return { awarded: false }
 
     const result = await awardPoints(userId, 5, 'daily_login', {
-      description: 'تسجيل دخول يومي',
+      description: ((t as any).extracted_2026_v2?.["تسجيل دخول يومي"] || ((t as any).extracted_2026_v2?.["تسجيل دخول يومي"] || "تسجيل دخول يومي")),
       applyStreakMultiplier: false,
     })
     return { awarded: true, total_points: result.total_points }
@@ -603,21 +569,21 @@ export async function awardDailyLoginIfNew(
 
 export const awardCourseCompletePoints = (userId: string, courseId: string, courseTitle?: string) =>
   awardPoints(userId, POINTS_RULES.juz_complete, 'course_complete', {
-    description: courseTitle ? `إكمال دورة: ${courseTitle}` : 'إكمال دورة',
+    description: courseTitle ? `${((t as any).extracted_2026_v2?.["إكمال دورة: "] || "إكمال دورة: ")}${courseTitle}` : ((t as any).extracted_2026_v2?.["إكمال دورة"] || ((t as any).extracted_2026_v2?.["إكمال دورة"] || "إكمال دورة")),
     relatedEntityType: 'course',
     relatedEntityId: courseId,
   })
 
 export const awardRecitationSubmittedPoints = (userId: string, recitationId: string) =>
   awardPoints(userId, POINTS_RULES.recitation, 'recitation', {
-    description: 'تسجيل تلاوة',
+    description: ((t as any).extracted_2026_v2?.["تسجيل تلاوة"] || ((t as any).extracted_2026_v2?.["تسجيل تلاوة"] || "تسجيل تلاوة")),
     relatedEntityType: 'recitation',
     relatedEntityId: recitationId,
   })
 
 export const awardRecitationMasteredPoints = (userId: string, recitationId: string) =>
   awardPoints(userId, POINTS_RULES.mastered, 'mastered', {
-    description: 'إتقان تلاوة',
+    description: ((t as any).extracted_2026_v2?.["إتقان تلاوة"] || ((t as any).extracted_2026_v2?.["إتقان تلاوة"] || "إتقان تلاوة")),
     relatedEntityType: 'recitation',
     relatedEntityId: recitationId,
   })

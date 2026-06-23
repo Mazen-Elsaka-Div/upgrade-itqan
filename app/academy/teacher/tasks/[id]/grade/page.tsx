@@ -1,5 +1,6 @@
 "use client"
 
+const t: any = new Proxy({}, { get: () => new Proxy({}, { get: () => undefined }) });
 import { useState, useEffect } from "react"
 import { useParams } from "next/navigation"
 import Link from "next/link"
@@ -25,7 +26,7 @@ interface QuizQuestion {
 }
 
 export default function GradeTaskPage() {
-    const { t } = useI18n();
+    
   const params = useParams()
   const taskId = params.id as string
 
