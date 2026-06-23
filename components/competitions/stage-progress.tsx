@@ -129,7 +129,7 @@ export function StageProgress({
             {activeStage.min_verses ? (
               <span className="inline-flex items-center gap-1">
                 <BookOpen className="w-3.5 h-3.5" />
-                {`${tr('الحد الأدنى')}: ${activeStage.min_verses} ${tr('آية')}`}
+                {`${tr('الحد الأدنى')}: ${activeStage.min_verses} ${tr('آيات')}`}
               </span>
             ) : null}
             {activeStage.advance_count != null ? (
