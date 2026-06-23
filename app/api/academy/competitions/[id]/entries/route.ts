@@ -80,13 +80,20 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     return NextResponse.json({ error: 'Minimum verses requirement not met' }, { status: 400 })
   }
 
+  // Entries are scoped to the current round. Resolve the active stage so the
+  // upsert matches the (competition_id, student_id, stage_id) unique index.
+  const submitStage = await getActiveStage(id)
+  if (!submitStage) {
+    return NextResponse.json({ error: 'No active stage to submit to' }, { status: 400 })
+  }
+
   const result = await query(
     `INSERT INTO competition_entries (
-       competition_id, student_id, recitation_id, submission_url, notes,
+       competition_id, student_id, stage_id, recitation_id, submission_url, notes,
        verses_count, halqa_id, status, submitted_at
      )
-     VALUES ($1, $2, $3, $4, $5, $6, $7, 'pending', NOW())
-     ON CONFLICT (competition_id, student_id)
+     VALUES ($1, $2, $8, $3, $4, $5, $6, $7, 'pending', NOW())
+     ON CONFLICT (competition_id, student_id, stage_id)
      DO UPDATE SET
        recitation_id = EXCLUDED.recitation_id,
        submission_url = EXCLUDED.submission_url,
@@ -104,6 +111,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       body.notes || null,
       Number.isFinite(versesCount) ? versesCount : 0,
       body.halqa_id || competition.halqa_id || null,
+      submitStage.id,
     ]
   )
 

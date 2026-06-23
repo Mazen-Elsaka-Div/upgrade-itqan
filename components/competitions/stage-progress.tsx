@@ -2,6 +2,7 @@
 
 import { CheckCircle2, Lock, Flag, Trophy, XCircle, Clock, ChevronLeft, BookOpen } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useI18n } from '@/lib/i18n/context'
 
 export interface StudentStage {
   id: string
@@ -22,18 +23,18 @@ export interface StudentStageEntry {
 }
 
 /** Human label + token-based styling for the student's status within a stage. */
-function statusBadge(status: string, isFinal: boolean) {
+function statusBadge(status: string, isFinal: boolean, tr: (s: string) => string) {
   switch (status) {
     case 'qualified':
-      return { label: 'تأهّلت', cls: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400', Icon: CheckCircle2 }
+      return { label: tr('تأهّلت'), cls: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400', Icon: CheckCircle2 }
     case 'winner':
-      return { label: 'فائز', cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400', Icon: Trophy }
+      return { label: tr('فائز'), cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400', Icon: Trophy }
     case 'eliminated':
-      return { label: 'لم تتأهّل', cls: 'bg-muted text-muted-foreground', Icon: XCircle }
+      return { label: tr('لم تتأهّل'), cls: 'bg-muted text-muted-foreground', Icon: XCircle }
     case 'evaluated':
-      return { label: isFinal ? 'تم التقييم' : 'بانتظار الترحيل', cls: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400', Icon: CheckCircle2 }
+      return { label: isFinal ? tr('تم التقييم') : tr('بانتظار الترحيل'), cls: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400', Icon: CheckCircle2 }
     case 'pending':
-      return { label: 'بانتظار التقييم', cls: 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400', Icon: Clock }
+      return { label: tr('بانتظار التقييم'), cls: 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400', Icon: Clock }
     default:
       return null
   }
@@ -56,6 +57,11 @@ export function StageProgress({
   activeStage: StudentStage | null
   entries: StudentStageEntry[]
 }) {
+  const { t } = useI18n()
+  // Bilingual fallback: look up the Arabic literal in the 2026 dictionary
+  // (English in en.ts), else render the Arabic literal as-is.
+  const tr = (s: string) => (t as any).addedTranslations_2026?.[s] || s
+
   if (!stages || stages.length <= 1) return null
 
   const sorted = [...stages].sort((a, b) => a.order_index - b.order_index)
@@ -63,10 +69,10 @@ export function StageProgress({
   const activeEntry = activeStage ? entries.find((e) => e.stage_id === activeStage.id) : null
 
   return (
-    <section className="bg-card border border-border rounded-2xl p-5 space-y-4" aria-label="مراحل المسابقة">
+    <section className="bg-card border border-border rounded-2xl p-5 space-y-4" aria-label={tr('مراحل المسابقة')}>
       <div className="flex items-center gap-2">
         <Flag className="w-4 h-4 text-primary" />
-        <h2 className="text-sm font-bold">مراحل المسابقة</h2>
+        <h2 className="text-sm font-bold">{tr('مراحل المسابقة')}</h2>
       </div>
 
       {/* Timeline */}
@@ -75,7 +81,7 @@ export function StageProgress({
           const entry = entries.find((e) => e.stage_id === stage.id)
           const isActive = activeStage?.id === stage.id
           const isFinal = stage.order_index >= maxOrder
-          const badge = entry ? statusBadge(entry.status, isFinal) : null
+          const badge = entry ? statusBadge(entry.status, isFinal, tr) : null
           return (
             <li key={stage.id} className="flex items-center gap-2">
               <div
@@ -113,7 +119,7 @@ export function StageProgress({
       {activeStage && (
         <div className="rounded-xl bg-muted/50 p-4 space-y-2">
           <p className="text-sm font-bold text-foreground">
-            {'المرحلة الحالية: '}
+            {`${tr('المرحلة الحالية')}: `}
             {activeStage.name}
           </p>
           {activeStage.description && (
@@ -123,24 +129,24 @@ export function StageProgress({
             {activeStage.min_verses ? (
               <span className="inline-flex items-center gap-1">
                 <BookOpen className="w-3.5 h-3.5" />
-                {`الحد الأدنى: ${activeStage.min_verses} آية`}
+                {`${tr('الحد الأدنى')}: ${activeStage.min_verses} ${tr('آية')}`}
               </span>
             ) : null}
             {activeStage.advance_count != null ? (
               <span className="inline-flex items-center gap-1">
                 <CheckCircle2 className="w-3.5 h-3.5" />
-                {`يتأهّل أعلى ${activeStage.advance_count}`}
+                {`${tr('يتأهّل أعلى')} ${activeStage.advance_count}`}
               </span>
             ) : (
               <span className="inline-flex items-center gap-1 text-amber-600 dark:text-amber-400">
                 <Trophy className="w-3.5 h-3.5" />
-                {'المرحلة النهائية'}
+                {tr('المرحلة النهائية')}
               </span>
             )}
           </div>
           {/* Student-specific call-out for the active stage. */}
           {activeEntry?.status === 'eliminated' && (
-            <p className="text-sm font-bold text-muted-foreground">{'لم تتأهّل لهذه المرحلة، نتمنى لك التوفيق في المرات القادمة.'}</p>
+            <p className="text-sm font-bold text-muted-foreground">{tr('لم تتأهّل لهذه المرحلة، نتمنى لك التوفيق في المرات القادمة.')}</p>
           )}
         </div>
       )}
