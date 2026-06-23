@@ -30,6 +30,10 @@ interface Props {
 const ROLE_LABEL: Record<string, string> = {
   teacher: 'مدرّس',
   reader: 'مقرئ',
+  student_supervisor: 'مشرف طلاب',
+  reciter_supervisor: 'مشرف مقرئين',
+  admin: 'مدير',
+  academy_admin: 'مشرف أكاديمية',
 }
 
 function RoleBadge({ role }: { role: string }) {
@@ -213,7 +217,7 @@ export function JudgesManager({ apiBase, competition, accent = 'primary', onClos
               {/* Add judges */}
               <div className="space-y-3">
                 <h4 className="text-sm font-bold text-muted-foreground">
-                  إضافة محكّم (مدرّس أو مقرئ)
+                  إضافة محكّم (مدرّس، مقرئ، أو مشرف)
                 </h4>
                 <div className="relative">
                   <Search className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -227,7 +231,7 @@ export function JudgesManager({ apiBase, competition, accent = 'primary', onClos
 
                 {available.length === 0 ? (
                   <p className="rounded-xl border-2 border-dashed border-border p-4 text-center text-sm text-muted-foreground">
-                    {search ? 'لا نتائج مطابقة' : 'لا يوجد مدرّسون أو مقرئون متاحون للإضافة'}
+                    {search ? 'لا نتائج مطابقة' : 'لا يوجد مرشحين متاحين للإضافة'}
                   </p>
                 ) : (
                   <ul className="max-h-64 space-y-2 overflow-y-auto">

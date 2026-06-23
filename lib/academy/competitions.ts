@@ -380,7 +380,7 @@ export async function getJudgeAssignments(judgeId: string) {
 }
 
 // Roles allowed to be assigned as competition judges.
-export const JUDGE_ROLES = ['teacher', 'reader'] as const
+export const JUDGE_ROLES = ['teacher', 'reader', 'student_supervisor', 'reciter_supervisor', 'admin', 'academy_admin'] as const
 
 export interface JudgeRow {
   id: string
@@ -435,7 +435,7 @@ export async function addCompetitionJudge(competitionId: string, judgeId: string
   const user = await queryOne<{ role: string }>(`SELECT role FROM users WHERE id = $1`, [judgeId])
   if (!user) return { success: false as const, error: ((en.extracted_2026_v2 as any)?.["المستخدم غير موجود"] || "المستخدم غير موجود") }
   if (!(JUDGE_ROLES as readonly string[]).includes(user.role)) {
-    return { success: false as const, error: ((en.extracted_2026_v2 as any)?.["يمكن تعيين المدرّسين أو المقرئين فقط كمحكّمين"] || "يمكن تعيين المدرّسين أو المقرئين فقط كمحكّمين") }
+    return { success: false as const, error: ((en.extracted_2026_v2 as any)?.["يمكن تعيين المدرّسين أو المقرئين أو المشرفين فقط كمحكّمين"] || "يمكن تعيين المدرّسين أو المقرئين أو المشرفين فقط كمحكّمين") }
   }
   await query(
     `INSERT INTO competition_judges (competition_id, judge_id)
