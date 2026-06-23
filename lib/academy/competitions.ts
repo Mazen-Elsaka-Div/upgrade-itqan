@@ -801,7 +801,7 @@ export async function previewCompetitionResults(competitionId: string, stageId?:
        JOIN users u ON u.id = ce.student_id
       WHERE ce.competition_id = $1
         AND ($2::uuid IS NULL OR ce.stage_id = $2)
-        AND ce.status IN ('evaluated', 'winner', 'qualified', 'eliminated')
+        AND ce.status IN ('evaluated', 'winner', 'qualified', 'eliminated', 'disqualified')
         AND ce.score IS NOT NULL
       ORDER BY ce.score DESC, ce.submitted_at ASC`,
     [competitionId, targetStageId],
@@ -981,10 +981,10 @@ export async function advanceStageOrFinalize(
       }
       // Mark advancing vs eliminated in the CURRENT stage.
       for (const row of advancing) {
-        await tx(`UPDATE competition_entries SET status = 'qualified' WHERE id = $1`, [row.entry_id])
+        await tx(`UPDATE competition_entries SET status = 'winner' WHERE id = $1`, [row.entry_id])
       }
       for (const row of eliminated) {
-        await tx(`UPDATE competition_entries SET status = 'eliminated' WHERE id = $1`, [row.entry_id])
+        await tx(`UPDATE competition_entries SET status = 'disqualified' WHERE id = $1`, [row.entry_id])
       }
       // Create fresh pending entries for advancers in the NEXT stage.
       for (const row of advancing) {
