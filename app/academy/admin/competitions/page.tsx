@@ -118,7 +118,7 @@ export default function AdminCompetitionsPage() {
     setSubmittingEval(true)
     try {
       let finalScore = evalForm.score
-      if (selectedComp.type === 'tajweed') { const vals = Object.values(evalForm.tajweed_scores); finalScore = vals.length ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length * 10) / 10 : 0 }
+      if (selectedComp.type === 'tajweed') { const vals = Object.values(evalForm.tajweed_scores); finalScore = vals.reduce((a, b) => a + b, 0) }
       const res = await fetch(`/api/academy/admin/competitions/${selectedComp.id}/entries/${evaluatingId}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ score: finalScore, tajweed_scores: evalForm.tajweed_scores, feedback: evalForm.feedback, mark_as_winner: evalForm.mark_as_winner }) })
       if (res.ok) { setEvaluatingId(null); fetchEntries(selectedComp); fetchCompetitions() }
       else { const d = await res.json(); alert(d.error || a.compError) }

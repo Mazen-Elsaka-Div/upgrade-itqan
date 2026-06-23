@@ -247,7 +247,7 @@ export default function AdminLibraryCompetitionsPage() {
       let finalScore = evalForm.score
       if (selectedComp.type === 'tajweed') {
         const vals = Object.values(evalForm.tajweed_scores)
-        finalScore = vals.length ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length * 10) / 10 : 0
+        finalScore = vals.reduce((a, b) => a + b, 0)
       }
       const res = await fetch(`/api/admin/competitions/${selectedComp.id}/entries/${evaluatingId}/evaluate`, {
         method: 'POST',

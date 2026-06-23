@@ -149,7 +149,7 @@ export default function ReaderCompetitionDetailPage({ params }: { params: Promis
         const values = Object.values(evalForm.tajweed_scores)
         // Each rule is scored out of 10; the average (0-10) is scaled to a /100 final score
         // so tajweed entries use the same scale as every other competition type.
-        finalScore = values.length > 0 ? Math.round((values.reduce((a, b) => a + b, 0) / values.length) * 10 * 10) / 10 : 0
+        finalScore = values.reduce((a, b) => a + b, 0)
       }
 
       const res = await fetch(`/api/reader/competitions/entries/${evaluatingId}/evaluate`, {

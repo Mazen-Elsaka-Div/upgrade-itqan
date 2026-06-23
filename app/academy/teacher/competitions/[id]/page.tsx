@@ -99,7 +99,7 @@ export default function TeacherCompetitionDetailPage({ params }: { params: Promi
       let finalScore = evalForm.score
       if (competition?.type === 'tajweed' && Object.keys(evalForm.tajweed_scores).length > 0) {
         const values = Object.values(evalForm.tajweed_scores)
-        finalScore = values.length > 0 ? Math.round(values.reduce((a, b) => a + b, 0) / values.length * 10) / 10 : 0
+        finalScore = values.reduce((a, b) => a + b, 0)
       }
 
       const res = await fetch(`/api/academy/teacher/competitions/${id}/entries/${evaluatingId}/evaluate`, {
