@@ -1,7 +1,5 @@
-
-const t: any = new Proxy({}, { get: () => new Proxy({}, { get: () => undefined }) });
-import { useI18n } from "@/lib/i18n/context";
 'use client'
+
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
