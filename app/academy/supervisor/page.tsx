@@ -102,7 +102,6 @@ export default function AcademySupervisorDashboard() {
     { href: '/academy/supervisor/content', label: a.svContentSupervision, desc: a.svContentSupervisionDesc, icon: BookOpen, color: 'text-blue-500', bg: 'bg-blue-500/10' },
     { href: '/academy/fiqh-supervisor/questions', label: a.svFiqhQuestions, desc: a.svFiqhQuestionsDesc, icon: HelpCircle, color: 'text-rose-500', bg: 'bg-rose-500/10' },
     { href: '/academy/supervisor/teachers', label: a.svTeacherVerification, desc: a.svTeacherVerificationDesc, icon: UserCheck, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-    { href: '/academy/supervisor/quality', label: a.svQualityMonitorShort, desc: a.svQualityMonitorDesc, icon: BarChart3, color: 'text-purple-500', bg: 'bg-purple-500/10' },
   ]
 
   return (
