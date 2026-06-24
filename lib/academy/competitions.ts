@@ -417,12 +417,20 @@ export async function getCompetitionJudges(competitionId: string): Promise<Judge
  * Users eligible to be assigned as judges (teachers + reciters). Optional
  * free-text search on name/email. Capped to keep the picker responsive.
  */
-export async function getCandidateJudges(search?: string): Promise<CandidateJudge[]> {
+export async function getCandidateJudges(search?: string, scope?: string): Promise<CandidateJudge[]> {
   const params: any[] = []
   let sql = `SELECT id, name, email, role, avatar_url
              FROM users
              WHERE role = ANY($1)`
-  params.push(JUDGE_ROLES as unknown as string[])
+  
+  let allowedRoles = [...JUDGE_ROLES] as string[]
+  if (scope === 'academy') {
+    allowedRoles = allowedRoles.filter(r => ['teacher', 'student_supervisor', 'academy_admin', 'admin'].includes(r))
+  } else if (scope === 'library') {
+    allowedRoles = allowedRoles.filter(r => ['reader', 'reciter_supervisor', 'admin'].includes(r))
+  }
+  
+  params.push(allowedRoles)
   if (search && search.trim()) {
     params.push(`%${search.trim()}%`)
     sql += ` AND (name ILIKE $${params.length} OR email ILIKE $${params.length})`
@@ -432,10 +440,21 @@ export async function getCandidateJudges(search?: string): Promise<CandidateJudg
 }
 
 export async function addCompetitionJudge(competitionId: string, judgeId: string) {
+  const comp = await queryOne<{ scope: string }>(`SELECT scope FROM competitions WHERE id = $1`, [competitionId])
+  if (!comp) return { success: false as const, error: ((en.extracted_2026_v2 as any)?.["المسابقة غير موجودة"] || "المسابقة غير موجودة") }
+
   const user = await queryOne<{ role: string }>(`SELECT role FROM users WHERE id = $1`, [judgeId])
   if (!user) return { success: false as const, error: ((en.extracted_2026_v2 as any)?.["المستخدم غير موجود"] || "المستخدم غير موجود") }
-  if (!(JUDGE_ROLES as readonly string[]).includes(user.role)) {
-    return { success: false as const, error: ((en.extracted_2026_v2 as any)?.["يمكن تعيين المدرّسين أو المقرئين أو المشرفين فقط كمحكّمين"] || "يمكن تعيين المدرّسين أو المقرئين أو المشرفين فقط كمحكّمين") }
+
+  let allowedRoles = [...JUDGE_ROLES] as string[]
+  if (comp.scope === 'academy') {
+    allowedRoles = allowedRoles.filter(r => ['teacher', 'student_supervisor', 'academy_admin', 'admin'].includes(r))
+  } else if (comp.scope === 'library') {
+    allowedRoles = allowedRoles.filter(r => ['reader', 'reciter_supervisor', 'admin'].includes(r))
+  }
+
+  if (!allowedRoles.includes(user.role)) {
+    return { success: false as const, error: ((en.extracted_2026_v2 as any)?.["دور المستخدم غير صالح للتحكيم في هذه المسابقة"] || "دور المستخدم غير صالح للتحكيم في هذه المسابقة") }
   }
   await query(
     `INSERT INTO competition_judges (competition_id, judge_id)

@@ -30,7 +30,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const search = new URL(req.url).searchParams.get('search') || undefined
     const [judges, candidates] = await Promise.all([
       getCompetitionJudges(id),
-      getCandidateJudges(search),
+      getCandidateJudges(search, 'academy'),
     ])
     return NextResponse.json({ judges, candidates })
   } catch (error) {
