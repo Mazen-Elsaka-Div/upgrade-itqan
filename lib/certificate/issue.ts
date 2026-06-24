@@ -122,7 +122,7 @@ export async function buildValuesForRequest(
   const dataMap = (r.data || {}) as Record<string, string>
 
   const values: FieldValues = {
-    student_name: r.student_name,
+    student_name: dataMap.display_name || dataMap.arabic_name || r.student_name,
     teacher_name: teacherName || dataMap.teacher_name || "",
     source_label: r.source_label || "",
     reason,
