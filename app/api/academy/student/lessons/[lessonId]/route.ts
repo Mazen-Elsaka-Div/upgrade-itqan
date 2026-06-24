@@ -47,7 +47,7 @@ export async function GET(
       `
       const comps = await query(compQ, [lessonId, session.sub])
       if (comps.length > 0) is_completed = true
-    } catch (e) { }
+    } catch (e) { console.error('[lesson] completion check failed:', e) }
 
     // 4. Fetch attachments
     const attachments = await query(`SELECT id, file_url, file_type, file_name FROM lesson_attachments WHERE lesson_id = $1`, [lessonId])

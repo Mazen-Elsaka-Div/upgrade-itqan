@@ -249,7 +249,7 @@ function ReaderChatContent() {
           const data = await res.json()
           setSearchResults(data.students || [])
         }
-      } catch (err) { }
+      } catch (err) { console.error('Student search failed:', err) }
       finally { setSearching(false) }
     }, 500)
     return () => clearTimeout(delayDebounceFn)
