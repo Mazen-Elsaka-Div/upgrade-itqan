@@ -5,7 +5,7 @@ import { awardCompetitionWinner } from '@/lib/academy/competitions'
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getSession()
-  if (!session || !['academy_admin', 'admin'].includes(session.role)) {
+  if (!session || !['academy_admin', 'admin', 'student_supervisor'].includes(session.role)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
   const { id } = await params
@@ -75,7 +75,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getSession()
-  if (!session || !['academy_admin', 'admin'].includes(session.role)) {
+  if (!session || !['academy_admin', 'admin', 'student_supervisor'].includes(session.role)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
   const { id } = await params

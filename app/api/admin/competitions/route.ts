@@ -13,8 +13,9 @@ export async function GET(req: NextRequest) {
     const url = new URL(req.url)
     const status = url.searchParams.get('status')
     const type = url.searchParams.get('type')
-    const filters: string[] = [`c.scope = 'library'`]
+    const filters: string[] = []
     const params: any[] = []
+
 
     if (status && status !== 'all') {
       params.push(status)
@@ -38,7 +39,7 @@ export async function GET(req: NextRequest) {
       LEFT JOIN users creator ON creator.id = c.created_by
       LEFT JOIN users winner ON winner.id = c.winner_id
       LEFT JOIN competition_entries ce ON ce.competition_id = c.id
-      WHERE ${filters.join(' AND ')}
+      ${filters.length > 0 ? `WHERE ${filters.join(' AND ')}` : ''}
       GROUP BY c.id, creator.name, winner.name
       ORDER BY c.created_at DESC
     `, params)
@@ -75,6 +76,7 @@ export async function POST(req: NextRequest) {
       award_top_n,
       certificate_template_id,
       stages,
+      scope,
     } = await req.json()
 
     if (!title || !start_date || !end_date) {
@@ -84,6 +86,7 @@ export async function POST(req: NextRequest) {
     const now = new Date()
     const start = new Date(start_date)
     const status = start > now ? 'upcoming' : 'active'
+    const finalScope = scope === 'academy' ? 'academy' : 'library'
 
     const result = await query<{ id: string }>(`
       INSERT INTO competitions (
@@ -92,7 +95,7 @@ export async function POST(req: NextRequest) {
         badge_key, points_multiplier, min_verses, is_featured, scope, created_at,
         certificate_enabled, award_top_n, certificate_template_id
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, 'library', NOW(), $16, $17, $18)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $19, NOW(), $16, $17, $18)
       RETURNING *
     `, [
       title,
@@ -117,6 +120,7 @@ export async function POST(req: NextRequest) {
       Boolean(certificate_enabled),
       award_top_n ? Number(award_top_n) : null,
       certificate_template_id || null,
+      finalScope,
     ])
 
     // Set up the competition's stages (rounds). When no/one stage is provided,

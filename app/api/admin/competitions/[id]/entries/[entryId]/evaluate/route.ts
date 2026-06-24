@@ -17,7 +17,7 @@ export async function POST(
   try {
     // Verify competition belongs to library
     const competition = await queryOne(
-      `SELECT id FROM competitions WHERE id = $1 AND scope = 'library'`,
+      `SELECT id FROM competitions WHERE id = $1`,
       [id]
     )
     if (!competition) return NextResponse.json({ error: 'Not found' }, { status: 404 })

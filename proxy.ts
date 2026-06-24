@@ -223,8 +223,12 @@ export default async function middleware(req: NextRequest) {
 
                 // Check if user has academy access before allowing them into /academy.
                 // NOTE: pending/rejected teachers are handled above and never reach this check.
+                // Admin-role supervisors (student_supervisor, reciter_supervisor) always have
+                // access to /academy/admin/* regardless of the has_academy_access flag.
+                const adminSupervisorRoles = ['admin', 'student_supervisor', 'reciter_supervisor', 'academy_admin']
+                const isAdminSupervisor = adminSupervisorRoles.includes(sessionPayload.role)
                 if (pathname.startsWith("/academy") && !academyPublicPaths.some(p => pathname.startsWith(p)) && !isFiqhLibraryPath(pathname)) {
-                    if (!hasAcademyAccess && sessionPayload.role !== 'admin') {
+                    if (!hasAcademyAccess && !isAdminSupervisor) {
                         // Send to /student if they still have quran access, else home
                         const target = hasQuranAccess ? "/student" : "/"
                         return NextResponse.redirect(new URL(target, req.url))

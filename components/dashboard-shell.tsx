@@ -160,7 +160,7 @@ const getRoleConfig = (t: any): Record<'student' | 'reader' | 'admin' | 'student
           { href: '/admin/supervisor-tasks', label: t.admin.sidebarSupervisorTasks, icon: ListChecks },
           { href: '/admin/users', label: t.admin.users, icon: Users },
           { href: '/admin/recitations', label: t.admin.recitations, icon: FileText },
-          { href: '/academy/admin/competitions', label: t.admin.sidebarCompetitions || t.academy?.competitions, icon: Trophy },
+          { href: '/admin/competitions', label: t.admin.sidebarCompetitions || t.academy?.competitions, icon: Trophy },
           { href: '/admin/conversations', label: t.admin.conversations, icon: MessagesSquare },
           { href: '/community/maqraa/forum', label: t.admin.sidebarForum || t.academy?.forum, icon: MessagesSquare },
           { href: '/academy/fiqh', label: t.admin.sidebarFiqhLibrary || t.academy?.fiqhLibrary, icon: Library },

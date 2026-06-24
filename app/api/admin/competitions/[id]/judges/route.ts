@@ -12,7 +12,7 @@ const ALLOWED = ['admin', 'student_supervisor', 'reciter_supervisor']
 
 async function ensureLibraryCompetition(id: string) {
   return queryOne<{ id: string }>(
-    `SELECT id FROM competitions WHERE id = $1 AND scope = 'library'`,
+    `SELECT id FROM competitions WHERE id = $1`,
     [id]
   )
 }

@@ -12,7 +12,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
   try {
     const competition = await queryOne(
-      `SELECT c.*, u.name as created_by_name FROM competitions c LEFT JOIN users u ON u.id = c.created_by WHERE c.id = $1 AND c.scope = 'library'`,
+      `SELECT c.*, u.name as created_by_name FROM competitions c LEFT JOIN users u ON u.id = c.created_by WHERE c.id = $1`,
       [id]
     )
     if (!competition) return NextResponse.json({ error: 'Not found' }, { status: 404 })
@@ -58,7 +58,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         award_top_n = $16,
         certificate_template_id = $17,
         updated_at = NOW()
-      WHERE id = $18 AND scope = 'library'
+      WHERE id = $18
       RETURNING *
     `, [
       title, description || null, type, start_date, end_date,
@@ -95,7 +95,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
 
   try {
     await query(`DELETE FROM competition_entries WHERE competition_id = $1`, [id])
-    await query(`DELETE FROM competitions WHERE id = $1 AND scope = 'library'`, [id])
+    await query(`DELETE FROM competitions WHERE id = $1`, [id])
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error deleting competition:', error)

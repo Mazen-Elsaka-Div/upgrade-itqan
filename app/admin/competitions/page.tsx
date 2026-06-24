@@ -41,6 +41,7 @@ interface Competition {
   evaluated_count?: number
   average_score?: number
   created_by_name?: string | null
+  scope?: string
 }
 
 interface Entry {
@@ -64,6 +65,7 @@ type CompetitionForm = {
   prizes_description: string; rules: string; tajweed_rules: string;
   badge_key: string; points_multiplier: number; min_verses: number; is_featured: boolean;
   certificate_enabled: boolean; award_top_n: number; certificate_template_id: string;
+  scope: string;
 }
 
 const emptyForm: CompetitionForm = {
@@ -71,6 +73,7 @@ const emptyForm: CompetitionForm = {
   max_participants: 100, prizes_description: '', rules: '', tajweed_rules: '',
   badge_key: 'star_of_halaqah', points_multiplier: 1, min_verses: 0, is_featured: false,
   certificate_enabled: false, award_top_n: 10, certificate_template_id: '',
+  scope: 'library',
 }
 
 function formatDate(value: string, isAr: boolean) {
@@ -196,6 +199,7 @@ export default function AdminLibraryCompetitionsPage() {
       certificate_enabled: Boolean(comp.certificate_enabled),
       award_top_n: Number(comp.award_top_n || 10),
       certificate_template_id: comp.certificate_template_id || '',
+      scope: comp.scope || 'library',
     })
     setShowModal(true)
   }
@@ -216,6 +220,7 @@ export default function AdminLibraryCompetitionsPage() {
           certificate_template_id: form.certificate_template_id || null,
           award_top_n: form.certificate_enabled ? Number(form.award_top_n) || 10 : null,
           stages: editItem ? undefined : stages,
+          scope: form.scope,
         }),
       })
       if (res.ok) { setShowModal(false); fetchCompetitions() }
@@ -412,9 +417,9 @@ export default function AdminLibraryCompetitionsPage() {
         <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-3 max-w-2xl">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm font-bold backdrop-blur">
-              <BookOpen className="h-4 w-4" /> {tr('مسابقات المقرأة', 'Maqra’ah Competitions')}
+              <BookOpen className="h-4 w-4" /> {tr('المسابقات', 'Competitions')}
             </div>
-            <h1 className="text-3xl font-black lg:text-4xl">{tr('إدارة مسابقات المقرأة', 'Maqra’ah Competitions Management')}</h1>
+            <h1 className="text-3xl font-black lg:text-4xl">{tr('إدارة المسابقات', 'Competitions Management')}</h1>
             <p className="text-sm text-white/80 leading-7">
               {tr(
                 'أنشئ مسابقات تلاوة وتجويد وحفظ خاصة بطلاب المقرأة. تابع المشاركات وتحكيم القراء، وأعلن الفائزين لمنحهم النقاط والشارات.',
@@ -600,8 +605,8 @@ export default function AdminLibraryCompetitionsPage() {
           <div className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-3xl border border-border bg-card shadow-2xl">
             <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-card/95 p-6 backdrop-blur">
               <div>
-                <h3 className="text-xl font-black">{editItem ? tr('تعديل المسابقة', 'Edit Competition') : tr('مسابقة جديدة للمقرأة', 'New Maqra’ah Competition')}</h3>
-                <p className="mt-1 text-sm text-muted-foreground">{tr('هذه المسابقة خاصة بطلاب المقرأة فقط', 'This competition is for Maqra’ah students only')}</p>
+                <h3 className="text-xl font-black">{editItem ? tr('تعديل المسابقة', 'Edit Competition') : tr('مسابقة جديدة', 'New Maqra’ah Competition')}</h3>
+                <p className="mt-1 text-sm text-muted-foreground">{tr('أنشئ مسابقة جديدة واختر ما إذا كانت للمقرأة أو للأكاديمية', 'This competition is for Maqra’ah students only')}</p>
               </div>
               <button onClick={() => setShowModal(false)} className="rounded-xl p-2 hover:bg-muted transition"><X className="h-5 w-5" /></button>
             </div>
@@ -618,7 +623,7 @@ export default function AdminLibraryCompetitionsPage() {
                 ))}
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-4 sm:grid-cols-3">
                 <label className="block space-y-1.5 text-sm font-bold">
                   <span>{tr('اسم المسابقة', 'Competition Name')} <span className="text-red-500">*</span></span>
                   <input required value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))}
@@ -629,6 +634,14 @@ export default function AdminLibraryCompetitionsPage() {
                   <select value={form.type} onChange={e => setForm(p => ({ ...p, type: e.target.value, badge_key: TYPE_CONFIG[e.target.value]?.badge || 'star_of_halaqah' }))}
                     className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary">
                     {Object.entries(TYPE_CONFIG).map(([t, c]) => <option key={t} value={t}>{c.label}</option>)}
+                  </select>
+                </label>
+                <label className="block space-y-1.5 text-sm font-bold">
+                  <span>{tr('نطاق المسابقة', 'Competition Scope')}</span>
+                  <select value={form.scope} onChange={e => setForm(p => ({ ...p, scope: e.target.value }))}
+                    className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary">
+                    <option value="library">{tr('المقرأة', 'Maqra’ah')}</option>
+                    <option value="academy">{tr('الأكاديمية', 'Academy')}</option>
                   </select>
                 </label>
               </div>

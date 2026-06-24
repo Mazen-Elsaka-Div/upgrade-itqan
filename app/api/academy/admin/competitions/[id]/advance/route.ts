@@ -9,7 +9,7 @@ import {
   cancelCompetition,
 } from '@/lib/academy/competitions'
 
-const ALLOWED = ['academy_admin', 'admin']
+const ALLOWED = ['academy_admin', 'admin', 'student_supervisor']
 
 // GET: preview the active stage's ranking + cutoff (no writes).
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {

@@ -5,7 +5,7 @@ import { createCompetitionStages, type StageInput } from '@/lib/academy/competit
 
 export async function GET(req: NextRequest) {
   const session = await getSession()
-  if (!session || !['academy_admin', 'admin'].includes(session.role)) {
+  if (!session || !['academy_admin', 'admin', 'student_supervisor'].includes(session.role)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
   try {
@@ -49,7 +49,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const session = await getSession()
-  if (!session || !['academy_admin', 'admin'].includes(session.role)) {
+  if (!session || !['academy_admin', 'admin', 'student_supervisor'].includes(session.role)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
   try {

@@ -13,7 +13,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
   try {
     const competition = await queryOne(
-      `SELECT * FROM competitions WHERE id = $1 AND scope = 'library'`,
+      `SELECT * FROM competitions WHERE id = $1`,
       [id]
     )
     if (!competition) return NextResponse.json({ error: 'Not found' }, { status: 404 })

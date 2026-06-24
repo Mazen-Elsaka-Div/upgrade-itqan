@@ -8,7 +8,7 @@ import {
   removeCompetitionJudge,
 } from '@/lib/academy/competitions'
 
-const ALLOWED = ['academy_admin', 'admin']
+const ALLOWED = ['academy_admin', 'admin', 'student_supervisor']
 
 async function ensureAcademyCompetition(id: string) {
   return queryOne<{ id: string }>(
