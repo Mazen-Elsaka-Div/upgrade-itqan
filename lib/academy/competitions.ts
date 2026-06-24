@@ -862,12 +862,15 @@ async function finalizeStageAsResults(
   stage: CompetitionStage,
   remainingStageIds: string[],
 ): Promise<{ success: boolean; error?: string; winners?: number; ranked?: number }> {
-  const { ready, ranking } = await previewCompetitionResults(competitionId, stage.id)
+  const { ready, ranking, topN } = await previewCompetitionResults(competitionId, stage.id)
   if (!ready) {
     return { success: false, error: ((en.extracted_2026_v2 as any)?.["لا توجد مشاركات مُقيّمة لاعتماد نتائجها"] || "لا توجد مشاركات مُقيّمة لاعتماد نتائجها") }
   }
 
   const winnerRows = ranking.filter((r) => r.is_winner)
+  if (winnerRows.length > topN) {
+    return { success: false, error: ((en.extracted_2026_v2 as any)?.["يوجد تعادل في الدرجات يتجاوز العدد المسموح. يرجى تعديل التقييم لكسر التعادل."] || "يوجد تعادل في الدرجات يتجاوز العدد المسموح. يرجى تعديل التقييم لكسر التعادل.") }
+  }
   const firstPlace = ranking.find((r) => r.rank === 1)
 
   await withTransaction(async (tx) => {
@@ -985,12 +988,15 @@ export async function advanceStageOrFinalize(
       return { ...res, finalized: true }
     }
 
-    const { ready, ranking } = await previewCompetitionResults(competitionId, stage.id)
+    const { ready, ranking, topN } = await previewCompetitionResults(competitionId, stage.id)
     if (!ready) {
       return { success: false, error: ((en.extracted_2026_v2 as any)?.["لا توجد مشاركات مُقيّمة في هذه المرحلة"] || "لا توجد مشاركات مُقيّمة في هذه المرحلة") }
     }
 
     const advancing = ranking.filter((r) => r.is_winner) // is_winner == within advance_count here
+    if (advancing.length > topN) {
+      return { success: false, error: ((en.extracted_2026_v2 as any)?.["يوجد تعادل في الدرجات يتجاوز العدد المسموح للتأهل. يرجى تعديل التقييم لكسر التعادل."] || "يوجد تعادل في الدرجات يتجاوز العدد المسموح للتأهل. يرجى تعديل التقييم لكسر التعادل.") }
+    }
     const eliminated = ranking.filter((r) => !r.is_winner)
 
     await withTransaction(async (tx) => {
