@@ -46,11 +46,12 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     const body = await req.json().catch(() => ({}))
     const action = body?.action || 'advance'
+    const allowTie = !!body?.allowTie
 
     const result =
-      action === 'finalize_now' ? await finalizeCurrentStageAsResults(id)
+      action === 'finalize_now' ? await finalizeCurrentStageAsResults(id, allowTie)
       : action === 'cancel' ? await cancelCompetition(id)
-      : await advanceStageOrFinalize(id)
+      : await advanceStageOrFinalize(id, { allowTie })
 
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 })

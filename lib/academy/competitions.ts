@@ -861,6 +861,7 @@ async function finalizeStageAsResults(
   competitionId: string,
   stage: CompetitionStage,
   remainingStageIds: string[],
+  allowTie: boolean = false,
 ): Promise<{ success: boolean; error?: string; winners?: number; ranked?: number }> {
   const { ready, ranking, topN } = await previewCompetitionResults(competitionId, stage.id)
   if (!ready) {
@@ -868,7 +869,7 @@ async function finalizeStageAsResults(
   }
 
   const winnerRows = ranking.filter((r) => r.is_winner)
-  if (winnerRows.length > topN) {
+  if (!allowTie && winnerRows.length > topN) {
     return { success: false, error: ((en.extracted_2026_v2 as any)?.["يوجد تعادل في الدرجات يتجاوز العدد المسموح. يرجى تعديل التقييم لكسر التعادل."] || "يوجد تعادل في الدرجات يتجاوز العدد المسموح. يرجى تعديل التقييم لكسر التعادل.") }
   }
   const firstPlace = ranking.find((r) => r.rank === 1)
@@ -930,6 +931,7 @@ async function finalizeStageAsResults(
 export async function finalizeCompetitionResults(
   competitionId: string,
   stageId?: string,
+  allowTie: boolean = false,
 ): Promise<{ success: boolean; error?: string; winners?: number; ranked?: number }> {
   try {
     const stages = await getStages(competitionId)
@@ -940,7 +942,7 @@ export async function finalizeCompetitionResults(
       return { success: false, error: ((en.extracted_2026_v2 as any)?.["لا توجد مرحلة نشطة"] || "لا توجد مرحلة نشطة") }
     }
     const remaining = stages.filter((s) => s.order_index > stage.order_index).map((s) => s.id)
-    return await finalizeStageAsResults(competitionId, stage, remaining)
+    return await finalizeStageAsResults(competitionId, stage, remaining, allowTie)
   } catch (error) {
     console.error('Error finalizing competition results:', error)
     return { success: false, error: ((en.extracted_2026_v2 as any)?.["حدث خطأ أثناء اعتماد النتائج"] || "حدث خطأ أثناء اعتماد النتائج") }
@@ -948,8 +950,8 @@ export async function finalizeCompetitionResults(
 }
 
 /** Explicit alias for the admin "finalize current stage now" action (option 2). */
-export async function finalizeCurrentStageAsResults(competitionId: string) {
-  return finalizeCompetitionResults(competitionId)
+export async function finalizeCurrentStageAsResults(competitionId: string, allowTie: boolean = false) {
+  return finalizeCompetitionResults(competitionId, undefined, allowTie)
 }
 
 /**
@@ -966,6 +968,7 @@ export async function finalizeCurrentStageAsResults(competitionId: string) {
  */
 export async function advanceStageOrFinalize(
   competitionId: string,
+  opts?: { allowTie?: boolean },
 ): Promise<{ success: boolean; error?: string; advanced?: number; eliminated?: number; finalized?: boolean; winners?: number }> {
   try {
     const stages = await getStages(competitionId)
@@ -976,7 +979,7 @@ export async function advanceStageOrFinalize(
 
     // Final stage → crown winners.
     if (isFinalStage(stage, stages)) {
-      const res = await finalizeCompetitionResults(competitionId, stage.id)
+      const res = await finalizeCompetitionResults(competitionId, stage.id, opts?.allowTie)
       return { ...res, finalized: true }
     }
 
@@ -984,7 +987,7 @@ export async function advanceStageOrFinalize(
     const nextStage = await getNextStage(competitionId, stage.order_index)
     if (!nextStage) {
       // No next stage despite not being "final" (shouldn't happen) — finalize.
-      const res = await finalizeCompetitionResults(competitionId, stage.id)
+      const res = await finalizeCompetitionResults(competitionId, stage.id, opts?.allowTie)
       return { ...res, finalized: true }
     }
 
@@ -994,7 +997,7 @@ export async function advanceStageOrFinalize(
     }
 
     const advancing = ranking.filter((r) => r.is_winner) // is_winner == within advance_count here
-    if (advancing.length > topN) {
+    if (!opts?.allowTie && advancing.length > topN) {
       return { success: false, error: ((en.extracted_2026_v2 as any)?.["يوجد تعادل في الدرجات يتجاوز العدد المسموح للتأهل. يرجى تعديل التقييم لكسر التعادل."] || "يوجد تعادل في الدرجات يتجاوز العدد المسموح للتأهل. يرجى تعديل التقييم لكسر التعادل.") }
     }
     const eliminated = ranking.filter((r) => !r.is_winner)

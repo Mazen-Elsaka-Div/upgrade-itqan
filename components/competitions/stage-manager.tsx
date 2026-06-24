@@ -62,6 +62,7 @@ export function StageManager({
   const [busy, setBusy] = useState(false)
   const [confirm, setConfirm] = useState<null | "advance" | "finalize_now" | "cancel">(null)
   const [error, setError] = useState<string | null>(null)
+  const [allowTie, setAllowTie] = useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -95,7 +96,7 @@ export function StageManager({
       const res = await fetch(`${basePath}/advance`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action }),
+        body: JSON.stringify({ action, allowTie }),
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
@@ -103,6 +104,7 @@ export function StageManager({
         return
       }
       setConfirm(null)
+      setAllowTie(false)
       await load()
       onChanged?.()
     } catch {
@@ -111,6 +113,8 @@ export function StageManager({
       setBusy(false)
     }
   }
+
+  const tieAtCutoff = preview ? preview.ranking.filter(r => r.is_winner).length > (cutoff || 0) : false
 
   if (loading) {
     return (
@@ -256,6 +260,20 @@ export function StageManager({
                 <span>{"سيتم إنهاء المسابقة فوراً بدون فائز أو نقاط أو شهادات، مع إشعار كل المشاركين. لا يمكن التراجع."}</span>
               )}
             </DialogDescription>
+            {tieAtCutoff && (confirm === "advance" || confirm === "finalize_now") && (
+              <div className="mt-4 flex items-center space-x-2 space-x-reverse rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+                <input
+                  type="checkbox"
+                  id="allowTie"
+                  className="h-4 w-4 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
+                  checked={allowTie}
+                  onChange={(e) => setAllowTie(e.target.checked)}
+                />
+                <label htmlFor="allowTie" className="font-medium cursor-pointer">
+                  يوجد تعادل يتجاوز العدد المسموح. السماح لهم بمشاركة المركز وتخطي الحد الأقصى للمقاعد؟
+                </label>
+              </div>
+            )}
           </DialogHeader>
           {error && <p className="text-sm text-destructive">{error}</p>}
           <DialogFooter>
