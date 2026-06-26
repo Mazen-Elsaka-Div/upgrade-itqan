@@ -7,16 +7,21 @@ import { query, queryOne } from "../db"
 import { UserRole } from "../types/lms"
 import type { User as LMSUser } from "../types/lms"
 
+const SAFE_USER_COLUMNS = `
+  id, name, email, role, gender, email_verified,
+  created_at, updated_at, role_changed_at, role_changed_by
+`
+
 export async function getUserById(userId: string): Promise<LMSUser | null> {
   return queryOne<LMSUser>(
-    `SELECT * FROM users WHERE id = $1`,
+    `SELECT ${SAFE_USER_COLUMNS} FROM users WHERE id = $1`,
     [userId]
   )
 }
 
 export async function getUserByEmail(email: string): Promise<LMSUser | null> {
   return queryOne<LMSUser>(
-    `SELECT * FROM users WHERE email = $1`,
+    `SELECT ${SAFE_USER_COLUMNS} FROM users WHERE email = $1`,
     [email]
   )
 }
@@ -31,7 +36,7 @@ export async function createLMSUser(
   return queryOne<LMSUser>(
     `INSERT INTO users (id, email, name, role, gender) 
      VALUES ($1, $2, $3, $4, $5)
-     RETURNING *`,
+     RETURNING ${SAFE_USER_COLUMNS}`,
     [userId, email, name, role, gender]
   )
 }
@@ -46,25 +51,25 @@ export async function updateUserRole(userId: string, role: UserRole): Promise<bo
 
 export async function getAllTeachers(): Promise<LMSUser[]> {
   return query<LMSUser>(
-    `SELECT * FROM users WHERE role = 'TEACHER' ORDER BY name ASC`
+    `SELECT ${SAFE_USER_COLUMNS} FROM users WHERE role = 'TEACHER' ORDER BY name ASC`
   )
 }
 
 export async function getAllStudents(): Promise<LMSUser[]> {
   return query<LMSUser>(
-    `SELECT * FROM users WHERE role = 'STUDENT' ORDER BY name ASC`
+    `SELECT ${SAFE_USER_COLUMNS} FROM users WHERE role = 'STUDENT' ORDER BY name ASC`
   )
 }
 
 export async function getAllParents(): Promise<LMSUser[]> {
   return query<LMSUser>(
-    `SELECT * FROM users WHERE role = 'PARENT' ORDER BY name ASC`
+    `SELECT ${SAFE_USER_COLUMNS} FROM users WHERE role = 'PARENT' ORDER BY name ASC`
   )
 }
 
 export async function getUsersByRole(role: UserRole): Promise<LMSUser[]> {
   return query<LMSUser>(
-    `SELECT * FROM users WHERE role = $1 ORDER BY name ASC`,
+    `SELECT ${SAFE_USER_COLUMNS} FROM users WHERE role = $1 ORDER BY name ASC`,
     [role]
   )
 }
@@ -94,7 +99,7 @@ export async function hasPermission(userId: string, permissionId: string): Promi
 
 export async function getTeacherStudents(teacherId: string): Promise<LMSUser[]> {
   return query<LMSUser>(
-    `SELECT DISTINCT u.* FROM users u
+    `SELECT DISTINCT ${SAFE_USER_COLUMNS.split(',').map(c => `u.${c.trim()}`).join(', ')} FROM users u
      JOIN course_enrollments ce ON u.id = ce.student_id
      JOIN courses c ON ce.course_id = c.id
      WHERE c.teacher_id = $1 AND u.role = 'STUDENT'

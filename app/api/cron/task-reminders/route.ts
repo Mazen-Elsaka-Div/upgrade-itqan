@@ -1,9 +1,14 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { query } from '@/lib/db'
 import { createNotification } from '@/lib/notifications'
+import { isCronAuthorized } from '@/lib/cron-auth'
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    if (!isCronAuthorized(req)) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
     let morningReminders = 0
     let overdueAlerts = 0
 

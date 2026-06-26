@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { query } from "@/lib/db"
 import { createNotification } from "@/lib/notifications"
+import { isCronAuthorized } from "@/lib/cron-auth"
 
 /**
  * GET / POST  /api/cron/academy-reminders
@@ -42,13 +43,7 @@ interface TaskRow {
 }
 
 function isAuthorized(req: NextRequest): boolean {
-  const expected = process.env.CRON_SECRET
-  if (!expected) return true // No secret configured → allow (dev / preview)
-  const fromHeader =
-    req.headers.get("x-cron-secret") ||
-    req.headers.get("authorization")?.replace(/^Bearer\s+/i, "")
-  const fromQuery = new URL(req.url).searchParams.get("secret")
-  return fromHeader === expected || fromQuery === expected
+  return isCronAuthorized(req)
 }
 
 async function logRun(

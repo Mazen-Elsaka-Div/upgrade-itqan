@@ -97,11 +97,12 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await getSession()
-  if (!session || session.role !== 'student') {
-    return NextResponse.json({ error: 'غير مصرح' }, { status: 401 })
-  }
-  const me = session.sub
+  try {
+    const session = await getSession()
+    if (!session || session.role !== 'student') {
+      return NextResponse.json({ error: 'غير مصرح' }, { status: 401 })
+    }
+    const me = session.sub
 
   const body = await req.json().catch(() => ({}))
   const { request_id, action } = body as { request_id?: string; action?: string }
@@ -176,4 +177,8 @@ export async function POST(req: NextRequest) {
     action === 'approve' ? 'تم قبول الطلب بنجاح' : action === 'reject' ? 'تم رفض الطلب' : 'تم إلغاء الربط بنجاح'
 
   return NextResponse.json({ success: true, status: newStatus, message: successMessage })
+  } catch (error) {
+    console.error("[student/family] POST error:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+  }
 }

@@ -1,14 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
 import { generateAndSendParentWeeklyReports, getPreviousWeekWindow } from "@/lib/academy/parent-reports"
+import { isCronAuthorized } from "@/lib/cron-auth"
 
 function isAuthorized(req: NextRequest): boolean {
-  const expected = process.env.CRON_SECRET
-  if (!expected) return true
-  const fromHeader =
-    req.headers.get("x-cron-secret") ||
-    req.headers.get("authorization")?.replace(/^Bearer\s+/i, "")
-  const fromQuery = new URL(req.url).searchParams.get("secret")
-  return fromHeader === expected || fromQuery === expected
+  return isCronAuthorized(req)
 }
 
 async function run(req: NextRequest) {

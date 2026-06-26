@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { query } from "@/lib/db"
 import { getPrayerTimes, isWithinTimeWindow } from "@/lib/external/aladhan-api"
+import { isCronAuthorized } from "@/lib/cron-auth"
 
 /**
  * POST /api/cron/werd-reminders
@@ -16,10 +17,7 @@ import { getPrayerTimes, isWithinTimeWindow } from "@/lib/external/aladhan-api"
  */
 export async function POST(req: NextRequest) {
   try {
-    // Verify cron secret for security
-    const cronSecret = req.headers.get("x-cron-secret") || req.headers.get("authorization")?.replace("Bearer ", "")
-    
-    if (cronSecret !== process.env.CRON_SECRET) {
+    if (!isCronAuthorized(req)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 

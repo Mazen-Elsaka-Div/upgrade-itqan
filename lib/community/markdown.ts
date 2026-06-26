@@ -20,20 +20,33 @@ const escapeHtml = (s: string): string =>
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;")
 
+const isSafeUrl = (url: string): boolean => {
+  try {
+    const u = new URL(url, "https://example.com")
+    return ["http:", "https:", "mailto:"].includes(u.protocol)
+  } catch {
+    return false
+  }
+}
+
 const renderInline = (raw: string): string => {
   let text = escapeHtml(raw)
 
   // Images: ![alt](url)
   text = text.replace(
     /!\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]*)")?\)/g,
-    (_m, alt, url, title) =>
-      `<img src="${url}" alt="${alt}" ${title ? `title="${title}"` : ""} class="my-3 max-w-full rounded-lg" loading="lazy" />`
+    (_m, alt, url, title) => {
+      if (!isSafeUrl(url)) return alt || ""
+      return `<img src="${url}" alt="${alt}" ${title ? `title="${title}"` : ""} class="my-3 max-w-full rounded-lg" loading="lazy" />`
+    }
   )
   // Links: [text](url)
   text = text.replace(
     /\[([^\]]+)\]\(([^)\s]+)(?:\s+"([^"]*)")?\)/g,
-    (_m, label, url, title) =>
-      `<a href="${url}" ${title ? `title="${title}"` : ""} class="text-primary underline" target="_blank" rel="noopener noreferrer">${label}</a>`
+    (_m, label, url, title) => {
+      if (!isSafeUrl(url)) return label
+      return `<a href="${url}" ${title ? `title="${title}"` : ""} class="text-primary underline" target="_blank" rel="noopener noreferrer">${label}</a>`
+    }
   )
   // Inline code
   text = text.replace(

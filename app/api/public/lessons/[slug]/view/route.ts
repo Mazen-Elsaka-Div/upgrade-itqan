@@ -14,10 +14,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ slu
     duration_minutes: number
     meeting_link: string | null
     meeting_provider: string | null
-    meeting_password: string | null
     status: string
   }>(
-    `SELECT id, scheduled_at, duration_minutes, meeting_link, meeting_provider, meeting_password, status
+    `SELECT id, scheduled_at, duration_minutes, meeting_link, meeting_provider, status
      FROM public_lessons WHERE public_slug = $1 AND is_published = true LIMIT 1`,
     [slug]
   )
@@ -58,7 +57,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ slu
     meeting: exposeLink && lesson.meeting_link ? {
       link: lesson.meeting_link,
       provider: lesson.meeting_provider,
-      password: lesson.meeting_password,
     } : null,
   })
 }

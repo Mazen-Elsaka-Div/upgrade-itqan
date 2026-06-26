@@ -1,12 +1,16 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { query } from "@/lib/db"
 import { createNotification } from "@/lib/notifications"
 import { sendSessionReminderEmail } from "@/lib/email"
+import { isCronAuthorized } from "@/lib/cron-auth"
 
 // You can call this route using a cron job (e.g. Vercel Cron)
 // e.g. every hour: 0 * * * *
-export async function GET() {
+export async function GET(req: NextRequest) {
     try {
+        if (!isCronAuthorized(req)) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+        }
         // Find all bookings scheduled in the next 24 hours
         // that are confirmed and haven't had a reminder sent yet
         const bookingsParams = await query<{

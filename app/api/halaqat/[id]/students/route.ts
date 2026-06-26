@@ -24,9 +24,10 @@ async function loadHalaqaShort(id: string) {
  * themselves (limited fields).
  */
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const session = await getSession()
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const { id } = await params
+  try {
+    const session = await getSession()
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const { id } = await params
 
   const halaqa = await loadHalaqaShort(id)
   if (!halaqa) return NextResponse.json({ error: 'الحلقة غير موجودة' }, { status: 404 })
@@ -69,6 +70,10 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   )
 
   return NextResponse.json({ students })
+  } catch (error) {
+    console.error("[halaqat/students] GET error:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+  }
 }
 
 /**
@@ -78,9 +83,10 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
  * Enroll a student. Owner or platform admin only.
  */
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const session = await getSession()
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const { id } = await params
+  try {
+    const session = await getSession()
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const { id } = await params
 
   const halaqa = await loadHalaqaShort(id)
   if (!halaqa) return NextResponse.json({ error: 'الحلقة غير موجودة' }, { status: 404 })
@@ -126,6 +132,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     [id, studentId]
   )
   return NextResponse.json({ success: true, message: 'تمت إضافة الطالب' }, { status: 201 })
+  } catch (error) {
+    console.error("[halaqat/students] POST error:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+  }
 }
 
 /**
@@ -133,9 +143,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
  * Body: { student_id }
  */
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const session = await getSession()
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const { id } = await params
+  try {
+    const session = await getSession()
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const { id } = await params
 
   const halaqa = await loadHalaqaShort(id)
   if (!halaqa) return NextResponse.json({ error: 'الحلقة غير موجودة' }, { status: 404 })
@@ -157,4 +168,8 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     [id, studentId]
   )
   return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error("[halaqat/students] DELETE error:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+  }
 }

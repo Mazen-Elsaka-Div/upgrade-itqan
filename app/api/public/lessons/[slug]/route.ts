@@ -13,7 +13,6 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ slu
     public_slug: string
     meeting_link: string | null
     meeting_provider: string | null
-    meeting_password: string | null
     scheduled_at: string
     duration_minutes: number
     status: string
@@ -23,7 +22,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ slu
     teacher_avatar: string | null
   }>(
     `SELECT pl.id, pl.teacher_id, pl.title, pl.description, pl.cover_image_url, pl.public_slug,
-            pl.meeting_link, pl.meeting_provider, pl.meeting_password,
+            pl.meeting_link, pl.meeting_provider,
             pl.scheduled_at, pl.duration_minutes, pl.status, pl.is_published,
             u.name AS teacher_name, u.bio AS teacher_bio, u.avatar_url AS teacher_avatar
      FROM public_lessons pl
@@ -59,7 +58,6 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ slu
       meeting: exposeLink && lesson.meeting_link ? {
         link: lesson.meeting_link,
         provider: lesson.meeting_provider,
-        password: lesson.meeting_password,
       } : null,
     },
   })

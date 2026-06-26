@@ -59,7 +59,6 @@ if (databaseUrl) {
     console.error("[DB] Idle client error (handled, pool will recover):", err.message)
   })
 
-  console.log("[DB] Connected to database at:", databaseUrl.split('@')[1]?.split('/')[0] || 'unknown host')
 }
 
 // Warm up pool on startup (keeps 2 connections open so first requests are fast)

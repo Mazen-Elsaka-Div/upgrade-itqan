@@ -6,7 +6,9 @@ __v0_jsx-dev-runtime.ts
 # Common ignores
 node_modules/
 .next/
+.env
 .env*.local
+.env.*
 .DS_Store
 iqraa.zip
 itqaan_story.md
@@ -15,3 +17,6 @@ itqan-main (1).zip
 Itqan Upgrade.zip
 # typescript
 *.tsbuildinfo
+# temp/scratch files
+temp.html
+student_center_old.tsx

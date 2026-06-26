@@ -15,12 +15,13 @@ type RecSummary = { mastered_ayahs: number; reviewing_ayahs: number }
 type JuzRow = { juz_number: number }
 
 export async function GET() {
-  const session = await getSession()
-  if (!session || session.role !== "student") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
+  try {
+    const session = await getSession()
+    if (!session || session.role !== "student") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
 
-  const studentId = session.sub
+    const studentId = session.sub
 
   // 1. Daily aggregates for last 30 days
   const dailyData = await query<DailyAgg>(
@@ -186,4 +187,8 @@ export async function GET() {
       percentage: Math.round((activeDays30 / 30) * 100),
     },
   })
+  } catch (error) {
+    console.error("[progress-report] error:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+  }
 }

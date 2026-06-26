@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSession } from '@/lib/auth'
 import { sendAdminActivityReport } from '@/lib/admin/activity-reports'
+import { isCronAuthorized } from '@/lib/cron-auth'
 
-function isCronAuthorized(req: NextRequest) {
-  const expected = process.env.CRON_SECRET
-  if (!expected) return true
-  const token = req.headers.get('x-cron-secret') || req.headers.get('authorization')?.replace(/^Bearer\s+/i, '') || new URL(req.url).searchParams.get('secret')
-  return token === expected
+function isCronAuthorizedLocal(req: NextRequest) {
+  return isCronAuthorized(req)
 }
 
 async function run(req: NextRequest) {
@@ -14,7 +12,7 @@ async function run(req: NextRequest) {
   const period = url.searchParams.get('period') === 'monthly' ? 'monthly' : 'weekly'
   const dryRun = url.searchParams.get('dryRun') === '1' || url.searchParams.get('dryRun') === 'true'
 
-  if (!isCronAuthorized(req)) {
+  if (!isCronAuthorizedLocal(req)) {
     const session = await getSession()
     if (!session || session.role !== 'admin') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

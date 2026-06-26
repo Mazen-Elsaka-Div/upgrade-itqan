@@ -1,8 +1,9 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { query } from '@/lib/db'
 import { endVideoSession } from '@/lib/video-sessions'
 import { getVideoSettings } from '@/lib/video-settings'
 import { listRoomParticipants } from '@/lib/livekit'
+import { isCronAuthorized } from '@/lib/cron-auth'
 
 /**
  * Auto-end stale live sessions.
@@ -29,8 +30,12 @@ interface LiveSessionRow {
   last_activity_at: string | null
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    if (!isCronAuthorized(req)) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
     const live = await query<LiveSessionRow>(
       `SELECT
          vs.id,

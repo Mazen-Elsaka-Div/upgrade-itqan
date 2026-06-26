@@ -6,6 +6,27 @@ import { NextRequest, NextResponse } from 'next/server'
 // - Efficient streaming without buffering entire file in memory
 export const runtime = 'edge'
 
+// Only allow proxying from known file hosts to prevent SSRF (matches pdf-proxy).
+const ALLOWED_HOST_SUFFIXES = [
+  'utfs.io',
+  'ufs.sh',
+  'amazonaws.com',
+  'cloudinary.com',
+  'res.cloudinary.com',
+]
+
+function isAllowedUrl(fileUrl: string): boolean {
+  try {
+    const u = new URL(fileUrl)
+    if (u.protocol !== 'https:') return false
+    return ALLOWED_HOST_SUFFIXES.some(
+      (suffix) => u.hostname === suffix || u.hostname.endsWith(`.${suffix}`),
+    )
+  } catch {
+    return false
+  }
+}
+
 /**
  * Audio Proxy API
  * Proxies audio files from UploadThing (or any URL) while properly
@@ -20,6 +41,10 @@ export async function GET(request: NextRequest) {
 
     if (!fileUrl) {
       return NextResponse.json({ error: 'URL parameter is required' }, { status: 400 })
+    }
+
+    if (!isAllowedUrl(fileUrl)) {
+      return NextResponse.json({ error: 'URL host not allowed' }, { status: 403 })
     }
 
     // Forward the Range header from the browser (critical for Safari/iOS)
@@ -102,6 +127,10 @@ export async function HEAD(request: NextRequest) {
 
     if (!fileUrl) {
       return new NextResponse(null, { status: 400 })
+    }
+
+    if (!isAllowedUrl(fileUrl)) {
+      return new NextResponse(null, { status: 403 })
     }
 
     const upstream = await fetch(fileUrl, { method: 'HEAD' })

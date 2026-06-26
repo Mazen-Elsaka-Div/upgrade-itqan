@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
             verification_expires_at: string
             email_verified: boolean
         }>(
-            `SELECT * FROM users WHERE email = $1 LIMIT 1`,
+            `SELECT id, name, email, role, verification_code, verification_expires_at, email_verified FROM users WHERE email = $1 LIMIT 1`,
             [email.toLowerCase()]
         )
 

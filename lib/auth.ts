@@ -1,8 +1,15 @@
 import { cookies } from "next/headers"
 import { SignJWT, jwtVerify } from "jose"
 
+if (!process.env.JWT_SECRET) {
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("JWT_SECRET environment variable is required in production")
+  }
+  console.warn("[AUTH] JWT_SECRET not set — using dev fallback. NEVER deploy without setting JWT_SECRET.")
+}
+
 const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "hana-lazan-secret-key-change-in-production"
+  process.env.JWT_SECRET || "dev-only-fallback-do-not-deploy"
 )
 
 export type AllRoles = "student" | "reader" | "admin" | "student_supervisor" | "reciter_supervisor" | "teacher" | "parent" | "academy_admin" | "fiqh_supervisor" | "content_supervisor" | "supervisor" | "quality_supervisor"

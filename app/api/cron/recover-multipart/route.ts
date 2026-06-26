@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { query } from '@/lib/db'
 import {
   abortMultipart,
@@ -6,6 +6,7 @@ import {
   completeMultipart,
   listMultipartParts,
 } from '@/lib/recordings-s3'
+import { isCronAuthorized } from '@/lib/cron-auth'
 
 /**
  * Crash recovery for client-side multipart recordings.
@@ -23,7 +24,11 @@ export const dynamic = 'force-dynamic'
 
 const DEFAULT_INACTIVE_MIN = 10
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  if (!isCronAuthorized(req)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+
   const thresholdMin = Number(process.env.RECORDING_RECOVER_THRESHOLD_MIN || DEFAULT_INACTIVE_MIN)
 
   const stale = await query<{

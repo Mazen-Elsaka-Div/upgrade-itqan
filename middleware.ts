@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 
 const publicPaths = ["/", "/about", "/contact", "/sitemap-page", "/login", "/login-admin", "/register", "/reader-register", "/teacher-register", "/forgot-password", "/reset-password", "/verify", "/privacy", "/terms", "/maintenance", "/change-password", "/rejected"]
-const apiPublicPaths = ["/api/auth", "/api/admin/homepage", "/api/admin/analytics"]
+const apiPublicPaths = ["/api/auth", "/api/admin/homepage", "/api/admin/analytics", "/api/internal"]
 
 // Academy public paths (for public lessons and invitations)
 const academyPublicPaths = ["/academy/public", "/academy/invite", "/academy/lesson"]
@@ -93,35 +93,26 @@ export default async function middleware(req: NextRequest) {
                 let dbUser: any = null
                 if (isSensitiveRoute && !academyPublicPaths.some(p => pathname.startsWith(p))) {
                     try {
-                        // Query the live database directly (DATABASE_URL) via the shared pg
-                        // pool. The previous Supabase REST call was unreliable from the
-                        // middleware bundle — it resolved to the app's own host and returned an
-                        // HTML page, which made res.json() throw "Unexpected token '<'". A direct
-                        // query always targets the real live DB and never returns HTML.
-                        const { queryOne } = await import("@/lib/db")
-                        // The pool can take up to connectionTimeoutMillis (8s) just to
-                        // hand out a connection, and a query has no built-in timeout. On
-                        // every sensitive-route navigation that risk compounds: a slow or
-                        // exhausted pool would stall the request (manifesting to users as a
-                        // blank "page couldn't load" / multi-minute timeout). Race the check
-                        // against a short timeout so a struggling DB falls through to the
-                        // cached-session path below instead of hanging navigation.
+                        // Query the live database via an internal API route because
+                        // the edge runtime does not support the pg module directly.
                         const dbCheckTimeout = new Promise<never>((_, reject) =>
                             setTimeout(() => reject(new Error("middleware db check timed out")), 3000)
                         )
+                        
+                        const fetchUserStatus = async () => {
+                            const res = await fetch(new URL("/api/internal/user-status", req.url), {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                },
+                                body: JSON.stringify({ userId: sessionPayload.sub })
+                            });
+                            if (!res.ok) throw new Error("Internal API returned " + res.status);
+                            return await res.json();
+                        }
+
                         const userRow = await Promise.race([
-                            queryOne<{
-                                role: string
-                                is_active: boolean
-                                is_disabled: boolean
-                                has_academy_access: boolean
-                                has_quran_access: boolean
-                                approval_status: string
-                                must_change_password: boolean
-                            }>(
-                                `SELECT role, is_active, is_disabled, has_academy_access, has_quran_access, approval_status, must_change_password FROM users WHERE id = $1 LIMIT 1`,
-                                [sessionPayload.sub]
-                            ),
+                            fetchUserStatus(),
                             dbCheckTimeout,
                         ])
 
