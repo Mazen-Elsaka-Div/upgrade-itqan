@@ -1,16 +1,25 @@
 import { cookies } from "next/headers"
 import { SignJWT, jwtVerify } from "jose"
 
-if (!process.env.JWT_SECRET) {
-  if (process.env.NODE_ENV === "production") {
-    throw new Error("JWT_SECRET environment variable is required in production")
+function getJwtSecret() {
+  if (!process.env.JWT_SECRET) {
+    // Only throw when actually used, not when module is imported during build
+    if (process.env.NODE_ENV === "production" && !process.env.VERCEL_BUILD) {
+      throw new Error("JWT_SECRET environment variable is required in production")
+    }
+    console.warn("[AUTH] JWT_SECRET not set — using dev fallback. NEVER deploy without setting JWT_SECRET.")
+    return new TextEncoder().encode("dev-only-fallback-do-not-deploy")
   }
-  console.warn("[AUTH] JWT_SECRET not set — using dev fallback. NEVER deploy without setting JWT_SECRET.")
+  return new TextEncoder().encode(process.env.JWT_SECRET)
 }
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "dev-only-fallback-do-not-deploy"
-)
+let _jwtSecret: Uint8Array | null = null
+function getSecret() {
+  if (!_jwtSecret) {
+    _jwtSecret = getJwtSecret()
+  }
+  return _jwtSecret
+}
 
 export type AllRoles = "student" | "reader" | "admin" | "student_supervisor" | "reciter_supervisor" | "teacher" | "parent" | "academy_admin" | "fiqh_supervisor" | "content_supervisor" | "supervisor" | "quality_supervisor"
 
@@ -32,12 +41,12 @@ export async function signToken(payload: Omit<JWTPayload, "iat" | "exp">) {
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("30d")
-    .sign(JWT_SECRET)
+    .sign(getSecret())
 }
 
 export async function verifyToken(token: string): Promise<JWTPayload | null> {
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET)
+    const { payload } = await jwtVerify(token, getSecret())
     return payload as unknown as JWTPayload
   } catch {
     return null
