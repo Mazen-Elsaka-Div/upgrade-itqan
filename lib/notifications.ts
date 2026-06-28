@@ -134,7 +134,7 @@ export async function createNotificationForMany(
 export async function getAdminUserIds(): Promise<string[]> {
     try {
         const result = await query(
-            `SELECT id FROM users WHERE role IN ('admin', 'academy_admin') AND is_active = true`
+            `SELECT id FROM users WHERE role IN ('admin', 'academy_admin', 'student_supervisor', 'reciter_supervisor') AND is_active = true`
         )
         return (result as any[]).map(row => row.id)
     } catch (error) {
