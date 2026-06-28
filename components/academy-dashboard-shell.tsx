@@ -671,6 +671,8 @@ export function AcademyDashboardShell({
               // so they don't get redirected to the Qur'an side.
               role={
                 role === 'academy_admin' ? 'academy/admin' :
+                role === 'content_supervisor' ? 'academy/content-supervisor' :
+                role === 'fiqh_questions_supervisor' ? 'academy/fiqh-supervisor' :
                 role === 'teacher' ? 'academy/teacher' :
                 role === 'parent' ? 'academy/parent' :
                 role === 'supervisor' ? 'academy/supervisor' :
