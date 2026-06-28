@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
     const offset = (page - 1) * limit
 
     const notifications = await query(
-      `SELECT id, type, title, message, category, link, is_read, created_at,
+      `SELECT id, type, title, message, category, COALESCE(link, action_url) as link, is_read, created_at,
               related_recitation_id, related_booking_id
        FROM notifications
        WHERE user_id = $1
