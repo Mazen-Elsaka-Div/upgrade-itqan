@@ -535,7 +535,7 @@ export function DashboardShell({ role, children, headerTitle }: { role: 'student
             <LanguageSwitcher variant="outline" />
 
             <NotificationDropdown
-              role={role}
+              role={role === 'student_supervisor' || role === 'reciter_supervisor' ? 'admin' : role}
               unreadCount={unreadCount}
               onRefresh={async () => {
                 const res = await fetch('/api/unread-counts')
