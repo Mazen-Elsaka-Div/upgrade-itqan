@@ -32,5 +32,22 @@ export async function GET() {
     console.error("[admin/roles] count error:", e)
   }
 
-  return NextResponse.json({ catalog: ROLE_CATALOG, counts })
+  // Admin-tier users for the quick-access assignment list.
+  let admins: Array<{ id: string; name: string; email: string | null; role: string; academy_roles: string[] | null }> = []
+  try {
+    admins = await query(
+      `SELECT id, name, email, role, academy_roles
+         FROM users
+        WHERE role IN ('admin', 'super_admin', 'maqraa_admin', 'academy_admin', 'student_supervisor', 'reciter_supervisor')
+           OR (academy_roles IS NOT NULL AND array_length(academy_roles, 1) > 0)
+        ORDER BY
+          CASE role WHEN 'admin' THEN 0 WHEN 'super_admin' THEN 0 WHEN 'maqraa_admin' THEN 1 WHEN 'academy_admin' THEN 2 ELSE 3 END,
+          name
+        LIMIT 200`
+    )
+  } catch (e) {
+    console.error("[admin/roles] admins error:", e)
+  }
+
+  return NextResponse.json({ catalog: ROLE_CATALOG, counts, admins })
 }

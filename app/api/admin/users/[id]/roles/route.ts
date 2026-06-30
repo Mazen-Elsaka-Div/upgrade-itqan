@@ -76,25 +76,26 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     `UPDATE users
         SET role = $1,
             academy_roles = $2::varchar[],
-            role_changed_by = $3,
             updated_at = NOW()
-      WHERE id = $4`,
-    [role, cleanAcademyRoles, session!.sub, id]
+      WHERE id = $3`,
+    [role, cleanAcademyRoles, id]
   )
 
-  // Best-effort audit trail; ignore if the table/columns differ.
+  // Best-effort audit trail using the platform's audit_log table.
   try {
     await query(
-      `INSERT INTO activity_logs (user_id, action, entity_type, entity_id, description)
-       VALUES ($1, 'change_user_roles', 'user', $2, $3)`,
+      `INSERT INTO audit_log (admin_id, action_type, target_user_id, old_value, new_value, description)
+       VALUES ($1, 'change_user_roles', $2, $3, $4, $5)`,
       [
         session!.sub,
         id,
+        JSON.stringify({ role: existing.role }),
+        JSON.stringify({ role, academy_roles: cleanAcademyRoles }),
         `تغيير دور ${existing.name} من "${existing.role}" إلى "${role}" + أدوار: [${cleanAcademyRoles.join(", ")}]`,
       ]
     )
-  } catch {
-    // non-fatal
+  } catch (e) {
+    console.error("[admin/users/roles] audit error:", e)
   }
 
   return NextResponse.json({ ok: true, role, academyRoles: cleanAcademyRoles })
