@@ -251,6 +251,8 @@ export default function Home() {
   const [scrolled, setScrolled] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [settings, setSettings] = useState<Record<string, any>>({})
+  // Journey fork: which door the visitor has opened ('academy' | 'maqraa' | null).
+  const [journeyTrack, setJourneyTrack] = useState<"academy" | "maqraa" | null>(null)
   const { resolvedTheme, setTheme } = useTheme()
   const { locale, dir, toggleLocale, t } = useI18n()
   const heroRef = useRef<HTMLDivElement>(null)
@@ -892,31 +894,128 @@ export default function Home() {
             </div>
           </Reveal>
 
-          <div className="max-w-4xl mx-auto">
-            {c.steps.map((step, i) => (
-              <Reveal key={i} delay={i * 0.12}>
-                <div className="group relative flex gap-8 md:gap-12 py-10 border-b border-hp-navy/10 dark:border-hp-gold/15 last:border-0">
-                  <div className="flex-shrink-0">
-                    <div
-                      className="text-7xl md:text-8xl font-bold text-hp-bronze/30 dark:text-hp-gold/35 leading-none transition-all duration-500 group-hover:text-hp-bronze dark:group-hover:text-hp-gold"
-                      style={{ fontFamily: "var(--font-quran)" }}
-                    >
-                      {step.n}
+          {/* ---- The two doors (fork in the road) ---- */}
+          <div className="max-w-4xl mx-auto grid sm:grid-cols-2 gap-6 md:gap-10">
+            {([
+              { key: "academy" as const, icon: GraduationCap, label: c.journeyAcademyLabel, tagline: c.journeyAcademyTagline, link: c.academy.link, cta: c.academy.cta },
+              { key: "maqraa" as const, icon: Mic, label: c.journeyMaqraaLabel, tagline: c.journeyMaqraaTagline, link: c.maqraa.link, cta: c.maqraa.cta },
+            ]).map((door, i) => {
+              const Icon = door.icon
+              const active = journeyTrack === door.key
+              return (
+                <Reveal key={door.key} delay={i * 0.12}>
+                  <button
+                    type="button"
+                    onClick={() => setJourneyTrack(active ? null : door.key)}
+                    aria-pressed={active}
+                    className={`group relative w-full overflow-hidden rounded-t-[5rem] rounded-b-2xl border text-center px-8 pt-14 pb-10 transition-all duration-500 ${
+                      active
+                        ? "border-hp-bronze dark:border-hp-gold bg-hp-navy text-hp-parchment shadow-2xl shadow-hp-navy/25 -translate-y-1"
+                        : "border-hp-navy/15 dark:border-hp-gold/20 bg-hp-card dark:bg-hp-dark-2 hover:-translate-y-1 hover:border-hp-bronze/60 dark:hover:border-hp-gold/50 hover:shadow-xl"
+                    }`}
+                  >
+                    {/* Arched ornament frame */}
+                    <ArchFrame
+                      className={`absolute inset-x-6 top-4 bottom-0 h-[calc(100%-1rem)] w-auto mx-auto transition-colors duration-500 ${
+                        active ? "text-hp-gold/40" : "text-hp-bronze/15 dark:text-hp-gold/15 group-hover:text-hp-bronze/35 dark:group-hover:text-hp-gold/30"
+                      }`}
+                    />
+                    <div className="relative">
+                      <span
+                        className={`mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full border transition-all duration-500 ${
+                          active
+                            ? "border-hp-gold/50 bg-hp-gold text-hp-navy"
+                            : "border-hp-bronze/25 dark:border-hp-gold/25 bg-hp-navy/5 dark:bg-hp-gold/10 text-hp-navy dark:text-hp-gold group-hover:scale-110"
+                        }`}
+                      >
+                        <Icon className="h-9 w-9" />
+                      </span>
+                      <h3
+                        className={`text-3xl md:text-4xl font-bold mb-3 transition-colors ${active ? "text-hp-parchment" : "text-hp-navy dark:text-hp-cream"}`}
+                        style={{ fontFamily: "var(--font-quran)" }}
+                      >
+                        {door.label}
+                      </h3>
+                      <p className={`text-sm md:text-base leading-relaxed mb-6 transition-colors ${active ? "text-hp-parchment/75" : "text-hp-ink/60 dark:text-hp-cream/60"}`}>
+                        {door.tagline}
+                      </p>
+                      <span
+                        className={`inline-flex items-center gap-2 text-sm font-bold tracking-wide transition-colors ${
+                          active ? "text-hp-gold" : "text-hp-bronze dark:text-hp-gold"
+                        }`}
+                      >
+                        <span>{active ? door.cta : c.scrollText}</span>
+                        <ChevronDown className={`w-4 h-4 transition-transform duration-500 ${active ? "rotate-180" : ""}`} />
+                      </span>
                     </div>
-                  </div>
-                  <div className="flex-1 pt-2">
-                    <h3 className="text-2xl md:text-3xl font-bold text-hp-navy dark:text-hp-cream mb-4" style={{ fontFamily: "var(--font-quran)" }}>
-                      {step.t}
-                    </h3>
-                    <p className="text-hp-ink/65 dark:text-hp-cream/65 leading-loose md:text-lg max-w-2xl">{step.d}</p>
-                  </div>
-                  <div className="hidden md:flex items-center text-hp-bronze/40 dark:text-hp-gold/45 group-hover:text-hp-bronze dark:group-hover:text-hp-gold group-hover:-translate-x-2 transition-all duration-500">
-                    <ForwardArrow className="w-6 h-6" />
+                  </button>
+                </Reveal>
+              )
+            })}
+          </div>
+
+          {/* ---- The selected track's timeline ---- */}
+          <AnimatePresence mode="wait">
+            {journeyTrack && (
+              <motion.div
+                key={journeyTrack}
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.5, ease: "easeInOut" }}
+                className="overflow-hidden"
+              >
+                <div className="max-w-3xl mx-auto pt-16">
+                  <OrnamentDivider className="w-40 h-7 mx-auto mb-12 text-hp-bronze dark:text-hp-gold" />
+                  {(journeyTrack === "academy" ? c.academySteps : c.maqraaSteps).map((step, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, x: dir === "rtl" ? 24 : -24 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.1, duration: 0.45 }}
+                      className="group relative flex gap-6 md:gap-10 py-8 border-b border-hp-navy/10 dark:border-hp-gold/15 last:border-0"
+                    >
+                      <div className="flex-shrink-0">
+                        <div
+                          className="flex h-16 w-16 md:h-20 md:w-20 items-center justify-center rounded-full border border-hp-bronze/25 dark:border-hp-gold/25 bg-hp-navy/5 dark:bg-hp-gold/10 text-3xl md:text-4xl font-bold text-hp-bronze dark:text-hp-gold leading-none transition-all duration-500 group-hover:bg-hp-navy dark:group-hover:bg-hp-gold group-hover:text-hp-gold dark:group-hover:text-hp-navy"
+                          style={{ fontFamily: "var(--font-quran)" }}
+                        >
+                          {step.n}
+                        </div>
+                      </div>
+                      <div className="flex-1 pt-2">
+                        <h4 className="text-xl md:text-2xl font-bold text-hp-navy dark:text-hp-cream mb-2" style={{ fontFamily: "var(--font-quran)" }}>
+                          {step.t}
+                        </h4>
+                        <p className="text-hp-ink/65 dark:text-hp-cream/65 leading-loose">{step.d}</p>
+                      </div>
+                    </motion.div>
+                  ))}
+
+                  {/* Track CTA */}
+                  <div className="text-center pt-12">
+                    <Link
+                      href={journeyTrack === "academy" ? c.academy.link : c.maqraa.link}
+                      className="group inline-flex h-14 items-center gap-3 rounded-full bg-hp-navy dark:bg-hp-gold px-10 font-bold text-hp-parchment dark:text-hp-navy transition-all duration-500 hover:gap-5 shadow-xl shadow-hp-navy/20"
+                    >
+                      <span>{journeyTrack === "academy" ? c.academy.cta : c.maqraa.cta}</span>
+                      <ForwardArrow className="w-5 h-5 transition-transform duration-500 group-hover:-translate-x-1" />
+                    </Link>
                   </div>
                 </div>
-              </Reveal>
-            ))}
-          </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* ---- Both paths meet ---- */}
+          <Reveal>
+            <div className="max-w-2xl mx-auto text-center mt-20">
+              <OrnamentDivider className="w-48 h-8 mx-auto mb-6 text-hp-bronze/60 dark:text-hp-gold/60" />
+              <p className="text-lg md:text-xl text-hp-navy/80 dark:text-hp-cream/75 leading-loose" style={{ fontFamily: "var(--font-quran)" }}>
+                {c.journeyMeetText}
+              </p>
+            </div>
+          </Reveal>
         </div>
       </section>
 

@@ -105,13 +105,29 @@ export const DEFAULT_HOMEPAGE_CONTENT = {
 
   // Journey
   homepage_journey_eyebrow: { ar: 'المسار', en: 'The Path' } as Bi,
-  homepage_journey_title: { ar: 'كيف تَبدأُ رحلتَك', en: 'How to begin your journey' } as Bi,
-  homepage_journey_subtitle: { ar: 'أربعُ خطواتٍ هَيِّنات، وأنتَ في صَدرِ المَجلس', en: 'Four easy steps and you’re in the front row' } as Bi,
-  homepage_journey_steps: [
-    { n: { ar: '١', en: '1' }, t: { ar: 'سَجِّل في المنصَّة', en: 'Register on the platform' }, d: { ar: 'أنشئ حسابَكَ في دقائق، اختر منصَّتَك (الأكاديميَّة أو المَقْرأة أو كلتيهما)، وأَكمِل ملفَّكَ التعريفيَّ.', en: 'Create your account in minutes, choose your platform (Academy, Maqra’ah, or both), and complete your profile.' } },
-    { n: { ar: '٢', en: '2' }, t: { ar: 'اخْتَر مُعلِّمَك', en: 'Choose your teacher' }, d: { ar: 'تصفَّح قائمةَ الأساتذةِ والمُقرئين، اقرأْ سيرَهم وتقييماتِ طلَّابِهم، ثم اخترِ الأنسبَ لك.', en: 'Browse the teachers and reciters, read their bios and student reviews, then choose who fits you best.' } },
-    { n: { ar: '٣', en: '3' }, t: { ar: 'احْجِزْ موعدَك', en: 'Book your session' }, d: { ar: 'اختر اليومَ والساعةَ من تقويمِ المُعلِّم، فيَصلُكَ تَنبيهٌ قبلَ الجلسةِ بوقتٍ كافٍ.', en: 'Pick the day and time from the teacher’s calendar and get a reminder well before the session.' } },
-    { n: { ar: '٤', en: '4' }, t: { ar: 'ابْدأْ في الإتقان', en: 'Start mastering' }, d: { ar: 'احْضُرْ الجلساتِ، أَنجِزْ الواجبات، وَتابعْ تقدُّمَك حتى تَبلُغَ غايتَك بإذن الله.', en: 'Attend the sessions, complete your assignments, and track your progress until you reach your goal, by Allah’s will.' } },
+  homepage_journey_title: { ar: 'اختَرْ بابَكَ نحوَ الإتقان', en: 'Choose your gateway to mastery' } as Bi,
+  homepage_journey_subtitle: { ar: 'لِكُلِّ طالبٍ طريق؛ فاطْرُقِ البابَ الذي يُناسِبُ هِمَّتَكَ، وسِرْ خطوةً خطوة', en: 'Every seeker has a path — open the door that suits your ambition and walk it step by step' } as Bi,
+  // Fork-in-the-road: the two doors the visitor chooses between.
+  homepage_journey_academy_label: { ar: 'طالبُ عِلم', en: 'Seeker of Knowledge' } as Bi,
+  homepage_journey_academy_tagline: { ar: 'رِحلةُ الأكاديميَّة: دوراتٌ وشهادات', en: 'The Academy path: courses & certificates' } as Bi,
+  homepage_journey_maqraa_label: { ar: 'طالبُ تِلاوة', en: 'Seeker of Recitation' } as Bi,
+  homepage_journey_maqraa_tagline: { ar: 'رِحلةُ المَقْرأة: تَسميعٌ وإجازة', en: 'The Maqra’ah path: recitation & ijazah' } as Bi,
+  homepage_journey_meet_text: { ar: 'وكِلا الطريقَينِ يَلتقي عندَ غايةٍ واحدة: إتقانُ كتابِ الله', en: 'Both roads meet at a single goal: mastering the Book of Allah' } as Bi,
+  // Academy track steps
+  homepage_journey_academy_steps: [
+    { n: { ar: '١', en: '1' }, t: { ar: 'سَجِّل في الأكاديميَّة', en: 'Join the Academy' }, d: { ar: 'أنشئ حسابَكَ في دقائق وأَكمِل ملفَّكَ التعريفيَّ لِتَبدأَ مسيرتَكَ العلميَّة.', en: 'Create your account in minutes and complete your profile to begin your academic path.' } },
+    { n: { ar: '٢', en: '2' }, t: { ar: 'اختَرْ مسارَكَ ومستواك', en: 'Choose your track & level' }, d: { ar: 'حدِّدْ تخصُّصَكَ في علوم القرآن أو التجويد أو الفقه، وابدأْ من المستوى الذي يُناسِبُك.', en: 'Pick your specialization in Qur’anic sciences, tajwid, or fiqh, and start at the level that fits you.' } },
+    { n: { ar: '٣', en: '3' }, t: { ar: 'التَحِقْ بالدوراتِ والحَلَقات', en: 'Enroll in courses & circles' }, d: { ar: 'احْضُرِ الدروسَ المباشرةَ والمُسجَّلة، وتفاعَلْ مع أساتذتِكَ وزملائك.', en: 'Attend live and recorded lessons and engage with your instructors and peers.' } },
+    { n: { ar: '٤', en: '4' }, t: { ar: 'أَنجِزِ الواجباتِ والاختبارات', en: 'Complete assignments & exams' }, d: { ar: 'طبِّقْ ما تَعلَّمتَه، وأَنجِزِ التكليفات، واجتَزِ الاختباراتِ لِتَنتقِلَ بين المستويات.', en: 'Apply what you learn, complete your tasks, and pass exams to advance between levels.' } },
+    { n: { ar: '٥', en: '5' }, t: { ar: 'انَلْ شهادتَكَ المعتمدة', en: 'Earn your accredited certificate' }, d: { ar: 'اختِمْ مسارَكَ بشهادةٍ موثَّقةٍ بختمِ الأكاديميَّة تُثبِتُ ما بَلَغتَه من إتقان.', en: 'Crown your path with a certificate sealed by the Academy that proves your mastery.' } },
+  ],
+  // Maqra’ah track steps
+  homepage_journey_maqraa_steps: [
+    { n: { ar: '١', en: '1' }, t: { ar: 'سَجِّل في المَقْرأة', en: 'Join the Maqra’ah' }, d: { ar: 'أنشئ حسابَكَ واختر المَقْرأةَ لِتَبدأَ رحلةَ الحفظِ والتَّسميعِ الروحانيَّة.', en: 'Create your account and choose the Maqra’ah to begin your spiritual journey of memorization and recitation.' } },
+    { n: { ar: '٢', en: '2' }, t: { ar: 'اختبارُ تحديدِ المستوى', en: 'Placement assessment' }, d: { ar: 'يَستمِعُ المُقرئُ إلى تِلاوتِكَ لِيُحدِّدَ مستواكَ ويَضعَ لكَ خُطَّةَ الحفظِ المُناسِبة.', en: 'A reciter listens to your recitation to determine your level and set the right memorization plan.' } },
+    { n: { ar: '٣', en: '3' }, t: { ar: 'اختَرْ مُقرِئَكَ واحجِزْ', en: 'Choose your reciter & book' }, d: { ar: 'تصفَّحْ المُقرئينَ المُجازين، اقرأْ سيرَهم، ثم احجِزْ موعدَكَ في الوقتِ الذي يُناسِبُك.', en: 'Browse certified reciters, read their bios, then book a time that suits you.' } },
+    { n: { ar: '٤', en: '4' }, t: { ar: 'سَمِّعْ وِردَكَ اليوميّ', en: 'Recite your daily portion' }, d: { ar: 'اعرِضْ تِلاوتَكَ مباشرةً على المُقرئ فيُصحِّحُ ويُتابِعُ تقدُّمَكَ جلسةً بعدَ جلسة.', en: 'Recite live to the reciter who corrects and tracks your progress session after session.' } },
+    { n: { ar: '٥', en: '5' }, t: { ar: 'نَلْ إجازتَكَ', en: 'Receive your ijazah' }, d: { ar: 'أَتْمِمْ حفظَكَ بإتقان، واظفَرْ بإجازةٍ مُتَّصِلةِ السَّنَدِ بإذن الله.', en: 'Complete your memorization with mastery and attain an ijazah with a connected chain, by Allah’s will.' } },
   ],
 
   // Testimonials
@@ -305,11 +321,17 @@ export function buildHomepageContent(settings: AnyMap, locale: Locale) {
     featuresSubtitle: L(get('homepage_features_subtitle'), locale),
     features: arr('homepage_features').map((f: AnyMap) => ({ num: L(f.num, locale), t: L(f.t, locale), d: L(f.d, locale) })),
 
-    // journey
+    // journey (fork-in-the-road: two tracks)
     journeyEyebrow: L(get('homepage_journey_eyebrow'), locale),
     journeyTitle: L(get('homepage_journey_title'), locale),
     journeySubtitle: L(get('homepage_journey_subtitle'), locale),
-    steps: arr('homepage_journey_steps').map((s: AnyMap) => ({ n: L(s.n, locale), t: L(s.t, locale), d: L(s.d, locale) })),
+    journeyAcademyLabel: L(get('homepage_journey_academy_label'), locale),
+    journeyAcademyTagline: L(get('homepage_journey_academy_tagline'), locale),
+    journeyMaqraaLabel: L(get('homepage_journey_maqraa_label'), locale),
+    journeyMaqraaTagline: L(get('homepage_journey_maqraa_tagline'), locale),
+    journeyMeetText: L(get('homepage_journey_meet_text'), locale),
+    academySteps: arr('homepage_journey_academy_steps').map((s: AnyMap) => ({ n: L(s.n, locale), t: L(s.t, locale), d: L(s.d, locale) })),
+    maqraaSteps: arr('homepage_journey_maqraa_steps').map((s: AnyMap) => ({ n: L(s.n, locale), t: L(s.t, locale), d: L(s.d, locale) })),
 
     // testimonials
     testimonialsEyebrow: L(get('homepage_testimonials_eyebrow'), locale),

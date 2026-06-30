@@ -295,13 +295,34 @@ export default function AdminHomepagePage() {
             <BiField label={tr('العنوان الصغير', 'Eyebrow')} value={get('homepage_journey_eyebrow')} onChange={v => set('homepage_journey_eyebrow', v)} />
             <BiField label={tr('العنوان', 'Title')} value={get('homepage_journey_title')} onChange={v => set('homepage_journey_title', v)} />
             <BiField label={tr('العنوان الفرعي', 'Subtitle')} value={get('homepage_journey_subtitle')} onChange={v => set('homepage_journey_subtitle', v)} />
+            <BiField label={tr('جملة اللقاء (أسفل القسم)', 'Meeting line (bottom)')} value={get('homepage_journey_meet_text')} onChange={v => set('homepage_journey_meet_text', v)} />
           </SectionCard>
 
-          <SectionCard title={tr('خطوات المسار', 'Journey steps')}>
+          <SectionCard title={tr('بابُ الأكاديميَّة', 'Academy door')}>
+            <BiField label={tr('اسم الباب', 'Door label')} value={get('homepage_journey_academy_label')} onChange={v => set('homepage_journey_academy_label', v)} />
+            <BiField label={tr('وصف مختصر', 'Tagline')} value={get('homepage_journey_academy_tagline')} onChange={v => set('homepage_journey_academy_tagline', v)} />
             <Repeater
               label={tr('خطوة', 'Step')}
-              items={(get('homepage_journey_steps') || []) as AnyMap[]}
-              onChange={v => set('homepage_journey_steps', v)}
+              items={(get('homepage_journey_academy_steps') || []) as AnyMap[]}
+              onChange={v => set('homepage_journey_academy_steps', v)}
+              newItem={() => ({ n: { ar: '', en: '' }, t: { ar: '', en: '' }, d: { ar: '', en: '' } })}
+              renderItem={(item, update) => (
+                <div className="space-y-3">
+                  <BiField label={tr('الرقم', 'Number')} value={item.n} onChange={v => update({ n: v })} />
+                  <BiField label={tr('العنوان', 'Title')} value={item.t} onChange={v => update({ t: v })} />
+                  <BiArea label={tr('الوصف', 'Description')} value={item.d} onChange={v => update({ d: v })} rows={2} />
+                </div>
+              )}
+            />
+          </SectionCard>
+
+          <SectionCard title={tr('بابُ المَقْرأة', 'Maqra’ah door')}>
+            <BiField label={tr('اسم الباب', 'Door label')} value={get('homepage_journey_maqraa_label')} onChange={v => set('homepage_journey_maqraa_label', v)} />
+            <BiField label={tr('وصف مختصر', 'Tagline')} value={get('homepage_journey_maqraa_tagline')} onChange={v => set('homepage_journey_maqraa_tagline', v)} />
+            <Repeater
+              label={tr('خطوة', 'Step')}
+              items={(get('homepage_journey_maqraa_steps') || []) as AnyMap[]}
+              onChange={v => set('homepage_journey_maqraa_steps', v)}
               newItem={() => ({ n: { ar: '', en: '' }, t: { ar: '', en: '' }, d: { ar: '', en: '' } })}
               renderItem={(item, update) => (
                 <div className="space-y-3">
