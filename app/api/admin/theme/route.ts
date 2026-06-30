@@ -33,7 +33,7 @@ export async function PUT(req: NextRequest) {
 
   await query(
     `INSERT INTO system_settings (setting_key, setting_value, setting_type, description, is_public, updated_by, updated_at)
-     VALUES ($1, $2::jsonb, 'theme', 'Global design tokens', true, $3, NOW())
+     VALUES ($1, $2::jsonb, 'general', 'Global design tokens', true, $3, NOW())
      ON CONFLICT (setting_key) DO UPDATE
         SET setting_value = EXCLUDED.setting_value,
             updated_by    = EXCLUDED.updated_by,

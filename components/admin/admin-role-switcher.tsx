@@ -59,7 +59,7 @@ export function AdminRoleSwitcher({ currentMode }: { currentMode: Mode }) {
           <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-64" dir="rtl">
+      <DropdownMenuContent align="end" className="w-64">
         <DropdownMenuLabel className="text-xs text-muted-foreground">التبديل بين الأوضاع</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {MODES.map((m) => {
