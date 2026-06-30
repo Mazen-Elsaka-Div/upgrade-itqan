@@ -76,22 +76,23 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     `UPDATE users
         SET role = $1,
             academy_roles = $2::varchar[],
+            role_changed_at = NOW(),
+            role_changed_by = $3,
             updated_at = NOW()
-      WHERE id = $3`,
-    [role, cleanAcademyRoles, id]
+      WHERE id = $4`,
+    [role, cleanAcademyRoles, session!.sub, id]
   )
 
-  // Best-effort audit trail using the platform's audit_log table.
+  // Best-effort audit trail using the platform's activity_logs table.
   try {
     await query(
-      `INSERT INTO audit_log (admin_id, action_type, target_user_id, old_value, new_value, description)
-       VALUES ($1, 'change_user_roles', $2, $3, $4, $5)`,
+      `INSERT INTO activity_logs (user_id, action, entity_type, entity_id, description, details)
+       VALUES ($1, 'change_user_roles', 'user', $2, $3, $4::jsonb)`,
       [
         session!.sub,
         id,
-        JSON.stringify({ role: existing.role }),
-        JSON.stringify({ role, academy_roles: cleanAcademyRoles }),
         `تغيير دور ${existing.name} من "${existing.role}" إلى "${role}" + أدوار: [${cleanAcademyRoles.join(", ")}]`,
+        JSON.stringify({ old: { role: existing.role }, new: { role, academy_roles: cleanAcademyRoles } }),
       ]
     )
   } catch (e) {
