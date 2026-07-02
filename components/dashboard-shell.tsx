@@ -21,6 +21,10 @@ import {
 import { usePublicSettings } from '@/lib/hooks/use-public-settings'
 import { useSidebarCollapsed } from '@/hooks/use-sidebar-collapsed'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { AdminModeBanner } from '@/components/admin/admin-mode-banner'
+import { AdminRoleSwitcher } from '@/components/admin/admin-role-switcher'
+import { AdminOnboardingTour } from '@/components/admin/admin-onboarding-tour'
+import { Palette, Sparkles } from 'lucide-react'
 
 type NavItem = { href: string; label: string; icon: React.ElementType; badge?: number | string | null }
 type NavSection = { title?: string; items: NavItem[] }
@@ -206,7 +210,30 @@ const getRoleConfig = (t: any): Record<'student' | 'reader' | 'admin' | 'student
   }
 })
 
-export function DashboardShell({ role, children, headerTitle }: { role: 'student' | 'reader' | 'admin' | 'student_supervisor' | 'reciter_supervisor'; children: React.ReactNode; headerTitle?: string }) {
+// Governance tools that ONLY the Super Admin may see. Appended to the admin
+// sidebar at runtime so the platform-wide controls (design, branding, roles,
+// overview) are clearly grouped and gated.
+const getSuperAdminSection = (t: any): NavSection => ({
+  title: t.admin?.sidebarGovernance || 'الحوكمة والتحكم',
+  items: [
+    { href: '/admin/analytics', label: t.admin?.sidebarPlatformOverview || 'نظرة عامة على المنصة', icon: PieChart },
+    { href: '/admin/role-management', label: t.admin?.sidebarRoleManagement || 'إدارة الأدوار', icon: ShieldCheck },
+    { href: '/admin/theme', label: t.admin?.sidebarThemeEditor || 'التصميم والألوان', icon: Palette },
+    { href: '/admin/branding', label: t.admin?.sidebarBranding || 'الهوية البصرية', icon: Sparkles },
+  ],
+})
+
+// The new admin tiers all reuse the rich `admin` sidebar config. Mode scoping is
+// communicated through the indicator banner + role switcher rather than by
+// hiding sidebar items, so the Super Admin keeps full reach while borrowing a lens.
+function resolveConfigRole(
+  role: 'student' | 'reader' | 'admin' | 'super_admin' | 'maqraa_admin' | 'academy_admin' | 'student_supervisor' | 'reciter_supervisor',
+): 'student' | 'reader' | 'admin' | 'student_supervisor' | 'reciter_supervisor' {
+  if (role === 'super_admin' || role === 'maqraa_admin' || role === 'academy_admin') return 'admin'
+  return role
+}
+
+export function DashboardShell({ role, children, headerTitle, adminMode }: { role: 'student' | 'reader' | 'admin' | 'super_admin' | 'maqraa_admin' | 'academy_admin' | 'student_supervisor' | 'reciter_supervisor'; children: React.ReactNode; headerTitle?: string; adminMode?: 'super' | 'maqraa' | 'academy' }) {
   const pathname = usePathname()
   const router = useRouter()
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -289,7 +316,12 @@ export function DashboardShell({ role, children, headerTitle }: { role: 'student
     return () => clearInterval(interval)
   }, [])
 
-  const rawConfig = getRoleConfig(t)[role]
+  const isSuperAdminRole = role === 'admin' || role === 'super_admin'
+  const baseConfig = getRoleConfig(t)[resolveConfigRole(role)]
+  // Super admins get the exclusive governance section appended to their sidebar.
+  const rawConfig = isSuperAdminRole
+    ? { ...baseConfig, sections: [...baseConfig.sections, getSuperAdminSection(t)] }
+    : baseConfig
 
   // Inject unread direct message counts + pending-certificate badge
   // into the sidebar items. When the maqraa student has data_required
@@ -352,13 +384,14 @@ export function DashboardShell({ role, children, headerTitle }: { role: 'student
 
   const sidebarBase = 'bg-card border-l border-border'
 
-  const isActive = (href: string) => pathname === href || (href !== `/${role}` && pathname.startsWith(href + '/'))
+  const homeHref = resolveConfigRole(role) === 'admin' ? '/admin' : `/${role}`
+  const isActive = (href: string) => pathname === href || (href !== homeHref && pathname.startsWith(href + '/'))
 
   return (
     <div className={cn(
       "h-screen flex overflow-hidden bg-background transition-colors duration-500",
       isReader && "theme-islamic",
-      (role === 'admin' || role === 'student' || role === 'reader' || role === 'student_supervisor' || role === 'reciter_supervisor') && "admin-theme"
+      (role === 'admin' || role === 'super_admin' || role === 'maqraa_admin' || role === 'academy_admin' || role === 'student' || role === 'reader' || role === 'student_supervisor' || role === 'reciter_supervisor') && "admin-theme"
     )}>
       {/* Overlay */}
       {sidebarOpen && <div className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm lg:hidden" onClick={() => setSidebarOpen(false)} />}
@@ -510,6 +543,11 @@ export function DashboardShell({ role, children, headerTitle }: { role: 'student
 
       {/* Main */}
       <div className="flex-1 flex flex-col h-full overflow-hidden min-w-0">
+        {/* Super-admin borrowed-mode indicator: a loud reminder the admin is
+            operating outside their default super-admin context. */}
+        {isSuperAdminRole && (adminMode === 'maqraa' || adminMode === 'academy') && (
+          <AdminModeBanner mode={adminMode} />
+        )}
         <header className={cn(
           'border-b border-border flex items-center justify-between px-6 lg:px-8 bg-background/95 backdrop-blur-md z-10 sticky top-0',
           role === 'student' ? 'h-20' : 'h-16'
@@ -523,9 +561,10 @@ export function DashboardShell({ role, children, headerTitle }: { role: 'student
           <div className="flex items-center gap-4">
             {role !== 'student' && (
               <div className="hidden md:block">
-                <GlobalSearch role={role as 'admin' | 'reader'} />
+                <GlobalSearch role={resolveConfigRole(role) as 'admin' | 'reader'} />
               </div>
             )}
+            {isSuperAdminRole && <AdminRoleSwitcher currentMode={adminMode ?? 'super'} />}
             <ModeSwitcher
               currentMode="library"
               userRole={role}
@@ -537,7 +576,7 @@ export function DashboardShell({ role, children, headerTitle }: { role: 'student
             <LanguageSwitcher variant="outline" />
 
             <NotificationDropdown
-              role={role === 'student_supervisor' || role === 'reciter_supervisor' ? 'admin' : role}
+              role={resolveConfigRole(role) === 'admin' ? 'admin' : role}
               unreadCount={unreadCount}
               onRefresh={async () => {
                 const res = await fetch('/api/unread-counts')
@@ -567,6 +606,9 @@ export function DashboardShell({ role, children, headerTitle }: { role: 'student
           {children}
         </main>
       </div>
+
+      {/* First-visit onboarding tour for any admin tier. */}
+      {resolveConfigRole(role) === 'admin' && <AdminOnboardingTour role={role} adminMode={adminMode} />}
     </div>
   )
 }

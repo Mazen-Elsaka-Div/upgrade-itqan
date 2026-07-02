@@ -38,17 +38,18 @@ export async function POST(req: NextRequest) {
       name: string
       email: string
       password_hash: string
-      role: "student" | "reader" | "admin" | "student_supervisor" | "reciter_supervisor" | "parent" | "teacher" | "academy_admin" | "fiqh_supervisor" | "supervisor"
+      role: "student" | "reader" | "admin" | "super_admin" | "maqraa_admin" | "student_supervisor" | "reciter_supervisor" | "parent" | "teacher" | "academy_admin" | "fiqh_supervisor" | "supervisor"
       is_active: boolean
       is_locked: boolean
       failed_login_count: number
       approval_status: string
       has_academy_access: boolean
       has_quran_access: boolean
+      academy_roles: string[] | null
     }>(
       `SELECT id, name, email, password_hash, role, is_active, is_locked,
               COALESCE(failed_login_count, 0) AS failed_login_count, approval_status,
-              has_academy_access, has_quran_access
+              has_academy_access, has_quran_access, academy_roles
        FROM users WHERE email = $1`,
       [email.toLowerCase()]
     )
@@ -142,7 +143,7 @@ export async function POST(req: NextRequest) {
 
     if (loginType === "admin") {
       // Admin login page check
-      const allowedAdminRoles = ["admin", "academy_admin", "student_supervisor", "reciter_supervisor", "fiqh_supervisor", "supervisor"];
+      const allowedAdminRoles = ["admin", "super_admin", "maqraa_admin", "academy_admin", "student_supervisor", "reciter_supervisor", "fiqh_supervisor", "supervisor"];
       if (!allowedAdminRoles.includes(user.role)) {
         return NextResponse.json(
           { error: "غير مصرح لك بالدخول كمدير" },
@@ -205,6 +206,7 @@ export async function POST(req: NextRequest) {
       name: user.name,
       has_academy_access: user.has_academy_access,
       has_quran_access: user.has_quran_access,
+      academy_roles: user.academy_roles ?? [],
     })
 
     // insert a new session for the active active token
