@@ -197,6 +197,30 @@ export default async function middleware(req: NextRequest) {
                     ? dbUser.has_quran_access !== false
                     : sessionPayload.has_quran_access !== false
 
+                // Super-admin-only governance routes (design, branding, homepage,
+                // SEO, role management, platform overview). Scoped admins
+                // (maqraa_admin / academy_admin) and supervisors are bounced back
+                // to the admin home. The legacy `admin` role is the super admin.
+                const superAdminOnlyPrefixes = [
+                    "/admin/theme",
+                    "/admin/branding",
+                    "/admin/role-management",
+                    "/admin/analytics",
+                    "/admin/homepage",
+                    "/admin/seo",
+                    "/api/admin/theme",
+                    "/api/admin/branding",
+                    "/api/admin/roles",
+                    "/api/admin/platform-overview",
+                ]
+                const isSuper = sessionPayload.role === 'admin' || sessionPayload.role === 'super_admin'
+                if (!isSuper && superAdminOnlyPrefixes.some(p => pathname === p || pathname.startsWith(p + "/"))) {
+                    if (pathname.startsWith("/api/")) {
+                        return NextResponse.json({ error: "غير مصرح" }, { status: 403 })
+                    }
+                    return NextResponse.redirect(new URL("/admin", req.url))
+                }
+
                 // #1: Strictly prevent teachers from accessing student pages by manual URL entry.
                 // Admins are also redirected to their own dashboard rather than silently allowed
                 // to browse the student view (which can confuse RBAC tests and audits).

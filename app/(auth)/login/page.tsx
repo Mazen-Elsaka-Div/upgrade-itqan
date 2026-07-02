@@ -27,7 +27,8 @@ function getRedirectPath(u: LoginUser): string {
     return '/reader/pending'
   }
 
-  if (role === 'admin') return '/admin'
+  if (role === 'admin' || role === 'super_admin') return '/admin'
+  if (role === 'maqraa_admin') return '/admin'
   if (role === 'academy_admin') return '/academy/admin'
   if (role === 'student_supervisor' || role === 'reciter_supervisor') return '/admin'
   if (role === 'fiqh_supervisor') return '/academy/fiqh-supervisor'
