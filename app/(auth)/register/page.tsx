@@ -45,7 +45,7 @@ function RegisterContent() {
 
       {/* Main Content */}
       <main className="relative z-10 w-full max-w-3xl px-4 py-24">
-        <div className="bg-card/95 backdrop-blur-xl border border-border shadow-2xl rounded-2xl p-8 md:p-10 transition-all duration-500">
+        <div className="bg-card backdrop-blur-xl border border-border shadow-2xl rounded-2xl p-8 md:p-10 transition-all duration-500">
           {!selectedRole ? (
             <RoleSelection onSelect={setSelectedRole} />
           ) : (

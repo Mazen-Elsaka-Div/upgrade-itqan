@@ -139,7 +139,7 @@ export default function LoginPage() {
 
       {/* Form */}
       <main className="relative z-10 w-full max-w-lg px-4 py-12">
-        <div className="bg-card/95 backdrop-blur-xl border border-border shadow-2xl rounded-2xl p-8 md:p-10">
+        <div className="bg-card backdrop-blur-xl border border-border shadow-2xl rounded-2xl p-8 md:p-10">
           <div className="text-center mb-8">
             <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">{t.login}</h1>
             <p className="text-muted-foreground">{t.auth.enterCredentials}</p>
