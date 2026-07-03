@@ -32,7 +32,7 @@ export const DEFAULT_HOMEPAGE_CONTENT = {
 
   // Hero
   homepage_hero_bismillah: { ar: 'بِسْمِ اللهِ الرَّحْمَنِ الرَّحِيم', en: 'In the Name of Allah, the Most Gracious, the Most Merciful' } as Bi,
-  homepage_hero_title: { ar: 'إتقــــــانُ التِلاوة', en: 'Mastering Recitation' } as Bi,
+  homepage_hero_title: { ar: 'إتقــــــانُ التلاوة', en: 'Mastering Recitation' } as Bi,
   homepage_hero_subtitle: { ar: 'ورحلةُ التَعَلُّم', en: 'and the Journey of Learning' } as Bi,
   homepage_hero_description: {
     ar: 'مِنبرٌ علميٌّ يجمع بين أكاديميَّةٍ راسخةٍ للدُّروسِ والشَّهادات، ومَقْرأةٍ روحانيَّةٍ للحفظِ والتَّسميعِ بإشرافِ المقرِئينَ المُجازين.',
@@ -115,7 +115,7 @@ export const DEFAULT_HOMEPAGE_CONTENT = {
   homepage_journey_meet_text: { ar: 'وكِلا الطريقَينِ يَلتقي عندَ غايةٍ واحدة: إتقانُ كتابِ الله', en: 'Both roads meet at a single goal: mastering the Book of Allah' } as Bi,
   // Academy track steps
   homepage_journey_academy_steps: [
-    { n: { ar: '١', en: '1' }, t: { ar: 'سَجِّل في الأكاديميَّة', en: 'Join the Academy' }, d: { ar: 'أنشئ حسابَكَ في دقائق وأَكمِل ملف��ّكَ التعريفيَّ لِتَبدأَ مسيرتَكَ العلميَّة.', en: 'Create your account in minutes and complete your profile to begin your academic path.' } },
+    { n: { ar: '١', en: '1' }, t: { ar: 'سَجِّل في الأكاديميَّة', en: 'Join the Academy' }, d: { ar: 'أنشئ حسابَكَ ��ي دقائق وأَكمِل ملف��ّكَ التعريفيَّ لِتَبدأَ مسيرتَكَ العلميَّة.', en: 'Create your account in minutes and complete your profile to begin your academic path.' } },
     { n: { ar: '٢', en: '2' }, t: { ar: 'اختَرْ مسارَكَ ومستواك', en: 'Choose your track & level' }, d: { ar: 'حدِّدْ تخصُّصَكَ في علوم القرآن أو التجويد أو الفقه، وابدأْ من المستوى الذي يُناسِبُك.', en: 'Pick your specialization in Qur’anic sciences, tajwid, or fiqh, and start at the level that fits you.' } },
     { n: { ar: '٣', en: '3' }, t: { ar: 'التَحِقْ بالدوراتِ والحَلَقات', en: 'Enroll in courses & circles' }, d: { ar: 'احْضُرِ الدروسَ المباشرةَ والمُسجَّلة، وتفاعَلْ مع أساتذتِكَ وزملائك.', en: 'Attend live and recorded lessons and engage with your instructors and peers.' } },
     { n: { ar: '٤', en: '4' }, t: { ar: 'أَنجِزِ الواجباتِ والاختبارات', en: 'Complete assignments & exams' }, d: { ar: 'طبِّقْ ما تَعلَّمتَه، وأَنجِزِ التكليفات، واجتَزِ الاختباراتِ لِتَنتقِلَ بين المستويات.', en: 'Apply what you learn, complete your tasks, and pass exams to advance between levels.' } },
