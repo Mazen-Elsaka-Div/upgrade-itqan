@@ -150,12 +150,12 @@ function TestimonialCard({ q, n, r, dir }: Testimonial & { dir: "rtl" | "ltr" })
       <div className="relative pt-4">
         <p
           className="text-base md:text-lg text-hp-ink/85 dark:text-hp-cream/85 leading-loose mb-6 line-clamp-4"
-          style={{ fontFamily: "var(--font-quran)" }}
+          style={{ fontFamily: "var(--font-heading)" }}
         >
           {q}
         </p>
         <div className="pt-4 border-t border-hp-navy/10 dark:border-hp-gold/15">
-          <div className="font-bold text-hp-navy dark:text-hp-cream" style={{ fontFamily: "var(--font-quran)" }}>
+          <div className="font-bold text-hp-navy dark:text-hp-cream" style={{ fontFamily: "var(--font-heading)" }}>
             {n}
           </div>
           <div className="text-sm text-hp-ink/55 dark:text-hp-cream/55 mt-1">{r}</div>
@@ -223,7 +223,7 @@ function TestimonialsMarquee({
           <span className="text-xs tracking-[0.35em] text-hp-bronze dark:text-hp-gold uppercase mb-4 block">{eyebrow}</span>
           <h2
             className="text-5xl md:text-6xl font-bold text-hp-navy dark:text-hp-cream leading-tight"
-            style={{ fontFamily: "var(--font-quran)" }}
+            style={{ fontFamily: "var(--font-heading)" }}
           >
             {title}
           </h2>
@@ -379,7 +379,7 @@ export default function Home() {
               <Logo />
             </div>
             <div className="leading-tight">
-              <div className="text-xl font-bold tracking-tight text-hp-navy dark:text-hp-gold" style={{ fontFamily: "var(--font-quran)" }}>
+              <div className="text-xl font-bold tracking-tight text-hp-navy dark:text-hp-gold" style={{ fontFamily: "var(--font-heading)" }}>
                 {c.brandName}
               </div>
               <div className="text-[10px] tracking-[0.2em] text-hp-ink/55 dark:text-hp-cream/55 uppercase">
@@ -610,7 +610,7 @@ export default function Home() {
             <Reveal delay={0.15}>
               <h1
                 className="text-[14vw] sm:text-[10vw] md:text-8xl lg:text-9xl font-bold leading-[0.95] tracking-tight text-hp-navy dark:text-hp-cream mb-10 md:mb-14"
-                style={{ fontFamily: "var(--font-quran)" }}
+                style={{ fontFamily: "var(--font-heading)" }}
               >
                 {c.heroTitle}
               </h1>
@@ -627,7 +627,7 @@ export default function Home() {
             <Reveal delay={0.38}>
               <h2
                 className="text-[10vw] sm:text-[7vw] md:text-6xl lg:text-7xl font-light italic text-hp-bronze dark:text-hp-gold mb-12 md:mb-14"
-                style={{ fontFamily: "var(--font-quran)" }}
+                style={{ fontFamily: "var(--font-heading)" }}
               >
                 {c.heroSubtitle}
               </h2>
@@ -669,7 +669,7 @@ export default function Home() {
               <div className="grid grid-cols-2 md:grid-cols-4 max-w-4xl mx-auto border-y border-hp-ink/10 dark:border-hp-cream/10 divide-x divide-hp-ink/10 dark:divide-hp-cream/10 divide-x-reverse">
                 {c.stats.map((s, i) => (
                   <div key={i} className="py-8 px-2 text-center">
-                    <div className="text-3xl md:text-4xl font-bold text-hp-navy dark:text-hp-gold" style={{ fontFamily: "var(--font-quran)" }}>
+                    <div className="text-3xl md:text-4xl font-bold text-hp-navy dark:text-hp-gold" style={{ fontFamily: "var(--font-heading)" }}>
                       <CountUp value={s.v} suffix={s.s} locale={locale} />
                     </div>
                     <div className="text-xs md:text-sm text-hp-ink/60 dark:text-hp-cream/60 mt-2 tracking-wide">{s.l}</div>
@@ -703,7 +703,7 @@ export default function Home() {
                 <span className="text-xs tracking-[0.35em] text-hp-gold uppercase">{c.pillarsEyebrow}</span>
                 <div className="h-px w-12 bg-hp-gold" />
               </div>
-              <h2 className="text-5xl md:text-7xl font-bold mb-6 leading-tight" style={{ fontFamily: "var(--font-quran)" }}>
+              <h2 className="text-5xl md:text-7xl font-bold mb-6 leading-tight" style={{ fontFamily: "var(--font-heading)" }}>
                 {c.pillarsTitle}
               </h2>
               <p className="text-hp-parchment/70 text-lg leading-relaxed">
@@ -724,13 +724,13 @@ export default function Home() {
                   <ArabesqueCorner size={120} className="absolute bottom-0 left-0 text-hp-bronze/35 dark:text-hp-gold/30 rotate-180" />
 
                   <div className="relative">
-                    <div className="text-7xl font-bold text-hp-bronze/35 dark:text-hp-gold/30 mb-2 leading-none" style={{ fontFamily: "var(--font-quran)" }}>
+                    <div className="text-7xl font-bold text-hp-bronze/35 dark:text-hp-gold/30 mb-2 leading-none" style={{ fontFamily: "var(--font-heading)" }}>
                       {c.academy.number}
                     </div>
                     <div className="flex items-center gap-3 mb-2 -mt-8">
                       <span className="text-xs tracking-[0.3em] text-hp-bronze dark:text-hp-gold uppercase">{c.academy.badge}</span>
                     </div>
-                    <h3 className="text-4xl md:text-5xl font-bold mb-4 text-hp-navy dark:text-hp-cream" style={{ fontFamily: "var(--font-quran)" }}>
+                    <h3 className="text-4xl md:text-5xl font-bold mb-4 text-hp-navy dark:text-hp-cream" style={{ fontFamily: "var(--font-heading)" }}>
                       {c.academy.title}
                     </h3>
                     <p className="text-hp-ink/75 dark:text-hp-cream/75 leading-loose mb-10 text-base md:text-lg">
@@ -746,7 +746,7 @@ export default function Home() {
                               <Icon className="w-4 h-4 text-hp-bronze dark:text-hp-gold" />
                             </div>
                             <div>
-                              <div className="font-semibold text-base mb-0.5 text-hp-navy dark:text-hp-cream" style={{ fontFamily: "var(--font-quran)" }}>{f.t}</div>
+                              <div className="font-semibold text-base mb-0.5 text-hp-navy dark:text-hp-cream" style={{ fontFamily: "var(--font-heading)" }}>{f.t}</div>
                               <div className="text-sm text-hp-ink/65 dark:text-hp-cream/60">{f.d}</div>
                             </div>
                           </div>
@@ -776,13 +776,13 @@ export default function Home() {
                   <ArabesqueCorner size={120} className="absolute bottom-0 left-0 text-hp-bronze/35 dark:text-hp-dark/25 rotate-180" />
 
                   <div className="relative">
-                    <div className="text-7xl font-bold text-hp-bronze/35 dark:text-hp-dark/30 mb-2 leading-none" style={{ fontFamily: "var(--font-quran)" }}>
+                    <div className="text-7xl font-bold text-hp-bronze/35 dark:text-hp-dark/30 mb-2 leading-none" style={{ fontFamily: "var(--font-heading)" }}>
                       {c.maqraa.number}
                     </div>
                     <div className="flex items-center gap-3 mb-2 -mt-8">
                       <span className="text-xs tracking-[0.3em] text-hp-bronze dark:text-hp-dark/80 uppercase">{c.maqraa.badge}</span>
                     </div>
-                    <h3 className="text-4xl md:text-5xl font-bold mb-4 text-hp-green dark:text-hp-dark" style={{ fontFamily: "var(--font-quran)" }}>
+                    <h3 className="text-4xl md:text-5xl font-bold mb-4 text-hp-green dark:text-hp-dark" style={{ fontFamily: "var(--font-heading)" }}>
                       {c.maqraa.title}
                     </h3>
                     <p className="text-hp-ink/75 dark:text-hp-dark/85 leading-loose mb-10 text-base md:text-lg">
@@ -798,7 +798,7 @@ export default function Home() {
                               <Icon className="w-4 h-4 text-hp-bronze dark:text-hp-dark" />
                             </div>
                             <div>
-                              <div className="font-semibold text-base mb-0.5 text-hp-green dark:text-hp-dark" style={{ fontFamily: "var(--font-quran)" }}>{f.t}</div>
+                              <div className="font-semibold text-base mb-0.5 text-hp-green dark:text-hp-dark" style={{ fontFamily: "var(--font-heading)" }}>{f.t}</div>
                               <div className="text-sm text-hp-ink/65 dark:text-hp-dark/75">{f.d}</div>
                             </div>
                           </div>
@@ -832,7 +832,7 @@ export default function Home() {
             <div className="grid lg:grid-cols-12 gap-10 mb-20">
               <div className="lg:col-span-5">
                 <span className="text-xs tracking-[0.35em] text-hp-bronze dark:text-hp-gold uppercase mb-4 block">{c.featuresEyebrow}</span>
-                <h2 className="text-5xl md:text-6xl font-bold leading-tight text-hp-navy dark:text-hp-cream" style={{ fontFamily: "var(--font-quran)" }}>
+                <h2 className="text-5xl md:text-6xl font-bold leading-tight text-hp-navy dark:text-hp-cream" style={{ fontFamily: "var(--font-heading)" }}>
                   {c.featuresTitle}
                 </h2>
               </div>
@@ -856,14 +856,14 @@ export default function Home() {
 
                     <div className="relative">
                       <div className="flex items-center justify-between mb-8">
-                        <span className="text-3xl font-bold text-hp-bronze/60 dark:text-hp-gold/55" style={{ fontFamily: "var(--font-quran)" }}>
+                        <span className="text-3xl font-bold text-hp-bronze/60 dark:text-hp-gold/55" style={{ fontFamily: "var(--font-heading)" }}>
                           {f.num}
                         </span>
                         <div className="w-12 h-12 rounded-full bg-hp-navy/5 dark:bg-hp-gold/10 flex items-center justify-center transition-all duration-500 group-hover:bg-hp-navy dark:group-hover:bg-hp-gold group-hover:rotate-12">
                           <Icon className="w-5 h-5 text-hp-navy dark:text-hp-gold group-hover:text-hp-gold dark:group-hover:text-hp-navy transition-colors" />
                         </div>
                       </div>
-                      <h3 className="text-2xl font-bold text-hp-navy dark:text-hp-cream mb-3" style={{ fontFamily: "var(--font-quran)" }}>
+                      <h3 className="text-2xl font-bold text-hp-navy dark:text-hp-cream mb-3" style={{ fontFamily: "var(--font-heading)" }}>
                         {f.t}
                       </h3>
                       <p className="text-hp-ink/65 dark:text-hp-cream/65 leading-loose text-sm">{f.d}</p>
@@ -885,7 +885,7 @@ export default function Home() {
             <div className="text-center mb-20 max-w-2xl mx-auto">
               <span className="text-xs tracking-[0.35em] text-hp-bronze dark:text-hp-gold uppercase mb-4 block">{c.journeyEyebrow}</span>
               <OrnamentDivider className="w-48 h-8 mx-auto mb-6 text-hp-bronze dark:text-hp-gold" />
-              <h2 className="text-5xl md:text-6xl font-bold text-hp-navy dark:text-hp-cream leading-tight mb-6" style={{ fontFamily: "var(--font-quran)" }}>
+              <h2 className="text-5xl md:text-6xl font-bold text-hp-navy dark:text-hp-cream leading-tight mb-6" style={{ fontFamily: "var(--font-heading)" }}>
                 {c.journeyTitle}
               </h2>
               <p className="text-lg text-hp-ink/65 dark:text-hp-cream/65">
@@ -932,7 +932,7 @@ export default function Home() {
                       </span>
                       <h3
                         className={`text-3xl md:text-4xl font-bold mb-3 transition-colors ${active ? "text-hp-parchment" : "text-hp-navy dark:text-hp-cream"}`}
-                        style={{ fontFamily: "var(--font-quran)" }}
+                        style={{ fontFamily: "var(--font-heading)" }}
                       >
                         {door.label}
                       </h3>
@@ -978,13 +978,13 @@ export default function Home() {
                       <div className="flex-shrink-0">
                         <div
                           className="flex h-16 w-16 md:h-20 md:w-20 items-center justify-center rounded-full border border-hp-bronze/25 dark:border-hp-gold/25 bg-hp-navy/5 dark:bg-hp-gold/10 text-3xl md:text-4xl font-bold text-hp-bronze dark:text-hp-gold leading-none transition-all duration-500 group-hover:bg-hp-navy dark:group-hover:bg-hp-gold group-hover:text-hp-gold dark:group-hover:text-hp-navy"
-                          style={{ fontFamily: "var(--font-quran)" }}
+                          style={{ fontFamily: "var(--font-heading)" }}
                         >
                           {step.n}
                         </div>
                       </div>
                       <div className="flex-1 pt-2">
-                        <h4 className="text-xl md:text-2xl font-bold text-hp-navy dark:text-hp-cream mb-2" style={{ fontFamily: "var(--font-quran)" }}>
+                        <h4 className="text-xl md:text-2xl font-bold text-hp-navy dark:text-hp-cream mb-2" style={{ fontFamily: "var(--font-heading)" }}>
                           {step.t}
                         </h4>
                         <p className="text-hp-ink/65 dark:text-hp-cream/65 leading-loose">{step.d}</p>
@@ -1011,7 +1011,7 @@ export default function Home() {
           <Reveal>
             <div className="max-w-2xl mx-auto text-center mt-20">
               <OrnamentDivider className="w-48 h-8 mx-auto mb-6 text-hp-bronze/60 dark:text-hp-gold/60" />
-              <p className="text-lg md:text-xl text-hp-navy/80 dark:text-hp-cream/75 leading-loose" style={{ fontFamily: "var(--font-quran)" }}>
+              <p className="text-lg md:text-xl text-hp-navy/80 dark:text-hp-cream/75 leading-loose" style={{ fontFamily: "var(--font-heading)" }}>
                 {c.journeyMeetText}
               </p>
             </div>
@@ -1067,12 +1067,12 @@ export default function Home() {
             <div className="max-w-3xl mx-auto text-center">
               <Sparkles className="w-10 h-10 text-hp-gold mx-auto mb-6" />
               <OrnamentDivider className="w-48 h-8 mx-auto mb-8 text-hp-gold" />
-              <h2 className="text-5xl md:text-7xl font-bold mb-8 leading-tight" style={{ fontFamily: "var(--font-quran)" }}>
+              <h2 className="text-5xl md:text-7xl font-bold mb-8 leading-tight" style={{ fontFamily: "var(--font-heading)" }}>
                 {c.ctaTitle}
               </h2>
               <p className="text-lg md:text-xl text-hp-parchment/70 leading-loose mb-12">
                 {c.ctaDesc}{" "}
-                <span className="text-hp-gold" style={{ fontFamily: "var(--font-quran)" }}>{c.ctaHadith}</span>.
+                <span className="text-hp-gold" style={{ fontFamily: "var(--font-heading)" }}>{c.ctaHadith}</span>.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link
@@ -1116,7 +1116,7 @@ export default function Home() {
                   <Logo light />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-hp-parchment" style={{ fontFamily: "var(--font-quran)" }}>
+                  <div className="text-2xl font-bold text-hp-parchment" style={{ fontFamily: "var(--font-heading)" }}>
                     {c.brandName}
                   </div>
                   <div className="text-[10px] tracking-[0.2em] text-hp-parchment/50 uppercase">
