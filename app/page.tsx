@@ -609,7 +609,7 @@ export default function Home() {
 
             <Reveal delay={0.15}>
               <h1
-                className="text-[14vw] sm:text-[10vw] md:text-8xl lg:text-9xl font-bold leading-[0.95] tracking-tight text-hp-navy dark:text-hp-cream mb-10 md:mb-14"
+                className="text-[17vw] sm:text-[13vw] md:text-[10rem] lg:text-[13rem] font-normal leading-[0.9] tracking-tight text-hp-navy dark:text-hp-cream mb-10 md:mb-14"
                 style={{ fontFamily: "'BIXIE', serif" }}
               >
                 {c.heroTitle}
