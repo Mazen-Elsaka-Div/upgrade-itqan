@@ -24,7 +24,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { AdminModeBanner } from '@/components/admin/admin-mode-banner'
 import { AdminRoleSwitcher } from '@/components/admin/admin-role-switcher'
 import { AdminOnboardingTour } from '@/components/admin/admin-onboarding-tour'
- import { Palette, Sparkles, Settings2, Plug, Grid, UserPlus, HelpCircle } from 'lucide-react'
+ import { Palette, Sparkles, Settings2, Grid, UserPlus, HelpCircle } from 'lucide-react'
 
 type NavItem = { href: string; label: string; icon: React.ElementType; badge?: number | string | null }
 type NavSection = { title?: string; items: NavItem[] }
@@ -257,7 +257,6 @@ const getSuperConfig = (t: any): ShellConfig => ({
         { href: '/admin/site-settings',   label: 'إعدادات الموقع العامة', icon: Settings2 },
         { href: '/admin/settings',         label: t.admin?.systemSettings || 'إعدادات النظام', icon: Settings },
         { href: '/admin/email-templates',  label: t.admin?.emailTemplates || 'قوالب البريد', icon: ScrollText },
-        { href: '/admin/integrations',     label: 'التكاملات والخدمات',    icon: Plug },
       ],
     },
     {
