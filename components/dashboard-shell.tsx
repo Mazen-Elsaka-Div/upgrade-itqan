@@ -210,21 +210,46 @@ const getRoleConfig = (t: any): Record<'student' | 'reader' | 'admin' | 'student
   }
 })
 
-// Governance tools that ONLY the Super Admin may see. Appended to the admin
-// sidebar at runtime so the platform-wide controls (design, branding, roles,
-// overview) are clearly grouped and gated.
-const getSuperAdminSection = (t: any): NavSection => ({
-  title: t.admin?.sidebarGovernance || 'الحوكمة والتحكم',
-  items: [
-  { href: '/admin/analytics', label: t.admin?.sidebarPlatformOverview || 'نظرة عامة على المنصة', icon: PieChart },
-  { href: '/admin/site-settings', label: 'إعدادات الموقع العامة', icon: Settings2 },
-  { href: '/admin/content-pages', label: 'صفحات المحتوى الثابت', icon: FileText },
-  { href: '/admin/integrations', label: 'التكاملات والخدمات', icon: Plug },
-  { href: '/admin/role-management', label: t.admin?.sidebarRoleManagement || 'إدارة الأدوار', icon: ShieldCheck },
-  { href: '/admin/theme', label: t.admin?.sidebarThemeEditor || 'التصميم والألوان', icon: Palette },
-  { href: '/admin/branding', label: t.admin?.sidebarBranding || 'الهوية البصرية', icon: Sparkles },
-  ],
-})
+// Governance tools that ONLY the Super Admin may see.
+// Organised into 4 clear sub-groups so each section has a single concern.
+const getSuperAdminSections = (t: any): NavSection[] => [
+  {
+    // 1 — هوية الموقع: كل ما يظهر للزائر قبل تسجيل الدخول
+    title: 'هوية الموقع',
+    items: [
+      { href: '/admin/homepage',      label: t.admin?.sidebarHomepage    || 'الصفحة الرئيسية',      icon: Globe },
+      { href: '/admin/seo',           label: t.admin?.sidebarSEO         || 'SEO والميتا داتا',       icon: Search },
+      { href: '/admin/theme',         label: t.admin?.sidebarThemeEditor || 'التصميم والألوان',      icon: Palette },
+      { href: '/admin/branding',      label: t.admin?.sidebarBranding    || 'الهوية البصرية',        icon: Sparkles },
+      { href: '/admin/content-pages', label: 'صفحات المحتوى الثابت',                                icon: FileText },
+    ],
+  },
+  {
+    // 2 — الحوكمة والصلاحيات: من يملك ماذا
+    title: 'الحوكمة والصلاحيات',
+    items: [
+      { href: '/admin/role-management', label: t.admin?.sidebarRoleManagement || 'إدارة الأدوار',  icon: ShieldCheck },
+      { href: '/admin/security',        label: t.admin?.security              || 'الأمان',          icon: Shield },
+      { href: '/admin/audit-log',       label: 'سجل التدقيق الموحد',                               icon: ScrollText },
+    ],
+  },
+  {
+    // 3 — إعدادات المنصة: تؤثر على المنصتين معًا
+    title: 'إعدادات المنصة',
+    items: [
+      { href: '/admin/site-settings', label: 'إعدادات الموقع العامة', icon: Settings2 },
+      { href: '/admin/integrations',  label: 'التكاملات والخدمات',    icon: Plug },
+    ],
+  },
+  {
+    // 4 — الإشراف والمراقبة: أرقام واحتياطيات
+    title: 'الإشراف والمراقبة',
+    items: [
+      { href: '/admin/analytics', label: t.admin?.sidebarPlatformOverview || 'نظرة عامة على المنصة', icon: PieChart },
+      { href: '/admin/backup',    label: t.admin?.backup                  || 'النسخ الاحتياطي',       icon: Archive },
+    ],
+  },
+]
 
 // The new admin tiers all reuse the rich `admin` sidebar config. Mode scoping is
 // communicated through the indicator banner + role switcher rather than by
@@ -323,8 +348,8 @@ export function DashboardShell({ role, children, headerTitle, adminMode }: { rol
   const baseConfig = getRoleConfig(t)[resolveConfigRole(role)]
   // Super admins get the exclusive governance section appended to their sidebar.
   const rawConfig = isSuperAdminRole
-    ? { ...baseConfig, sections: [...baseConfig.sections, getSuperAdminSection(t)] }
-    : baseConfig
+  ? { ...baseConfig, sections: [...baseConfig.sections, ...getSuperAdminSections(t)] }
+  : baseConfig
 
   // Inject unread direct message counts + pending-certificate badge
   // into the sidebar items. When the maqraa student has data_required
