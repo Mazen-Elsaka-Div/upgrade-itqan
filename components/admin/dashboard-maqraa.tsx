@@ -6,10 +6,9 @@ import { useI18n } from "@/lib/i18n/context"
 import { StatusBadge } from "@/components/status-badge"
 import {
   Users, BookOpen, ClipboardList, Clock,
-  ArrowLeft, Eye, UserCheck,
+  ArrowLeft, UserCheck, CheckCircle2,
 } from "lucide-react"
-import { ViewsChart } from "@/components/admin/analytics/views-chart"
-import { VisitorStats } from "@/components/admin/analytics/visitors-stats"
+import { MaqraaInsights } from "@/components/admin/analytics/maqraa-insights"
 import { SuspendedStudents } from "@/components/admin/SuspendedStudents"
 import { StudentSupervisorDashboard } from "@/components/admin/student-supervisor-dashboard"
 import { ReciterSupervisorDashboard } from "@/components/admin/reciter-supervisor-dashboard"
@@ -21,7 +20,6 @@ export function DashboardMaqraa() {
 
   const [data, setData] = useState<{ stats: any; latestRecitations: any[] } | null>(null)
   const [loading, setLoading] = useState(true)
-  const [analytics, setAnalytics] = useState<any>(null)
   const [me, setMe] = useState<{ role: string; name?: string } | null>(null)
 
   useEffect(() => {
@@ -56,10 +54,6 @@ export function DashboardMaqraa() {
     }
 
     loadStats()
-    fetch("/api/admin/analytics?days=30")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => { if (d) setAnalytics(d) })
-      .catch(() => {})
   }, [me])
 
   if (me?.role === "student_supervisor") return <StudentSupervisorDashboard name={me.name} />
@@ -106,37 +100,21 @@ export function DashboardMaqraa() {
     { label: t.admin.pendingReaderApps, value: stats.pendingReaderApps, icon: UserCheck, iconBg: "bg-amber-500/10 text-amber-500 border-amber-500/20" },
   ]
 
-  const chartData = (analytics?.overTime || []).map((d: any) => ({
-    date: d.raw_date || d.day,
-    views_count: parseInt(d.views || "0"),
-    visitors_count: parseInt(d.visitors || "0"),
-  }))
-
-  const topCountriesMapped = (analytics?.topCountries || []).map((c: any) => ({
-    country: c.country,
-    count: parseInt(c.views || "0"),
-  }))
-
-  const deviceTypesRaw = analytics?.deviceTypes || []
-  const totalDevices = deviceTypesRaw.reduce((sum: number, d: any) => sum + parseInt(d.count || "0"), 0)
-  const deviceTypesMapped = deviceTypesRaw.map((d: any) => ({
-    device_type: d.device_type,
-    count: parseInt(d.count || "0"),
-    percentage: totalDevices > 0 ? Math.round((parseInt(d.count || "0") / totalDevices) * 100) : 0,
-  }))
-
-  const totalViews = parseInt(analytics?.overview?.total_views || "0")
-  const uniqueVisitors = parseInt(analytics?.overview?.unique_visitors || "0")
+  // Maqraa-focused summary metrics derived from the recitation status distribution.
+  const statusDist: Record<string, number> = stats.statusDistribution || {}
+  const totalRecitations = Object.values(statusDist).reduce((sum: number, n: any) => sum + (Number(n) || 0), 0)
+  const masteredCount = Number(statusDist.mastered || 0)
+  const inReviewCount = Number(statusDist.in_review || 0)
 
   return (
     <div className="space-y-6 pb-20 lg:pb-0 font-sans" dir={isAr ? "rtl" : "ltr"}>
       {/* Quick Stats Summary */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {[
-          { label: `${t.admin.totalViews} (30 ${isAr ? t.admin.daysAgo : "Days"})`, value: totalViews, icon: Eye, circle: "bg-primary/10 border-primary/20", iconColor: "text-primary" },
-          { label: t.admin.uniqueVisitors, value: uniqueVisitors, icon: Users, circle: "bg-primary/10 border-primary/20", iconColor: "text-primary" },
-          { label: t.admin.totalMembers, value: stats.totalStudents + stats.totalReaders, icon: BookOpen, circle: "bg-accent/10 border-accent/20", iconColor: "text-accent" },
-          { label: t.admin.todaysRecitations, value: stats.recitationsToday, icon: ClipboardList, circle: "bg-amber-100/50 dark:bg-amber-900/30 border-amber-200 dark:border-amber-900/50", iconColor: "text-amber-700 dark:text-amber-400" },
+          { label: isAr ? "إجمالي التلاوات" : "Total recitations", value: totalRecitations, icon: ClipboardList, circle: "bg-primary/10 border-primary/20", iconColor: "text-primary" },
+          { label: isAr ? "تلاوات متقنة" : "Mastered recitations", value: masteredCount, icon: CheckCircle2, circle: "bg-emerald-500/10 border-emerald-500/20", iconColor: "text-emerald-600 dark:text-emerald-400" },
+          { label: isAr ? "قيد المراجعة" : "In review", value: inReviewCount, icon: Clock, circle: "bg-amber-100/50 dark:bg-amber-900/30 border-amber-200 dark:border-amber-900/50", iconColor: "text-amber-700 dark:text-amber-400" },
+          { label: t.admin.totalMembers, value: stats.totalStudents + stats.totalReaders, icon: Users, circle: "bg-accent/10 border-accent/20", iconColor: "text-accent" },
         ].map((card) => {
           const Icon = card.icon
           return (
@@ -177,13 +155,13 @@ export function DashboardMaqraa() {
         })}
       </div>
 
-      {analytics && <ViewsChart data={chartData} />}
+      <MaqraaInsights
+        statusDistribution={statusDist}
+        readersActivity={stats.readersActivity || []}
+        recitationsOverTime={stats.recitationsOverTime || []}
+      />
 
       <SuspendedStudents />
-
-      {analytics && (
-        <VisitorStats countryData={topCountriesMapped} deviceData={deviceTypesMapped} />
-      )}
 
       {/* Latest Recitations */}
       <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">

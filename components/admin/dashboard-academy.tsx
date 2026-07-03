@@ -9,14 +9,12 @@ import {
   Award,
   GraduationCap,
   ArrowLeft,
-  Eye,
   UserCheck,
   TrendingUp,
   ClipboardList,
   Sparkles,
 } from 'lucide-react'
-import { ViewsChart } from '@/components/admin/analytics/views-chart'
-import { VisitorStats } from '@/components/admin/analytics/visitors-stats'
+import { AcademyInsights } from '@/components/admin/analytics/academy-insights'
 import { StatsGridSkeleton, StatsMiniGridSkeleton, ChartSkeleton } from "@/components/admin/skeletons"
 import { Skeleton } from "@/components/ui/skeleton"
 
@@ -51,26 +49,18 @@ export function DashboardAcademy() {
   const dateLocale = locale === 'ar' ? 'ar-SA' : 'en-US'
 
   const [stats, setStats] = useState<AcademyStats | null>(null)
-  const [analytics, setAnalytics] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const load = async () => {
       try {
-        const [statsRes, analyticsRes] = await Promise.all([
-          fetch('/api/academy/admin/stats'),
-          fetch('/api/admin/analytics?days=30').catch(() => null),
-        ])
+        const statsRes = await fetch('/api/academy/admin/stats')
 
         if (statsRes.ok) {
           setStats(await statsRes.json())
         } else {
           setError(await statsRes.text())
-        }
-
-        if (analyticsRes && analyticsRes.ok) {
-          setAnalytics(await analyticsRes.json())
         }
       } catch (err) {
         console.error('[academy-admin] load error:', err)
@@ -120,33 +110,6 @@ export function DashboardAcademy() {
   }
 
   const fmt = (num: number) => num.toLocaleString(dateLocale)
-
-  // Analytics derived data (shared page_views table covers both platforms; we only show high-level usage)
-  const chartData = (analytics?.overTime || []).map((d: any) => ({
-    date: d.raw_date || d.day,
-    views_count: parseInt(d.views || '0'),
-    visitors_count: parseInt(d.visitors || '0'),
-  }))
-
-  const topCountriesMapped = (analytics?.topCountries || []).map((c: any) => ({
-    country: c.country,
-    count: parseInt(c.views || '0'),
-  }))
-
-  const deviceTypesRaw = analytics?.deviceTypes || []
-  const totalDevices = deviceTypesRaw.reduce(
-    (sum: number, d: any) => sum + parseInt(d.count || '0'),
-    0,
-  )
-  const deviceTypesMapped = deviceTypesRaw.map((d: any) => ({
-    device_type: d.device_type,
-    count: parseInt(d.count || '0'),
-    percentage:
-      totalDevices > 0 ? Math.round((parseInt(d.count || '0') / totalDevices) * 100) : 0,
-  }))
-
-  const totalViews = parseInt(analytics?.overview?.total_views || '0')
-  const uniqueVisitors = parseInt(analytics?.overview?.unique_visitors || '0')
 
   // Stats grid cards
   const statCards = [
@@ -200,28 +163,28 @@ export function DashboardAcademy() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <div className="bg-card rounded-xl p-3 sm:p-4 border border-border shadow-sm flex items-center gap-3 sm:gap-4 hover:shadow-md transition-shadow">
           <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-500/10 flex items-center justify-center flex-shrink-0 border border-blue-500/20">
-            <Eye className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 dark:text-blue-400" />
+            <GraduationCap className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 dark:text-blue-400" />
           </div>
           <div className="min-w-0">
             <p className="text-xl sm:text-2xl font-bold text-foreground truncate">
-              {fmt(totalViews)}
+              {fmt(stats.active_enrollments)}
             </p>
             <p className="text-xs sm:text-sm text-muted-foreground">
-              {a.dashTotalViews}
+              {a.dashActiveEnrollments}
             </p>
           </div>
         </div>
 
         <div className="bg-card rounded-xl p-3 sm:p-4 border border-border shadow-sm flex items-center gap-3 sm:gap-4 hover:shadow-md transition-shadow">
           <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0 border border-emerald-500/20">
-            <Users className="h-5 w-5 sm:h-6 sm:w-6 text-emerald-600 dark:text-emerald-400" />
+            <Award className="h-5 w-5 sm:h-6 sm:w-6 text-emerald-600 dark:text-emerald-400" />
           </div>
           <div className="min-w-0">
             <p className="text-xl sm:text-2xl font-bold text-foreground truncate">
-              {fmt(uniqueVisitors)}
+              {fmt(stats.certificates_issued)}
             </p>
             <p className="text-xs sm:text-sm text-muted-foreground">
-              {a.dashUniqueVisitors}
+              {a.dashCertificates}
             </p>
           </div>
         </div>
@@ -282,8 +245,14 @@ export function DashboardAcademy() {
         })}
       </div>
 
-      {/* Views Chart */}
-      {analytics && chartData.length > 0 && <ViewsChart data={chartData} />}
+      {/* Academy insights: community composition + enrollment pulse */}
+      <AcademyInsights
+        totalStudents={stats.total_students}
+        totalTeachers={stats.total_teachers}
+        enrollmentsToday={stats.enrollments_today}
+        enrollmentsWeek={stats.enrollments_week}
+        activeEnrollments={stats.active_enrollments}
+      />
 
       {/* Engagement & Activity Banner */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
@@ -323,16 +292,6 @@ export function DashboardAcademy() {
           </div>
         </div>
       </div>
-
-      {/* Visitor Stats (Countries & Devices) */}
-      {analytics && (topCountriesMapped.length > 0 || deviceTypesMapped.length > 0) && (
-        <div className="grid grid-cols-1 gap-6">
-          <VisitorStats
-            countryData={topCountriesMapped}
-            deviceData={deviceTypesMapped}
-          />
-        </div>
-      )}
 
       {/* Latest Courses + Top Students side by side */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
