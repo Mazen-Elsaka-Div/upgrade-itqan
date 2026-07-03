@@ -133,16 +133,16 @@ export function DashboardMaqraa() {
       {/* Quick Stats Summary */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {[
-          { label: `${t.admin.totalViews} (30 ${isAr ? t.admin.daysAgo : "Days"})`, value: totalViews, icon: Eye },
-          { label: t.admin.uniqueVisitors, value: uniqueVisitors, icon: Users },
-          { label: t.admin.totalMembers, value: stats.totalStudents + stats.totalReaders, icon: BookOpen },
-          { label: t.admin.todaysRecitations, value: stats.recitationsToday, icon: ClipboardList },
+          { label: `${t.admin.totalViews} (30 ${isAr ? t.admin.daysAgo : "Days"})`, value: totalViews, icon: Eye, circle: "bg-primary/10 border-primary/20", iconColor: "text-primary" },
+          { label: t.admin.uniqueVisitors, value: uniqueVisitors, icon: Users, circle: "bg-primary/10 border-primary/20", iconColor: "text-primary" },
+          { label: t.admin.totalMembers, value: stats.totalStudents + stats.totalReaders, icon: BookOpen, circle: "bg-accent/10 border-accent/20", iconColor: "text-accent" },
+          { label: t.admin.todaysRecitations, value: stats.recitationsToday, icon: ClipboardList, circle: "bg-amber-100/50 dark:bg-amber-900/30 border-amber-200 dark:border-amber-900/50", iconColor: "text-amber-700 dark:text-amber-400" },
         ].map((card) => {
           const Icon = card.icon
           return (
             <div key={card.label} className="bg-card rounded-xl p-3 sm:p-4 border border-border shadow-sm flex items-center gap-3 sm:gap-4 hover:shadow-md transition-shadow">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 border border-primary/20">
-                <Icon className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+              <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center flex-shrink-0 border ${card.circle}`}>
+                <Icon className={`h-5 w-5 sm:h-6 sm:w-6 ${card.iconColor}`} />
               </div>
               <div className="min-w-0">
                 <p className="text-xl sm:text-2xl font-bold text-foreground truncate">

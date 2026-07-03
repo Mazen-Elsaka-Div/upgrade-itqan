@@ -24,7 +24,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { AdminModeBanner } from '@/components/admin/admin-mode-banner'
 import { AdminRoleSwitcher } from '@/components/admin/admin-role-switcher'
 import { AdminOnboardingTour } from '@/components/admin/admin-onboarding-tour'
- import { Palette, Sparkles, Settings2, Plug } from 'lucide-react'
+ import { Palette, Sparkles, Settings2, Plug, Grid, UserPlus, HelpCircle } from 'lucide-react'
 
 type NavItem = { href: string; label: string; icon: React.ElementType; badge?: number | string | null }
 type NavSection = { title?: string; items: NavItem[] }
@@ -210,50 +210,160 @@ const getRoleConfig = (t: any): Record<'student' | 'reader' | 'admin' | 'student
   }
 })
 
-// Governance tools that ONLY the Super Admin may see.
-// Organised into 4 clear sub-groups so each section has a single concern.
-const getSuperAdminSections = (t: any): NavSection[] => [
-  {
-    // 1 — هوية الموقع: كل ما يظهر للزائر قبل تسجيل الدخول
-    title: 'هوية الموقع',
-    items: [
-      { href: '/admin/homepage',      label: t.admin?.sidebarHomepage    || 'الصفحة الرئيسية',      icon: Globe },
-      { href: '/admin/seo',           label: t.admin?.sidebarSEO         || 'SEO والميتا داتا',       icon: Search },
-      { href: '/admin/theme',         label: t.admin?.sidebarThemeEditor || 'التصميم والألوان',      icon: Palette },
-      { href: '/admin/branding',      label: t.admin?.sidebarBranding    || 'الهوية البصرية',        icon: Sparkles },
-      { href: '/admin/content-pages', label: 'صفحات المحتوى الثابت',                                icon: FileText },
-    ],
-  },
-  {
-    // 2 — الحوكمة والصلاحيات: من يملك ماذا
-    title: 'الحوكمة والصلاحيات',
-    items: [
-      { href: '/admin/role-management', label: t.admin?.sidebarRoleManagement || 'إدارة الأدوار',  icon: ShieldCheck },
-      { href: '/admin/security',        label: t.admin?.security              || 'الأمان',          icon: Shield },
-      { href: '/admin/audit-log',       label: 'سجل التدقيق الموحد',                               icon: ScrollText },
-    ],
-  },
-  {
-    // 3 — إعدادات المنصة: تؤثر على المنصتين معًا
-    title: 'إعدادات المنصة',
-    items: [
-      { href: '/admin/site-settings', label: 'إعدادات الموقع العامة', icon: Settings2 },
-      { href: '/admin/integrations',  label: 'التكاملات والخدمات',    icon: Plug },
-    ],
-  },
-  {
-    // 4 — الإشراف والمراقبة: أرقام واحتياطيات
-    title: 'الإشراف والمراقبة',
-    items: [
-      { href: '/admin/analytics', label: t.admin?.sidebarPlatformOverview || 'نظرة عامة على المنصة', icon: PieChart },
-      { href: '/admin/backup',    label: t.admin?.backup                  || 'النسخ الاحتياطي',       icon: Archive },
-    ],
-  },
-]
+type ShellConfig = { sections: NavSection[]; label: string; name: string; sublabel: string }
 
-// The new admin tiers all reuse the rich `admin` sidebar config. Mode scoping is
-// communicated through the indicator banner + role switcher rather than by
-// hiding sidebar items, so the Super Admin keeps full reach while borrowing a lens.
+// ── Super Admin (governance) ────────────────────────────────────────────────
+// Platform-wide governance only. No operational maqraa/academy items — the
+// Super Admin switches the mode from the segmented control to manage those.
+const getSuperConfig = (t: any): ShellConfig => ({
+  sections: [
+    {
+      title: t.main,
+      items: [
+        { href: '/admin', label: t.admin.dashboard, icon: LayoutDashboard },
+        { href: '/admin/analytics', label: t.admin?.sidebarPlatformOverview || 'نظرة عامة على المنصة', icon: PieChart },
+      ],
+    },
+    {
+      title: 'هوية الموقع',
+      items: [
+        { href: '/admin/homepage',      label: t.admin?.sidebarHomepage    || t.admin.homepage || 'الصفحة الرئيسية', icon: Home },
+        { href: '/admin/seo',           label: t.admin?.sidebarSEO         || t.admin.seo || 'SEO والميتا داتا',      icon: Globe },
+        { href: '/admin/theme',         label: t.admin?.sidebarThemeEditor || 'التصميم والألوان',      icon: Palette },
+        { href: '/admin/branding',      label: t.admin?.sidebarBranding    || 'الهوية البصرية',        icon: Sparkles },
+        { href: '/admin/content-pages', label: 'صفحات المحتوى الثابت',                                 icon: FileText },
+      ],
+    },
+    {
+      title: 'الحوكمة والصلاحيات',
+      items: [
+        { href: '/admin/users',           label: t.admin.users, icon: Users },
+        { href: '/admin/role-management', label: t.admin?.sidebarRoleManagement || 'إدارة الأدوار',  icon: ShieldCheck },
+        { href: '/admin/security',        label: t.admin?.security              || 'الأمان',          icon: Shield },
+        { href: '/admin/audit-log',       label: 'سجل التدقيق الموحد',                                icon: ScrollText },
+      ],
+    },
+    {
+      title: 'إعدادات المنصة',
+      items: [
+        { href: '/admin/site-settings', label: 'إعدادات الموقع العامة', icon: Settings2 },
+        { href: '/admin/integrations',  label: 'التكاملات والخدمات',    icon: Plug },
+      ],
+    },
+    {
+      title: 'الإشراف والمراقبة',
+      items: [
+        { href: '/admin/backup', label: t.admin?.backup || 'النسخ الاحتياطي', icon: Archive },
+      ],
+    },
+    {
+      title: t.shell.account,
+      items: [
+        { href: '/admin/notifications', label: t.student.notifications, icon: Bell },
+        { href: '/admin/profile',       label: t.student.profile,       icon: User },
+      ],
+    },
+  ],
+  label: 'المدير العام', name: 'المدير العام', sublabel: 'المدير العام',
+})
+
+// ── Maqraa mode ─────────────────────────────────────────────────────────────
+// The full classic admin sidebar, minus the platform-wide site items that only
+// the Super Admin (super mode) may touch.
+const MAQRAA_EXCLUDED_HREFS = ['/admin/homepage', '/admin/seo', '/admin/security', '/admin/backup']
+const getMaqraaConfig = (t: any): ShellConfig => {
+  const admin = getRoleConfig(t).admin
+  const sections = admin.sections
+    .map((s) => ({ ...s, items: s.items.filter((i) => !MAQRAA_EXCLUDED_HREFS.includes(i.href)) }))
+    .filter((s) => s.items.length > 0)
+  return { sections, label: 'مدير المقرأة', name: 'مدير المقرأة', sublabel: 'مدير المقرأة' }
+}
+
+// ── Academy mode ────────────────────────────────────────────────────────────
+// Mirrors the classic academy_admin sidebar (links stay under /academy/admin/…
+// where the working pages live).
+const getAcademyConfig = (t: any): ShellConfig => ({
+  sections: [
+    {
+      title: t.main || 'الرئيسية',
+      items: [
+        { href: '/academy/admin', label: t.academy?.dashboard || 'لوحة التحكم', icon: LayoutDashboard },
+        { href: '/academy/admin/analytics', label: t.academy?.analytics || 'التحليلات', icon: BarChart3 },
+      ],
+    },
+    {
+      title: t.academyAdmin?.sidebarEducationalProcess,
+      items: [
+        { href: '/academy/admin/courses', label: t.academy?.courses || 'الدورات', icon: BookOpen },
+        { href: '/academy/admin/archive', label: t.academyAdmin?.archiveTitle, icon: Archive },
+        { href: '/academy/admin/categories', label: t.academy?.categories || 'التصنيفات', icon: Grid },
+        { href: '/academy/admin/learning-paths', label: t.academy?.learningPaths || 'المسارات التعليمية', icon: Route },
+      ],
+    },
+    {
+      title: t.academyAdmin?.sidebarUsersPermissions,
+      items: [
+        { href: '/academy/admin/teachers', label: t.academy?.teachers || 'المدرسين', icon: GraduationCap },
+        { href: '/academy/admin/teacher-applications', label: t.academy?.teacherApplications || 'طلبات التدريس', icon: UserCheck },
+        { href: '/academy/admin/application-questions', label: t.academy?.applicationQuestions || 'أسئلة طلبات الانضمام', icon: ClipboardList },
+        { href: '/academy/admin/students', label: t.academy?.students || 'الطلاب', icon: Users },
+        { href: '/academy/admin/supervisors', label: t.academyAdmin?.supervision || 'الإشراف', icon: Shield },
+        { href: '/academy/admin/users', label: t.admin?.users || 'المستخدمين', icon: Users },
+        { href: '/academy/admin/invitations', label: t.academy?.invitations || 'الدعوات', icon: UserPlus },
+      ],
+    },
+    {
+      title: t.academyAdmin?.sidebarEngagement,
+      items: [
+        { href: '/academy/admin/competitions', label: t.academy?.competitions || 'المسابقات', icon: Trophy },
+        { href: '/academy/admin/leaderboard', label: t.academy?.leaderboard || 'لوحة المتصدرين', icon: Star },
+        { href: '/academy/admin/badges', label: t.academy?.badges || 'الشارات', icon: Award },
+      ],
+    },
+    {
+      title: t.academyAdmin?.sidebarCommunity,
+      items: [
+        { href: '/community/academy/admin', label: t.academy?.forum || 'المنتدى', icon: MessagesSquare },
+        { href: '/community/academy/admin/manage', label: t.academyAdmin?.sidebarManageForum, icon: Shield },
+        { href: '/academy/admin/fiqh', label: t.academy?.fiqhQuestions || 'صندوق الأسئلة الفقهية', icon: HelpCircle },
+        { href: '/academy/fiqh', label: t.academy?.fiqhLibrary || 'المكتبة الفقهية', icon: Library },
+        { href: '/academy/library', label: t.academy?.booksLibrary || 'مكتبة الكتب (تصفح)', icon: BookOpen },
+        { href: '/academy/admin/library/books', label: t.academyAdmin?.sidebarManageLibrary, icon: BookOpen },
+        { href: '/academy/admin/announcements', label: t.admin?.announcements || 'الإعلانات', icon: Megaphone },
+        { href: '/academy/admin/conversations', label: t.admin?.conversations || 'مركز المحادثات', icon: MessagesSquare },
+      ],
+    },
+    {
+      title: t.academyAdmin?.sidebarHalaqatBroadcast,
+      items: [
+        { href: '/academy/admin/halaqat', label: t.academy?.halaqat || 'الحلقات', icon: GraduationCap },
+        { href: '/academy/admin/video-settings', label: t.academyAdmin?.sidebarVideoSettings, icon: Video },
+      ],
+    },
+    {
+      title: t.admin?.settings || 'الإعدادات',
+      items: [
+        { href: '/academy/admin/certificates', label: t.academy?.certificatesCenter || t.academy?.certificates || 'مركز الشهادات', icon: Award },
+        { href: '/academy/admin/access-control', label: t.academy?.accessControl || 'التحكم بالوصول', icon: Shield },
+        { href: '/academy/admin/settings', label: t.admin?.systemSettings || 'إعدادات النظام', icon: Settings },
+      ],
+    },
+  ],
+  label: t.academy?.adminPortal || 'إدارة الأكاديمية',
+  name: t.academy?.admin || 'مدير الأكاديمية',
+  sublabel: t.academy?.academyAdmin || 'مدير الأكاديمية',
+})
+
+// Pick the sidebar config for an admin tier based on the active mode. Each mode
+// is fully scoped: no item from one mode ever leaks into another.
+function getConfigForMode(mode: 'super' | 'maqraa' | 'academy', t: any): ShellConfig {
+  if (mode === 'academy') return getAcademyConfig(t)
+  if (mode === 'maqraa') return getMaqraaConfig(t)
+  return getSuperConfig(t)
+}
+
+// Supervisors keep their own dedicated sidebars; every other role maps straight
+// through. Admin tiers are handled separately via getConfigForMode.
 function resolveConfigRole(
   role: 'student' | 'reader' | 'admin' | 'super_admin' | 'maqraa_admin' | 'academy_admin' | 'student_supervisor' | 'reciter_supervisor',
 ): 'student' | 'reader' | 'admin' | 'student_supervisor' | 'reciter_supervisor' {
@@ -345,11 +455,16 @@ export function DashboardShell({ role, children, headerTitle, adminMode }: { rol
   }, [])
 
   const isSuperAdminRole = role === 'admin' || role === 'super_admin'
-  const baseConfig = getRoleConfig(t)[resolveConfigRole(role)]
-  // Super admins get the exclusive governance section appended to their sidebar.
-  const rawConfig = isSuperAdminRole
-  ? { ...baseConfig, sections: [...baseConfig.sections, ...getSuperAdminSections(t)] }
-  : baseConfig
+  // Admin tiers (super / maqraa / academy) render a fully mode-scoped sidebar.
+  // The segmented switcher (super only) changes the active mode; scoped admins
+  // are pinned to their own mode. No item from one mode leaks into another.
+  const isAdminTier =
+    role === 'admin' || role === 'super_admin' || role === 'maqraa_admin' || role === 'academy_admin'
+  const effectiveMode: 'super' | 'maqraa' | 'academy' =
+    adminMode ?? (isSuperAdminRole ? 'super' : role === 'academy_admin' ? 'academy' : 'maqraa')
+  const rawConfig = isAdminTier
+    ? getConfigForMode(effectiveMode, t)
+    : getRoleConfig(t)[resolveConfigRole(role)]
 
   // Inject unread direct message counts + pending-certificate badge
   // into the sidebar items. When the maqraa student has data_required
