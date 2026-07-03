@@ -246,8 +246,10 @@ const getSuperConfig = (t: any): ShellConfig => ({
     {
       title: 'إعدادات المنصة',
       items: [
-        { href: '/admin/site-settings', label: 'إعدادات الموقع العامة', icon: Settings2 },
-        { href: '/admin/integrations',  label: 'التكاملات والخدمات',    icon: Plug },
+        { href: '/admin/site-settings',   label: 'إعدادات الموقع العامة', icon: Settings2 },
+        { href: '/admin/settings',         label: t.admin?.systemSettings || 'إعدادات النظام', icon: Settings },
+        { href: '/admin/email-templates',  label: t.admin?.emailTemplates || 'قوالب البريد', icon: ScrollText },
+        { href: '/admin/integrations',     label: 'التكاملات والخدمات',    icon: Plug },
       ],
     },
     {
@@ -268,9 +270,19 @@ const getSuperConfig = (t: any): ShellConfig => ({
 })
 
 // ── Maqraa mode ─────────────────────────────────────────────────────────────
-// The full classic admin sidebar, minus the platform-wide site items that only
-// the Super Admin (super mode) may touch.
-const MAQRAA_EXCLUDED_HREFS = ['/admin/homepage', '/admin/seo', '/admin/security', '/admin/backup']
+// The classic admin sidebar, minus every platform-wide / general item that now
+// lives exclusively in the Super Admin (super mode) sidebar — so nothing is
+// duplicated across modes. Site identity (homepage/seo), security, backup,
+// global user management and general platform settings all belong to super.
+const MAQRAA_EXCLUDED_HREFS = [
+  '/admin/homepage',
+  '/admin/seo',
+  '/admin/security',
+  '/admin/backup',
+  '/admin/users',
+  '/admin/settings',
+  '/admin/email-templates',
+]
 const getMaqraaConfig = (t: any): ShellConfig => {
   const admin = getRoleConfig(t).admin
   const sections = admin.sections
@@ -305,10 +317,9 @@ const getAcademyConfig = (t: any): ShellConfig => ({
       items: [
         { href: '/academy/admin/teachers', label: t.academy?.teachers || 'المدرسين', icon: GraduationCap },
         { href: '/academy/admin/teacher-applications', label: t.academy?.teacherApplications || 'طلبات التدريس', icon: UserCheck },
-        { href: '/academy/admin/application-questions', label: t.academy?.applicationQuestions || 'أسئلة طلبات الانضمام', icon: ClipboardList },
+        { href: '/academy/admin/application-questions', label: t.academy?.applicationQuestions || 'أ��ئلة طلبات الانضمام', icon: ClipboardList },
         { href: '/academy/admin/students', label: t.academy?.students || 'الطلاب', icon: Users },
         { href: '/academy/admin/supervisors', label: t.academyAdmin?.supervision || 'الإشراف', icon: Shield },
-        { href: '/academy/admin/users', label: t.admin?.users || 'المستخدمين', icon: Users },
         { href: '/academy/admin/invitations', label: t.academy?.invitations || 'الدعوات', icon: UserPlus },
       ],
     },
