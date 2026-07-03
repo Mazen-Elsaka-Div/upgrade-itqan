@@ -113,21 +113,21 @@ export function StudentForm({ initialRole, onBack }: StudentFormProps) {
           <label htmlFor="fullname" className="block text-sm font-medium text-foreground/80 mb-1">{t.auth.fullName}</label>
           <div className="relative">
             <User className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5" />
-            <input id="fullname" type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder={t.auth.enterFullName} className="w-full pr-10 pl-4 py-3 bg-secondary/20 dark:bg-secondary/10 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-colors text-sm text-foreground" required />
+            <input id="fullname" type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder={t.auth.enterFullName} className="w-full pr-10 pl-4 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-colors text-sm text-foreground placeholder:text-muted-foreground" required />
           </div>
         </div>
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-foreground/80 mb-1">{t.auth.email}</label>
           <div className="relative">
             <Mail className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5" />
-            <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@example.com" dir="ltr" className="w-full pr-10 pl-4 py-3 bg-secondary/20 dark:bg-secondary/10 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-colors text-sm text-foreground" required />
+            <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@example.com" dir="ltr" className="w-full pr-10 pl-4 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-colors text-sm text-foreground placeholder:text-muted-foreground" required />
           </div>
         </div>
         <div>
           <label htmlFor="password" className="block text-sm font-medium text-foreground/80 mb-1">{t.auth.password}</label>
           <div className="relative">
             <Lock className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5" />
-            <input id="password" type={showPw ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} placeholder={t.auth.passwordPlaceholder} dir="ltr" className="w-full pr-10 pl-10 py-3 bg-secondary/20 dark:bg-secondary/10 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-colors text-sm text-foreground" required minLength={6} />
+            <input id="password" type={showPw ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} placeholder={t.auth.passwordPlaceholder} dir="ltr" className="w-full pr-10 pl-10 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-colors text-sm text-foreground placeholder:text-muted-foreground" required minLength={6} />
             <button type="button" onClick={() => setShowPw(!showPw)} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground" aria-label="toggle password">
               {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
@@ -137,7 +137,7 @@ export function StudentForm({ initialRole, onBack }: StudentFormProps) {
           <label htmlFor="gender" className="block text-sm font-medium text-foreground/80 mb-1">{t.auth.gender}</label>
           <div className="relative">
             <ChevronDown className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5 pointer-events-none" />
-            <select id="gender" value={gender} onChange={(e) => setGender(e.target.value)} className="w-full pr-4 pl-10 py-3 bg-secondary/20 dark:bg-secondary/10 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-colors text-sm text-foreground appearance-none" required>
+            <select id="gender" value={gender} onChange={(e) => setGender(e.target.value)} className="w-full pr-4 pl-10 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-colors text-sm text-foreground appearance-none" required>
               <option value="" className="bg-card">{t.auth.selectGender}</option>
               <option value="male" className="bg-card">{t.auth.male}</option>
               <option value="female" className="bg-card">{t.auth.female}</option>
@@ -152,7 +152,7 @@ export function StudentForm({ initialRole, onBack }: StudentFormProps) {
             </label>
             <div className="relative">
               <ChevronDown className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5 pointer-events-none" />
-              <select id="platform" value={platform} onChange={(e) => setPlatform(e.target.value)} className="w-full pr-4 pl-10 py-3 bg-secondary/20 dark:bg-secondary/10 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-colors text-sm text-foreground appearance-none" required>
+              <select id="platform" value={platform} onChange={(e) => setPlatform(e.target.value)} className="w-full pr-4 pl-10 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-colors text-sm text-foreground appearance-none" required>
                 <option value="both" className="bg-card">
                   {t.locale === 'ar' ? 'الاثنان معاً (المقرأة والأكاديمية)' : 'Both (Maqra\'ah & Academy)'}
                 </option>
@@ -167,10 +167,10 @@ export function StudentForm({ initialRole, onBack }: StudentFormProps) {
           </div>
         )}
 
-        <button type="submit" disabled={loading} className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 flex items-center justify-center gap-2 disabled:opacity-60">
+        <button type="submit" disabled={loading} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3.5 px-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 flex items-center justify-center gap-2 disabled:opacity-60">
           {loading ? (
             <span className="flex items-center gap-2">
-              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <span className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
               {t.auth.creatingAccount}
             </span>
           ) : (
