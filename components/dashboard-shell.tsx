@@ -24,7 +24,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { AdminModeBanner } from '@/components/admin/admin-mode-banner'
 import { AdminRoleSwitcher } from '@/components/admin/admin-role-switcher'
 import { AdminOnboardingTour } from '@/components/admin/admin-onboarding-tour'
- import { Palette, Sparkles, Settings2 } from 'lucide-react'
+ import { Palette, Sparkles, Settings2, Plug } from 'lucide-react'
 
 type NavItem = { href: string; label: string; icon: React.ElementType; badge?: number | string | null }
 type NavSection = { title?: string; items: NavItem[] }
@@ -219,6 +219,7 @@ const getSuperAdminSection = (t: any): NavSection => ({
   { href: '/admin/analytics', label: t.admin?.sidebarPlatformOverview || 'نظرة عامة على المنصة', icon: PieChart },
   { href: '/admin/site-settings', label: 'إعدادات الموقع العامة', icon: Settings2 },
   { href: '/admin/content-pages', label: 'صفحات المحتوى الثابت', icon: FileText },
+  { href: '/admin/integrations', label: 'التكاملات والخدمات', icon: Plug },
   { href: '/admin/role-management', label: t.admin?.sidebarRoleManagement || 'إدارة الأدوار', icon: ShieldCheck },
   { href: '/admin/theme', label: t.admin?.sidebarThemeEditor || 'التصميم والألوان', icon: Palette },
   { href: '/admin/branding', label: t.admin?.sidebarBranding || 'الهوية البصرية', icon: Sparkles },
