@@ -244,11 +244,10 @@ const getSuperConfig = (t: any): ShellConfig => ({
       ],
     },
     {
-      // Forum moderation for both platforms is centralised under the Super Admin.
-      title: 'إدارة المنتديات',
+      // Forum moderation is centralised under the Super Admin.
+      title: 'إدارة المنتدى',
       items: [
-        { href: '/community/maqraa/admin/manage',  label: 'إدارة منتدى المقرأة',   icon: MessagesSquare },
-        { href: '/community/academy/admin/manage', label: 'إدارة منتدى الأكاديمية', icon: MessagesSquare },
+        { href: '/community/academy/admin/manage', label: 'إدارة المنتدى', icon: MessagesSquare },
       ],
     },
     {
@@ -292,8 +291,6 @@ const MAQRAA_EXCLUDED_HREFS = [
   // Academy-only content — the fiqh library lives under /academy and belongs to
   // the Academy sidebar, so it must not leak into the Maqraa sidebar.
   '/academy/fiqh',
-  // Forum management is centralised under the Super Admin.
-  '/community/maqraa/admin/manage',
 ]
 const getMaqraaConfig = (t: any): ShellConfig => {
   const admin = getRoleConfig(t).admin

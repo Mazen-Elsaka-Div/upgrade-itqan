@@ -92,6 +92,21 @@ export default async function CommunityLayout({
     </>
   )
 
+  // Admin-tier users (super / maqraa / academy admins) always keep their
+  // unified dashboard shell in their currently-active mode — no matter which
+  // community they open. This prevents a Super Admin who clicks "إدارة المنتدى"
+  // from being dropped into the Academy account shell.
+  const adminTierRoles = ['admin', 'super_admin', 'maqraa_admin', 'academy_admin']
+  if (adminTierRoles.includes(session.role)) {
+    const cookieStore = await cookies()
+    const adminMode = resolveAdminMode(
+      cookieStore.get(ADMIN_MODE_COOKIE)?.value,
+      session.role,
+      session.academy_roles ?? [],
+    )
+    return <DashboardShell role={session.role as any} adminMode={adminMode}>{inner}</DashboardShell>
+  }
+
   // Wrap the community pages in the same dashboard shell the user sees on
   // their other pages, so the main sidebar stays visible (and collapsible)
   // when they navigate into the forum or its admin/settings pages.
@@ -111,18 +126,7 @@ export default async function CommunityLayout({
     )
   }
 
-  // maqraa — admin-tier users keep their active mode (e.g. super) so the
-  // sidebar stays consistent when navigating from the super-admin sidebar.
+  // maqraa (non-admin roles)
   const role = resolveMaqraaShellRole(session)
-  const adminTierRoles = ['admin', 'super_admin', 'maqraa_admin', 'academy_admin']
-  if (adminTierRoles.includes(session.role)) {
-    const cookieStore = await cookies()
-    const adminMode = resolveAdminMode(
-      cookieStore.get(ADMIN_MODE_COOKIE)?.value,
-      session.role,
-      session.academy_roles ?? [],
-    )
-    return <DashboardShell role={session.role as any} adminMode={adminMode}>{inner}</DashboardShell>
-  }
   return <DashboardShell role={role}>{inner}</DashboardShell>
 }
