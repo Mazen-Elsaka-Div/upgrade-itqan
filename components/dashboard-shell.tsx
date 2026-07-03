@@ -216,11 +216,12 @@ const getRoleConfig = (t: any): Record<'student' | 'reader' | 'admin' | 'student
 const getSuperAdminSection = (t: any): NavSection => ({
   title: t.admin?.sidebarGovernance || 'الحوكمة والتحكم',
   items: [
-    { href: '/admin/analytics', label: t.admin?.sidebarPlatformOverview || 'نظرة عامة على المنصة', icon: PieChart },
-    { href: '/admin/site-settings', label: 'إعدادات الموقع العامة', icon: Settings2 },
-    { href: '/admin/role-management', label: t.admin?.sidebarRoleManagement || 'إدارة الأدوار', icon: ShieldCheck },
-    { href: '/admin/theme', label: t.admin?.sidebarThemeEditor || 'التصميم والألوان', icon: Palette },
-    { href: '/admin/branding', label: t.admin?.sidebarBranding || 'الهوية البصرية', icon: Sparkles },
+  { href: '/admin/analytics', label: t.admin?.sidebarPlatformOverview || 'نظرة عامة على المنصة', icon: PieChart },
+  { href: '/admin/site-settings', label: 'إعدادات الموقع العامة', icon: Settings2 },
+  { href: '/admin/content-pages', label: 'صفحات المحتوى الثابت', icon: FileText },
+  { href: '/admin/role-management', label: t.admin?.sidebarRoleManagement || 'إدارة الأدوار', icon: ShieldCheck },
+  { href: '/admin/theme', label: t.admin?.sidebarThemeEditor || 'التصميم والألوان', icon: Palette },
+  { href: '/admin/branding', label: t.admin?.sidebarBranding || 'الهوية البصرية', icon: Sparkles },
   ],
 })
 
