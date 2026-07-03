@@ -439,6 +439,16 @@ export function DashboardShell({ role, children, headerTitle, adminMode }: { rol
           </button>
         </div>
 
+        {/* Super Admin mode switcher — segmented control just above the nav */}
+        {isSuperAdminRole && (
+          <div className={cn(
+            'border-b border-border shrink-0',
+            collapsed ? 'lg:px-2 lg:py-2 px-4 py-3' : 'px-4 py-3'
+          )}>
+            <AdminRoleSwitcher currentMode={adminMode ?? 'super'} collapsed={collapsed} />
+          </div>
+        )}
+
         {/* Navigation */}
         <nav className={cn('flex-1 overflow-y-auto overflow-x-hidden py-6 space-y-1', collapsed ? 'lg:px-2 px-4' : 'px-4')}>
           {config.sections.map((section, si) => (
@@ -564,7 +574,7 @@ export function DashboardShell({ role, children, headerTitle, adminMode }: { rol
                 <GlobalSearch role={resolveConfigRole(role) as 'admin' | 'reader'} />
               </div>
             )}
-            {isSuperAdminRole && <AdminRoleSwitcher currentMode={adminMode ?? 'super'} />}
+
             <ModeSwitcher
               currentMode="library"
               userRole={role}
