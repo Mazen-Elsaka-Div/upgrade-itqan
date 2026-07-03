@@ -99,7 +99,7 @@ export function StudentForm({ initialRole, onBack }: StudentFormProps) {
         <button onClick={onBack} className="p-2 hover:bg-secondary rounded-full transition-colors" aria-label="back">
           <ArrowRight className="w-5 h-5 text-muted-foreground rtl:rotate-0 ltr:rotate-180" />
         </button>
-        <h2 className="text-2xl font-bold text-foreground mr-2">{roleTitle}</h2>
+        <h2 className="text-2xl font-bold text-card-foreground mr-2">{roleTitle}</h2>
       </div>
 
       {error && (
@@ -110,34 +110,34 @@ export function StudentForm({ initialRole, onBack }: StudentFormProps) {
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label htmlFor="fullname" className="block text-sm font-medium text-foreground/80 mb-1">{t.auth.fullName}</label>
+          <label htmlFor="fullname" className="block text-sm font-medium text-card-foreground/80 mb-1">{t.auth.fullName}</label>
           <div className="relative">
             <User className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5" />
-            <input id="fullname" type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder={t.auth.enterFullName} className="w-full pr-10 pl-4 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-colors text-sm text-foreground placeholder:text-muted-foreground" required />
+            <input id="fullname" type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder={t.auth.enterFullName} className="w-full pr-10 pl-4 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-colors text-sm text-card-foreground placeholder:text-muted-foreground" required />
           </div>
         </div>
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-foreground/80 mb-1">{t.auth.email}</label>
+          <label htmlFor="email" className="block text-sm font-medium text-card-foreground/80 mb-1">{t.auth.email}</label>
           <div className="relative">
             <Mail className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5" />
-            <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@example.com" dir="ltr" className="w-full pr-10 pl-4 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-colors text-sm text-foreground placeholder:text-muted-foreground" required />
+            <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@example.com" dir="ltr" className="w-full pr-10 pl-4 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-colors text-sm text-card-foreground placeholder:text-muted-foreground" required />
           </div>
         </div>
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-foreground/80 mb-1">{t.auth.password}</label>
+          <label htmlFor="password" className="block text-sm font-medium text-card-foreground/80 mb-1">{t.auth.password}</label>
           <div className="relative">
             <Lock className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5" />
-            <input id="password" type={showPw ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} placeholder={t.auth.passwordPlaceholder} dir="ltr" className="w-full pr-10 pl-10 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-colors text-sm text-foreground placeholder:text-muted-foreground" required minLength={6} />
-            <button type="button" onClick={() => setShowPw(!showPw)} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground" aria-label="toggle password">
+            <input id="password" type={showPw ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} placeholder={t.auth.passwordPlaceholder} dir="ltr" className="w-full pr-10 pl-10 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-colors text-sm text-card-foreground placeholder:text-muted-foreground" required minLength={6} />
+            <button type="button" onClick={() => setShowPw(!showPw)} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-card-foreground" aria-label="toggle password">
               {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
         </div>
         <div>
-          <label htmlFor="gender" className="block text-sm font-medium text-foreground/80 mb-1">{t.auth.gender}</label>
+          <label htmlFor="gender" className="block text-sm font-medium text-card-foreground/80 mb-1">{t.auth.gender}</label>
           <div className="relative">
             <ChevronDown className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5 pointer-events-none" />
-            <select id="gender" value={gender} onChange={(e) => setGender(e.target.value)} className="w-full pr-4 pl-10 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-colors text-sm text-foreground appearance-none" required>
+            <select id="gender" value={gender} onChange={(e) => setGender(e.target.value)} className="w-full pr-4 pl-10 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-colors text-sm text-card-foreground appearance-none" required>
               <option value="" className="bg-card">{t.auth.selectGender}</option>
               <option value="male" className="bg-card">{t.auth.male}</option>
               <option value="female" className="bg-card">{t.auth.female}</option>
@@ -147,12 +147,12 @@ export function StudentForm({ initialRole, onBack }: StudentFormProps) {
 
         {initialRole !== 'parent' && (
           <div>
-            <label htmlFor="platform" className="block text-sm font-medium text-foreground/80 mb-1">
+            <label htmlFor="platform" className="block text-sm font-medium text-card-foreground/80 mb-1">
               {t.locale === 'ar' ? 'المنصة المراد التسجيل بها' : 'Platform to register in'}
             </label>
             <div className="relative">
               <ChevronDown className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5 pointer-events-none" />
-              <select id="platform" value={platform} onChange={(e) => setPlatform(e.target.value)} className="w-full pr-4 pl-10 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-colors text-sm text-foreground appearance-none" required>
+              <select id="platform" value={platform} onChange={(e) => setPlatform(e.target.value)} className="w-full pr-4 pl-10 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-colors text-sm text-card-foreground appearance-none" required>
                 <option value="both" className="bg-card">
                   {t.locale === 'ar' ? 'الاثنان معاً (المقرأة والأكاديمية)' : 'Both (Maqra\'ah & Academy)'}
                 </option>

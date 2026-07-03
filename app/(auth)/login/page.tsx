@@ -141,7 +141,7 @@ export default function LoginPage() {
       <main className="relative z-10 w-full max-w-lg px-4 py-12">
         <div className="bg-card backdrop-blur-xl border border-border shadow-2xl rounded-2xl p-8 md:p-10">
           <div className="text-center mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">{t.login}</h1>
+            <h1 className="text-3xl md:text-4xl font-bold text-card-foreground mb-2">{t.login}</h1>
             <p className="text-muted-foreground">{t.auth.enterCredentials}</p>
           </div>
 
@@ -153,7 +153,7 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-foreground/80 mb-1">{t.auth.email}</label>
+              <label htmlFor="email" className="block text-sm font-medium text-card-foreground/80 mb-1">{t.auth.email}</label>
               <div className="relative">
                 <Mail className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5" />
                 <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@example.com" dir="ltr" className="w-full pr-10 pl-4 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-colors text-sm text-foreground placeholder:text-muted-foreground" required />
@@ -161,7 +161,7 @@ export default function LoginPage() {
             </div>
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label htmlFor="password" className="block text-sm font-medium text-foreground/80">{t.auth.password}</label>
+                <label htmlFor="password" className="block text-sm font-medium text-card-foreground/80">{t.auth.password}</label>
                 <Link href="/forgot-password" className="text-xs text-primary hover:underline">{t.auth.forgotPassword}</Link>
               </div>
               <div className="relative">

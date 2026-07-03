@@ -45,7 +45,7 @@ export function RoleSelection({ onSelect }: RoleSelectionProps) {
   return (
     <div className="space-y-6">
       <div className="text-center mb-8">
-        <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-3">
+        <h1 className="text-3xl md:text-4xl font-bold text-card-foreground mb-3">
           {t.locale === 'ar' ? 'أهلاً بك في منصة إتقان' : 'Welcome to Itqan Platform'}
         </h1>
         <p className="text-muted-foreground text-lg">
@@ -63,10 +63,10 @@ export function RoleSelection({ onSelect }: RoleSelectionProps) {
             onClick={() => onSelect(role.id as any)}
             className={`flex flex-col items-center p-6 text-center border-2 rounded-2xl transition-all duration-300 ${role.color}`}
           >
-            <div className="p-4 bg-background/50 rounded-full mb-4">
+            <div className="p-4 bg-card rounded-full mb-4 border border-border">
               <role.icon className="w-8 h-8" />
             </div>
-            <h3 className="text-xl font-bold mb-2">{role.title}</h3>
+            <h3 className="text-xl font-bold text-card-foreground mb-2">{role.title}</h3>
             <p className="text-sm opacity-80">{role.description}</p>
           </motion.button>
         ))}
