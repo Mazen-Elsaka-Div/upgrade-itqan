@@ -269,7 +269,7 @@ const getSuperConfig = (t: any): ShellConfig => ({
   label: 'المدير العام', name: 'المدير العام', sublabel: 'المدير العام',
 })
 
-// ── Maqraa mode ─────────────────────────────────────────────────────────────
+// ── Maqraa mode ──────────────────────────────────────────────────────��──────
 // The classic admin sidebar, minus every platform-wide / general item that now
 // lives exclusively in the Super Admin (super mode) sidebar — so nothing is
 // duplicated across modes. Site identity (homepage/seo), security, backup,
@@ -282,6 +282,9 @@ const MAQRAA_EXCLUDED_HREFS = [
   '/admin/users',
   '/admin/settings',
   '/admin/email-templates',
+  // Academy-only content — the fiqh library lives under /academy and belongs to
+  // the Academy sidebar, so it must not leak into the Maqraa sidebar.
+  '/academy/fiqh',
 ]
 const getMaqraaConfig = (t: any): ShellConfig => {
   const admin = getRoleConfig(t).admin
