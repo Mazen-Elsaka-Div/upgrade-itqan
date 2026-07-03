@@ -4,153 +4,119 @@ import { query } from '@/lib/db'
 
 /**
  * GET /api/admin/audit-log
- * Returns audit log entries for permission changes and important actions
- * Query params:
- *  - type: filter by action type
- *  - user_id: filter by affected user
- *  - admin_id: filter by admin who made the change
- *  - from: start date
- *  - to: end date
- *  - limit: number of entries (default 50)
- *  - offset: pagination offset
+ * Returns governance audit log entries — super_admin only.
+ * Query params: platform, action, actor_id, from, to, limit, offset
  */
 export async function GET(req: NextRequest) {
   const session = await getSession()
-  if (!session || !['admin', 'academy_admin'].includes(session.role)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const isSuperAdmin = session?.role === 'admin' || session?.role === 'super_admin'
+  if (!session || !isSuperAdmin) {
+    return NextResponse.json({ error: 'غير مصرح' }, { status: 403 })
   }
 
   const { searchParams } = new URL(req.url)
-  const type = searchParams.get('type')
-  const userId = searchParams.get('user_id')
-  const adminId = searchParams.get('admin_id')
-  const from = searchParams.get('from')
-  const to = searchParams.get('to')
-  const limit = parseInt(searchParams.get('limit') || '50')
-  const offset = parseInt(searchParams.get('offset') || '0')
+  const platform = searchParams.get('platform')
+  const action   = searchParams.get('action')
+  const actorId  = searchParams.get('actor_id')
+  const from     = searchParams.get('from')
+  const to       = searchParams.get('to')
+  const limit    = Math.min(parseInt(searchParams.get('limit')  || '50'), 200)
+  const offset   = parseInt(searchParams.get('offset') || '0')
 
-  let whereClause = 'TRUE'
-  const params: any[] = []
-  let paramIndex = 1
+  const conditions: string[] = []
+  const params: unknown[]    = []
+  let idx = 1
 
-  if (type) {
-    whereClause += ` AND al.action_type = $${paramIndex++}`
-    params.push(type)
-  }
-  if (userId) {
-    whereClause += ` AND al.target_user_id = $${paramIndex++}`
-    params.push(userId)
-  }
-  if (adminId) {
-    whereClause += ` AND al.admin_id = $${paramIndex++}`
-    params.push(adminId)
-  }
-  if (from) {
-    whereClause += ` AND al.created_at >= $${paramIndex++}`
-    params.push(from)
-  }
-  if (to) {
-    whereClause += ` AND al.created_at <= $${paramIndex++}`
-    params.push(to)
-  }
+  if (platform) { conditions.push(`al.platform = $${idx++}`);              params.push(platform) }
+  if (action)   { conditions.push(`al.action ILIKE $${idx++}`);            params.push(`%${action}%`) }
+  if (actorId)  { conditions.push(`al.actor_id = $${idx++}`);              params.push(actorId) }
+  if (from)     { conditions.push(`al.created_at >= $${idx++}`);           params.push(from) }
+  if (to)       { conditions.push(`al.created_at <= $${idx++}`);           params.push(to + 'T23:59:59Z') }
 
-  params.push(limit, offset)
+  const where = conditions.length ? 'WHERE ' + conditions.join(' AND ') : ''
 
   try {
-    const logs = await query<{
-      id: string
-      action_type: string
-      admin_id: string
-      admin_name: string
-      admin_email: string
-      target_user_id: string | null
-      target_user_name: string | null
-      target_user_email: string | null
-      old_value: any
-      new_value: any
-      description: string
-      ip_address: string | null
-      created_at: string
-    }>(
-      `SELECT 
-         al.id,
-         al.action_type,
-         al.admin_id,
-         admin_user.name as admin_name,
-         admin_user.email as admin_email,
-         al.target_user_id,
-         target_user.name as target_user_name,
-         target_user.email as target_user_email,
-         al.old_value,
-         al.new_value,
-         al.description,
-         al.ip_address,
-         al.created_at
-       FROM audit_log al
-       LEFT JOIN users admin_user ON admin_user.id = al.admin_id
-       LEFT JOIN users target_user ON target_user.id = al.target_user_id
-       WHERE ${whereClause}
-       ORDER BY al.created_at DESC
-       LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
-      params
-    )
-
-    // Get total count for pagination
-    const countResult = await query<{ count: string }>(
-      `SELECT COUNT(*) as count FROM audit_log al WHERE ${whereClause}`,
-      params.slice(0, -2)
-    )
-
-    // Get action types for filter dropdown
-    const actionTypes = await query<{ action_type: string; count: string }>(
-      `SELECT action_type, COUNT(*)::text as count 
-       FROM audit_log 
-       GROUP BY action_type 
-       ORDER BY count DESC`
-    )
+    const [logs, countResult, platforms, actions] = await Promise.all([
+      query(
+        `SELECT
+           al.id, al.action, al.platform,
+           al.entity_type, al.entity_id,
+           al.old_value, al.new_value,
+           al.ip_address, al.user_agent,
+           al.created_at,
+           al.actor_email,
+           u.name  AS actor_name,
+           u.email AS actor_email_resolved
+         FROM audit_log al
+         LEFT JOIN users u ON u.id = al.actor_id
+         ${where}
+         ORDER BY al.created_at DESC
+         LIMIT $${idx++} OFFSET $${idx++}`,
+        [...params, limit, offset]
+      ),
+      query(
+        `SELECT COUNT(*) AS total FROM audit_log al ${where}`,
+        params
+      ),
+      query(`SELECT DISTINCT platform FROM audit_log ORDER BY platform`),
+      query(`SELECT DISTINCT action   FROM audit_log ORDER BY action`),
+    ])
 
     return NextResponse.json({
       logs,
-      total: parseInt(countResult[0]?.count || '0'),
-      actionTypes: actionTypes.map(a => ({ type: a.action_type, count: parseInt(a.count) })),
+      total:     parseInt((countResult[0] as { total: string })?.total || '0'),
+      platforms: (platforms as { platform: string }[]).map(r => r.platform),
+      actions:   (actions   as { action:   string }[]).map(r => r.action),
     })
   } catch (error) {
-    console.error('[API] Error fetching audit log:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    console.error('[API] audit-log GET error:', error)
+    return NextResponse.json({ error: 'خطأ في الخادم' }, { status: 500 })
   }
 }
 
 /**
  * POST /api/admin/audit-log
- * Create a new audit log entry (internal use)
+ * Internal endpoint — write an audit entry programmatically.
+ * Prefer using lib/admin/audit.ts#logAudit() from server code directly.
  */
 export async function POST(req: NextRequest) {
   const session = await getSession()
-  if (!session || !['admin', 'academy_admin'].includes(session.role)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const isSuperAdmin = session?.role === 'admin' || session?.role === 'super_admin'
+  if (!session || !isSuperAdmin) {
+    return NextResponse.json({ error: 'غير مصرح' }, { status: 403 })
   }
 
-  const body = await req.json()
-  const { action_type, target_user_id, old_value, new_value, description } = body
+  const body = await req.json().catch(() => ({}))
+  const { action, platform, entity_type, entity_id, old_value, new_value } = body
 
-  if (!action_type) {
-    return NextResponse.json({ error: 'action_type is required' }, { status: 400 })
+  if (!action || !platform) {
+    return NextResponse.json({ error: 'action و platform مطلوبان' }, { status: 400 })
   }
 
   try {
-    // Get IP from headers
     const forwarded = req.headers.get('x-forwarded-for')
-    const ip = forwarded ? forwarded.split(',')[0] : req.headers.get('x-real-ip') || null
+    const ip = forwarded ? forwarded.split(',')[0].trim() : req.headers.get('x-real-ip') ?? null
 
     await query(
-      `INSERT INTO audit_log (admin_id, action_type, target_user_id, old_value, new_value, description, ip_address)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [session.sub, action_type, target_user_id || null, old_value || null, new_value || null, description || '', ip]
+      `INSERT INTO audit_log
+         (actor_id, actor_email, action, platform, entity_type, entity_id, old_value, new_value, ip_address)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
+      [
+        session.sub,
+        session.email ?? null,
+        action,
+        platform,
+        entity_type ?? null,
+        entity_id ?? null,
+        old_value ? JSON.stringify(old_value) : null,
+        new_value ? JSON.stringify(new_value) : null,
+        ip,
+      ]
     )
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('[API] Error creating audit log:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    console.error('[API] audit-log POST error:', error)
+    return NextResponse.json({ error: 'خطأ في الخادم' }, { status: 500 })
   }
 }

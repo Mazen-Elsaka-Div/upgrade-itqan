@@ -2,36 +2,61 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { ShieldCheck, GraduationCap, Mic, Check, Loader2, ChevronDown } from "lucide-react"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { ShieldCheck, GraduationCap, Mic, Loader2 } from "lucide-react"
+import { cn } from "@/lib/utils"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 type Mode = "super" | "maqraa" | "academy"
 
-const MODES: { id: Mode; label: string; desc: string; icon: typeof ShieldCheck; dot: string }[] = [
-  { id: "super", label: "المدير العام", desc: "تحكم كامل في المنصة", icon: ShieldCheck, dot: "bg-amber-500" },
-  { id: "maqraa", label: "مدير المقرأة", desc: "إدارة التلاوة والتسميع", icon: Mic, dot: "bg-emerald-500" },
-  { id: "academy", label: "مدير الأكاديمية", desc: "إدارة الدورات والطلاب", icon: GraduationCap, dot: "bg-blue-500" },
+const MODES: {
+  id: Mode
+  label: string
+  shortLabel: string
+  icon: typeof ShieldCheck
+  activeClass: string
+  dotClass: string
+}[] = [
+  {
+    id: "super",
+    label: "المدير العام",
+    shortLabel: "عام",
+    icon: ShieldCheck,
+    activeClass: "bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/40",
+    dotClass: "bg-amber-500",
+  },
+  {
+    id: "maqraa",
+    label: "مدير المقرأة",
+    shortLabel: "المقرأة",
+    icon: Mic,
+    activeClass: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/40",
+    dotClass: "bg-emerald-500",
+  },
+  {
+    id: "academy",
+    label: "مدير الأكاديمية",
+    shortLabel: "الأكاديمية",
+    icon: GraduationCap,
+    activeClass: "bg-blue-500/15 text-blue-700 dark:text-blue-400 border-blue-500/40",
+    dotClass: "bg-blue-500",
+  },
 ]
 
-// Lets a Super Admin switch the lens they operate the dashboard through. The
-// choice is persisted in a cookie via /api/admin/mode and the layout re-reads
-// it, so the whole shell (and the indicator banner) reflects the active mode.
-export function AdminRoleSwitcher({ currentMode }: { currentMode: Mode }) {
+// Segmented control that lets a Super Admin switch the lens they operate
+// the dashboard through. Persisted via /api/admin/mode (POST) so the whole
+// shell re-reads it on router.refresh().
+export function AdminRoleSwitcher({
+  currentMode,
+  collapsed = false,
+}: {
+  currentMode: Mode
+  collapsed?: boolean
+}) {
   const router = useRouter()
   const [pending, setPending] = useState<Mode | null>(null)
 
-  const active = MODES.find((m) => m.id === currentMode) ?? MODES[0]
-  const ActiveIcon = active.icon
-
   async function pickMode(mode: Mode) {
-    if (mode === currentMode) return
+    if (mode === currentMode || pending) return
     setPending(mode)
     try {
       await fetch("/api/admin/mode", {
@@ -45,46 +70,94 @@ export function AdminRoleSwitcher({ currentMode }: { currentMode: Mode }) {
     }
   }
 
+  // Collapsed sidebar → show only the active mode's icon with a coloured dot.
+  if (collapsed) {
+    const active = MODES.find((m) => m.id === currentMode) ?? MODES[0]
+    const ActiveIcon = active.icon
+    return (
+      <TooltipProvider delayDuration={150}>
+        <div className="flex flex-col items-center gap-1 w-full px-2">
+          {MODES.map((m) => {
+            const Icon = m.icon
+            const isActive = m.id === currentMode
+            const isLoading = pending === m.id
+            return (
+              <Tooltip key={m.id}>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    onClick={() => pickMode(m.id)}
+                    disabled={!!pending}
+                    className={cn(
+                      "relative flex h-9 w-9 items-center justify-center rounded-xl border transition-all duration-200",
+                      isActive
+                        ? m.activeClass + " shadow-sm"
+                        : "border-transparent text-muted-foreground hover:bg-muted hover:text-foreground"
+                    )}
+                    aria-label={m.label}
+                    aria-pressed={isActive}
+                  >
+                    {isLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Icon className="h-4 w-4" />
+                    )}
+                    {isActive && (
+                      <span className={cn("absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full border-2 border-card", m.dotClass)} />
+                    )}
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="left">{m.label}</TooltipContent>
+              </Tooltip>
+            )
+          })}
+        </div>
+      </TooltipProvider>
+    )
+  }
+
+  // Expanded sidebar → full segmented control with labels.
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button
-          type="button"
-          className="flex items-center gap-2 rounded-xl border border-border bg-card px-3 py-2 text-sm font-bold text-foreground transition-colors hover:bg-muted"
-          aria-label="تبديل وضع الإدارة"
-        >
-          <span className={`h-2 w-2 rounded-full ${active.dot}`} />
-          <ActiveIcon className="h-4 w-4 text-primary" />
-          <span className="hidden sm:inline">{active.label}</span>
-          <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
-        </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-64">
-        <DropdownMenuLabel className="text-xs text-muted-foreground">التبديل بين الأوضاع</DropdownMenuLabel>
-        <DropdownMenuSeparator />
+    <div
+      dir="rtl"
+      className="w-full rounded-xl border border-border bg-muted/40 p-1"
+      role="group"
+      aria-label="تبديل وضع الإدارة"
+    >
+      <div className="flex items-center gap-1">
         {MODES.map((m) => {
           const Icon = m.icon
           const isActive = m.id === currentMode
+          const isLoading = pending === m.id
+
           return (
-            <DropdownMenuItem
+            <button
               key={m.id}
+              type="button"
               onClick={() => pickMode(m.id)}
-              className="flex cursor-pointer items-start gap-3 py-2.5"
+              disabled={!!pending}
+              aria-pressed={isActive}
+              title={m.label}
+              className={cn(
+                "relative flex flex-1 flex-col items-center justify-center gap-1 rounded-lg border px-1 py-2 text-[10px] font-bold transition-all duration-200",
+                isActive
+                  ? m.activeClass + " shadow-sm"
+                  : "border-transparent text-muted-foreground hover:bg-background hover:text-foreground"
+              )}
             >
-              <span className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-muted`}>
-                {pending === m.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Icon className="h-4 w-4 text-primary" />}
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="flex items-center gap-1.5 font-bold text-foreground">
-                  {m.label}
-                  {isActive && <Check className="h-3.5 w-3.5 text-primary" />}
-                </span>
-                <span className="block text-xs text-muted-foreground">{m.desc}</span>
-              </span>
-            </DropdownMenuItem>
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Icon className="h-4 w-4 shrink-0" />
+              )}
+              <span className="leading-none">{m.shortLabel}</span>
+              {isActive && (
+                <span className={cn("absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full border-2 border-card", m.dotClass)} />
+              )}
+            </button>
           )
         })}
-      </DropdownMenuContent>
-    </DropdownMenu>
+      </div>
+    </div>
   )
 }

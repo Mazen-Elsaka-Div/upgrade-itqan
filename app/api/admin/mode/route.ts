@@ -24,10 +24,18 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ mode, allowed, role: session.role })
 }
 
-// PUT /api/admin/mode — switch the Super Admin's active mode.
-export async function PUT(req: NextRequest) {
+// Shared handler for both PUT and POST — switches the Super Admin's active mode.
+// Only Super Admins (role === "admin" | "super_admin") are allowed to switch;
+// scoped admins are pinned to their own mode and must never call this.
+async function handleModeSwitch(req: NextRequest): Promise<NextResponse> {
   const session = await getSession()
   if (!session) return NextResponse.json({ error: "غير مصرح" }, { status: 401 })
+
+  // Enforce super_admin at the route level (middleware alone is not enough).
+  const isSuperAdmin = session.role === "admin" || session.role === "super_admin"
+  if (!isSuperAdmin) {
+    return NextResponse.json({ error: "مخصص للمدير العام فقط" }, { status: 403 })
+  }
 
   const academyRoles = session.academy_roles ?? []
   const allowed = allowedModesForRole(session.role, academyRoles)
@@ -41,10 +49,20 @@ export async function PUT(req: NextRequest) {
 
   const res = NextResponse.json({ mode: requested })
   res.cookies.set(ADMIN_MODE_COOKIE, requested, {
-    httpOnly: false, // read by the client shell to render the indicator
+    httpOnly: false, // read by the client shell to render the indicator banner
     sameSite: "lax",
     path: "/",
     maxAge: 60 * 60 * 24 * 30,
   })
   return res
+}
+
+// PUT /api/admin/mode
+export async function PUT(req: NextRequest) {
+  return handleModeSwitch(req)
+}
+
+// POST /api/admin/mode — same semantics as PUT; the client components use POST.
+export async function POST(req: NextRequest) {
+  return handleModeSwitch(req)
 }
