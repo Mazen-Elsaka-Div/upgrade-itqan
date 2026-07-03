@@ -24,6 +24,7 @@ export const SUPER_ADMIN_ONLY_PREFIXES = [
   "/admin/backup",
   "/admin/site-settings",
   "/admin/content-pages",
+  "/admin/audit-log",
 ]
 
 export function isSuperAdminOnlyPath(pathname: string): boolean {
