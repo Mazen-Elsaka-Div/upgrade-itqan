@@ -627,7 +627,7 @@ export default function Home() {
             <Reveal delay={0.38}>
               <h2
                 className="text-[10vw] sm:text-[7vw] md:text-6xl lg:text-7xl font-light italic text-hp-bronze dark:text-hp-gold mb-12 md:mb-14"
-                style={{ fontFamily: "'Amiri', serif" }}
+                style={{ fontFamily: "var(--font-amiri), 'Amiri', serif" }}
               >
                 {c.heroSubtitle}
               </h2>

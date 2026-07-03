@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
-@import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
+/* Amiri loaded via next/font in layout.tsx; BIXIE & Thmanyah via @font-face below */
 @custom-variant dark (&:is(.dark *));
 
 /* ── Thmanyah Serif Display (headings) ──────────────────────── */
