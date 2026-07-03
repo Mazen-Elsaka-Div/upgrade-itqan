@@ -26,7 +26,7 @@ export default function AdminUsersPage() {
   const isAr = locale === "ar"
 
   const [searchQuery, setSearchQuery] = useState("")
-  const [activeTab, setActiveTab] = useState<"students" | "readers" | "admins" | "supervisors">("students")
+  const [activeTab, setActiveTab] = useState<"all" | "students" | "readers" | "admins" | "supervisors" | "academy">("students")
   const [users, setUsers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [pagination, setPagination] = useState<any>(null)
@@ -79,9 +79,20 @@ export default function AdminUsersPage() {
   const fetchUsers = async (page: number = 1, search: string = "") => {
     setLoading(true)
     try {
-      const role = activeTab === "students" ? "student" : activeTab === "readers" ? "reader" : activeTab === "supervisors" ? "supervisors" : "admin"
+      const roleMap: Record<string, string> = {
+        students: "student", readers: "reader",
+        admins: "admin", supervisors: "supervisors",
+        academy: "", all: ""
+      }
+      const platformMap: Record<string, string> = {
+        students: "quran", readers: "quran",
+        admins: "all", supervisors: "quran",
+        academy: "academy", all: "all"
+      }
+      const roleParam = roleMap[activeTab] ? `&role=${roleMap[activeTab]}` : ""
+      const platformParam = `platform=${platformMap[activeTab] ?? "quran"}`
       const searchParam = search ? `&search=${encodeURIComponent(search)}` : ""
-      const res = await fetch(`/api/admin/users?role=${role}&platform=quran&page=${page}&limit=10${searchParam}`)
+      const res = await fetch(`/api/admin/users?${platformParam}${roleParam}&page=${page}&limit=10${searchParam}`)
       if (res.ok) {
         const data = await res.json()
         setUsers(data.users || [])
@@ -239,8 +250,10 @@ export default function AdminUsersPage() {
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <div className="flex p-1 bg-muted/50 border border-border rounded-2xl w-full lg:w-auto flex-1 overflow-x-auto overflow-y-hidden hide-scrollbar gap-1">
           {[
+            { id: "all", label: "الكل" },
             { id: "students", label: t.admin.students },
             { id: "readers", label: t.admin.readers },
+            { id: "academy", label: "الأكاديمية" },
             { id: "admins", label: t.admin.admins },
             { id: "supervisors", label: t.admin.supervisors }
           ].map((tab) => (
@@ -280,6 +293,9 @@ export default function AdminUsersPage() {
                   <th className="px-6 py-5 font-black whitespace-nowrap">{t.auth.email}</th>
                   <th className="px-6 py-5 font-black whitespace-nowrap">{t.admin.joinDate}</th>
                   <th className="px-6 py-5 font-black whitespace-nowrap">{t.auth.role}</th>
+                  {(activeTab === 'all' || activeTab === 'academy') && (
+                    <th className="px-6 py-5 font-black whitespace-nowrap">المنصة</th>
+                  )}
                   {activeTab === 'readers' && (
                     <th className="px-6 py-5 font-black whitespace-nowrap">{t.readerRegister.nationality}</th>
                   )}
@@ -374,6 +390,22 @@ export default function AdminUsersPage() {
                           )}
                         </div>
                       </td>
+                      {(activeTab === 'all' || activeTab === 'academy') && (
+                        <td className="px-6 py-4">
+                          <div className="flex flex-col gap-1">
+                            {user.has_quran_access !== false && (
+                              <Badge variant="outline" className="text-[9px] px-1.5 py-0.5 border-emerald-500/30 text-emerald-600 bg-emerald-500/5 w-fit">
+                                مقرأة
+                              </Badge>
+                            )}
+                            {user.has_academy_access && (
+                              <Badge variant="outline" className="text-[9px] px-1.5 py-0.5 border-blue-500/30 text-blue-600 bg-blue-500/5 w-fit">
+                                أكاديمية
+                              </Badge>
+                            )}
+                          </div>
+                        </td>
+                      )}
                       {activeTab === 'readers' && (
                         <td className="px-6 py-4 text-xs font-black text-muted-foreground">
                           {user.nationality || '-'}

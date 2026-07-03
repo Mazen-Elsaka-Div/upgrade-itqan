@@ -4,6 +4,7 @@ import { query } from "@/lib/db"
 import bcrypt from "bcryptjs"
 import { logAdminAction } from "@/lib/activity-log"
 import { resolveSupervisorScope, canSupervisorAccessUser } from "@/lib/supervisor-scope"
+import { logAudit } from "@/lib/admin/audit"
 
 // GET /api/admin/users - list all users (admin only)
 export async function GET(req: NextRequest) {
@@ -25,12 +26,14 @@ export async function GET(req: NextRequest) {
     let whereClause = "WHERE 1=1"
     const params: unknown[] = []
 
-    // Filter by platform (academy vs quran)
+    // Filter by platform (academy vs quran vs all)
+    // "all" or omitted = no platform filter (super admin site-wide view)
     if (platform === "academy") {
       whereClause += ` AND u.has_academy_access = true`
     } else if (platform === "quran") {
       whereClause += ` AND u.has_quran_access = true`
     }
+    // platform === "all" or null => no filter, super admin sees everyone
 
     // Enforce role restrictions for supervisors
     if (session!.role === 'student_supervisor') {
@@ -254,6 +257,20 @@ export async function PATCH(req: NextRequest) {
       description: `Admin updated user ${userId}`,
     })
 
+    // سجّل في audit_log الموحد (super_admin governance log)
+    const isSuperAdmin = session!.role === 'admin' || session!.role === 'super_admin'
+    if (isSuperAdmin) {
+      await logAudit({
+        actor_id: session!.sub,
+        actor_email: session!.email,
+        action: typeof isActive === 'boolean' ? (isActive ? 'user_activated' : 'user_deactivated') : 'user_updated',
+        platform: 'site',
+        entity_type: 'user',
+        entity_id: userId,
+        new_value: { role, isActive, has_academy_access, has_quran_access },
+      })
+    }
+
     return NextResponse.json({ user: result[0] })
   } catch (error) {
     console.error("Admin update user error:", error)
@@ -325,6 +342,19 @@ export async function POST(req: NextRequest) {
       entityId: (result[0] as any)?.id,
       description: `Admin created user ${email} with role ${role}`,
     })
+
+    const isSuperAdminPost = session!.role === 'admin' || session!.role === 'super_admin'
+    if (isSuperAdminPost) {
+      await logAudit({
+        actor_id: session!.sub,
+        actor_email: session!.email,
+        action: 'user_created',
+        platform: 'site',
+        entity_type: 'user',
+        entity_id: (result[0] as any)?.id,
+        new_value: { email, role, has_academy_access, has_quran_access },
+      })
+    }
 
     return NextResponse.json({ user: result[0] }, { status: 201 })
   } catch (error) {

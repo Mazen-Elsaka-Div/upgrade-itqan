@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getSession } from "@/lib/auth"
 import { query } from "@/lib/db"
+import { logAudit } from "@/lib/admin/audit"
 
 // PATCH /api/admin/users/[id]/access — update platform access for a user
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -41,6 +42,19 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
         if (!result.length) {
             return NextResponse.json({ error: "المستخدم غير موجود" }, { status: 404 })
+        }
+
+        const isSuperAdmin = session.role === 'admin' || (session.role as string) === 'super_admin'
+        if (isSuperAdmin) {
+          await logAudit({
+            actor_id: session.sub,
+            actor_email: session.email,
+            action: 'user_access_updated',
+            platform: 'site',
+            entity_type: 'user',
+            entity_id: id,
+            new_value: body,
+          })
         }
 
         return NextResponse.json({ user: result[0] })
