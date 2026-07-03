@@ -9,7 +9,7 @@ import { LanguageSwitcher } from '@/components/language-switcher'
 import { GlobalSearch } from '@/components/global-search'
 import { NotificationDropdown } from '@/components/notification-dropdown'
 import { ThemeToggle } from '@/components/theme-toggle'
-import { ModeSwitcher } from '@/components/mode-switcher'
+
 import {
   LayoutDashboard, Mic, FileText, Calendar, Bell, User, LogOut,
   Menu, X, Users, Settings, BarChart3, ClipboardList, Clock, MessageSquare,
@@ -244,6 +244,14 @@ const getSuperConfig = (t: any): ShellConfig => ({
       ],
     },
     {
+      // Forum moderation for both platforms is centralised under the Super Admin.
+      title: 'إدارة المنتديات',
+      items: [
+        { href: '/community/maqraa/admin/manage',  label: 'إدارة منتدى المقرأة',   icon: MessagesSquare },
+        { href: '/community/academy/admin/manage', label: 'إدارة منتدى الأكاديمية', icon: MessagesSquare },
+      ],
+    },
+    {
       title: 'إعدادات المنصة',
       items: [
         { href: '/admin/site-settings',   label: 'إعدادات الموقع العامة', icon: Settings2 },
@@ -269,7 +277,7 @@ const getSuperConfig = (t: any): ShellConfig => ({
   label: 'المدير العام', name: 'المدير العام', sublabel: 'المدير العام',
 })
 
-// ── Maqraa mode ──────────────────────────────────────────────────────��──────
+// ── Maqraa mode ──────────────────────────────────────────────────────���──────
 // The classic admin sidebar, minus every platform-wide / general item that now
 // lives exclusively in the Super Admin (super mode) sidebar — so nothing is
 // duplicated across modes. Site identity (homepage/seo), security, backup,
@@ -285,6 +293,8 @@ const MAQRAA_EXCLUDED_HREFS = [
   // Academy-only content — the fiqh library lives under /academy and belongs to
   // the Academy sidebar, so it must not leak into the Maqraa sidebar.
   '/academy/fiqh',
+  // Forum management is centralised under the Super Admin.
+  '/community/maqraa/admin/manage',
 ]
 const getMaqraaConfig = (t: any): ShellConfig => {
   const admin = getRoleConfig(t).admin
@@ -338,7 +348,6 @@ const getAcademyConfig = (t: any): ShellConfig => ({
       title: t.academyAdmin?.sidebarCommunity,
       items: [
         { href: '/community/academy/admin', label: t.academy?.forum || 'المنتدى', icon: MessagesSquare },
-        { href: '/community/academy/admin/manage', label: t.academyAdmin?.sidebarManageForum, icon: Shield },
         { href: '/academy/admin/fiqh', label: t.academy?.fiqhQuestions || 'صندوق الأسئلة الفقهية', icon: HelpCircle },
         { href: '/academy/fiqh', label: t.academy?.fiqhLibrary || 'المكتبة الفقهية', icon: Library },
         { href: '/academy/library', label: t.academy?.booksLibrary || 'مكتبة الكتب (تصفح)', icon: BookOpen },
@@ -568,15 +577,6 @@ export function DashboardShell({ role, children, headerTitle, adminMode }: { rol
           collapsed ? 'lg:justify-center lg:px-2' : 'justify-center',
           role === 'student' ? 'h-20' : 'h-16'
         )}>
-          <Link href="/" className={cn('block text-center w-full', collapsed ? 'px-0' : 'px-4')}>
-            <span className={cn(
-              "font-black text-primary leading-none tracking-tight",
-              collapsed ? "text-2xl" : "text-3xl"
-            )}>
-              {collapsed ? "إ" : t.appName}
-            </span>
-          </Link>
-
           {/* Desktop collapse toggle */}
           <button
             type="button"
@@ -732,13 +732,6 @@ export function DashboardShell({ role, children, headerTitle, adminMode }: { rol
               </div>
             )}
 
-            <ModeSwitcher
-              currentMode="library"
-              userRole={role}
-              academyRole={user?.academy_role}
-              hasQuranAccess={user?.has_quran_access}
-              hasAcademyAccess={user?.has_academy_access}
-            />
             <ThemeToggle />
             <LanguageSwitcher variant="outline" />
 
