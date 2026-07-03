@@ -32,8 +32,8 @@ export const DEFAULT_HOMEPAGE_CONTENT = {
 
   // Hero
   homepage_hero_bismillah: { ar: 'بِسْمِ اللهِ الرَّحْمَنِ الرَّحِيم', en: 'In the Name of Allah, the Most Gracious, the Most Merciful' } as Bi,
-  homepage_hero_title: { ar: 'إتقانُ التِلاوة', en: 'Mastering Recitation' } as Bi,
-  homepage_hero_subtitle: { ar: 'ورحلةُ التَعَلُّم', en: 'and the Journey of Learning' } as Bi,
+  homepage_hero_title: { ar: 'إتقــــــانُ التِلاوة', en: 'Mastering Recitation' } as Bi,
+  homepage_hero_subtitle: { ar: 'ورحلةُ التَعَلُم', en: 'and the Journey of Learning' } as Bi,
   homepage_hero_description: {
     ar: 'مِنبرٌ علميٌّ يجمع بين أكاديميَّةٍ راسخةٍ للدُّروسِ والشَّهادات، ومَقْرأةٍ روحانيَّةٍ للحفظِ والتَّسميعِ بإشرافِ المقرِئينَ المُجازين.',
     en: 'An academic platform that unites a structured academy for lessons and certificates with a spiritual Maqra’ah for memorization and recitation, supervised by certified reciters.',
@@ -115,7 +115,7 @@ export const DEFAULT_HOMEPAGE_CONTENT = {
   homepage_journey_meet_text: { ar: 'وكِلا الطريقَينِ يَلتقي عندَ غايةٍ واحدة: إتقانُ كتابِ الله', en: 'Both roads meet at a single goal: mastering the Book of Allah' } as Bi,
   // Academy track steps
   homepage_journey_academy_steps: [
-    { n: { ar: '١', en: '1' }, t: { ar: 'سَجِّل في الأكاديميَّة', en: 'Join the Academy' }, d: { ar: 'أنشئ حسابَكَ في دقائق وأَكمِل ملفَّكَ التعريفيَّ لِتَبدأَ مسيرتَكَ العلميَّة.', en: 'Create your account in minutes and complete your profile to begin your academic path.' } },
+    { n: { ar: '١', en: '1' }, t: { ar: 'سَجِّل في الأكاديميَّة', en: 'Join the Academy' }, d: { ar: 'أنشئ حسابَكَ في دقائق وأَكمِل ملف��ّكَ التعريفيَّ لِتَبدأَ مسيرتَكَ العلميَّة.', en: 'Create your account in minutes and complete your profile to begin your academic path.' } },
     { n: { ar: '٢', en: '2' }, t: { ar: 'اختَرْ مسارَكَ ومستواك', en: 'Choose your track & level' }, d: { ar: 'حدِّدْ تخصُّصَكَ في علوم القرآن أو التجويد أو الفقه، وابدأْ من المستوى الذي يُناسِبُك.', en: 'Pick your specialization in Qur’anic sciences, tajwid, or fiqh, and start at the level that fits you.' } },
     { n: { ar: '٣', en: '3' }, t: { ar: 'التَحِقْ بالدوراتِ والحَلَقات', en: 'Enroll in courses & circles' }, d: { ar: 'احْضُرِ الدروسَ المباشرةَ والمُسجَّلة، وتفاعَلْ مع أساتذتِكَ وزملائك.', en: 'Attend live and recorded lessons and engage with your instructors and peers.' } },
     { n: { ar: '٤', en: '4' }, t: { ar: 'أَنجِزِ الواجباتِ والاختبارات', en: 'Complete assignments & exams' }, d: { ar: 'طبِّقْ ما تَعلَّمتَه، وأَنجِزِ التكليفات، واجتَزِ الاختباراتِ لِتَنتقِلَ بين المستويات.', en: 'Apply what you learn, complete your tasks, and pass exams to advance between levels.' } },
@@ -137,7 +137,7 @@ export const DEFAULT_HOMEPAGE_CONTENT = {
     { q: { ar: 'تجربةٌ أعادتْ لي شَغفي بالقرآن، فالأستاذُ يُتابعُ تِلاوتي حرفًا حرفًا، وأنا في بيتي.', en: 'An experience that revived my passion for the Qur’an — the teacher follows my recitation letter by letter, from my own home.' }, n: { ar: 'أحمد المصري', en: 'Ahmad Al-Masri' }, r: { ar: 'طالبٌ في مسارِ الإجازة', en: 'Ijazah-track student' } },
     { q: { ar: 'حفظتُ ربعَ القرآن في ستَّةِ أشهرٍ بفضلِ المتابعةِ المُنظَّمةِ والمُقرئةِ المُتميِّزة.', en: 'I memorized a quarter of the Qur’an in six months thanks to the organized follow-up and an excellent reciter.' }, n: { ar: 'فاطمة الزهراء', en: 'Fatimah Al-Zahraa' }, r: { ar: 'طالبةُ تحفيظ', en: 'Memorization student' } },
     { q: { ar: 'الجَودةُ، التَّنظيمُ، الاحترامُ في التعامل، كلُّ شيءٍ يَدلُّ على أنَّ القائمين أهلُ علمٍ وصِدق.', en: 'Quality, organization, and respect — everything shows the team are people of knowledge and sincerity.' }, n: { ar: 'د. خالد الأنصاري', en: 'Dr. Khalid Al-Ansari' }, r: { ar: 'وَلِيُّ أمر', en: 'Parent' } },
-    { q: { ar: 'ما مرَّ يومٌ بعد التحاقي بالمَقْرأة إلا وذُقتُ حلاوةَ القرآنِ من جديد.', en: 'Not a day has passed since I joined the Maqra’ah without tasting the sweetness of the Qur’an anew.' }, n: { ar: 'محمد العبسي', en: 'Mohammed Al-Absi' }, r: { ar: 'طالبُ تجويد', en: 'Tajwid student' } },
+    { q: { ar: 'ما مرَّ يومٌ بعد التحاقي بالمَقْرأة إلا وذُقتُ حلاوةَ القرآنِ من جديد.', en: 'Not a day has passed since I joined the Maqra���ah without tasting the sweetness of the Qur’an anew.' }, n: { ar: 'محمد العبسي', en: 'Mohammed Al-Absi' }, r: { ar: 'طالبُ تجويد', en: 'Tajwid student' } },
     { q: { ar: 'المنصَّةُ راقيةٌ، والأساتذةُ مُجازون، والإدارةُ تَسمعُ لكلِّ مُلاحظةٍ بِصَدرٍ رَحب.', en: 'A refined platform, certified teachers, and an administration that welcomes every note warmly.' }, n: { ar: 'أم عبد الله', en: 'Umm Abdullah' }, r: { ar: 'وَلِيَّةُ أمر', en: 'Parent' } },
     { q: { ar: 'أَخذتُ إجازتي في رواية حفصٍ هنا، بعد سنواتٍ من التشتُّتِ بين منصَّاتٍ أخرى.', en: 'I earned my ijazah in the Hafs narration here, after years of drifting between other platforms.' }, n: { ar: 'يوسف الإدريسي', en: 'Yusuf Al-Idrisi' }, r: { ar: 'حاصلٌ على إجازة', en: 'Ijazah holder' } },
     { q: { ar: 'الجلساتُ المباشرةُ فيها رُوحٌ لا تَجدُها في أيِّ تسجيلٍ مُسبَّق.', en: 'Live sessions carry a spirit you won’t find in any pre-recorded lesson.' }, n: { ar: 'سارة المغربي', en: 'Sara Al-Maghribi' }, r: { ar: 'طالبةُ تجويد', en: 'Tajwid student' } },

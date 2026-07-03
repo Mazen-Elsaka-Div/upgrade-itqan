@@ -1,219 +1,433 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import { useI18n } from "@/lib/i18n/context"
-import { BookOpen, Users, Award, GraduationCap, TrendingUp, ArrowLeft, Loader2 } from "lucide-react"
-import { ChartSkeleton, StatsGridSkeleton, TableSkeleton } from "@/components/admin/skeletons"
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { useI18n } from '@/lib/i18n/context'
+import {
+  BookOpen,
+  Users,
+  Award,
+  GraduationCap,
+  ArrowLeft,
+  UserCheck,
+  TrendingUp,
+  ClipboardList,
+  Sparkles,
+} from 'lucide-react'
+import { AcademyInsights } from '@/components/admin/analytics/academy-insights'
+import { StatsGridSkeleton, StatsMiniGridSkeleton, ChartSkeleton } from "@/components/admin/skeletons"
+import { Skeleton } from "@/components/ui/skeleton"
 
 interface AcademyStats {
-  totals: {
-    courses: number
-    published_courses: number
-    lessons: number
+  total_students: number
+  total_teachers: number
+  total_courses: number
+  total_points_distributed: number
+  pending_teacher_apps: number
+  enrollments_today: number
+  enrollments_week: number
+  active_enrollments: number
+  certificates_issued: number
+  latest_courses: Array<{
+    id: string
+    title: string
+    teacher_name: string | null
     enrollments: number
-    active_enrollments: number
-    teachers: number
-    certificates: number
-    new_enrollments_30: number
-  }
-  recentCourses: { id: string; title: string; status: string; students_count: number; created_at: string }[]
-  topCourses: { id: string; title: string; students_count: number }[]
-  enrollmentsOverTime: { day: string; count: number }[]
+    created_at: string
+  }>
+  top_students: Array<{
+    id: string
+    name: string
+    avatar_url: string | null
+    total_points: number
+  }>
 }
 
 export function DashboardAcademy() {
-  const { t } = useI18n()
-  const isAr = t.locale === "ar"
+  const { t, locale } = useI18n()
+  const a = t.academyAdmin
+  const dateLocale = locale === 'ar' ? 'ar-SA' : 'en-US'
 
-  const [data, setData] = useState<AcademyStats | null>(null)
+  const [stats, setStats] = useState<AcademyStats | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    fetch("/api/admin/academy-stats")
-      .then((r) => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`)
-        return r.json()
-      })
-      .then(setData)
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false))
+    const load = async () => {
+      try {
+        const statsRes = await fetch('/api/academy/admin/stats')
+
+        if (statsRes.ok) {
+          setStats(await statsRes.json())
+        } else {
+          setError(await statsRes.text())
+        }
+      } catch (err) {
+        console.error('[academy-admin] load error:', err)
+        setError(String(err))
+      } finally {
+        setLoading(false)
+      }
+    }
+    load()
   }, [])
 
   if (loading) {
     return (
-      <div className="space-y-6 pb-20 lg:pb-0 font-sans" dir={isAr ? "rtl" : "ltr"}>
-        <StatsGridSkeleton count={4} />
-        <ChartSkeleton />
-        <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-border bg-muted/50">
-            <div className="h-5 w-40 bg-accent animate-pulse rounded-md" />
-          </div>
-          <TableSkeleton rows={4} cols={4} />
+      <div className="space-y-6 pb-20 lg:pb-0 font-sans">
+        {/* Title */}
+        <div className="flex items-center gap-3 mb-6">
+          <Skeleton className="w-12 h-12 rounded-xl" />
+          <Skeleton className="h-8 w-60" />
         </div>
+
+        {/* Quick Stats Summary */}
+        <StatsGridSkeleton count={4} />
+
+        {/* Stats Grid */}
+        <StatsMiniGridSkeleton count={5} />
+
+        {/* Views Chart */}
+        <ChartSkeleton />
       </div>
     )
   }
 
-  if (error || !data) {
+  if (error || !stats) {
     return (
       <div className="flex flex-col items-center justify-center p-20 gap-4">
-        <div className="text-red-500 font-bold text-xl">حدث خطأ أثناء تحميل بيانات الأكاديمية</div>
-        {error && <code className="bg-red-50 text-red-800 p-2 rounded text-sm">{error}</code>}
+        <div className="text-red-500 font-bold text-xl">
+          {a.dashLoadError}
+        </div>
+        <div className="text-muted-foreground">
+          {a.dashRetryHint}
+        </div>
+        {error && (
+          <code className="bg-red-50 text-red-800 p-2 rounded text-sm">{error}</code>
+        )}
       </div>
     )
   }
 
-  const { totals, recentCourses, topCourses, enrollmentsOverTime } = data
+  const fmt = (num: number) => num.toLocaleString(dateLocale)
 
+  // Stats grid cards
   const statCards = [
     {
-      label: "الدورات المنشورة",
-      value: totals.published_courses,
-      sub: `${totals.courses} إجمالي`,
-      icon: BookOpen,
-      color: "bg-primary/10 text-primary border-primary/20",
-    },
-    {
-      label: "إجمالي التسجيلات",
-      value: totals.enrollments,
-      sub: `${totals.new_enrollments_30} جديد خلال 30 يوم`,
+      label: a.analyticsStudents,
+      value: stats.total_students,
       icon: Users,
-      color: "bg-accent/10 text-accent border-accent/20",
+      iconBg: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
     },
     {
-      label: "المعلمون",
-      value: totals.teachers,
-      sub: `${totals.lessons} درس`,
+      label: a.analyticsTeachers,
+      value: stats.total_teachers,
       icon: GraduationCap,
-      color: "bg-emerald-500/10 text-emerald-600 border-emerald-200",
+      iconBg:
+        'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
     },
     {
-      label: "الشهادات الممنوحة",
-      value: totals.certificates,
-      sub: `${totals.active_enrollments} تسجيل نشط`,
+      label: a.analyticsCourses,
+      value: stats.total_courses,
+      icon: BookOpen,
+      iconBg:
+        'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20',
+    },
+    {
+      label: a.dashTeacherApplications,
+      value: stats.pending_teacher_apps,
+      icon: UserCheck,
+      iconBg: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
+    },
+    {
+      label: a.dashCertificates,
+      value: stats.certificates_issued,
       icon: Award,
-      color: "bg-amber-500/10 text-amber-600 border-amber-200",
+      iconBg: 'bg-pink-500/10 text-pink-600 dark:text-pink-400 border-pink-500/20',
     },
   ]
 
-  // Build a simple bar chart from enrollmentsOverTime
-  const maxCount = Math.max(...enrollmentsOverTime.map((d) => d.count), 1)
-
   return (
-    <div className="space-y-6 pb-20 lg:pb-0 font-sans" dir={isAr ? "rtl" : "ltr"}>
-      {/* Stat Cards */}
+    <div className="space-y-6 pb-20 lg:pb-0 font-sans">
+      {/* Title */}
+      <div className="flex items-center gap-3 mb-6">
+        <div className="p-2 sm:p-3 bg-blue-500/10 rounded-xl border border-blue-500/20">
+          <GraduationCap className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600 dark:text-blue-400" />
+        </div>
+        <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
+          {a.dashAcademyDashboard}
+        </h1>
+      </div>
+
+      {/* Quick Stats Summary (4 cards: views/visitors/total members/today's enrollments) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        {statCards.map((card) => {
-          const Icon = card.icon
+        <div className="bg-card rounded-xl p-3 sm:p-4 border border-border shadow-sm flex items-center gap-3 sm:gap-4 hover:shadow-md transition-shadow">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-500/10 flex items-center justify-center flex-shrink-0 border border-blue-500/20">
+            <GraduationCap className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 dark:text-blue-400" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-xl sm:text-2xl font-bold text-foreground truncate">
+              {fmt(stats.active_enrollments)}
+            </p>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              {a.dashActiveEnrollments}
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-card rounded-xl p-3 sm:p-4 border border-border shadow-sm flex items-center gap-3 sm:gap-4 hover:shadow-md transition-shadow">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0 border border-emerald-500/20">
+            <Award className="h-5 w-5 sm:h-6 sm:w-6 text-emerald-600 dark:text-emerald-400" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-xl sm:text-2xl font-bold text-foreground truncate">
+              {fmt(stats.certificates_issued)}
+            </p>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              {a.dashCertificates}
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-card rounded-xl p-3 sm:p-4 border border-border shadow-sm flex items-center gap-3 sm:gap-4 hover:shadow-md transition-shadow">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-purple-500/10 flex items-center justify-center flex-shrink-0 border border-purple-500/20">
+            <BookOpen className="h-5 w-5 sm:h-6 sm:w-6 text-purple-600 dark:text-purple-400" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-xl sm:text-2xl font-bold text-foreground truncate">
+              {fmt(stats.total_students + stats.total_teachers)}
+            </p>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              {a.dashTotalMembers}
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-card rounded-xl p-3 sm:p-4 border border-border shadow-sm flex items-center gap-3 sm:gap-4 hover:shadow-md transition-shadow">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-amber-100/50 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0 border border-amber-200 dark:border-amber-900/50">
+            <ClipboardList className="h-5 w-5 sm:h-6 sm:w-6 text-amber-700 dark:text-amber-400" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-xl sm:text-2xl font-bold text-foreground truncate">
+              {fmt(stats.enrollments_today)}
+            </p>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              {a.dashTodaysEnrollments}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Stats Grid (5 cards) */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+        {statCards.map((stat) => {
+          const Icon = stat.icon
           return (
-            <div key={card.label} className="bg-card rounded-xl p-4 sm:p-5 border border-border shadow-sm hover:shadow-md transition-shadow">
-              <div className={`w-10 h-10 rounded-md flex items-center justify-center border mb-3 ${card.color}`}>
-                <Icon className="h-5 w-5" />
+            <div
+              key={stat.label}
+              className="bg-card rounded-xl p-5 border border-border shadow-sm hover:shadow-md transition-shadow"
+            >
+              <div className="flex items-start justify-between mb-3">
+                <div
+                  className={`w-10 h-10 ${stat.iconBg} rounded-md flex items-center justify-center border`}
+                >
+                  <Icon className="h-5 w-5" />
+                </div>
               </div>
-              <p className="text-2xl sm:text-3xl font-bold text-foreground">
-                {card.value.toLocaleString(isAr ? "ar-EG" : "en-US")}
+              <h3 className="text-2xl sm:text-3xl font-bold text-foreground mb-1">
+                {fmt(stat.value)}
+              </h3>
+              <p className="text-xs sm:text-sm text-muted-foreground font-medium">
+                {stat.label}
               </p>
-              <p className="text-sm font-medium text-foreground mt-1">{card.label}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{card.sub}</p>
             </div>
           )
         })}
       </div>
 
-      {/* Enrollments Over Time */}
-      {enrollmentsOverTime.length > 0 && (
-        <div className="bg-card rounded-xl border border-border shadow-sm p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <TrendingUp className="h-4 w-4 text-primary" />
-            <h3 className="font-bold text-foreground">التسجيلات خلال 30 يوم</h3>
-          </div>
-          <div className="flex items-end gap-1 h-32">
-            {enrollmentsOverTime.map((d, i) => (
-              <div key={i} className="flex-1 flex flex-col items-center gap-1 group">
-                <div
-                  className="w-full bg-primary/80 rounded-t-sm transition-all group-hover:bg-primary"
-                  style={{ height: `${(d.count / maxCount) * 100}%`, minHeight: d.count > 0 ? "4px" : "0" }}
-                  title={`${d.day}: ${d.count}`}
-                />
-              </div>
-            ))}
-          </div>
-          <div className="flex justify-between mt-2 text-xs text-muted-foreground">
-            <span>{enrollmentsOverTime[0]?.day}</span>
-            <span>{enrollmentsOverTime[enrollmentsOverTime.length - 1]?.day}</span>
+      {/* Academy insights: community composition + enrollment pulse */}
+      <AcademyInsights
+        totalStudents={stats.total_students}
+        totalTeachers={stats.total_teachers}
+        enrollmentsToday={stats.enrollments_today}
+        enrollmentsWeek={stats.enrollments_week}
+        activeEnrollments={stats.active_enrollments}
+      />
+
+      {/* Engagement & Activity Banner */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+        <div className="bg-card rounded-xl p-4 border border-border shadow-sm">
+          <div className="flex items-center gap-3">
+            <TrendingUp className="w-5 h-5 text-emerald-600" />
+            <div>
+              <p className="text-xs text-muted-foreground">
+                {a.dashEnrollmentsThisWeek}
+              </p>
+              <p className="text-2xl font-bold">{fmt(stats.enrollments_week)}</p>
+            </div>
           </div>
         </div>
-      )}
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Courses */}
-        <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
-          <div className="p-5 border-b border-border flex items-center justify-between bg-muted/50">
+        <div className="bg-card rounded-xl p-4 border border-border shadow-sm">
+          <div className="flex items-center gap-3">
+            <BookOpen className="w-5 h-5 text-purple-600" />
             <div>
-              <h3 className="font-bold text-foreground">آخر الدورات المضافة</h3>
-              <p className="text-sm text-muted-foreground mt-0.5">أحدث 5 دورات في المنصة</p>
+              <p className="text-xs text-muted-foreground">
+                {a.dashActiveEnrollments}
+              </p>
+              <p className="text-2xl font-bold">{fmt(stats.active_enrollments)}</p>
             </div>
-            <Link href="/admin/academy/courses" className="text-sm text-primary font-medium hover:underline flex items-center gap-1">
-              عرض الكل <ArrowLeft className="w-4 h-4" />
+          </div>
+        </div>
+        <div className="bg-card rounded-xl p-4 border border-border shadow-sm">
+          <div className="flex items-center gap-3">
+            <Award className="w-5 h-5 text-amber-600" />
+            <div>
+              <p className="text-xs text-muted-foreground">
+                {a.dashTotalPointsDistributed}
+              </p>
+              <p className="text-2xl font-bold">
+                {fmt(stats.total_points_distributed)}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Latest Courses + Top Students side by side */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Latest Courses */}
+        <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden flex flex-col">
+          <div className="p-6 border-b border-border flex items-center justify-between bg-muted/50">
+            <div>
+              <h3 className="font-bold text-foreground">
+                {a.dashLatestCourses}
+              </h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                {a.dashRecentlyAdded}
+              </p>
+            </div>
+            <Link
+              href="/academy/admin/courses"
+              className="text-sm text-blue-600 dark:text-blue-400 font-medium hover:underline flex items-center gap-1"
+            >
+              {a.dashViewAll}
+              <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
             </Link>
           </div>
-          <div className="divide-y divide-border">
-            {recentCourses.length > 0
-              ? recentCourses.map((course) => (
-                <div key={course.id} className="px-5 py-3 flex items-center justify-between hover:bg-muted/30 transition-colors">
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{course.title}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {course.students_count} طالب •{" "}
-                      {new Date(course.created_at).toLocaleDateString(isAr ? "ar-SA" : "en-US")}
+          {stats.latest_courses.length > 0 ? (
+            <div className="divide-y divide-border">
+              {stats.latest_courses.map((course) => (
+                <Link
+                  key={course.id}
+                  href={`/academy/admin/courses/${course.id}`}
+                  className="flex items-center gap-4 p-4 hover:bg-muted/30 transition-colors"
+                >
+                  <div className="w-10 h-10 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center flex-shrink-0">
+                    <BookOpen className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-foreground truncate">
+                      {course.title}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {course.teacher_name || a.dashNoTeacher}
                     </p>
                   </div>
-                  <span className={`text-xs px-2 py-0.5 rounded-full border shrink-0 ${
-                    course.status === "published"
-                      ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                      : "bg-muted text-muted-foreground border-border"
-                  }`}>
-                    {course.status === "published" ? "منشور" : "مسودة"}
-                  </span>
-                </div>
-              ))
-              : (
-                <div className="p-8 text-center text-muted-foreground/50 text-sm">لا توجد دورات بعد</div>
-              )}
-          </div>
+                  <div className="text-end flex-shrink-0">
+                    <p className="text-sm font-bold text-foreground">
+                      {fmt(course.enrollments)}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {a.dashEnrolled}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="p-10 flex-1 flex flex-col items-center justify-center text-center">
+              <BookOpen className="w-12 h-12 text-muted-foreground/20 mb-4" />
+              <p className="text-muted-foreground font-medium">
+                {a.dashNoCoursesYet}
+              </p>
+            </div>
+          )}
         </div>
 
-        {/* Top Courses */}
-        <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
-          <div className="p-5 border-b border-border bg-muted/50">
-            <h3 className="font-bold text-foreground">أكثر الدورات تسجيلًا</h3>
-            <p className="text-sm text-muted-foreground mt-0.5">الدورات الأعلى إقبالًا</p>
+        {/* Top Students */}
+        <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden flex flex-col">
+          <div className="p-6 border-b border-border flex items-center justify-between bg-muted/50">
+            <div>
+              <h3 className="font-bold text-foreground">
+                {a.dashTopStudents}
+              </h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                {a.dashTopStudentsDesc}
+              </p>
+            </div>
+            <Link
+              href="/academy/admin/leaderboard"
+              className="text-sm text-blue-600 dark:text-blue-400 font-medium hover:underline flex items-center gap-1"
+            >
+              {a.dashViewAll}
+              <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
+            </Link>
           </div>
-          <div className="p-5 space-y-3">
-            {topCourses.length > 0
-              ? topCourses.map((course, i) => (
-                <div key={course.id} className="flex items-center gap-3">
-                  <span className="text-sm font-bold text-muted-foreground w-5 shrink-0">{i + 1}</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{course.title}</p>
-                    <div className="mt-1 h-1.5 bg-muted rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-primary rounded-full"
-                        style={{ width: `${(course.students_count / (topCourses[0]?.students_count || 1)) * 100}%` }}
-                      />
-                    </div>
+          {stats.top_students.length > 0 ? (
+            <div className="divide-y divide-border">
+              {stats.top_students.map((student, idx) => (
+                <Link
+                  key={student.id}
+                  href={`/academy/admin/users/${student.id}`}
+                  className="flex items-center gap-4 p-4 hover:bg-muted/30 transition-colors"
+                >
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm ${
+                      idx === 0
+                        ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/40'
+                        : idx === 1
+                          ? 'bg-slate-400/20 text-slate-700 dark:text-slate-300 border border-slate-400/40'
+                          : idx === 2
+                            ? 'bg-orange-500/20 text-orange-700 dark:text-orange-300 border border-orange-500/40'
+                            : 'bg-muted text-muted-foreground'
+                    }`}
+                  >
+                    {idx + 1}
                   </div>
-                  <span className="text-sm font-bold text-foreground shrink-0">
-                    {course.students_count.toLocaleString(isAr ? "ar-EG" : "en-US")}
-                  </span>
-                </div>
-              ))
-              : (
-                <div className="py-6 text-center text-muted-foreground/50 text-sm">لا توجد بيانات</div>
-              )}
-          </div>
+                  <div className="w-10 h-10 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    {student.avatar_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={student.avatar_url}
+                        alt={student.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-foreground truncate">
+                      {student.name}
+                    </p>
+                  </div>
+                  <div className="text-end flex-shrink-0 flex items-center gap-1">
+                    <Sparkles className="w-4 h-4 text-amber-500" />
+                    <p className="text-sm font-bold text-foreground">
+                      {fmt(student.total_points)}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="p-10 flex-1 flex flex-col items-center justify-center text-center">
+              <Sparkles className="w-12 h-12 text-amber-500/20 mb-4" />
+              <p className="text-muted-foreground font-medium">
+                {a.dashNoDataYet}
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

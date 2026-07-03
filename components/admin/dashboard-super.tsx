@@ -3,8 +3,10 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useI18n } from "@/lib/i18n/context"
-import { Users, BookOpen, ClipboardList, GraduationCap, Award, TrendingUp, Activity, LayoutDashboard } from "lucide-react"
+import { Users, BookOpen, ClipboardList, GraduationCap, Award, TrendingUp, Activity, LayoutDashboard, BarChart3 } from "lucide-react"
 import { StatsGridSkeleton } from "@/components/admin/skeletons"
+import { ViewsChart } from "@/components/admin/analytics/views-chart"
+import { VisitorStats } from "@/components/admin/analytics/visitors-stats"
 
 interface PlatformOverview {
   users: { total: number; active: number; new_30: number }
@@ -18,6 +20,7 @@ export function DashboardSuper() {
   const isAr = t.locale === "ar"
 
   const [data, setData] = useState<PlatformOverview | null>(null)
+  const [analytics, setAnalytics] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -30,6 +33,13 @@ export function DashboardSuper() {
       .then(setData)
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false))
+  }, [])
+
+  useEffect(() => {
+    fetch("/api/admin/analytics?days=30")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (d) setAnalytics(d) })
+      .catch(() => {})
   }, [])
 
   if (loading) {
@@ -52,6 +62,24 @@ export function DashboardSuper() {
   }
 
   const { users, academy, maqraa, roleDistribution } = data
+
+  // Visits analytics (shared page_views table) — owned by the Super Admin only.
+  const chartData = (analytics?.overTime || []).map((d: any) => ({
+    date: d.raw_date || d.day,
+    views_count: parseInt(d.views || "0"),
+    visitors_count: parseInt(d.visitors || "0"),
+  }))
+  const topCountriesMapped = (analytics?.topCountries || []).map((c: any) => ({
+    country: c.country,
+    count: parseInt(c.views || "0"),
+  }))
+  const deviceTypesRaw = analytics?.deviceTypes || []
+  const totalDevices = deviceTypesRaw.reduce((sum: number, d: any) => sum + parseInt(d.count || "0"), 0)
+  const deviceTypesMapped = deviceTypesRaw.map((d: any) => ({
+    device_type: d.device_type,
+    count: parseInt(d.count || "0"),
+    percentage: totalDevices > 0 ? Math.round((parseInt(d.count || "0") / totalDevices) * 100) : 0,
+  }))
 
   const globalCards = [
     {
@@ -157,6 +185,18 @@ export function DashboardSuper() {
           })}
         </div>
       </section>
+
+      {/* Visits analytics — Super Admin only */}
+      {analytics && (
+        <section className="space-y-6">
+          <div className="flex items-center gap-2">
+            <BarChart3 className="h-4 w-4 text-primary" />
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">إحصائيات الزيارات</h3>
+          </div>
+          <ViewsChart data={chartData} />
+          <VisitorStats countryData={topCountriesMapped} deviceData={deviceTypesMapped} />
+        </section>
+      )}
 
       {/* Side-by-side: Maqraa + Academy */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

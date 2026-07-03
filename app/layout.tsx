@@ -15,8 +15,9 @@ const cairo = Cairo({
 })
 
 const amiri = Amiri({
-  subsets: ['arabic'],
+  subsets: ['arabic', 'latin'],
   weight: ['400', '700'],
+  style: ['normal', 'italic'],
   variable: '--font-amiri',
 })
 
