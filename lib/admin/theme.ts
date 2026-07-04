@@ -122,7 +122,17 @@ export function normalizeTheme(raw: any): ThemeConfig {
 export function buildThemeCss(theme: ThemeConfig): string {
   const { colors: cc, radius, font } = theme
   const stack = THEME_FONTS[font]?.stack ?? THEME_FONTS.cairo.stack
+  // Font + radius are mode-agnostic, so they apply in both light and dark.
+  // The custom color palette is a LIGHT palette only — it must be scoped to
+  // `:root:not(.dark)` so it never clobbers the dark-mode tokens defined in
+  // globals.css (`.dark { ... }`). Injecting colors into a plain `:root` block
+  // overrode dark mode (the injected style loads after globals.css), producing
+  // broken half-light/half-dark surfaces in admin dashboards.
   return `:root{
+--radius:${radius};
+--font-cairo:${stack};
+}
+:root:not(.dark){
 --primary:${cc.primary};
 --primary-foreground:${cc.primaryForeground};
 --secondary:${cc.secondary};
@@ -132,7 +142,5 @@ export function buildThemeCss(theme: ThemeConfig): string {
 --background:${cc.background};
 --foreground:${cc.foreground};
 --ring:${cc.ring};
---radius:${radius};
---font-cairo:${stack};
 }`
 }
