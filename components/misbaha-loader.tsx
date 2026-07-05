@@ -12,8 +12,8 @@ export function MisbahaLoader() {
     if (!ctx) return
 
     const DPR = window.devicePixelRatio || 1
-    const W = 280
-    const H = 390
+    const W = 200
+    const H = 320
     canvas.width = W * DPR
     canvas.height = H * DPR
     canvas.style.width = `${W}px`
@@ -22,10 +22,14 @@ export function MisbahaLoader() {
 
     // ── إعدادات المسبحة ──────────────────────────────────────
     const BEAD_COUNT = 10        // عدد الخرزات في الدائرة
-    const RING_R     = 88        // نصف قطر الدائرة
-    const BEAD_R     = 14        // نصف قطر الخرزة الأساسية
+    const BEAD_R     = 10        // نصف قطر الخرزة الأساسية
+    // RING_R تحسب تلقائياً بحيث تكون الخرز ملتصقة تقريباً
+    // المسافة بين مركزين خرز متجاورتين = 2 * RING_R * sin(PI/BEAD_COUNT)
+    // عشان تكون ملتصقة: 2*BEAD_R ≈ 2*RING_R*sin(PI/10)
+    // → RING_R ≈ BEAD_R / sin(PI/10) ≈ 10 / 0.309 ≈ 32.4 → نضيف 2px فراغ بسيط
+    const RING_R     = Math.round(BEAD_R / Math.sin(Math.PI / BEAD_COUNT)) + 2
     const CX         = W / 2
-    const CY         = H / 2 - 20
+    const CY         = W / 2 + 2   // مركز الدائرة في النص العلوي
     const CYCLE_MS   = 3200      // كل دورة كاملة تاخد 3.2 ثانية (هادئة)
 
     // ── ألوان الخرزة الخشبية البنية ───────────────────────────
@@ -155,31 +159,36 @@ export function MisbahaLoader() {
     }
 
     // ── رسم الشراشيب (tassel) ───────────────────────────────────
+    // الشراشيب بها ميل بسيط لليمين وأطول
+    const TILT = 6  // مقدار الميل الأفقي للشعرة الخارجية
+
     function drawTassel(cx: number, startY: number) {
-      const strands = 9
-      const tasselLen = 38
-      const spread = 10
+      const strands = 11
+      const tasselLen = 52   // أطول من قبل
+      const spread = 13
 
       for (let i = 0; i < strands; i++) {
         const t = (i / (strands - 1)) - 0.5        // -0.5 → 0.5
-        const endX = cx + t * spread * 2
-        const endY = startY + tasselLen + Math.abs(t) * 6  // القصيرة في الوسط
+        // ميل عام لليمين + انتشار طبيعي
+        const endX = cx + t * spread * 2 + TILT
+        const endY = startY + tasselLen + Math.abs(t) * 5
 
-        // تذبذب خفيف للشراشيب بناءً على الوقت
+        // تذبذب خفيف بناءً على الوقت
         const elapsed = (startTime !== null)
           ? (performance.now() - startTime) / 1000 : 0
-        const wobble = Math.sin(elapsed * 1.5 + i * 0.7) * 1.2
+        const wobble = Math.sin(elapsed * 1.2 + i * 0.65) * 1.4
 
-        const alpha = i === 0 || i === strands - 1 ? 0.4 : 0.85
+        const alpha = i === 0 || i === strands - 1 ? 0.35 : 0.88
 
         ctx.strokeStyle = `rgba(74,124,89,${alpha})`
-        ctx.lineWidth = 1.2
+        ctx.lineWidth = 1.4
         ctx.lineCap = 'round'
         ctx.beginPath()
-        ctx.moveTo(cx + wobble * 0.3, startY)
+        // نبدأ من المركز بميل بسيط
+        ctx.moveTo(cx + TILT * 0.2 + wobble * 0.2, startY)
         ctx.quadraticCurveTo(
-          endX + wobble,
-          startY + tasselLen * 0.5,
+          endX + wobble * 0.6,
+          startY + tasselLen * 0.55,
           endX + wobble,
           endY
         )
@@ -212,42 +221,42 @@ export function MisbahaLoader() {
     function drawTailBeads(imamX: number, imamY: number) {
       // خط رابط من الدائرة لأسفل
       ctx.strokeStyle = THREAD
-      ctx.lineWidth = 1.8
+      ctx.lineWidth = 1.6
       ctx.lineCap = 'round'
       ctx.beginPath()
       ctx.moveTo(imamX, imamY + BEAD_R)
-      ctx.lineTo(imamX, imamY + BEAD_R + 14)
+      ctx.lineTo(imamX, imamY + BEAD_R + 8)
       ctx.stroke()
 
-      // الخرزة الأولى (imam / alif)
-      const b1Y = imamY + BEAD_R + 14 + 13
-      drawBead(imamX, b1Y, 13, false, 0)
+      // الخرزة الأولى (imam) - أصغر تناسباً مع الحجم الجديد
+      const b1Y = imamY + BEAD_R + 8 + 10
+      drawBead(imamX, b1Y, 10, false, 0)
 
       // رابط قصير
       ctx.strokeStyle = THREAD
-      ctx.lineWidth = 1.8
+      ctx.lineWidth = 1.6
       ctx.beginPath()
-      ctx.moveTo(imamX, b1Y + 13)
-      ctx.lineTo(imamX, b1Y + 13 + 9)
+      ctx.moveTo(imamX, b1Y + 10)
+      ctx.lineTo(imamX, b1Y + 10 + 6)
       ctx.stroke()
 
       // الخرزة الثانية (أصغر)
-      const b2Y = b1Y + 13 + 9 + 9
-      drawBead(imamX, b2Y, 9, false, 0)
+      const b2Y = b1Y + 10 + 6 + 7
+      drawBead(imamX, b2Y, 7, false, 0)
 
       // رابط للنحاس
       ctx.strokeStyle = THREAD
-      ctx.lineWidth = 1.8
+      ctx.lineWidth = 1.6
       ctx.beginPath()
-      ctx.moveTo(imamX, b2Y + 9)
-      ctx.lineTo(imamX, b2Y + 9 + 8)
+      ctx.moveTo(imamX, b2Y + 7)
+      ctx.lineTo(imamX, b2Y + 7 + 6)
       ctx.stroke()
 
       // النحاس (تيبيليك)
-      drawBrassConnector(imamX, b2Y + 9 + 8)
+      drawBrassConnector(imamX, b2Y + 7 + 6)
 
       // الشراشيب
-      drawTassel(imamX, b2Y + 9 + 8 + 18)
+      drawTassel(imamX, b2Y + 7 + 6 + 18)
     }
 
     // ── حلقة الرسم الرئيسية ────────────────────────────────────
