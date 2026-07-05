@@ -14,7 +14,7 @@ export async function GET() {
     )
 
     return NextResponse.json(
-      { enabled: enabled === true || enabled === "true", message },
+      { enabled: enabled === true || String(enabled) === "true", message },
       {
         headers: {
           // Edge cache: re-use the response for 60 s before re-fetching from origin
