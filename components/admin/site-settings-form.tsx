@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Globe, Clock, Wrench, Share2, Mail, Save, RefreshCw, AlertTriangle, Download, Upload, Palette } from "lucide-react"
+import { Globe, Clock, Wrench, Share2, Mail, Save, RefreshCw, AlertTriangle, Download, Upload, Palette, CheckCircle } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -72,13 +72,15 @@ export function SiteSettingsForm() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
 
-  // Export options
+  // Export state
   const [includeThemeInExport, setIncludeThemeInExport] = useState(false)
-  const [exportingSettings, setExportingSettings] = useState(false)
+  const [exportLoading, setExportLoading] = useState(false)
+  const [exportSuccess, setExportSuccess] = useState(false)
 
-  // Imported theme state — populated only when imported file contains theme data
-  const [importedTheme, setImportedTheme] = useState<any>(null)
-  const [importNotice, setImportNotice] = useState<string | null>(null)
+  // Import state — populated after reading a backup file
+  const [importedData, setImportedData] = useState<any>(null) // full parsed file
+  const [importNotice, setImportNotice] = useState<{ type: "theme" | "noTheme"; text: string } | null>(null)
+  const [importLoading, setImportLoading] = useState(false)
 
   useEffect(() => {
     fetch("/api/admin/site-settings")
@@ -117,120 +119,141 @@ export function SiteSettingsForm() {
   }
 
   // ── Export ──────────────────────────────────────────────────────────────────
+  // Uses the dedicated /api/admin/settings/full-export endpoint which pulls
+  // ALL settings directly from the DB, ensuring the exported file is complete.
   const handleExportSettings = async () => {
-    setExportingSettings(true)
+    setExportLoading(true)
+    setExportSuccess(false)
+    setError(null)
     try {
-      let exportPayload: Record<string, any> = { settings }
-
-      if (includeThemeInExport) {
-        const res = await fetch("/api/admin/theme")
-        if (res.ok) {
-          const data = await res.json()
-          exportPayload.theme = data.theme
-        }
+      const url = `/api/admin/settings/full-export?includeTheme=${includeThemeInExport}`
+      const res = await fetch(url)
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.error ?? "فشل في تصدير الإعدادات")
       }
-
-      const blob = new Blob([JSON.stringify(exportPayload, null, 2)], {
-        type: "application/json",
-      })
-      const url = URL.createObjectURL(blob)
+      const blob = await res.blob()
+      const objectUrl = URL.createObjectURL(blob)
       const a = document.createElement("a")
-      a.href = url
+      a.href = objectUrl
       const suffix = includeThemeInExport ? "with-theme" : "settings-only"
-      a.download = `itqan-settings-${suffix}-${new Date().toISOString().split("T")[0]}.json`
+      a.download = `itqan-full-backup-${suffix}-${new Date().toISOString().split("T")[0]}.json`
+      document.body.appendChild(a)
       a.click()
-      URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+      URL.revokeObjectURL(objectUrl)
+      setExportSuccess(true)
+      setTimeout(() => setExportSuccess(false), 4000)
+    } catch (err: any) {
+      setError(err.message)
     } finally {
-      setExportingSettings(false)
+      setExportLoading(false)
     }
   }
 
-  // ── Import ──────────────────────────────────────────────────────────────────
+  // ── Import (read file) ──────────────────────────────────────────────────────
+  // Reads the JSON file, surfaces the site_settings keys into the form for
+  // review, and stages the full payload for the save step.
   const handleImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
+    setImportLoading(true)
     const reader = new FileReader()
     reader.onload = (event) => {
       try {
         const parsed = JSON.parse(event.target?.result as string)
 
-        // Validate: must have a settings key
-        if (!parsed.settings || typeof parsed.settings !== "object") {
-          setError("الملف غير صالح — لم يتم العثور على بيانات الإعدادات.")
+        // Basic validation — must be our export format
+        const hasSiteSettings = parsed.site_settings && typeof parsed.site_settings === "object"
+        const hasLegacySettings = parsed.settings && typeof parsed.settings === "object"
+
+        if (!hasSiteSettings && !hasLegacySettings) {
+          setError("الملف غير صالح — لم يتم العثور على بيانات إعدادات صحيحة.")
+          setImportLoading(false)
           return
         }
 
-        // Load site settings into the form
-        const s = parsed.settings as SiteSettings
+        // Load site_settings into the form for review
+        const siteSrc = hasSiteSettings ? parsed.site_settings : parsed.settings
         setSettings({
-          site_name: s.site_name ?? "",
-          site_tagline: s.site_tagline ?? "",
-          site_default_language: s.site_default_language ?? "ar",
-          site_timezone: s.site_timezone ?? "Asia/Riyadh",
-          site_maintenance_enabled: s.site_maintenance_enabled ?? false,
-          site_maintenance_message: s.site_maintenance_message ?? "",
-          site_contact_email: s.site_contact_email ?? "",
-          site_contact_phone: s.site_contact_phone ?? "",
-          site_social_links: s.site_social_links ?? {},
+          site_name: siteSrc.site_name ?? "",
+          site_tagline: siteSrc.site_tagline ?? "",
+          site_default_language: siteSrc.site_default_language ?? "ar",
+          site_timezone: siteSrc.site_timezone ?? "Asia/Riyadh",
+          site_maintenance_enabled: siteSrc.site_maintenance_enabled ?? false,
+          site_maintenance_message: siteSrc.site_maintenance_message ?? "",
+          site_contact_email: siteSrc.site_contact_email ?? "",
+          site_contact_phone: siteSrc.site_contact_phone ?? "",
+          site_social_links: siteSrc.site_social_links ?? {},
         })
 
-        // Handle theme — only apply if it exists in the file
-        if (parsed.theme && typeof parsed.theme === "object") {
-          setImportedTheme(parsed.theme)
-          setImportNotice("تم تحميل ملف يتضمن إعدادات المظهر (الألوان والخط) — سيتم استعادة المظهر أيضاً عند الضغط على «حفظ الإعدادات».")
-        } else {
-          setImportedTheme(null)
-          setImportNotice("تم تحميل الإعدادات العامة بنجاح — لا يتضمن الملف إعدادات مظهر، لن يتأثر المظهر الحالي.")
-        }
+        // Stage the full parsed payload so Save can restore everything
+        setImportedData(parsed)
 
+        const hasTheme = parsed.includes_theme && parsed.theme && typeof parsed.theme === "object"
+        const settingsCount = [
+          Object.keys(parsed.site_settings ?? {}).length,
+          Object.keys(parsed.maqraa_settings ?? {}).length,
+          Object.keys(parsed.seo_settings ?? {}).length,
+          Object.keys(parsed.homepage_settings ?? {}).length,
+          Object.keys(parsed.general_settings ?? {}).length,
+        ].reduce((a, b) => a + b, 0)
+
+        setImportNotice(
+          hasTheme
+            ? {
+                type: "theme",
+                text: `تم تحميل ملف يتضمن ${settingsCount} إعداد + إعدادات المظهر (الألوان والخط). سيتم استعادتها جميعاً عند الضغط على «حفظ الإعدادات».`,
+              }
+            : {
+                type: "noTheme",
+                text: `تم تحميل ملف يتضمن ${settingsCount} إعداد. لا يتضمن الملف إعدادات مظهر — لن يتأثر المظهر الحالي.`,
+              }
+        )
         setError(null)
         setSuccess(false)
       } catch {
         setError("فشل في قراءة الملف — تأكد أنه ملف JSON صالح.")
+      } finally {
+        setImportLoading(false)
       }
     }
     reader.readAsText(file)
-
-    // Reset input so same file can be re-imported if needed
     e.target.value = ""
   }
 
   // ── Save ────────────────────────────────────────────────────────────────────
+  // If a backup file was imported, sends the full payload to full-export (POST).
+  // Always also saves the site_settings form values separately.
   const handleSave = async () => {
     setSaving(true)
     setError(null)
     setSuccess(false)
     try {
-      const savePromises: Promise<Response>[] = [
-        fetch("/api/admin/site-settings", {
+      if (importedData) {
+        // Full restore via the comprehensive endpoint
+        const res = await fetch("/api/admin/settings/full-export", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ data: importedData }),
+        })
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error ?? "فشل في استعادة الإعدادات")
+        setImportedData(null)
+        setImportNotice(null)
+      } else {
+        // Normal save — only site settings
+        const res = await fetch("/api/admin/site-settings", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ settings }),
-        }),
-      ]
-
-      // If an imported theme is pending, save it in parallel
-      if (importedTheme) {
-        savePromises.push(
-          fetch("/api/admin/theme", {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ theme: importedTheme }),
-          })
-        )
-      }
-
-      const results = await Promise.all(savePromises)
-      const failed = results.find((r) => !r.ok)
-      if (failed) {
-        const data = await failed.json().catch(() => ({}))
-        throw new Error(data.error ?? "خطأ غير معروف")
+        })
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error ?? "خطأ غير معروف")
       }
 
       setSuccess(true)
-      setImportedTheme(null)
-      setImportNotice(null)
       router.refresh()
     } catch (err: any) {
       setError(err.message)
@@ -257,16 +280,20 @@ export function SiteSettingsForm() {
       )}
       {success && (
         <Alert className="border-green-200 bg-green-50 text-green-800 dark:bg-green-950 dark:border-green-800 dark:text-green-200">
+          <CheckCircle className="w-4 h-4" />
           <AlertDescription>تم حفظ الإعدادات بنجاح.</AlertDescription>
         </Alert>
       )}
       {importNotice && (
-        <Alert className={importedTheme
-          ? "border-blue-200 bg-blue-50 text-blue-800 dark:bg-blue-950 dark:border-blue-800 dark:text-blue-200"
-          : "border-emerald-200 bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:border-emerald-800 dark:text-emerald-200"
-        }>
-          {importedTheme && <Palette className="w-4 h-4" />}
-          <AlertDescription>{importNotice}</AlertDescription>
+        <Alert
+          className={
+            importNotice.type === "theme"
+              ? "border-blue-200 bg-blue-50 text-blue-800 dark:bg-blue-950 dark:border-blue-800 dark:text-blue-200"
+              : "border-emerald-200 bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:border-emerald-800 dark:text-emerald-200"
+          }
+        >
+          {importNotice.type === "theme" ? <Palette className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
+          <AlertDescription>{importNotice.text}</AlertDescription>
         </Alert>
       )}
 
@@ -461,14 +488,17 @@ export function SiteSettingsForm() {
             <CardTitle className="text-base">نسخة احتياطية من الإعدادات</CardTitle>
           </div>
           <CardDescription>
-            صدّر الإعدادات الحالية كملف JSON أو استعد نسخة سبق تصديرها.
+            صدّر نسخة شاملة من جميع إعدادات المنصة (إعدادات الموقع، المقرأة، الأكاديمية، SEO، الصفحة الرئيسية) أو استعد نسخة سبق تصديرها.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
 
           {/* Export */}
           <div className="rounded-lg bg-muted/50 p-4 space-y-4">
-            <p className="text-sm font-semibold text-foreground">تصدير الإعدادات</p>
+            <p className="text-sm font-semibold text-foreground">تصدير النسخة الاحتياطية</p>
+            <p className="text-xs text-muted-foreground">
+              يشمل الملف المصدَّر: إعدادات الموقع العامة، إعدادات المقرأة والأكاديمية، إعدادات SEO، الصفحة الرئيسية، بيانات الهوية والتواصل.
+            </p>
 
             {/* Theme include toggle */}
             <div className="flex items-start gap-3">
@@ -480,10 +510,10 @@ export function SiteSettingsForm() {
               />
               <div className="space-y-1">
                 <Label htmlFor="include-theme" className="text-sm font-medium cursor-pointer">
-                  تضمين إعدادات المظهر (الألوان والخط والاستدارة) في الملف المصدَّر
+                  تضمين إعدادات المظهر (الألوان، الخط، الاستدارة) في الملف
                 </Label>
                 <p className="text-xs text-muted-foreground">
-                  عند استيراد هذا الملف لاحقاً، سيتم استعادة المظهر أيضاً. إن لم تفعّل هذا الخيار فلن يتضمن الملف أي إعدادات للمظهر.
+                  عند استيراد هذا الملف لاحقاً، سيتم استعادة المظهر أيضاً. بدون هذا الخيار، لن يتأثر المظهر عند الاستيراد.
                 </p>
               </div>
             </div>
@@ -491,16 +521,18 @@ export function SiteSettingsForm() {
             <Button
               variant="outline"
               onClick={handleExportSettings}
-              disabled={exportingSettings}
+              disabled={exportLoading}
               className="gap-2"
             >
-              {exportingSettings ? (
+              {exportLoading ? (
                 <RefreshCw className="w-4 h-4 animate-spin" />
+              ) : exportSuccess ? (
+                <CheckCircle className="w-4 h-4 text-green-600" />
               ) : (
                 <Download className="w-4 h-4" />
               )}
-              {exportingSettings ? "جار التصدير..." : "تصدير الإعدادات"}
-              {includeThemeInExport && !exportingSettings && (
+              {exportLoading ? "جار التصدير..." : exportSuccess ? "تم التصدير بنجاح!" : "تصدير الإعدادات"}
+              {includeThemeInExport && !exportLoading && !exportSuccess && (
                 <Badge variant="secondary" className="text-[10px] px-1.5 py-0">+ مظهر</Badge>
               )}
             </Button>
@@ -510,7 +542,7 @@ export function SiteSettingsForm() {
           <div className="rounded-lg bg-muted/50 p-4 space-y-3">
             <p className="text-sm font-semibold text-foreground">استيراد من ملف نسخة احتياطية</p>
             <p className="text-xs text-muted-foreground">
-              اختر ملف JSON سبق تصديره. ستُعرض الإعدادات في النموذج للمراجعة قبل الحفظ. إذا كان الملف يتضمن مظهراً فسيتم استعادته عند الضغط على «حفظ الإعدادات».
+              اختر ملف JSON سبق تصديره. ستُعرض إعدادات الموقع العامة في النموذج للمراجعة، وعند الضغط على «حفظ الإعدادات» سيتم استعادة جميع الإعدادات الأخرى (المقرأة، SEO، المظهر إن وُجد...).
             </p>
 
             {/* Hidden file input */}
@@ -525,10 +557,15 @@ export function SiteSettingsForm() {
             <Button
               variant="outline"
               onClick={() => importInputRef.current?.click()}
+              disabled={importLoading}
               className="gap-2 border-primary/30 text-primary hover:bg-primary/5"
             >
-              <Upload className="w-4 h-4" />
-              اختيار ملف واستيراد الإعدادات
+              {importLoading ? (
+                <RefreshCw className="w-4 h-4 animate-spin" />
+              ) : (
+                <Upload className="w-4 h-4" />
+              )}
+              {importLoading ? "جار القراءة..." : importedData ? "استيراد ملف آخر" : "اختيار ملف واستيراد الإعدادات"}
             </Button>
           </div>
         </CardContent>
@@ -542,9 +579,15 @@ export function SiteSettingsForm() {
           ) : (
             <Save className="w-4 h-4" />
           )}
-          {saving ? "جار الحفظ..." : "حفظ الإعدادات"}
-          {importedTheme && !saving && (
-            <Badge variant="secondary" className="text-[10px] px-1.5 py-0">+ مظهر</Badge>
+          {saving
+            ? "جار الحفظ..."
+            : importedData
+            ? "استعادة جميع الإعدادات"
+            : "حفظ الإعدادات"}
+          {importedData && !saving && (
+            <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+              {importNotice?.type === "theme" ? "+ مظهر" : ""}
+            </Badge>
           )}
         </Button>
       </div>
