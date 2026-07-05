@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Checkbox } from "@/components/ui/checkbox"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 const TIMEZONES = [
   { value: "Asia/Riyadh", label: "الرياض (UTC+3)" },
@@ -73,7 +73,7 @@ export function SiteSettingsForm() {
   const [success, setSuccess] = useState(false)
 
   // Export state
-  const [includeThemeInExport, setIncludeThemeInExport] = useState(false)
+  const [exportDialogOpen, setExportDialogOpen] = useState(false)
   const [exportLoading, setExportLoading] = useState(false)
   const [exportSuccess, setExportSuccess] = useState(false)
 
@@ -118,15 +118,13 @@ export function SiteSettingsForm() {
     setSuccess(false)
   }
 
-  // ── Export ──────────────────────────────────────────────────────────────────
-  // Uses the dedicated /api/admin/settings/full-export endpoint which pulls
-  // ALL settings directly from the DB, ensuring the exported file is complete.
-  const handleExportSettings = async () => {
+  const handleExportSettings = async (includeTheme: boolean) => {
+    setExportDialogOpen(false)
     setExportLoading(true)
     setExportSuccess(false)
     setError(null)
     try {
-      const url = `/api/admin/settings/full-export?includeTheme=${includeThemeInExport}`
+      const url = `/api/admin/settings/full-export?includeTheme=${includeTheme}`
       const res = await fetch(url)
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
@@ -136,7 +134,7 @@ export function SiteSettingsForm() {
       const objectUrl = URL.createObjectURL(blob)
       const a = document.createElement("a")
       a.href = objectUrl
-      const suffix = includeThemeInExport ? "with-theme" : "settings-only"
+      const suffix = includeTheme ? "with-theme" : "settings-only"
       a.download = `itqan-full-backup-${suffix}-${new Date().toISOString().split("T")[0]}.json`
       document.body.appendChild(a)
       a.click()
@@ -167,6 +165,13 @@ export function SiteSettingsForm() {
         // Basic validation — must be our export format
         const hasSiteSettings = parsed.site_settings && typeof parsed.site_settings === "object"
         const hasLegacySettings = parsed.settings && typeof parsed.settings === "object"
+        const isDbBackup = parsed.data && Array.isArray(parsed.data.settings)
+
+        if (isDbBackup) {
+          setError("الملف غير صالح — هذا الملف هو نسخة احتياطية لقاعدة البيانات بالكامل. يرجى التوجه لصفحة «النسخ الاحتياطية» لاستعادته.")
+          setImportLoading(false)
+          return
+        }
 
         if (!hasSiteSettings && !hasLegacySettings) {
           setError("الملف غير صالح — لم يتم العثور على بيانات إعدادات صحيحة.")
@@ -500,27 +505,9 @@ export function SiteSettingsForm() {
               يشمل الملف المصدَّر: إعدادات الموقع العامة، إعدادات المقرأة والأكاديمية، إعدادات SEO، الصفحة الرئيسية، بيانات الهوية والتواصل.
             </p>
 
-            {/* Theme include toggle */}
-            <div className="flex items-start gap-3">
-              <Checkbox
-                id="include-theme"
-                checked={includeThemeInExport}
-                onCheckedChange={(checked) => setIncludeThemeInExport(!!checked)}
-                className="mt-0.5"
-              />
-              <div className="space-y-1">
-                <Label htmlFor="include-theme" className="text-sm font-medium cursor-pointer">
-                  تضمين إعدادات المظهر (الألوان، الخط، الاستدارة) في الملف
-                </Label>
-                <p className="text-xs text-muted-foreground">
-                  عند استيراد هذا الملف لاحقاً، سيتم استعادة المظهر أيضاً. بدون هذا الخيار، لن يتأثر المظهر عند الاستيراد.
-                </p>
-              </div>
-            </div>
-
             <Button
               variant="outline"
-              onClick={handleExportSettings}
+              onClick={() => setExportDialogOpen(true)}
               disabled={exportLoading}
               className="gap-2"
             >
@@ -532,11 +519,31 @@ export function SiteSettingsForm() {
                 <Download className="w-4 h-4" />
               )}
               {exportLoading ? "جار التصدير..." : exportSuccess ? "تم التصدير بنجاح!" : "تصدير الإعدادات"}
-              {includeThemeInExport && !exportLoading && !exportSuccess && (
-                <Badge variant="secondary" className="text-[10px] px-1.5 py-0">+ مظهر</Badge>
-              )}
             </Button>
           </div>
+
+          <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
+            <DialogContent dir="rtl">
+              <DialogHeader>
+                <DialogTitle>تصدير الإعدادات</DialogTitle>
+                <DialogDescription className="mt-2">
+                  هل ترغب في تضمين إعدادات المظهر (الألوان، الخط، الاستدارة) في ملف النسخة الاحتياطية؟
+                  <br /><br />
+                  إذا قمت بتضمينها، سيتم استعادة المظهر الحالي عند رفع هذا الملف في المستقبل.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter className="flex gap-2 sm:justify-start mt-4">
+                <Button onClick={() => handleExportSettings(true)} className="gap-2 bg-primary text-primary-foreground">
+                  <Palette className="w-4 h-4" />
+                  نعم، تصدير الإعدادات مع المظهر
+                </Button>
+                <Button onClick={() => handleExportSettings(false)} variant="outline" className="gap-2">
+                  <Settings className="w-4 h-4" />
+                  تصدير الإعدادات فقط
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
 
           {/* Import */}
           <div className="rounded-lg bg-muted/50 p-4 space-y-3">

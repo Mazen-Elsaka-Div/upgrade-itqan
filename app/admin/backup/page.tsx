@@ -4,13 +4,14 @@ import { useState, useEffect, useRef } from 'react'
 import {
     Database, Download, Trash2, RefreshCcw, Loader2,
     CheckCircle, AlertTriangle, Archive, Upload,
-    Settings, Clock, FileJson, ShieldCheck
+    Settings, Clock, FileJson, ShieldCheck, Palette
 } from 'lucide-react'
 import { SettingsSkeleton } from '@/components/ui/skeletons'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 type Stats = {
     tables: {
@@ -34,7 +35,7 @@ export default function AdminBackupPage() {
     const [loading, setLoading] = useState(true)
     const [actionLoading, setActionLoading] = useState<string | null>(null)
     const [messages, setMessages] = useState<{ type: 'success' | 'error', text: string }[]>([])
-    const [includeTheme, setIncludeTheme] = useState(false)
+    const [exportDialogOpen, setExportDialogOpen] = useState(false)
     const restoreInputRef = useRef<HTMLInputElement>(null)
     const settingsRestoreInputRef = useRef<HTMLInputElement>(null)
 
@@ -93,7 +94,8 @@ export default function AdminBackupPage() {
     }
 
     // ── Export Settings Backup ────────────────────────────────────────────────
-    const handleExportSettings = async () => {
+    const handleExportSettings = async (includeTheme: boolean) => {
+        setExportDialogOpen(false)
         setActionLoading('export_settings')
         try {
             const url = `/api/admin/settings/full-export?includeTheme=${includeTheme}`
@@ -130,6 +132,14 @@ export default function AdminBackupPage() {
         try {
             const text = await file.text()
             const json = JSON.parse(text)
+            
+            if (json.site_settings || json.includes_theme !== undefined) {
+                 addMsg('error', 'هذا الملف هو نسخة للإعدادات فقط. يرجى استخدامه في قسم استعادة الإعدادات بالأسفل.')
+                 setActionLoading(null)
+                 e.target.value = ''
+                 return
+            }
+
             const res = await fetch('/api/admin/backup', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -160,6 +170,14 @@ export default function AdminBackupPage() {
         try {
             const text = await file.text()
             const json = JSON.parse(text)
+            
+            if (json.data && Array.isArray(json.data.settings)) {
+                addMsg('error', 'هذا الملف هو نسخة لقاعدة البيانات بالكامل. يرجى استخدامه في قسم استعادة قاعدة البيانات بالأعلى.')
+                setActionLoading(null)
+                e.target.value = ''
+                return
+            }
+
             const res = await fetch('/api/admin/settings/full-export', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -331,36 +349,15 @@ export default function AdminBackupPage() {
                     يشمل: إعدادات الموقع العامة، المقرأة، الأكاديمية، SEO، الصفحة الرئيسية، بيانات الهوية والتواصل — مع خيار تضمين المظهر.
                 </p>
 
-                {/* Theme toggle */}
-                <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
-                    <Checkbox
-                        id="backup-include-theme"
-                        checked={includeTheme}
-                        onCheckedChange={(v) => setIncludeTheme(!!v)}
-                        className="mt-0.5"
-                    />
-                    <div>
-                        <Label htmlFor="backup-include-theme" className="text-sm font-medium cursor-pointer">
-                            تضمين إعدادات المظهر (الألوان، الخط، الاستدارة) في ملف الإعدادات
-                        </Label>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                            عند استيراد الملف لاحقاً سيتم استعادة المظهر أيضاً. بدون هذا الخيار لن يتأثر المظهر عند الاستيراد.
-                        </p>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
                     <Button
-                        onClick={handleExportSettings}
+                        onClick={() => setExportDialogOpen(true)}
                         disabled={!!actionLoading}
                         className="gap-2"
                         variant="outline"
                     >
                         {actionLoading === 'export_settings' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
                         تصدير نسخة الإعدادات
-                        {includeTheme && actionLoading !== 'export_settings' && (
-                            <Badge variant="secondary" className="text-[10px] px-1.5">+ مظهر</Badge>
-                        )}
                     </Button>
 
                     <div>
@@ -382,6 +379,29 @@ export default function AdminBackupPage() {
                         </Button>
                     </div>
                 </div>
+
+                <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
+                    <DialogContent dir="rtl">
+                        <DialogHeader>
+                            <DialogTitle>تصدير الإعدادات</DialogTitle>
+                            <DialogDescription className="mt-2">
+                                هل ترغب في تضمين إعدادات المظهر (الألوان، الخط، الاستدارة) في ملف النسخة الاحتياطية؟
+                                <br /><br />
+                                إذا قمت بتضمينها، سيتم استعادة المظهر الحالي عند رفع هذا الملف في المستقبل.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter className="flex gap-2 sm:justify-start mt-4">
+                            <Button onClick={() => handleExportSettings(true)} className="gap-2 bg-primary text-primary-foreground">
+                                <Palette className="w-4 h-4" />
+                                نعم، تصدير الإعدادات مع المظهر
+                            </Button>
+                            <Button onClick={() => handleExportSettings(false)} variant="outline" className="gap-2">
+                                <Settings className="w-4 h-4" />
+                                تصدير الإعدادات فقط
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             </div>
 
             {/* ── Section 3: Maintenance Actions ─────────────────────────────── */}
