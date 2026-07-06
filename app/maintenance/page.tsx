@@ -181,6 +181,20 @@ export default async function MaintenancePage() {
           >
             جزاكم الله خيراً على صبركم
           </p>
+
+          {/* Admin login link — lets an administrator sign in to disable maintenance */}
+          <a
+            href="/login-admin"
+            style={{
+              fontSize: "0.75rem",
+              color: "rgba(212,168,67,0.55)",
+              textDecoration: "none",
+              borderBottom: "1px dotted rgba(212,168,67,0.4)",
+              paddingBottom: "1px",
+            }}
+          >
+            دخول المشرفين
+          </a>
         </main>
 
         {/* Bottom gold border line */}

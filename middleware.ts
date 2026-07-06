@@ -19,21 +19,27 @@ function isFiqhLibraryPath(pathname: string) {
   )
 }
 
-// In-process cache for maintenance status (avoids hammering the DB on every request)
+// In-process cache for maintenance status (avoids hammering the DB on every request).
+// TTL is short (20s) so enabling/disabling maintenance takes effect quickly.
 let maintenanceCache: { enabled: boolean; message: string; expiry: number } | null = null
 
-async function getMaintenanceStatus(baseUrl: string): Promise<{ enabled: boolean; message: string }> {
+async function getMaintenanceStatus(req: NextRequest): Promise<{ enabled: boolean; message: string }> {
     const now = Date.now()
     if (maintenanceCache && maintenanceCache.expiry > now) {
         return { enabled: maintenanceCache.enabled, message: maintenanceCache.message }
     }
+    // Build an absolute origin that works behind Vercel's proxy. Prefer forwarded
+    // headers (set by the platform) and fall back to the parsed request origin.
+    const forwardedHost = req.headers.get("x-forwarded-host") || req.headers.get("host")
+    const forwardedProto = req.headers.get("x-forwarded-proto") || "https"
+    const baseUrl = forwardedHost ? `${forwardedProto}://${forwardedHost}` : req.nextUrl.origin
     try {
         const res = await Promise.race([
             fetch(`${baseUrl}/api/internal/maintenance-status`, { cache: "no-store" }),
             new Promise<never>((_, reject) => setTimeout(() => reject(new Error("timeout")), 2000)),
         ])
         const data = await (res as Response).json()
-        maintenanceCache = { enabled: !!data.enabled, message: data.message ?? "", expiry: now + 60_000 }
+        maintenanceCache = { enabled: !!data.enabled, message: data.message ?? "", expiry: now + 20_000 }
         return { enabled: maintenanceCache.enabled, message: maintenanceCache.message }
     } catch {
         // On error, assume maintenance is OFF so the site keeps running
@@ -56,16 +62,18 @@ export default async function middleware(req: NextRequest) {
 
     // ── Maintenance Mode ─────────────────────────────────────────────────────
     // Check BEFORE everything else. Only admins can pass through.
-    const isMaintenancePage = pathname === "/maintenance"
-    const isInternalOrApi   = pathname.startsWith("/api/internal") || pathname.startsWith("/api/auth")
-    if (!isMaintenancePage && !isInternalOrApi) {
-        const baseUrl = req.nextUrl.origin
-        const { enabled } = await getMaintenanceStatus(baseUrl)
+    // Paths that must ALWAYS work during maintenance so an admin can log in and
+    // disable it: the maintenance page itself, admin login, and auth/internal APIs.
+    const maintenanceAllowlist =
+        pathname === "/maintenance" ||
+        pathname === "/login-admin" ||
+        pathname.startsWith("/api/internal") ||
+        pathname.startsWith("/api/auth")
+    if (!maintenanceAllowlist) {
+        const { enabled } = await getMaintenanceStatus(req)
         if (enabled) {
             // Peek at the session cookie to see if this is an admin
-            const sessionCookie =
-                req.cookies.get("auth-token")?.value ||
-                req.cookies.get("better-auth.session_token")?.value
+            const sessionCookie = req.cookies.get("auth-token")?.value
             let isAdmin = false
             if (sessionCookie) {
                 try {
