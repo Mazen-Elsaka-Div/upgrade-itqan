@@ -70,6 +70,9 @@ export function ThemeEditor({ initialTheme }: { initialTheme: ThemeConfig }) {
       "--sec": c.secondary,
       "--secf": c.secondaryForeground,
       "--rad": theme.radius,
+      "--acad": c.academyPrimary,
+      "--maint-bg": c.maintenanceBg,
+      "--maint-gold": c.maintenanceGold,
       fontFamily: THEME_FONTS[theme.font]?.stack,
     } as React.CSSProperties
   }, [theme])
@@ -86,8 +89,12 @@ export function ThemeEditor({ initialTheme }: { initialTheme: ThemeConfig }) {
       })
       if (res.ok) {
         setSaved(true)
-        setTimeout(() => setSaved(false), 3000)
-        router.refresh()
+        // Hard reload so the Server Component (ThemeStyleInjector) re-runs and
+        // injects the new CSS variables — router.refresh() alone can hit a
+        // stale serverless cache and show the old theme.
+        setTimeout(() => {
+          window.location.reload()
+        }, 800)
       }
     } finally {
       setSaving(false)
@@ -271,6 +278,7 @@ export function ThemeEditor({ initialTheme }: { initialTheme: ThemeConfig }) {
                     زر محدّد
                   </button>
                 </div>
+                {/* Main palette swatches */}
                 <div className="flex gap-1.5 pt-1">
                   {(["primary", "accent", "secondary", "background", "foreground"] as (keyof ThemeColors)[]).map((k) => (
                     <span
@@ -280,6 +288,25 @@ export function ThemeEditor({ initialTheme }: { initialTheme: ThemeConfig }) {
                       className="h-7 flex-1 rounded-md border border-black/10"
                     />
                   ))}
+                </div>
+                {/* Academy & maintenance swatches */}
+                <div className="flex gap-2 pt-1 items-center">
+                  <span className="text-xs opacity-60 shrink-0">واجهات خاصة:</span>
+                  <span
+                    title="لون الأكاديمية"
+                    style={{ background: "var(--acad)" }}
+                    className="h-6 flex-1 rounded-md border border-black/10"
+                  />
+                  <span
+                    title="خلفية الصيانة"
+                    style={{ background: "var(--maint-bg)" }}
+                    className="h-6 flex-1 rounded-md border border-black/10"
+                  />
+                  <span
+                    title="الذهبي للصيانة"
+                    style={{ background: "var(--maint-gold)" }}
+                    className="h-6 flex-1 rounded-md border border-black/10"
+                  />
                 </div>
               </div>
             </div>
