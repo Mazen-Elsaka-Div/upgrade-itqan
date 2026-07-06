@@ -29,6 +29,7 @@ export default async function AcademyAdminLayout({
       role="academy_admin"
       showModeSwitcher={true}
       libraryRole={session.role}
+      adminMode="academy"
     >
       {children}
       <Toaster richColors position="top-center" />

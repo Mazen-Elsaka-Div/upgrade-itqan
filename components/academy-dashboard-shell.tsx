@@ -9,6 +9,7 @@ import { LanguageSwitcher } from '@/components/language-switcher'
 import { NotificationDropdown } from '@/components/notification-dropdown'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { ModeSwitcher } from '@/components/mode-switcher'
+import { AdminRoleSwitcher } from '@/components/admin/admin-role-switcher'
 import {
   LayoutDashboard, BookOpen, Calendar, Bell, User, LogOut,
   Menu, X, Users, Settings, Trophy, MessageSquare, ClipboardList,
@@ -298,6 +299,7 @@ interface AcademyDashboardShellProps {
   headerTitle?: string
   showModeSwitcher?: boolean
   libraryRole?: string | null
+  adminMode?: 'super' | 'maqraa' | 'academy'
 }
 
 export function AcademyDashboardShell({
@@ -305,7 +307,8 @@ export function AcademyDashboardShell({
   children,
   headerTitle,
   showModeSwitcher = true,
-  libraryRole = null
+  libraryRole = null,
+  adminMode = 'academy'
 }: AcademyDashboardShellProps) {
   const pathname = usePathname()
   const router = useRouter()
@@ -462,28 +465,39 @@ export function AcademyDashboardShell({
         'bg-card border-l border-border',
         collapsed ? 'w-72 lg:w-20' : 'w-72'
       )}>
-        {/* Logo */}
+        {/* Top bar — AdminRoleSwitcher for admins, logo for others */}
         <div className={cn(
-          'flex items-center border-b border-border relative overflow-hidden shrink-0 bg-gradient-to-l from-[#1E3A5F]/5 to-transparent',
-          collapsed ? 'lg:justify-center lg:px-2 justify-center' : 'justify-center',
-          (role === 'academy_student' || role === 'parent') ? 'h-20' : 'h-16'
+          'flex items-center gap-2 border-b border-border relative overflow-hidden shrink-0 min-h-16 py-3',
+          'bg-gradient-to-l from-[#1E3A5F]/5 to-transparent',
+          collapsed ? 'lg:flex-col lg:justify-center lg:gap-2 lg:px-2 px-4' : 'px-4',
+          showModeSwitcher && libraryRole === 'admin' ? 'justify-between' : 'justify-center'
         )}>
-          <Link href="/" className={cn('block text-center w-full', collapsed ? 'px-0' : 'px-4')}>
-            <span className={cn(
-              "font-black text-primary leading-none tracking-tight",
-              collapsed ? "text-2xl" : "text-3xl"
-            )}>
-              {collapsed ? "إ" : "إتقان"}
-            </span>
-          </Link>
+          {/* AdminRoleSwitcher — only for super admin, mirrors dashboard-shell exactly */}
+          {showModeSwitcher && libraryRole === 'admin' && (
+            <div className={cn('min-w-0', collapsed ? 'lg:w-full' : 'flex-1')}>
+              <AdminRoleSwitcher currentMode={adminMode ?? 'academy'} collapsed={collapsed} />
+            </div>
+          )}
 
-          {/* Desktop collapse toggle */}
+          {/* Logo — shown for non-admin roles only */}
+          {!(showModeSwitcher && libraryRole === 'admin') && (
+            <Link href="/" className={cn('block text-center w-full', collapsed ? 'px-0' : 'px-4')}>
+              <span className={cn(
+                "font-black text-primary leading-none tracking-tight",
+                collapsed ? "text-2xl" : "text-3xl"
+              )}>
+                {collapsed ? "إ" : "إتقان"}
+              </span>
+            </Link>
+          )}
+
+          {/* Desktop collapse toggle — after switcher in DOM so renders to its left */}
           <button
             type="button"
             onClick={toggleCollapsed}
             className={cn(
-              'hidden lg:flex items-center justify-center p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors',
-              collapsed ? 'absolute top-2 left-1/2 -translate-x-1/2' : 'absolute top-2 left-2'
+              'hidden lg:flex items-center justify-center p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0',
+              !(showModeSwitcher && libraryRole === 'admin') && (collapsed ? 'absolute top-2 left-1/2 -translate-x-1/2' : 'absolute top-2 left-2')
             )}
             aria-label={collapsed ? (t.shell?.expandSidebar || 'Expand sidebar') : (t.shell?.collapseSidebar || 'Collapse sidebar')}
             title={collapsed ? (t.shell?.expandSidebar || 'Expand sidebar') : (t.shell?.collapseSidebar || 'Collapse sidebar')}
@@ -492,7 +506,7 @@ export function AcademyDashboardShell({
           </button>
 
           <button
-            className="lg:hidden p-1"
+            className="lg:hidden p-1 shrink-0"
             onClick={() => setSidebarOpen(false)}
             aria-label="close"
           >
@@ -500,7 +514,8 @@ export function AcademyDashboardShell({
           </button>
         </div>
 
-        {/* Academy Badge + Mode Switcher */}
+        {/* Academy Badge — only for non-admin roles */}
+        {!(showModeSwitcher && libraryRole === 'admin') && (
         <div className={cn('border-b border-border', collapsed ? 'lg:px-2 lg:py-2 px-4 py-3' : 'px-4 py-3')}>
           <div className={cn(
             'rounded-lg bg-[#1E3A5F]/10 text-[#1E3A5F] dark:text-[#7faad6]',
@@ -510,20 +525,8 @@ export function AcademyDashboardShell({
             <span className={cn('font-semibold text-sm', collapsed && 'lg:hidden')}>{t.academy?.title || 'الأكاديمية'}</span>
             <Sparkles className={cn('w-4 h-4 mr-auto', collapsed && 'lg:hidden')} />
           </div>
-
-          {/* Mode Switcher — only shown when user has access to both modes */}
-          {showModeSwitcher && libraryRole && (user?.has_quran_access || user?.has_academy_access) && (
-            <div className={cn('mt-2', collapsed && 'lg:hidden')}>
-              <ModeSwitcher
-                currentMode="academy"
-                userRole={libraryRole}
-                academyRole={role}
-                hasQuranAccess={user?.has_quran_access}
-                hasAcademyAccess={user?.has_academy_access}
-              />
-            </div>
-          )}
         </div>
+        )}
 
         {/* Navigation */}
         <nav className={cn('flex-1 overflow-y-auto overflow-x-hidden py-6 space-y-1', collapsed ? 'lg:px-2 px-4' : 'px-4')}>
