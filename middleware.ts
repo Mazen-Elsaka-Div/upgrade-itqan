@@ -101,7 +101,8 @@ export default async function middleware(req: NextRequest) {
         return NextResponse.next()
     }
 
-    // Allow API public paths
+    // Allow API public paths (INCLUDING /api/internal/*)
+    // MUST check BEFORE rejecting unauthenticated API requests (line ~120)
     if (apiPublicPaths.some((p) => pathname.startsWith(p))) {
         return NextResponse.next()
     }
