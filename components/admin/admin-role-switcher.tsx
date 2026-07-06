@@ -42,9 +42,16 @@ const MODES: {
   },
 ]
 
+// The canonical home page for each mode — where to land after switching.
+const MODE_HOME: Record<Mode, string> = {
+  super: "/admin",
+  maqraa: "/admin",
+  academy: "/academy/admin",
+}
+
 // Segmented control that lets a Super Admin switch the lens they operate
-// the dashboard through. Persisted via /api/admin/mode (POST) so the whole
-// shell re-reads it on router.refresh().
+// the dashboard through. Persisted via /api/admin/mode (POST) then navigates
+// to the canonical home page of the chosen mode.
 export function AdminRoleSwitcher({
   currentMode,
   collapsed = false,
@@ -59,12 +66,16 @@ export function AdminRoleSwitcher({
     if (mode === currentMode || pending) return
     setPending(mode)
     try {
-      await fetch("/api/admin/mode", {
+      const res = await fetch("/api/admin/mode", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ mode }),
       })
-      router.refresh()
+      if (res.ok) {
+        // Navigate to the canonical home for this mode instead of refreshing
+        // the current page (which may not exist under the new mode).
+        router.push(MODE_HOME[mode])
+      }
     } finally {
       setPending(null)
     }
