@@ -63,18 +63,19 @@ export default async function MaintenancePage() {
           <div style={{ textAlign: "center" }}>
             <p
               style={{
-                fontSize: "0.875rem",
+                fontSize: "1.1rem",
                 letterSpacing: "0.2em",
                 color: "#D4A843",
                 marginBottom: "0.5rem",
                 opacity: 0.8,
+                fontWeight: 600,
               }}
             >
               منصة
             </p>
             <h1
               style={{
-                fontSize: "clamp(2rem, 6vw, 3.5rem)",
+                fontSize: "clamp(2.5rem, 8vw, 4.5rem)",
                 fontWeight: 700,
                 color: "#F5F0E8",
                 margin: 0,
@@ -137,10 +138,10 @@ export default async function MaintenancePage() {
 
             <h2
               style={{
-                fontSize: "clamp(1.4rem, 4vw, 2rem)",
+                fontSize: "clamp(1.8rem, 5vw, 2.5rem)",
                 fontWeight: 700,
                 color: "#F5F0E8",
-                margin: "0 0 1.25rem",
+                margin: "0 0 1.5rem",
                 lineHeight: 1.4,
               }}
             >
@@ -149,10 +150,11 @@ export default async function MaintenancePage() {
 
             <p
               style={{
-                fontSize: "clamp(1rem, 2.5vw, 1.2rem)",
+                fontSize: "clamp(1.15rem, 3vw, 1.5rem)",
                 color: "rgba(245,240,232,0.75)",
-                lineHeight: 1.8,
+                lineHeight: 1.9,
                 margin: 0,
+                fontWeight: 500,
               }}
             >
               {message}
@@ -175,10 +177,11 @@ export default async function MaintenancePage() {
           {/* Bottom caption */}
           <p
             style={{
-              fontSize: "0.8rem",
+              fontSize: "0.95rem",
               color: "rgba(245,240,232,0.4)",
               margin: 0,
               textAlign: "center",
+              fontWeight: 500,
             }}
           >
             جزاكم الله خيراً على صبركم
@@ -188,11 +191,13 @@ export default async function MaintenancePage() {
           <a
             href="/login"
             style={{
-              fontSize: "0.75rem",
-              color: "rgba(212,168,67,0.55)",
+              fontSize: "0.9rem",
+              color: "rgba(212,168,67,0.7)",
               textDecoration: "none",
-              borderBottom: "1px dotted rgba(212,168,67,0.4)",
-              paddingBottom: "1px",
+              borderBottom: "1px solid rgba(212,168,67,0.5)",
+              paddingBottom: "2px",
+              fontWeight: 500,
+              display: "inline-block",
             }}
           >
             دخول المشرفين
