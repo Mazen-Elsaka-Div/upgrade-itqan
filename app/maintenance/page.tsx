@@ -17,7 +17,7 @@ export default async function MaintenancePage() {
         inset: 0,
         zIndex: 9999,
         overflow: "auto",
-        backgroundColor: "#0B3D2E",
+        backgroundColor: "var(--maintenance-bg)",
         fontFamily: "'Amiri', 'Scheherazade New', 'Noto Naskh Arabic', serif",
       }}
     >
@@ -28,7 +28,8 @@ export default async function MaintenancePage() {
             position: "fixed",
             inset: 0,
             opacity: 0.07,
-            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='%23D4A843'%3E%3Cpolygon points='40,0 47,28 74,28 52,46 60,74 40,58 20,74 28,46 6,28 33,28'/%3E%3C/g%3E%3C/svg%3E")`,
+            backgroundColor: "var(--maintenance-gold)",
+            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='currentColor'%3E%3Cpolygon points='40,0 47,28 74,28 52,46 60,74 40,58 20,74 28,46 6,28 33,28'/%3E%3C/g%3E%3C/svg%3E")`,
             backgroundSize: "80px 80px",
           }}
         />
@@ -42,7 +43,7 @@ export default async function MaintenancePage() {
             left: 0,
             right: 0,
             height: "4px",
-            background: "linear-gradient(90deg, transparent, #D4A843, #F5D78E, #D4A843, transparent)",
+            background: `linear-gradient(90deg, transparent, var(--maintenance-gold), var(--maintenance-gold-light), var(--maintenance-gold), transparent)`,
           }}
         />
 
@@ -65,7 +66,7 @@ export default async function MaintenancePage() {
               style={{
                 fontSize: "1.1rem",
                 letterSpacing: "0.2em",
-                color: "#D4A843",
+                color: "var(--maintenance-gold)",
                 marginBottom: "0.5rem",
                 opacity: 0.8,
                 fontWeight: 600,
@@ -77,7 +78,7 @@ export default async function MaintenancePage() {
               style={{
                 fontSize: "clamp(2.5rem, 8vw, 4.5rem)",
                 fontWeight: 700,
-                color: "#F5F0E8",
+                color: "var(--maintenance-cream)",
                 margin: 0,
                 lineHeight: 1.2,
               }}
@@ -90,7 +91,7 @@ export default async function MaintenancePage() {
                 margin: "1rem auto 0",
                 width: "80px",
                 height: "2px",
-                background: "linear-gradient(90deg, transparent, #D4A843, transparent)",
+                background: `linear-gradient(90deg, transparent, var(--maintenance-gold), transparent)`,
               }}
             />
           </div>
@@ -128,7 +129,7 @@ export default async function MaintenancePage() {
               aria-hidden="true"
               style={{
                 fontSize: "1.5rem",
-                color: "#D4A843",
+                color: "var(--maintenance-gold)",
                 margin: "0 0 1rem",
                 opacity: 0.6,
               }}
@@ -140,7 +141,7 @@ export default async function MaintenancePage() {
               style={{
                 fontSize: "clamp(1.8rem, 5vw, 2.5rem)",
                 fontWeight: 700,
-                color: "#F5F0E8",
+                color: "var(--maintenance-cream)",
                 margin: "0 0 1.5rem",
                 lineHeight: 1.4,
               }}
@@ -165,7 +166,7 @@ export default async function MaintenancePage() {
               aria-hidden="true"
               style={{
                 fontSize: "1.5rem",
-                color: "#D4A843",
+                color: "var(--maintenance-gold)",
                 margin: "1.25rem 0 0",
                 opacity: 0.6,
               }}
@@ -192,9 +193,9 @@ export default async function MaintenancePage() {
             href="/login"
             style={{
               fontSize: "1.1rem",
-              color: "rgba(212,168,67,0.7)",
+              color: `color-mix(in srgb, var(--maintenance-gold) 70%, transparent)`,
               textDecoration: "none",
-              borderBottom: "1px solid rgba(212,168,67,0.5)",
+              borderBottom: `1px solid color-mix(in srgb, var(--maintenance-gold) 50%, transparent)`,
               paddingBottom: "3px",
               fontWeight: 500,
               display: "inline-block",
@@ -213,7 +214,7 @@ export default async function MaintenancePage() {
             left: 0,
             right: 0,
             height: "4px",
-            background: "linear-gradient(90deg, transparent, #D4A843, #F5D78E, #D4A843, transparent)",
+            background: `linear-gradient(90deg, transparent, var(--maintenance-gold), var(--maintenance-gold-light), var(--maintenance-gold), transparent)`,
           }}
         />
     </div>
