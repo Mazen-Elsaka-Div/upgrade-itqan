@@ -10,15 +10,17 @@ export default async function MaintenancePage() {
   )
 
   return (
-    <html lang="ar" dir="rtl">
-      <body
-        style={{
-          margin: 0,
-          padding: 0,
-          backgroundColor: "#0B3D2E",
-          fontFamily: "'Amiri', 'Scheherazade New', 'Noto Naskh Arabic', serif",
-        }}
-      >
+    <div
+      dir="rtl"
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 9999,
+        overflow: "auto",
+        backgroundColor: "#0B3D2E",
+        fontFamily: "'Amiri', 'Scheherazade New', 'Noto Naskh Arabic', serif",
+      }}
+    >
         {/* Geometric SVG background pattern */}
         <div
           aria-hidden="true"
@@ -184,7 +186,7 @@ export default async function MaintenancePage() {
 
           {/* Admin login link — lets an administrator sign in to disable maintenance */}
           <a
-            href="/login-admin"
+            href="/login"
             style={{
               fontSize: "0.75rem",
               color: "rgba(212,168,67,0.55)",
@@ -209,7 +211,6 @@ export default async function MaintenancePage() {
             background: "linear-gradient(90deg, transparent, #D4A843, #F5D78E, #D4A843, transparent)",
           }}
         />
-      </body>
-    </html>
+    </div>
   )
 }

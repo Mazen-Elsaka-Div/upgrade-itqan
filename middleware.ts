@@ -28,14 +28,12 @@ async function getMaintenanceStatus(req: NextRequest): Promise<{ enabled: boolea
     if (maintenanceCache && maintenanceCache.expiry > now) {
         return { enabled: maintenanceCache.enabled, message: maintenanceCache.message }
     }
-    // Build an absolute origin that works behind Vercel's proxy. Prefer forwarded
-    // headers (set by the platform) and fall back to the parsed request origin.
-    const forwardedHost = req.headers.get("x-forwarded-host") || req.headers.get("host")
-    const forwardedProto = req.headers.get("x-forwarded-proto") || "https"
-    const baseUrl = forwardedHost ? `${forwardedProto}://${forwardedHost}` : req.nextUrl.origin
+    // Resolve the internal API URL against the incoming request. This mirrors the
+    // proven /api/internal/user-status self-fetch used elsewhere in this middleware
+    // and works correctly behind Vercel's proxy.
     try {
         const res = await Promise.race([
-            fetch(`${baseUrl}/api/internal/maintenance-status`, { cache: "no-store" }),
+            fetch(new URL("/api/internal/maintenance-status", req.url), { cache: "no-store" }),
             new Promise<never>((_, reject) => setTimeout(() => reject(new Error("timeout")), 2000)),
         ])
         const data = await (res as Response).json()
@@ -63,10 +61,12 @@ export default async function middleware(req: NextRequest) {
     // ── Maintenance Mode ─────────────────────────────────────────────────────
     // Check BEFORE everything else. Only admins can pass through.
     // Paths that must ALWAYS work during maintenance so an admin can log in and
-    // disable it: the maintenance page itself, admin login, and auth/internal APIs.
+    // disable it: the maintenance page itself, the login page, and auth/internal
+    // APIs. Reaching /login is harmless for non-admins — after logging in they are
+    // still bounced to /maintenance since they lack an admin role.
     const maintenanceAllowlist =
         pathname === "/maintenance" ||
-        pathname === "/login-admin" ||
+        pathname === "/login" ||
         pathname.startsWith("/api/internal") ||
         pathname.startsWith("/api/auth")
     if (!maintenanceAllowlist) {
