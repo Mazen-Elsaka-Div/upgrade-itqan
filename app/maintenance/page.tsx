@@ -191,11 +191,11 @@ export default async function MaintenancePage() {
           <a
             href="/login"
             style={{
-              fontSize: "0.9rem",
+              fontSize: "1.1rem",
               color: "rgba(212,168,67,0.7)",
               textDecoration: "none",
               borderBottom: "1px solid rgba(212,168,67,0.5)",
-              paddingBottom: "2px",
+              paddingBottom: "3px",
               fontWeight: 500,
               display: "inline-block",
             }}
