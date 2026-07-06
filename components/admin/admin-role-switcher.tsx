@@ -1,10 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { ShieldCheck, GraduationCap, Mic, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { switchAdminMode } from "@/lib/admin/switch-mode-action"
 
 type Mode = "super" | "maqraa" | "academy"
 
@@ -42,16 +42,9 @@ const MODES: {
   },
 ]
 
-// The canonical home page for each mode — where to land after switching.
-const MODE_HOME: Record<Mode, string> = {
-  super: "/admin",
-  maqraa: "/admin",
-  academy: "/academy/admin",
-}
-
 // Segmented control that lets a Super Admin switch the lens they operate
-// the dashboard through. Persisted via /api/admin/mode (POST) then navigates
-// to the canonical home page of the chosen mode.
+// the dashboard through. Uses Server Action for instant mode switch + redirect
+// without network latency or router.push() overhead.
 export function AdminRoleSwitcher({
   currentMode,
   collapsed = false,
@@ -59,24 +52,16 @@ export function AdminRoleSwitcher({
   currentMode: Mode
   collapsed?: boolean
 }) {
-  const router = useRouter()
   const [pending, setPending] = useState<Mode | null>(null)
 
   async function pickMode(mode: Mode) {
     if (mode === currentMode || pending) return
     setPending(mode)
     try {
-      const res = await fetch("/api/admin/mode", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mode }),
-      })
-      if (res.ok) {
-        // Navigate to the canonical home for this mode instead of refreshing
-        // the current page (which may not exist under the new mode).
-        router.push(MODE_HOME[mode])
-      }
-    } finally {
+      // Server Action handles mode persistence + atomic redirect to mode home
+      await switchAdminMode(mode)
+    } catch (err) {
+      console.error("Failed to switch mode:", err)
       setPending(null)
     }
   }
