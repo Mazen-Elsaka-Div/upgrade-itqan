@@ -20,7 +20,12 @@ export type ThemeColors = {
 }
 
 export type ThemeConfig = {
-  colors: ThemeColors
+  light: {
+    colors: ThemeColors
+  }
+  dark: {
+    colors: ThemeColors
+  }
   radius: string // e.g. "0.625rem"
   font: ThemeFontId
 }
@@ -70,21 +75,42 @@ export const THEME_FONTS: Record<
   },
 }
 
-// Defaults mirror the values shipped in app/globals.css (:root).
+// Defaults mirror the values shipped in app/globals.css (:root for light mode).
+// Dark mode colors are automatically derived but can be overridden per color.
+const DEFAULT_COLORS: ThemeColors = {
+  primary: "#0D5A3C",
+  primaryForeground: "#FFFFFF",
+  secondary: "#F5F5F0",
+  secondaryForeground: "#0D5A3C",
+  accent: "#C9A962",
+  accentForeground: "#0D1512",
+  background: "#FAFAF8",
+  foreground: "#0D1512",
+  ring: "#0D5A3C",
+  academyPrimary: "#1E3A5F",
+  maintenanceBg: "#0B3D2E",
+  maintenanceGold: "#D4A843",
+}
+
 export const DEFAULT_THEME: ThemeConfig = {
-  colors: {
-    primary: "#0D5A3C",
-    primaryForeground: "#FFFFFF",
-    secondary: "#F5F5F0",
-    secondaryForeground: "#0D5A3C",
-    accent: "#C9A962",
-    accentForeground: "#0D1512",
-    background: "#FAFAF8",
-    foreground: "#0D1512",
-    ring: "#0D5A3C",
-    academyPrimary: "#1E3A5F",
-    maintenanceBg: "#0B3D2E",
-    maintenanceGold: "#D4A843",
+  light: {
+    colors: DEFAULT_COLORS,
+  },
+  dark: {
+    colors: {
+      primary: "#3B6BA5",
+      primaryForeground: "#F0F4F8",
+      secondary: "#1F2937",
+      secondaryForeground: "#3B6BA5",
+      accent: "#D4A843",
+      accentForeground: "#F0F4F8",
+      background: "#0F172A",
+      foreground: "#F0F4F8",
+      ring: "#3B6BA5",
+      academyPrimary: "#3B6BA5",
+      maintenanceBg: "#0B3D2E",
+      maintenanceGold: "#D4A843",
+    },
   },
   radius: "0.625rem",
   font: "cairo",
@@ -96,69 +122,83 @@ function safeHex(value: unknown, fallback: string): string {
   return typeof value === "string" && HEX_RE.test(value.trim()) ? value.trim() : fallback
 }
 
+// Helper to normalize individual color set
+function normalizeColors(c: any, d: ThemeColors): ThemeColors {
+  return {
+    primary: safeHex(c.primary, d.primary),
+    primaryForeground: safeHex(c.primaryForeground, d.primaryForeground),
+    secondary: safeHex(c.secondary, d.secondary),
+    secondaryForeground: safeHex(c.secondaryForeground, d.secondaryForeground),
+    accent: safeHex(c.accent, d.accent),
+    accentForeground: safeHex(c.accentForeground, d.accentForeground),
+    background: safeHex(c.background, d.background),
+    foreground: safeHex(c.foreground, d.foreground),
+    ring: safeHex(c.ring, d.ring),
+    academyPrimary: safeHex(c.academyPrimary, d.academyPrimary),
+    maintenanceBg: safeHex(c.maintenanceBg, d.maintenanceBg),
+    maintenanceGold: safeHex(c.maintenanceGold, d.maintenanceGold),
+  }
+}
+
 // Coerce arbitrary stored/incoming data into a valid ThemeConfig so a malformed
 // row can never inject broken CSS or crash a render.
 export function normalizeTheme(raw: any): ThemeConfig {
-  const c = raw?.colors ?? {}
-  const d = DEFAULT_THEME.colors
   const font: ThemeFontId = THEME_FONTS[raw?.font as ThemeFontId] ? raw.font : "cairo"
   const radius =
     typeof raw?.radius === "string" && /^[0-9.]+rem$/.test(raw.radius.trim())
       ? raw.radius.trim()
       : DEFAULT_THEME.radius
+
   return {
-    colors: {
-      primary: safeHex(c.primary, d.primary),
-      primaryForeground: safeHex(c.primaryForeground, d.primaryForeground),
-      secondary: safeHex(c.secondary, d.secondary),
-      secondaryForeground: safeHex(c.secondaryForeground, d.secondaryForeground),
-      accent: safeHex(c.accent, d.accent),
-      accentForeground: safeHex(c.accentForeground, d.accentForeground),
-      background: safeHex(c.background, d.background),
-      foreground: safeHex(c.foreground, d.foreground),
-      ring: safeHex(c.ring, d.ring),
-      academyPrimary: safeHex(c.academyPrimary, d.academyPrimary),
-      maintenanceBg: safeHex(c.maintenanceBg, d.maintenanceBg),
-      maintenanceGold: safeHex(c.maintenanceGold, d.maintenanceGold),
+    light: {
+      colors: normalizeColors(raw?.light?.colors ?? {}, DEFAULT_THEME.light.colors),
+    },
+    dark: {
+      colors: normalizeColors(raw?.dark?.colors ?? {}, DEFAULT_THEME.dark.colors),
     },
     radius,
     font,
   }
 }
 
-// Build the CSS that overrides the relevant root variables. Returns null when
-// the theme is effectively the default (no overrides needed) to avoid emitting
-// dead markup. `--font-cairo` is overridden because globals.css resolves the
-// `font-sans` utility through it.
+// Build the CSS that overrides the relevant root variables for both light and dark modes.
 export function buildThemeCss(theme: ThemeConfig): string {
-  const { colors: cc, radius, font } = theme
+  const { light, dark, radius, font } = theme
+  const lc = light.colors
+  const dc = dark.colors
   const stack = THEME_FONTS[font]?.stack ?? THEME_FONTS.cairo.stack
-  // Font + radius are mode-agnostic, so they apply in both light and dark.
-  // The custom color palette is a LIGHT palette only — it must be scoped to
-  // `:root:not(.dark)` so it never clobbers the dark-mode tokens defined in
-  // globals.css (`.dark { ... }`). Injecting colors into a plain `:root` block
-  // overrode dark mode (the injected style loads after globals.css), producing
-  // broken half-light/half-dark surfaces in admin dashboards.
+
   return `:root{
 --radius:${radius};
 --font-cairo:${stack};
---academy-primary:${cc.academyPrimary};
---academy-primary-light:color-mix(in srgb,${cc.academyPrimary} 80%,#ffffff);
---academy-primary-dark:color-mix(in srgb,${cc.academyPrimary} 80%,#000000);
---maintenance-bg:${cc.maintenanceBg};
---maintenance-gold:${cc.maintenanceGold};
---maintenance-gold-light:color-mix(in srgb,${cc.maintenanceGold} 60%,#ffffff);
---maintenance-cream:color-mix(in srgb,${cc.maintenanceGold} 10%,#ffffff);
+--academy-primary:${lc.academyPrimary};
+--academy-primary-light:color-mix(in srgb,${lc.academyPrimary} 80%,#ffffff);
+--academy-primary-dark:color-mix(in srgb,${lc.academyPrimary} 80%,#000000);
+--maintenance-bg:${lc.maintenanceBg};
+--maintenance-gold:${lc.maintenanceGold};
+--maintenance-gold-light:color-mix(in srgb,${lc.maintenanceGold} 60%,#ffffff);
+--maintenance-cream:color-mix(in srgb,${lc.maintenanceGold} 10%,#ffffff);
 }
 :root:not(.dark){
---primary:${cc.primary};
---primary-foreground:${cc.primaryForeground};
---secondary:${cc.secondary};
---secondary-foreground:${cc.secondaryForeground};
---accent:${cc.accent};
---accent-foreground:${cc.accentForeground};
---background:${cc.background};
---foreground:${cc.foreground};
---ring:${cc.ring};
+--primary:${lc.primary};
+--primary-foreground:${lc.primaryForeground};
+--secondary:${lc.secondary};
+--secondary-foreground:${lc.secondaryForeground};
+--accent:${lc.accent};
+--accent-foreground:${lc.accentForeground};
+--background:${lc.background};
+--foreground:${lc.foreground};
+--ring:${lc.ring};
+}
+.dark{
+--primary:${dc.primary};
+--primary-foreground:${dc.primaryForeground};
+--secondary:${dc.secondary};
+--secondary-foreground:${dc.secondaryForeground};
+--accent:${dc.accent};
+--accent-foreground:${dc.accentForeground};
+--background:${dc.background};
+--foreground:${dc.foreground};
+--ring:${dc.ring};
 }`
 }

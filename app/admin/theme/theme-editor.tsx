@@ -52,14 +52,23 @@ export function ThemeEditor({ initialTheme }: { initialTheme: ThemeConfig }) {
   const [theme, setTheme] = useState<ThemeConfig>(initialTheme)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [mode, setMode] = useState<'light' | 'dark'>('light')
 
   const setColor = (key: keyof ThemeColors, value: string) =>
-    setTheme((t) => ({ ...t, colors: { ...t.colors, [key]: value } }))
+    setTheme((t) => ({
+      ...t,
+      [mode]: {
+        colors: {
+          ...t[mode].colors,
+          [key]: value,
+        },
+      },
+    }))
 
   // Inline CSS-var style for the live preview box only — keeps the surrounding
   // admin shell stable while still showing exactly how the palette looks.
   const previewStyle = useMemo(() => {
-    const c = theme.colors
+    const c = theme[mode].colors
     return {
       "--p": c.primary,
       "--pf": c.primaryForeground,
@@ -75,7 +84,7 @@ export function ThemeEditor({ initialTheme }: { initialTheme: ThemeConfig }) {
       "--maint-gold": c.maintenanceGold,
       fontFamily: THEME_FONTS[theme.font]?.stack,
     } as React.CSSProperties
-  }, [theme])
+  }, [theme, mode])
 
   const fontHref = THEME_FONTS[theme.font]?.href
 
@@ -108,27 +117,49 @@ export function ThemeEditor({ initialTheme }: { initialTheme: ThemeConfig }) {
       {fontHref ? <link rel="stylesheet" href={fontHref} /> : null}
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary shrink-0">
-            <Palette className="h-6 w-6" />
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary shrink-0">
+              <Palette className="h-6 w-6" />
+            </div>
+            <div>
+              <h1 className="text-xl sm:text-2xl font-bold text-foreground">محرّر التصميم والألوان</h1>
+              <p className="text-sm text-muted-foreground text-pretty">
+                تحكّم في ألوان المنصة والخط ودرجة الاستدارة. يُطبَّق على الموقع كاملاً فور الحفظ.
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-foreground">محرّر التصميم والألوان</h1>
-            <p className="text-sm text-muted-foreground text-pretty">
-              تحكّم في ألوان المنصة والخط ودرجة الاستدارة. يُطبَّق على الموقع كاملاً فور الحفظ.
-            </p>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={handleReset} className="gap-2">
+              <RotateCcw className="h-4 w-4" />
+              استعادة الافتراضي
+            </Button>
+            <Button onClick={handleSave} disabled={saving} className="gap-2">
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : saved ? <CheckCircle className="h-4 w-4" /> : <Save className="h-4 w-4" />}
+              {saved ? "تم الحفظ" : "حفظ التغييرات"}
+            </Button>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={handleReset} className="gap-2">
-            <RotateCcw className="h-4 w-4" />
-            استعادة الافتراضي
-          </Button>
-          <Button onClick={handleSave} disabled={saving} className="gap-2">
-            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : saved ? <CheckCircle className="h-4 w-4" /> : <Save className="h-4 w-4" />}
-            {saved ? "تم الحفظ" : "حفظ التغييرات"}
-          </Button>
+
+        {/* Light/Dark Mode Toggle */}
+        <div className="flex items-center gap-3 bg-muted rounded-lg p-3 w-fit">
+          <span className="text-sm font-medium text-muted-foreground">اختر الوضع:</span>
+          <div className="flex gap-1 bg-background rounded p-1">
+            {(['light', 'dark'] as const).map((m) => (
+              <button
+                key={m}
+                onClick={() => setMode(m)}
+                className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
+                  mode === m
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {m === 'light' ? '☀️ فاتح' : '🌙 داكن'}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
