@@ -179,12 +179,12 @@ export function ThemeEditor({ initialTheme }: { initialTheme: ThemeConfig }) {
                     <input
                       type="color"
                       aria-label={f.labelAr}
-                      value={theme.colors[f.key]}
+                      value={theme[mode].colors[f.key]}
                       onChange={(e) => setColor(f.key, e.target.value)}
                       className="h-10 w-12 shrink-0 cursor-pointer rounded-md border border-border bg-transparent p-1"
                     />
                     <Input
-                      value={theme.colors[f.key]}
+                      value={theme[mode].colors[f.key]}
                       onChange={(e) => setColor(f.key, e.target.value)}
                       className="font-mono text-sm uppercase"
                       dir="ltr"
@@ -212,12 +212,12 @@ export function ThemeEditor({ initialTheme }: { initialTheme: ThemeConfig }) {
                     <input
                       type="color"
                       aria-label={f.labelAr}
-                      value={theme.colors[f.key]}
+                      value={theme[mode].colors[f.key]}
                       onChange={(e) => setColor(f.key, e.target.value)}
                       className="h-10 w-12 shrink-0 cursor-pointer rounded-md border border-border bg-transparent p-1"
                     />
                     <Input
-                      value={theme.colors[f.key]}
+                      value={theme[mode].colors[f.key]}
                       onChange={(e) => setColor(f.key, e.target.value)}
                       className="font-mono text-sm uppercase"
                       dir="ltr"
@@ -315,7 +315,7 @@ export function ThemeEditor({ initialTheme }: { initialTheme: ThemeConfig }) {
                     <span
                       key={k}
                       title={k}
-                      style={{ background: theme.colors[k] }}
+                      style={{ background: theme[mode].colors[k] }}
                       className="h-7 flex-1 rounded-md border border-black/10"
                     />
                   ))}
