@@ -18,7 +18,7 @@ export default function HeaderNavClient({
   dashboardText: string | null
   userName?: string | null
 }) {
-  const { theme: isDark, setTheme: setTheme } = useTheme()
+  const { theme, setTheme } = useTheme()
   const { locale, t } = useI18n()
   const isAr = locale === "ar"
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -28,7 +28,8 @@ export default function HeaderNavClient({
     setMounted(true)
   }, [])
 
-  const toggleTheme = () => setTheme(isDark === "dark" ? "light" : "dark")
+  const isDark = mounted && theme === "dark"
+  const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark")
 
   const navItems = useMemo(
     () => [
@@ -76,7 +77,7 @@ export default function HeaderNavClient({
             aria-label={t.common?.toggleTheme || "تبديل المظهر"}
             className="p-2 text-hp-navy dark:text-hp-gold transition-colors"
           >
-            {mounted && (isDark === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />)}
+            {mounted && (isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />)}
           </button>
 
           {isLoggedIn && dashboardLink ? (
@@ -111,7 +112,7 @@ export default function HeaderNavClient({
             aria-label={t.common?.toggleTheme || "تبديل المظهر"}
             className="p-2 text-hp-navy dark:text-hp-gold"
           >
-            {mounted && (isDark === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />)}
+            {mounted && (isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />)}
           </button>
           <button
             className="p-2 text-hp-navy dark:text-hp-gold"
