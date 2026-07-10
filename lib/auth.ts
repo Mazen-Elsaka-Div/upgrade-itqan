@@ -1,4 +1,3 @@
-import { cookies } from "next/headers"
 import { SignJWT, jwtVerify } from "jose"
 
 function getJwtSecret() {
@@ -54,6 +53,10 @@ export async function verifyToken(token: string): Promise<JWTPayload | null> {
 }
 
 export async function getSession(): Promise<JWTPayload | null> {
+  // Import cookies only when the function is called (not at module load time)
+  // This avoids issues with Next.js build process when this module is imported
+  // from contexts that aren't Server Components
+  const { cookies } = await import("next/headers")
   const cookieStore = await cookies()
   const token = cookieStore.get("auth-token")?.value
   if (!token) return null
