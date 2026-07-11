@@ -26,6 +26,7 @@ import {
 } from "lucide-react"
 import { useI18n } from "@/lib/i18n/context"
 import { buildHomepageContent, buildHomepageColorVars, asBool, type Locale } from "@/lib/homepage-content"
+import HomepageHeader from "@/components/homepage-header"
 
 /* ============================================================
    ISLAMIC ORNAMENTAL SVG COMPONENTS
@@ -247,7 +248,7 @@ function TestimonialsMarquee({
    ============================================================ */
 
 export default function Home() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
+
   const [scrolled, setScrolled] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [settings, setSettings] = useState<Record<string, any>>({})
@@ -276,8 +277,7 @@ export default function Home() {
     return () => { cancelled = true }
   }, [])
 
-  const isDark = mounted && resolvedTheme === "dark"
-  const toggleTheme = () => setTheme(isDark ? "light" : "dark")
+
 
   // Localized + merged homepage content (defaults match the original copy).
   const c = buildHomepageContent(settings, locale)
@@ -363,131 +363,7 @@ export default function Home() {
         </div>
       )}
       {/* ============ HEADER ============ */}
-      <motion.header
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.7 }}
-        className={`fixed top-0 inset-x-0 z-50 transition-all duration-500 ${
-          scrolled
-            ? "bg-hp-parchment/85 dark:bg-hp-dark/85 backdrop-blur-xl border-b border-hp-ink/10 dark:border-hp-cream/10 py-3"
-            : "bg-transparent py-5"
-        }`}
-      >
-        <div className="container mx-auto px-6 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="relative w-11 h-11">
-              <Logo />
-            </div>
-            <div className="leading-tight">
-              <div className="text-xl font-bold tracking-tight text-hp-navy dark:text-hp-gold" style={{ fontFamily: "var(--font-heading)" }}>
-                {c.brandName}
-              </div>
-              <div className="text-[10px] tracking-[0.2em] text-hp-ink/55 dark:text-hp-cream/55 uppercase">
-                {c.brandTagline}
-              </div>
-            </div>
-          </Link>
-
-          <nav className="hidden lg:flex items-center gap-10">
-            {c.nav.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="text-sm text-hp-ink/70 dark:text-hp-cream/70 hover:text-hp-navy dark:hover:text-hp-gold transition-colors relative group"
-              >
-                {item.label}
-                <span className="absolute -bottom-1.5 right-0 h-px w-0 bg-hp-bronze transition-all duration-500 group-hover:w-full" />
-              </Link>
-            ))}
-          </nav>
-
-          <div className="hidden lg:flex items-center gap-3">
-            <LangButton />
-            <button
-              onClick={toggleTheme}
-              aria-label={t.common.toggleTheme}
-              className="relative w-10 h-10 rounded-full border border-hp-ink/15 dark:border-hp-cream/20 flex items-center justify-center text-hp-navy dark:text-hp-gold hover:border-hp-bronze dark:hover:border-hp-gold transition-all duration-500 hover:scale-105 overflow-hidden"
-            >
-              <AnimatePresence mode="wait" initial={false}>
-                {mounted && (
-                  <motion.span
-                    key={isDark ? "sun" : "moon"}
-                    initial={{ rotate: -90, opacity: 0, scale: 0.6 }}
-                    animate={{ rotate: 0, opacity: 1, scale: 1 }}
-                    exit={{ rotate: 90, opacity: 0, scale: 0.6 }}
-                    transition={{ duration: 0.4 }}
-                    className="absolute inset-0 flex items-center justify-center"
-                  >
-                    {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-                  </motion.span>
-                )}
-              </AnimatePresence>
-            </button>
-            <Link
-              href="/login"
-              className="text-sm text-hp-ink/70 dark:text-hp-cream/70 hover:text-hp-navy dark:hover:text-hp-gold px-4 py-2 transition-colors"
-            >
-              {c.loginText}
-            </Link>
-            <Link
-              href="/register"
-              className="text-sm font-medium px-5 py-2.5 rounded-full bg-hp-navy text-hp-parchment dark:bg-hp-gold dark:text-hp-dark hover:bg-hp-green dark:hover:bg-hp-gold-light transition-all duration-500 shadow-sm hover:shadow-lg"
-            >
-              {c.registerText}
-            </Link>
-          </div>
-
-          <div className="lg:hidden flex items-center gap-1">
-            <LangButton mobile />
-            <button
-              onClick={toggleTheme}
-              aria-label={t.common.toggleTheme}
-              className="p-2 text-hp-navy dark:text-hp-gold"
-            >
-              {mounted && (isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />)}
-            </button>
-            <button
-              className="p-2 text-hp-navy dark:text-hp-gold"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              aria-label={t.common.menu}
-            >
-              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
-        </div>
-
-        <AnimatePresence>
-          {isMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="lg:hidden bg-hp-parchment dark:bg-hp-dark border-t border-hp-ink/10 dark:border-hp-cream/10 overflow-hidden"
-            >
-              <div className="container mx-auto px-6 py-6 space-y-3">
-                {c.nav.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setIsMenuOpen(false)}
-                    className="block py-2 text-hp-ink/75 dark:text-hp-cream/75 hover:text-hp-navy dark:hover:text-hp-gold"
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-                <div className="pt-4 border-t border-hp-ink/10 dark:border-hp-cream/10 flex gap-3">
-                  <Link href="/login" className="flex-1 py-3 text-center border border-hp-navy/20 dark:border-hp-gold/30 dark:text-hp-gold rounded-full">
-                    {c.loginText}
-                  </Link>
-                  <Link href="/register" className="flex-1 py-3 text-center bg-hp-navy text-hp-parchment dark:bg-hp-gold dark:text-hp-dark rounded-full">
-                    {c.registerShort}
-                  </Link>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.header>
+      <HomepageHeader />
 
       {/* ============ HERO ============ */}
       <section ref={heroRef} className="relative min-h-screen flex items-center pt-32 pb-20 overflow-hidden">

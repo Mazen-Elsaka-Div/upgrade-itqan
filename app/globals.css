@@ -97,6 +97,12 @@
   --academy-primary: #1E3A5F;
   --academy-primary-light: #2A4A73;
   --academy-primary-dark: #152C4A;
+  
+  /* Maintenance & New Design Colors */
+  --maintenance-bg: #0B3D2E;
+  --maintenance-gold: #D4A843;
+  --maintenance-gold-light: #F5D78E;
+  --maintenance-cream: #F5F0E8;
 
   /* ===================================================================
      HOMEPAGE (app/page.tsx) — CMS-driven palette.
@@ -182,6 +188,12 @@
   --academy-primary: #3B6BA5;
   --academy-primary-light: #4A7AB8;
   --academy-primary-dark: #2C5A8F;
+  
+  /* Maintenance & New Design Colors (Dark Mode) */
+  --maintenance-bg: #0B3D2E;
+  --maintenance-gold: #D4A843;
+  --maintenance-gold-light: #F5D78E;
+  --maintenance-cream: #F5F0E8;
 }
 
 @theme inline {
@@ -262,6 +274,10 @@
   --color-hp-dark: var(--hp-dark);
   --color-hp-dark-2: var(--hp-dark-2);
   --color-hp-dark-3: var(--hp-dark-3);
+  --color-maintenance-bg: var(--maintenance-bg);
+  --color-maintenance-gold: var(--maintenance-gold);
+  --color-maintenance-gold-light: var(--maintenance-gold-light);
+  --color-maintenance-cream: var(--maintenance-cream);
 }
 
 @layer base {

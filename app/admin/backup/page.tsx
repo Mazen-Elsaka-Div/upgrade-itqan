@@ -2,54 +2,34 @@
 
 import { useState, useEffect, useRef } from 'react'
 import {
-    Database, Download, Trash2, RefreshCcw, Loader2,
-    CheckCircle, AlertTriangle, Archive, Upload,
-    Settings, Clock, FileJson, ShieldCheck, Palette
+    Database, Download, Upload, RefreshCcw, Loader2, CheckCircle,
+    AlertTriangle, Archive, Settings2, Palette,
 } from 'lucide-react'
 import { SettingsSkeleton } from '@/components/ui/skeletons'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Label } from '@/components/ui/label'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { useI18n } from '@/lib/i18n/context'
+import { parseBackup, backupFilename, type BackupKind } from '@/lib/admin/backup'
 
-type Stats = {
-    tables: {
-        users: number
-        recitations: number
-        bookings: number
-        reviews: number
-        notifications: number
-        activity_logs: number
-        page_views: number
-        messages: number
-        announcements: number
-        email_templates: number
-        settings_count: number
-    }
-    lastBackup: string | null
-}
+type Msg = { type: 'success' | 'error'; text: string }
 
 export default function AdminBackupPage() {
-    const [stats, setStats] = useState<Stats | null>(null)
+    const { t } = useI18n()
+    const lang = t.admin
+    const isAr = t.locale === 'ar'
+
+    const [stats, setStats] = useState<any>(null)
     const [loading, setLoading] = useState(true)
-    const [actionLoading, setActionLoading] = useState<string | null>(null)
-    const [messages, setMessages] = useState<{ type: 'success' | 'error', text: string }[]>([])
-    const [exportDialogOpen, setExportDialogOpen] = useState(false)
-    const restoreInputRef = useRef<HTMLInputElement>(null)
-    const settingsRestoreInputRef = useRef<HTMLInputElement>(null)
+    const [busy, setBusy] = useState<string | null>(null)
+    const [messages, setMessages] = useState<Msg[]>([])
 
     const loadStats = async () => {
-        setLoading(true)
         try {
             const res = await fetch('/api/admin/backup', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'stats' })
+                body: JSON.stringify({ action: 'stats' }),
             })
             if (res.ok) setStats(await res.json())
-        } catch {
-            addMsg('error', 'فشل في تحميل إحصائيات قاعدة البيانات')
         } finally {
             setLoading(false)
         }
@@ -57,241 +37,200 @@ export default function AdminBackupPage() {
 
     useEffect(() => { loadStats() }, [])
 
-    const addMsg = (type: 'success' | 'error', text: string) => {
+    const addMsg = (type: Msg['type'], text: string) => {
         setMessages(p => [{ type, text }, ...p].slice(0, 5))
-        setTimeout(() => setMessages(p => p.slice(1)), 6000)
+        setTimeout(() => setMessages(p => p.slice(0, -1)), 6000)
     }
 
-    // ── Export DB Backup ──────────────────────────────────────────────────────
-    const handleExportDB = async () => {
-        setActionLoading('export')
-        try {
-            const res = await fetch('/api/admin/backup', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'export' })
-            })
-            if (!res.ok) {
-                const err = await res.json().catch(() => ({}))
-                throw new Error(err.error ?? 'فشل التصدير')
-            }
-            const blob = await res.blob()
-            const url = URL.createObjectURL(blob)
-            const a = document.createElement('a')
-            a.href = url
-            a.download = `itqaan-db-backup-${new Date().toISOString().split('T')[0]}.json`
-            document.body.appendChild(a)
-            a.click()
-            document.body.removeChild(a)
-            URL.revokeObjectURL(url)
-            addMsg('success', 'تم تصدير النسخة الاحتياطية لقاعدة البيانات بنجاح')
-            await loadStats()
-        } catch (e: any) {
-            addMsg('error', e.message ?? 'فشل في تصدير قاعدة البيانات')
-        } finally {
-            setActionLoading(null)
-        }
+    // Localized label for a detected backup kind.
+    const kindLabel = (kind: BackupKind): string =>
+        kind === 'database' ? lang.bkKindDatabase
+            : kind === 'settings' ? lang.bkKindSettings
+                : lang.bkKindTheme
+
+    // ── Export ────────────────────────────────────────────────────────────────
+    const triggerDownload = (blob: Blob, kind: BackupKind) => {
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = backupFilename(kind)
+        a.click()
+        URL.revokeObjectURL(url)
     }
 
-    // ── Export Settings Backup ────────────────────────────────────────────────
-    const handleExportSettings = async (includeTheme: boolean) => {
-        setExportDialogOpen(false)
-        setActionLoading('export_settings')
+    const handleExport = async (kind: BackupKind) => {
+        setBusy(`export-${kind}`)
         try {
-            const url = `/api/admin/settings/full-export?includeTheme=${includeTheme}`
-            const res = await fetch(url)
-            if (!res.ok) {
-                const err = await res.json().catch(() => ({}))
-                throw new Error(err.error ?? 'فشل تصدير الإعدادات')
-            }
-            const blob = await res.blob()
-            const objectUrl = URL.createObjectURL(blob)
-            const a = document.createElement('a')
-            a.href = objectUrl
-            const suffix = includeTheme ? 'with-theme' : 'settings-only'
-            a.download = `itqan-settings-backup-${suffix}-${new Date().toISOString().split('T')[0]}.json`
-            document.body.appendChild(a)
-            a.click()
-            document.body.removeChild(a)
-            URL.revokeObjectURL(objectUrl)
-            addMsg('success', `تم تصدير نسخة الإعدادات${includeTheme ? ' (مع المظهر)' : ''} بنجاح`)
-        } catch (e: any) {
-            addMsg('error', e.message ?? 'فشل في تصدير الإعدادات')
-        } finally {
-            setActionLoading(null)
-        }
-    }
-
-    // ── Restore DB Backup ─────────────────────────────────────────────────────
-    const handleRestoreDB = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0]
-        if (!file) return
-        if (!confirm('تحذير: سيتم دمج بيانات ملف النسخة الاحتياطية مع قاعدة البيانات الحالية. هل تريد المتابعة؟')) return
-
-        setActionLoading('restore')
-        try {
-            const text = await file.text()
-            const json = JSON.parse(text)
-            
-            if (json.site_settings || json.includes_theme !== undefined) {
-                 addMsg('error', 'هذا الملف هو نسخة للإعدادات فقط. يرجى استخدامه في قسم استعادة الإعدادات بالأسفل.')
-                 setActionLoading(null)
-                 e.target.value = ''
-                 return
-            }
-
-            const res = await fetch('/api/admin/backup', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'restore', data: json })
-            })
-            const data = await res.json()
-            if (res.ok) {
-                addMsg('success', data.message ?? 'تمت الاستعادة بنجاح')
-                await loadStats()
+            let res: Response
+            if (kind === 'database') {
+                res = await fetch('/api/admin/backup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'export' }),
+                })
+            } else if (kind === 'settings') {
+                res = await fetch('/api/admin/settings/backup')
             } else {
-                addMsg('error', data.error ?? 'فشلت عملية الاستعادة')
+                res = await fetch('/api/admin/theme/backup')
             }
+            if (!res.ok) throw new Error()
+            triggerDownload(await res.blob(), kind)
+            addMsg('success', lang.bkExportSuccess)
         } catch {
-            addMsg('error', 'فشل في قراءة الملف — تأكد أنه ملف JSON صالح')
+            addMsg('error', lang.bkExportFailed)
         } finally {
-            setActionLoading(null)
-            e.target.value = ''
+            setBusy(null)
         }
     }
 
-    // ── Restore Settings Backup ───────────────────────────────────────────────
-    const handleRestoreSettings = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0]
-        if (!file) return
-        if (!confirm('سيتم استعادة إعدادات المنصة من هذا الملف. هل تريد المتابعة؟')) return
-
-        setActionLoading('restore_settings')
+    // ── Import (with smart client-side validation) ──────────────────────────────
+    const handleImport = async (kind: BackupKind, file: File) => {
+        setBusy(`import-${kind}`)
         try {
-            const text = await file.text()
-            const json = JSON.parse(text)
-            
-            if (json.data && Array.isArray(json.data.settings)) {
-                addMsg('error', 'هذا الملف هو نسخة لقاعدة البيانات بالكامل. يرجى استخدامه في قسم استعادة قاعدة البيانات بالأعلى.')
-                setActionLoading(null)
-                e.target.value = ''
+            const raw = await file.text()
+
+            // 1) Validate the file kind BEFORE sending anything to the server.
+            const parsed = parseBackup(raw, kind)
+            if (!parsed.ok) {
+                if (parsed.reason === 'invalid_json') {
+                    addMsg('error', lang.bkInvalidFile)
+                } else if (parsed.reason === 'not_backup') {
+                    addMsg('error', lang.bkNotBackupFile)
+                } else if (parsed.reason === 'wrong_kind' && parsed.detectedKind) {
+                    const detected = kindLabel(parsed.detectedKind)
+                    const tmpl =
+                        kind === 'database' ? lang.bkWrongKindDatabase
+                            : kind === 'settings' ? lang.bkWrongKindSettings
+                                : lang.bkWrongKindTheme
+                    addMsg('error', tmpl.replace('{kind}', detected))
+                }
                 return
             }
 
-            const res = await fetch('/api/admin/settings/full-export', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ data: json })
-            })
-            const data = await res.json()
-            if (res.ok) {
-                addMsg('success', data.message ?? 'تمت استعادة الإعدادات بنجاح')
-            } else {
-                addMsg('error', data.error ?? 'فشلت عملية استعادة الإعدادات')
-            }
-        } catch {
-            addMsg('error', 'فشل في قراءة الملف — تأكد أنه ملف JSON صالح')
-        } finally {
-            setActionLoading(null)
-            e.target.value = ''
-        }
-    }
+            if (!confirm(lang.bkImportConfirm)) return
 
-    // ── Generic Action ────────────────────────────────────────────────────────
-    const handleAction = async (action: string, confirmMsg?: string) => {
-        if (confirmMsg && !confirm(confirmMsg)) return
-        setActionLoading(action)
-        try {
-            const res = await fetch('/api/admin/backup', {
+            // 2) Send the raw file to the matching endpoint (server re-validates).
+            const endpoint =
+                kind === 'database' ? '/api/admin/backup'
+                    : kind === 'settings' ? '/api/admin/settings/backup'
+                        : '/api/admin/theme/backup'
+            const payload =
+                kind === 'database' ? { action: 'restore', raw } : { raw }
+
+            const res = await fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action })
+                body: JSON.stringify(payload),
             })
-            const data = await res.json()
+            const data = await res.json().catch(() => ({}))
+
             if (res.ok) {
-                addMsg('success', data.message ?? 'تمت العملية بنجاح')
+                addMsg('success', data.message || lang.bkImportSuccess)
                 await loadStats()
+            } else if (data?.error === 'INVALID_BACKUP') {
+                addMsg('error', lang.bkNotBackupFile)
             } else {
-                addMsg('error', data.error ?? 'حدث خطأ')
+                addMsg('error', data?.error || lang.bkImportFailed)
             }
         } catch {
-            addMsg('error', 'حدث خطأ غير متوقع')
+            addMsg('error', lang.bkReadError)
         } finally {
-            setActionLoading(null)
+            setBusy(null)
         }
     }
 
     if (loading) return <SettingsSkeleton />
 
-    const tableRows: { label: string; key: keyof Stats['tables']; color: string }[] = [
-        { label: 'المستخدمون', key: 'users', color: 'text-blue-600' },
-        { label: 'التسميعات', key: 'recitations', color: 'text-emerald-600' },
-        { label: 'الحجوزات', key: 'bookings', color: 'text-purple-600' },
-        { label: 'التقييمات', key: 'reviews', color: 'text-amber-600' },
-        { label: 'الإشعارات', key: 'notifications', color: 'text-red-500' },
-        { label: 'سجل النشاط', key: 'activity_logs', color: 'text-slate-600' },
-        { label: 'زيارات الصفحات', key: 'page_views', color: 'text-indigo-500' },
-        { label: 'الرسائل', key: 'messages', color: 'text-teal-600' },
-        { label: 'الإعلانات', key: 'announcements', color: 'text-orange-500' },
-        { label: 'قوالب البريد', key: 'email_templates', color: 'text-pink-500' },
-        { label: 'الإعدادات', key: 'settings_count', color: 'text-gray-600' },
+    const tableRows = [
+        { label: lang.bkUsers, key: 'users' },
+        { label: lang.bkRecitations, key: 'recitations' },
+        { label: lang.bkBookings, key: 'bookings' },
+        { label: lang.bkReviews, key: 'reviews' },
+        { label: lang.bkNotifications, key: 'notifications' },
+        { label: lang.bkMessages, key: 'messages' },
+        { label: lang.bkAnnouncements, key: 'announcements' },
+        { label: lang.bkEmailTemplates, key: 'email_templates' },
     ]
 
+    const sections: {
+        kind: BackupKind
+        title: string
+        desc: string
+        icon: React.ReactNode
+        accent: string
+    }[] = [
+            {
+                kind: 'database',
+                title: lang.bkSectionDatabase,
+                desc: lang.bkSectionDatabaseDesc,
+                icon: <Database className="w-5 h-5" />,
+                accent: 'text-blue-600 dark:text-blue-400 bg-blue-500/10 dark:bg-blue-500/20',
+            },
+            {
+                kind: 'settings',
+                title: lang.bkSectionSettings,
+                desc: lang.bkSectionSettingsDesc,
+                icon: <Settings2 className="w-5 h-5" />,
+                accent: 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-500/20',
+            },
+            {
+                kind: 'theme',
+                title: lang.bkSectionTheme,
+                desc: lang.bkSectionThemeDesc,
+                icon: <Palette className="w-5 h-5" />,
+                accent: 'text-amber-600 dark:text-amber-400 bg-amber-500/10 dark:bg-amber-500/20',
+            },
+        ]
+
     return (
-        <div className="p-6 max-w-5xl mx-auto space-y-6 font-arabic" dir="rtl">
+        <div className="p-6 max-w-4xl mx-auto space-y-6" dir={isAr ? 'rtl' : 'ltr'}>
             {/* Header */}
             <div className="flex items-center gap-3">
                 <Archive className="w-8 h-8 text-[#1B5E3B]" />
                 <div>
-                    <h1 className="text-2xl font-bold text-foreground">إدارة النسخ الاحتياطية</h1>
-                    <p className="text-muted-foreground text-sm">تصدير واستعادة بيانات المنصة وإعداداتها</p>
+                    <h1 className="text-2xl font-bold text-foreground">{lang.bkTitle}</h1>
+                    <p className="text-muted-foreground text-sm">{lang.bkDesc}</p>
                 </div>
             </div>
 
-            {/* Last backup banner */}
-            {stats?.lastBackup && (
-                <div className="flex items-center gap-3 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 dark:bg-emerald-950 dark:border-emerald-800 dark:text-emerald-300">
-                    <Clock className="w-4 h-4 shrink-0" />
-                    <p className="text-sm">
-                        آخر نسخة احتياطية:{' '}
-                        <span className="font-semibold">
-                            {new Date(stats.lastBackup).toLocaleString('ar-SA', { dateStyle: 'medium', timeStyle: 'short' })}
-                        </span>
-                    </p>
-                </div>
-            )}
-
             {/* Messages */}
             {messages.map((m, i) => (
-                <div key={i} className={`flex items-center gap-3 p-4 rounded-xl border ${m.type === 'success' ? 'bg-green-50 border-green-200 text-green-800 dark:bg-green-950 dark:border-green-800 dark:text-green-300' : 'bg-red-50 border-red-200 text-red-800 dark:bg-red-950 dark:border-red-800 dark:text-red-300'}`}>
-                    {m.type === 'success' ? <CheckCircle className="w-5 h-5 flex-shrink-0" /> : <AlertTriangle className="w-5 h-5 flex-shrink-0" />}
+                <div
+                    key={i}
+                    className={`flex items-center gap-3 p-4 rounded-xl border ${m.type === 'success'
+                            ? 'bg-green-50 border-green-200 text-green-800 dark:bg-green-500/10 dark:border-green-900 dark:text-green-300'
+                            : 'bg-red-50 border-red-200 text-red-800 dark:bg-red-500/10 dark:border-red-900 dark:text-red-300'
+                        }`}
+                >
+                    {m.type === 'success'
+                        ? <CheckCircle className="w-5 h-5 flex-shrink-0" />
+                        : <AlertTriangle className="w-5 h-5 flex-shrink-0" />}
                     <p className="text-sm font-medium">{m.text}</p>
                 </div>
             ))}
 
-            {/* DB Stats */}
-            <div className="bg-card rounded-xl border border-border shadow-sm p-6">
+            {/* DB stats */}
+            <div className="bg-card rounded-xl border border-border shadow-sm p-6" dir={isAr ? 'rtl' : 'ltr'}>
                 <div className="flex items-center justify-between mb-5">
                     <div className="flex items-center gap-2">
                         <Database className="w-5 h-5 text-blue-500" />
-                        <h2 className="font-semibold text-foreground">إحصائيات قاعدة البيانات</h2>
+                        <h2 className="font-semibold text-foreground">{lang.bkDbStats}</h2>
                     </div>
                     <Button
-                        variant="ghost"
+                        onClick={() => { setLoading(true); loadStats() }}
+                        variant="outline"
                         size="sm"
-                        onClick={loadStats}
-                        disabled={loading}
-                        className="gap-2 text-muted-foreground"
+                        className="border-border hover:bg-muted"
                     >
-                        <RefreshCcw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                        تحديث
+                        <RefreshCcw className="w-4 h-4 me-2" />
+                        {lang.bkRefresh}
                     </Button>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {tableRows.map(row => (
-                        <div key={row.key} className="bg-muted/60 rounded-xl p-3 text-center border border-border/50">
-                            <p className={`text-2xl font-bold ${row.color}`}>
-                                {((stats?.tables?.[row.key] as number) || 0).toLocaleString('ar-SA')}
+                        <div key={row.key} className="bg-muted rounded-lg p-3 text-center">
+                            <p className="text-xl font-bold text-foreground">
+                                {(stats?.tables?.[row.key] || 0).toLocaleString()}
                             </p>
                             <p className="text-xs text-muted-foreground mt-1">{row.label}</p>
                         </div>
@@ -299,186 +238,128 @@ export default function AdminBackupPage() {
                 </div>
             </div>
 
-            {/* ── Section 1: DB Backup ───────────────────────────────────────── */}
-            <div className="bg-card rounded-xl border border-border shadow-sm p-6 space-y-4">
-                <div className="flex items-center gap-2 mb-1">
-                    <FileJson className="w-5 h-5 text-emerald-600" />
-                    <h2 className="font-semibold text-foreground">نسخة احتياطية من قاعدة البيانات</h2>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                    يشمل الملف المصدَّر: المستخدمين، التسميعات، الحجوزات، التقييمات، الرسائل، الإعلانات، قوالب البريد، وجميع الإعدادات.
-                </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <Button
-                        onClick={handleExportDB}
-                        disabled={!!actionLoading}
-                        className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white"
-                    >
-                        {actionLoading === 'export' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-                        تصدير نسخة قاعدة البيانات
-                    </Button>
-
-                    <div>
-                        <input
-                            ref={restoreInputRef}
-                            type="file"
-                            accept=".json"
-                            className="hidden"
-                            onChange={handleRestoreDB}
-                        />
-                        <Button
-                            variant="outline"
-                            onClick={() => restoreInputRef.current?.click()}
-                            disabled={!!actionLoading}
-                            className="gap-2 w-full border-blue-300 text-blue-700 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-950"
-                        >
-                            {actionLoading === 'restore' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                            استيراد واستعادة نسخة احتياطية
-                        </Button>
-                    </div>
-                </div>
+            {/* Backup sections — each with Export + Import */}
+            <div className="space-y-4">
+                {sections.map(section => (
+                    <BackupSection
+                        key={section.kind}
+                        section={section}
+                        busy={busy}
+                        lang={lang}
+                        onExport={() => handleExport(section.kind)}
+                        onImport={(file) => handleImport(section.kind, file)}
+                    />
+                ))}
             </div>
 
-            {/* ── Section 2: Settings Backup ─────────────────────────────────── */}
-            <div className="bg-card rounded-xl border border-border shadow-sm p-6 space-y-4">
-                <div className="flex items-center gap-2 mb-1">
-                    <Settings className="w-5 h-5 text-primary" />
-                    <h2 className="font-semibold text-foreground">نسخة احتياطية من الإعدادات</h2>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                    يشمل: إعدادات الموقع العامة، المقرأة، الأكاديمية، SEO، الصفحة الرئيسية، بيانات الهوية والتواصل — مع خيار تضمين المظهر.
-                </p>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
+            {/* Clear cache */}
+            <div className="bg-card rounded-xl border border-amber-200 dark:border-amber-900 shadow-sm p-6">
+                <div className="flex items-center justify-between gap-4 flex-wrap">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-amber-500/10 dark:bg-amber-500/20 rounded-lg flex items-center justify-center">
+                            <RefreshCcw className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                        </div>
+                        <div>
+                            <p className="font-semibold text-foreground">{lang.bkClearCache}</p>
+                            <p className="text-xs text-muted-foreground">{lang.bkClearCacheDesc}</p>
+                        </div>
+                    </div>
                     <Button
-                        onClick={() => setExportDialogOpen(true)}
-                        disabled={!!actionLoading}
-                        className="gap-2"
+                        onClick={async () => {
+                            setBusy('clear_cache')
+                            try {
+                                const res = await fetch('/api/admin/backup', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ action: 'clear_cache' }),
+                                })
+                                const d = await res.json()
+                                addMsg(res.ok ? 'success' : 'error', d.message || lang.bkClearCacheSuccess)
+                            } finally { setBusy(null) }
+                        }}
+                        disabled={busy === 'clear_cache'}
                         variant="outline"
+                        className="border-amber-300 dark:border-amber-800 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10"
                     >
-                        {actionLoading === 'export_settings' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-                        تصدير نسخة الإعدادات
+                        {busy === 'clear_cache'
+                            ? <Loader2 className="w-4 h-4 animate-spin me-2" />
+                            : <RefreshCcw className="w-4 h-4 me-2" />}
+                        {lang.bkClearCacheNow}
                     </Button>
-
-                    <div>
-                        <input
-                            ref={settingsRestoreInputRef}
-                            type="file"
-                            accept=".json"
-                            className="hidden"
-                            onChange={handleRestoreSettings}
-                        />
-                        <Button
-                            variant="outline"
-                            onClick={() => settingsRestoreInputRef.current?.click()}
-                            disabled={!!actionLoading}
-                            className="gap-2 w-full border-primary/30 text-primary hover:bg-primary/5"
-                        >
-                            {actionLoading === 'restore_settings' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                            استيراد واستعادة إعدادات
-                        </Button>
-                    </div>
-                </div>
-
-                <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
-                    <DialogContent dir="rtl">
-                        <DialogHeader>
-                            <DialogTitle>تصدير الإعدادات</DialogTitle>
-                            <DialogDescription className="mt-2">
-                                هل ترغب في تضمين إعدادات المظهر (الألوان، الخط، الاستدارة) في ملف النسخة الاحتياطية؟
-                                <br /><br />
-                                إذا قمت بتضمينها، سيتم استعادة المظهر الحالي عند رفع هذا الملف في المستقبل.
-                            </DialogDescription>
-                        </DialogHeader>
-                        <DialogFooter className="flex gap-2 sm:justify-start mt-4">
-                            <Button onClick={() => handleExportSettings(true)} className="gap-2 bg-primary text-primary-foreground">
-                                <Palette className="w-4 h-4" />
-                                نعم، تصدير الإعدادات مع المظهر
-                            </Button>
-                            <Button onClick={() => handleExportSettings(false)} variant="outline" className="gap-2">
-                                <Settings className="w-4 h-4" />
-                                تصدير الإعدادات فقط
-                            </Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
-            </div>
-
-            {/* ── Section 3: Maintenance Actions ─────────────────────────────── */}
-            <div className="bg-card rounded-xl border border-border shadow-sm p-6 space-y-4">
-                <div className="flex items-center gap-2 mb-1">
-                    <ShieldCheck className="w-5 h-5 text-amber-600" />
-                    <h2 className="font-semibold text-foreground">عمليات الصيانة</h2>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-                    <ActionCard
-                        title="مسح الكاش"
-                        desc="إعادة تحديث جميع صفحات الموقع"
-                        color="amber"
-                        loading={actionLoading === 'clear_cache'}
-                        onClick={() => handleAction('clear_cache')}
-                    />
-                    <ActionCard
-                        title="حذف سجلات النشاط القديمة"
-                        desc="سجلات أقدم من 90 يوم"
-                        color="red"
-                        loading={actionLoading === 'clear_old_logs'}
-                        onClick={() => handleAction('clear_old_logs', 'سيتم حذف سجلات النشاط الأقدم من 90 يوم. هل تريد المتابعة؟')}
-                    />
-                    <ActionCard
-                        title="حذف الإشعارات القديمة"
-                        desc="الإشعارات المقروءة أقدم من 30 يوم"
-                        color="red"
-                        loading={actionLoading === 'clear_notifications'}
-                        onClick={() => handleAction('clear_notifications', 'سيتم حذف الإشعارات المقروءة الأقدم من 30 يوم. هل تريد المتابعة؟')}
-                    />
-                    <ActionCard
-                        title="حذف بيانات الزيارات القديمة"
-                        desc="بيانات زيارات الصفحات أقدم من 90 يوم"
-                        color="red"
-                        loading={actionLoading === 'clear_page_views'}
-                        onClick={() => handleAction('clear_page_views', 'سيتم حذف بيانات زيارات الصفحات الأقدم من 90 يوم. هل تريد المتابعة؟')}
-                    />
                 </div>
             </div>
 
             {/* Warning */}
             <div className="bg-amber-500/10 border border-amber-200 dark:border-amber-900 rounded-xl p-4 flex items-start gap-3">
                 <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
-                <p className="text-amber-700 dark:text-amber-300 text-sm">
-                    تحذير: عمليات الحذف والاستعادة لا يمكن التراجع عنها. تأكد دائماً من تصدير نسخة احتياطية قبل إجراء أي عملية صيانة.
-                </p>
+                <p className="text-amber-700 dark:text-amber-300 text-sm">{lang.bkWarning}</p>
             </div>
         </div>
     )
 }
 
-// ── Small reusable card for maintenance actions ───────────────────────────────
-function ActionCard({
-    title, desc, color, loading, onClick
+// ── Single backup section card (Export + Import) ────────────────────────────
+function BackupSection({
+    section, busy, lang, onExport, onImport,
 }: {
-    title: string
-    desc: string
-    color: 'amber' | 'red' | 'blue'
-    loading: boolean
-    onClick: () => void
+    section: { kind: BackupKind; title: string; desc: string; icon: React.ReactNode; accent: string }
+    busy: string | null
+    lang: any
+    onExport: () => void
+    onImport: (file: File) => void
 }) {
-    const colorMap = {
-        amber: 'border-amber-200 dark:border-amber-900 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950',
-        red: 'border-red-200 dark:border-red-900 text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950',
-        blue: 'border-blue-200 dark:border-blue-900 text-blue-700 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950',
-    }
+    const inputRef = useRef<HTMLInputElement>(null)
+    const exporting = busy === `export-${section.kind}`
+    const importing = busy === `import-${section.kind}`
+
     return (
-        <button
-            onClick={onClick}
-            disabled={loading}
-            className={`text-right p-4 rounded-xl border transition-colors disabled:opacity-60 ${colorMap[color]} space-y-1 w-full`}
-        >
-            <div className="flex items-center gap-2">
-                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                <span className="font-medium text-sm">{title}</span>
+        <div className="bg-card rounded-xl border border-border shadow-sm p-6">
+            <div className="flex items-center gap-3 mb-4">
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${section.accent}`}>
+                    {section.icon}
+                </div>
+                <div>
+                    <p className="font-semibold text-foreground">{section.title}</p>
+                    <p className="text-xs text-muted-foreground">{section.desc}</p>
+                </div>
             </div>
-            <p className="text-xs opacity-70">{desc}</p>
-        </button>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <Button
+                    onClick={onExport}
+                    disabled={exporting || importing}
+                    variant="outline"
+                    className="w-full border-border hover:bg-muted"
+                >
+                    {exporting
+                        ? <Loader2 className="w-4 h-4 animate-spin me-2" />
+                        : <Download className="w-4 h-4 me-2" />}
+                    {exporting ? lang.bkExporting : lang.bkExport}
+                </Button>
+
+                <div className="relative">
+                    <input
+                        ref={inputRef}
+                        type="file"
+                        accept=".json,application/json"
+                        onChange={(e) => {
+                            const f = e.target.files?.[0]
+                            if (f) onImport(f)
+                            e.target.value = '' // allow re-selecting the same file
+                        }}
+                        className="absolute inset-0 w-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                        disabled={exporting || importing}
+                    />
+                    <Button
+                        disabled={exporting || importing}
+                        className="w-full bg-[#1B5E3B] hover:bg-[#164d31] text-white pointer-events-none"
+                    >
+                        {importing
+                            ? <Loader2 className="w-4 h-4 animate-spin me-2" />
+                            : <Upload className="w-4 h-4 me-2" />}
+                        {importing ? lang.bkImporting : lang.bkImport}
+                    </Button>
+                </div>
+            </div>
+        </div>
     )
 }

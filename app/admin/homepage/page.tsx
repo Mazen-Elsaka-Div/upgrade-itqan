@@ -102,9 +102,10 @@ export default function AdminHomepagePage() {
   const tabCls = 'gap-1.5 data-[state=active]:bg-[#1B5E3B] data-[state=active]:text-white'
 
   return (
-    <div className="p-4 sm:p-6 max-w-5xl mx-auto space-y-6" dir={isAr ? 'rtl' : 'ltr'}>
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sticky top-0 z-20 bg-background/80 backdrop-blur-sm py-2">
+    <div dir={isAr ? 'rtl' : 'ltr'}>
+      {/* Header - Fixed at top */}
+      <div className="sticky top-0 z-20 bg-background/80 backdrop-blur-sm border-b border-border">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 py-3 px-4 sm:px-6 max-w-5xl mx-auto">
         <div className="flex items-center gap-3">
           <Home className="w-8 h-8 text-[#1B5E3B]" />
           <div>
@@ -116,9 +117,12 @@ export default function AdminHomepagePage() {
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : saved ? <CheckCircle className="w-4 h-4" /> : <Save className="w-4 h-4" />}
           {saved ? tr('تم الحفظ', 'Saved') : tr('حفظ التغييرات', 'Save changes')}
         </Button>
+        </div>
       </div>
 
-      {error && (
+      {/* Main content */}
+      <div className="p-4 sm:p-6 max-w-5xl mx-auto space-y-6">
+        {error && (
         <div className="bg-red-50 dark:bg-red-500/10 border border-red-300 dark:border-red-500/20 rounded-xl p-4 flex items-start gap-3">
           <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-500 mt-0.5 shrink-0" />
           <div>
@@ -499,6 +503,7 @@ export default function AdminHomepagePage() {
           </SectionCard>
         </TabsContent>
       </Tabs>
+      </div>
     </div>
   )
 }

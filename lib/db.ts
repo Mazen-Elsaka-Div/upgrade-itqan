@@ -72,8 +72,16 @@ export async function query<T = Record<string, unknown>>(
   params?: unknown[]
 ): Promise<T[]> {
   if (!pool) {
-    console.warn("[DB] No POSTGRES_URL or DATABASE_URL - Using mock data mode")
-    return [] as T[]
+    const hasUrl = !!(process.env.POSTGRES_URL || process.env.DATABASE_URL)
+    console.error("[DB] No connection pool initialized.", {
+      hasPostgresUrl: !!process.env.POSTGRES_URL,
+      hasDatabaseUrl: !!process.env.DATABASE_URL,
+      nodeEnv: process.env.NODE_ENV,
+    })
+    if (!hasUrl) {
+      console.error("[DB] ERROR: Neither POSTGRES_URL nor DATABASE_URL is set. Cannot run queries.")
+    }
+    throw new Error("Database not configured: POSTGRES_URL or DATABASE_URL missing")
   }
 
   try {

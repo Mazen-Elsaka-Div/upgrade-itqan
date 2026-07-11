@@ -60,7 +60,10 @@ export function ModeSwitcher({ currentMode, userRole, academyRole, hasQuranAcces
   }
 
   // Don't show switcher if only one mode available
-  if (modes.length <= 1) return null
+  // Exception: if an admin/super-admin (userRole === 'admin') has both access,
+  // always show it so they can switch back from academy to library
+  const isAdminWithBothAccess = userRole === 'admin' && hasQuranAccess && hasAcademyAccess
+  if (modes.length <= 1 && !isAdminWithBothAccess) return null
 
   function getAcademyHref(role: string, academyRole?: string | null): string {
     if (role === 'teacher') return '/academy/teacher'
