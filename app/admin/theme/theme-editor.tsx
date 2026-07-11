@@ -30,7 +30,17 @@ const COLOR_FIELDS: { key: keyof ThemeColors; labelAr: string; descAr: string }[
   { key: "secondaryForeground", labelAr: "نص اللون الثانوي", descAr: "النص فوق اللون الثانوي" },
   { key: "background", labelAr: "خلفية الصفحة", descAr: "خلفية الموقع العامة" },
   { key: "foreground", labelAr: "لون النص", descAr: "لون النص الأساسي" },
+  { key: "card", labelAr: "خلفية البطاقات", descAr: "خلفية الكروت والصناديق" },
+  { key: "cardForeground", labelAr: "نص البطاقات", descAr: "النص داخل الكروت" },
+  { key: "muted", labelAr: "الخلفية الباهتة", descAr: "للعناصر الثانوية جداً" },
+  { key: "mutedForeground", labelAr: "النص الباهت", descAr: "للنصوص غير الأساسية" },
+  { key: "border", labelAr: "لون الحدود", descAr: "إطارات العناصر والفواصل" },
   { key: "ring", labelAr: "لون التحديد", descAr: "إطار التركيز حول الحقول" },
+  { key: "sidebar", labelAr: "خلفية القائمة الجانبية", descAr: "لون القائمة الجانبية" },
+  { key: "sidebarForeground", labelAr: "نص القائمة الجانبية", descAr: "النص داخل القائمة الجانبية" },
+  { key: "sidebarPrimary", labelAr: "مميز القائمة الجانبية", descAr: "العناصر النشطة في القائمة" },
+  { key: "sidebarPrimaryForeground", labelAr: "نص مميز القائمة", descAr: "النص على العنصر النشط" },
+  { key: "sidebarBorder", labelAr: "حدود القائمة الجانبية", descAr: "الفواصل داخل القائمة" },
 ]
 
 const BRAND_COLOR_FIELDS: { key: keyof ThemeColors; labelAr: string; descAr: string }[] = [
@@ -78,6 +88,10 @@ export function ThemeEditor({ initialTheme }: { initialTheme: ThemeConfig }) {
       "--fg": c.foreground,
       "--sec": c.secondary,
       "--secf": c.secondaryForeground,
+      "--card": c.card,
+      "--card-fg": c.cardForeground,
+      "--sidebar-bg": c.sidebar,
+      "--sidebar-fg": c.sidebarForeground,
       "--rad": theme.radius,
       "--acad": c.academyPrimary,
       "--maint-bg": c.maintenanceBg,
@@ -294,6 +308,18 @@ export function ThemeEditor({ initialTheme }: { initialTheme: ThemeConfig }) {
                   className="p-3 text-sm"
                 >
                   بطاقة ثانوية بلون الخلفية الثانوية.
+                </div>
+                <div
+                  style={{ background: "var(--card)", color: "var(--card-fg)", borderRadius: "var(--rad)", border: "1px solid var(--sec)" }}
+                  className="p-3 text-sm"
+                >
+                  صندوق بطاقة أساسية.
+                </div>
+                <div
+                  style={{ background: "var(--sidebar-bg)", color: "var(--sidebar-fg)", borderRadius: "var(--rad)", border: "1px solid var(--sec)" }}
+                  className="p-3 text-sm font-semibold"
+                >
+                  لون القائمة الجانبية.
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <button

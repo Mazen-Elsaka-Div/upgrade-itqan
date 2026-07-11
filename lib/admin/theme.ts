@@ -12,6 +12,17 @@ export type ThemeColors = {
   background: string
   foreground: string
   ring: string
+  card: string
+  cardForeground: string
+  muted: string
+  mutedForeground: string
+  border: string
+  sidebar: string
+  sidebarForeground: string
+  sidebarPrimary: string
+  sidebarPrimaryForeground: string
+  sidebarBorder: string
+  sidebarRing: string
   // Academy & Maintenance brand colors — exposed so the theme editor can
   // change them without touching globals.css or source files.
   academyPrimary: string
@@ -87,6 +98,17 @@ const DEFAULT_COLORS: ThemeColors = {
   background: "#FAFAF8",
   foreground: "#0D1512",
   ring: "#0D5A3C",
+  card: "#FFFFFF",
+  cardForeground: "#0D1512",
+  muted: "#F5F5F0",
+  mutedForeground: "#6B7280",
+  border: "#E8E8E3",
+  sidebar: "#FFFFFF",
+  sidebarForeground: "#0D1512",
+  sidebarPrimary: "#0D5A3C",
+  sidebarPrimaryForeground: "#FFFFFF",
+  sidebarBorder: "#E8E8E3",
+  sidebarRing: "#0D5A3C",
   academyPrimary: "#1E3A5F",
   maintenanceBg: "#0B3D2E",
   maintenanceGold: "#D4A843",
@@ -107,6 +129,17 @@ export const DEFAULT_THEME: ThemeConfig = {
       background: "#0F172A",
       foreground: "#F0F4F8",
       ring: "#3B6BA5",
+      card: "#0F1614",
+      cardForeground: "#F5F5F0",
+      muted: "#1A2420",
+      mutedForeground: "#9CA3AF",
+      border: "#1F2D28",
+      sidebar: "#0F1614",
+      sidebarForeground: "#F5F5F0",
+      sidebarPrimary: "#C9A962",
+      sidebarPrimaryForeground: "#080D0B",
+      sidebarBorder: "#1F2D28",
+      sidebarRing: "#C9A962",
       academyPrimary: "#3B6BA5",
       maintenanceBg: "#0B3D2E",
       maintenanceGold: "#D4A843",
@@ -134,6 +167,17 @@ function normalizeColors(c: any, d: ThemeColors): ThemeColors {
     background: safeHex(c.background, d.background),
     foreground: safeHex(c.foreground, d.foreground),
     ring: safeHex(c.ring, d.ring),
+    card: safeHex(c.card, d.card),
+    cardForeground: safeHex(c.cardForeground, d.cardForeground),
+    muted: safeHex(c.muted, d.muted),
+    mutedForeground: safeHex(c.mutedForeground, d.mutedForeground),
+    border: safeHex(c.border, d.border),
+    sidebar: safeHex(c.sidebar, d.sidebar),
+    sidebarForeground: safeHex(c.sidebarForeground, d.sidebarForeground),
+    sidebarPrimary: safeHex(c.sidebarPrimary, d.sidebarPrimary),
+    sidebarPrimaryForeground: safeHex(c.sidebarPrimaryForeground, d.sidebarPrimaryForeground),
+    sidebarBorder: safeHex(c.sidebarBorder, d.sidebarBorder),
+    sidebarRing: safeHex(c.sidebarRing, d.sidebarRing),
     academyPrimary: safeHex(c.academyPrimary, d.academyPrimary),
     maintenanceBg: safeHex(c.maintenanceBg, d.maintenanceBg),
     maintenanceGold: safeHex(c.maintenanceGold, d.maintenanceGold),
@@ -179,7 +223,7 @@ export function buildThemeCss(theme: ThemeConfig): string {
 --maintenance-gold-light:color-mix(in srgb,${lc.maintenanceGold} 60%,#ffffff);
 --maintenance-cream:color-mix(in srgb,${lc.maintenanceGold} 10%,#ffffff);
 }
-:root:not(.dark){
+:root:not(.dark), .theme-islamic:not(.dark), .theme-academy:not(.dark), .theme-female:not(.dark), .admin-theme:not(.dark) {
 --primary:${lc.primary};
 --primary-foreground:${lc.primaryForeground};
 --secondary:${lc.secondary};
@@ -189,8 +233,19 @@ export function buildThemeCss(theme: ThemeConfig): string {
 --background:${lc.background};
 --foreground:${lc.foreground};
 --ring:${lc.ring};
+--card:${lc.card};
+--card-foreground:${lc.cardForeground};
+--muted:${lc.muted};
+--muted-foreground:${lc.mutedForeground};
+--border:${lc.border};
+--sidebar:${lc.sidebar};
+--sidebar-foreground:${lc.sidebarForeground};
+--sidebar-primary:${lc.sidebarPrimary};
+--sidebar-primary-foreground:${lc.sidebarPrimaryForeground};
+--sidebar-border:${lc.sidebarBorder};
+--sidebar-ring:${lc.sidebarRing};
 }
-.dark{
+.dark, .dark .theme-islamic, .theme-islamic.dark, .dark .theme-academy, .theme-academy.dark, .dark .theme-female, .theme-female.dark, .dark .admin-theme, .admin-theme.dark {
 --primary:${dc.primary};
 --primary-foreground:${dc.primaryForeground};
 --secondary:${dc.secondary};
@@ -200,5 +255,16 @@ export function buildThemeCss(theme: ThemeConfig): string {
 --background:${dc.background};
 --foreground:${dc.foreground};
 --ring:${dc.ring};
+--card:${dc.card};
+--card-foreground:${dc.cardForeground};
+--muted:${dc.muted};
+--muted-foreground:${dc.mutedForeground};
+--border:${dc.border};
+--sidebar:${dc.sidebar};
+--sidebar-foreground:${dc.sidebarForeground};
+--sidebar-primary:${dc.sidebarPrimary};
+--sidebar-primary-foreground:${dc.sidebarPrimaryForeground};
+--sidebar-border:${dc.sidebarBorder};
+--sidebar-ring:${dc.sidebarRing};
 }`
 }
