@@ -4,8 +4,20 @@ import { useState, useEffect } from 'react'
 import {
   Home, Save, AlertTriangle, Eye, EyeOff, Megaphone, Loader2, CheckCircle,
   Layout, Type, Palette, Sparkles, Route, MessageSquareQuote, PanelBottom, Navigation,
+  RotateCcw,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
@@ -42,6 +54,7 @@ export default function AdminHomepagePage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [resetting, setResetting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -55,6 +68,28 @@ export default function AdminHomepagePage() {
 
   const set = (key: string, value: any) => setSettings(prev => ({ ...prev, [key]: value }))
   const get = (key: string) => (settings[key] != null ? settings[key] : (DEFAULT_HOMEPAGE_CONTENT as AnyMap)[key])
+
+  const handleReset = async () => {
+    setResetting(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/admin/homepage/reset', { method: 'POST' })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data?.error || `${res.status}`)
+      // Revert local state to defaults so the form reflects the reset immediately
+      setSettings({
+        ...DEFAULT_HOMEPAGE_CONTENT,
+        ...DEFAULT_HOMEPAGE_COLORS,
+        ...DEFAULT_HOMEPAGE_FLAGS,
+      })
+      setSaved(true)
+      setTimeout(() => setSaved(false), 3000)
+    } catch (e: any) {
+      setError(e?.message || tr('فشل إعادة الضبط', 'Reset failed'))
+    } finally {
+      setResetting(false)
+    }
+  }
 
   const handleSave = async () => {
     setSaving(true)
@@ -114,10 +149,48 @@ export default function AdminHomepagePage() {
               <p className="text-muted-foreground text-sm">{tr('تحكَّم في كل نص ولون وقسم في الصفحة الرئيسية', 'Control every text, color and section of the homepage')}</p>
             </div>
           </div>
-          <Button onClick={handleSave} disabled={saving} className="bg-[#1B5E3B] hover:bg-[#1B5E3B]/90 text-white gap-2 shrink-0">
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : saved ? <CheckCircle className="w-4 h-4" /> : <Save className="w-4 h-4" />}
-            {saved ? tr('تم الحفظ', 'Saved') : tr('حفظ التغييرات', 'Save changes')}
-          </Button>
+          <div className="flex items-center gap-2">
+            {/* Reset to defaults */}
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  disabled={resetting || saving}
+                  className="gap-2 border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950"
+                >
+                  {resetting
+                    ? <Loader2 className="w-4 h-4 animate-spin" />
+                    : <RotateCcw className="w-4 h-4" />}
+                  {tr('إعادة الضبط', 'Reset to defaults')}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>{tr('إعادة الضبط إلى القيم الافتراضية؟', 'Reset to default values?')}</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {tr(
+                      'سيُحذف كل ما حفظته وستعود الصفحة الرئيسية إلى نصوصها وألوانها الأصلية. لا يمكن التراجع.',
+                      'All saved changes will be deleted and the homepage will revert to its original texts and colours. This cannot be undone.'
+                    )}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>{tr('إلغاء', 'Cancel')}</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleReset}
+                    className="bg-red-600 hover:bg-red-700 text-white"
+                  >
+                    {tr('نعم، أعد الضبط', 'Yes, reset')}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+
+            <Button onClick={handleSave} disabled={saving || resetting} className="bg-[#1B5E3B] hover:bg-[#1B5E3B]/90 text-white gap-2 shrink-0">
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : saved ? <CheckCircle className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+              {saved ? tr('تم الحفظ', 'Saved') : tr('حفظ التغييرات', 'Save changes')}
+            </Button>
+          </div>
         </div>
       </div>
 
