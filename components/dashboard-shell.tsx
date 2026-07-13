@@ -271,10 +271,10 @@ const getSuperConfig = (t: any): ShellConfig => ({
       ],
     },
   ],
-  label: 'المدير العام', name: 'المدير العام', sublabel: 'المدير العام',
+  label: 'المدير العام', name: 'المدير العام', sublabel: 'ال��دير العام',
 })
 
-// ── Maqraa mode ────────────────────────���─────────────────────────────���──────
+// ── Maqraa mode ────────────────────────���─────────────────────────────���────��─
 // The classic admin sidebar, minus every platform-wide / general item that now
 // lives exclusively in the Super Admin (super mode) sidebar — so nothing is
 // duplicated across modes. Site identity (homepage/seo), security, backup,
@@ -305,7 +305,7 @@ const getMaqraaConfig = (t: any): ShellConfig => {
 const getAcademyConfig = (t: any): ShellConfig => ({
   sections: [
     {
-      title: t.main || 'الرئيسية',
+      title: t.main || 'الر��يسية',
       items: [
         { href: '/academy/admin', label: t.academy?.dashboard || 'لوحة التحكم', icon: LayoutDashboard },
         { href: '/academy/admin/analytics', label: t.academy?.analytics || 'التحليلات', icon: BarChart3 },
@@ -710,7 +710,7 @@ export function DashboardShell({ role, children, headerTitle, adminMode }: { rol
           <AdminModeBanner mode={adminMode} />
         )}
         <header className={cn(
-          'border-b border-border flex items-center justify-between px-6 lg:px-8 bg-background/95 backdrop-blur-md z-10 sticky top-0',
+          'border-b border-border flex items-center justify-between px-6 lg:px-8 bg-background/95 backdrop-blur-md z-40 sticky top-0 left-0 right-0',
           role === 'student' ? 'h-20' : 'h-16'
         )}>
           <div className="flex items-center gap-4">
