@@ -46,9 +46,9 @@ export default function HeaderNavClient({
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="sticky top-0 z-50 w-full bg-hp-parchment/98 dark:bg-hp-dark/98 backdrop-blur-md border-b border-hp-ink/10 dark:border-hp-cream/10"
+      className="sticky top-4 z-50 px-4 sm:px-8 lg:px-12"
     >
-      <div className="max-w-[1600px] w-full mx-auto h-[80px] px-6 sm:px-8 lg:px-12 flex items-center justify-between gap-6">
+      <div className="w-full mx-auto h-[72px] px-5 sm:px-7 lg:px-8 flex items-center justify-between gap-6 bg-hp-parchment/96 dark:bg-hp-dark/96 backdrop-blur-md border border-hp-ink/12 dark:border-hp-cream/12 rounded-2xl shadow-[0_2px_16px_0_rgba(0,0,0,0.08)]">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5 shrink-0">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-hp-green text-hp-gold shadow-sm">
@@ -155,7 +155,7 @@ export default function HeaderNavClient({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.2 }}
-            className="lg:hidden absolute top-full left-0 right-0 border-b border-hp-ink/10 dark:border-hp-cream/10 bg-hp-parchment/98 dark:bg-hp-dark/98 backdrop-blur-md shadow-lg overflow-hidden"
+            className="lg:hidden absolute top-[calc(100%+8px)] left-0 right-0 bg-hp-parchment/96 dark:bg-hp-dark/96 backdrop-blur-md border border-hp-ink/12 dark:border-hp-cream/12 rounded-2xl shadow-[0_2px_16px_0_rgba(0,0,0,0.08)] overflow-hidden"
           >
             <div className="px-4 sm:px-6 py-4 space-y-3">
               {navItems.map((item) => (
