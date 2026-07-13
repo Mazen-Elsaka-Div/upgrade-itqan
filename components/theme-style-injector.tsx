@@ -1,4 +1,4 @@
-import { getSetting } from "@/lib/settings"
+import { query } from "@/lib/db"
 import {
   DEFAULT_THEME,
   THEME_FONTS,
@@ -7,15 +7,19 @@ import {
   type ThemeConfig,
 } from "@/lib/admin/theme"
 
-// Server component. Reads the saved theme from system_settings and injects the
-// matching CSS-variable overrides (and an optional Google Fonts stylesheet) so
-// the Super Admin's design choices apply across the whole site at runtime —
-// no code changes required.
+// Server component. Reads the saved theme DIRECTLY from the DB (no in-memory
+// cache) so the Super Admin's design choices apply immediately after saving —
+// no stale serverless-instance cache can block the update.
 export async function ThemeStyleInjector() {
   let theme: ThemeConfig = DEFAULT_THEME
   try {
-    const stored = await getSetting<any>("theme_config", null)
-    if (stored) theme = normalizeTheme(stored)
+    const rows = await query<{ setting_value: any }>(
+      `SELECT setting_value FROM system_settings WHERE setting_key = 'theme_config'`,
+      []
+    )
+    if (rows.length && rows[0].setting_value) {
+      theme = normalizeTheme(rows[0].setting_value)
+    }
   } catch {
     // Fall back to defaults; never block rendering on a settings failure.
   }

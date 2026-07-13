@@ -1,10 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { ShieldCheck, GraduationCap, Mic, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { switchAdminMode } from "@/lib/admin/switch-mode-action"
 
 type Mode = "super" | "maqraa" | "academy"
 
@@ -43,8 +43,8 @@ const MODES: {
 ]
 
 // Segmented control that lets a Super Admin switch the lens they operate
-// the dashboard through. Persisted via /api/admin/mode (POST) so the whole
-// shell re-reads it on router.refresh().
+// the dashboard through. Uses Server Action for instant mode switch + redirect
+// without network latency or router.push() overhead.
 export function AdminRoleSwitcher({
   currentMode,
   collapsed = false,
@@ -52,20 +52,16 @@ export function AdminRoleSwitcher({
   currentMode: Mode
   collapsed?: boolean
 }) {
-  const router = useRouter()
   const [pending, setPending] = useState<Mode | null>(null)
 
   async function pickMode(mode: Mode) {
     if (mode === currentMode || pending) return
     setPending(mode)
     try {
-      await fetch("/api/admin/mode", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mode }),
-      })
-      router.refresh()
-    } finally {
+      // Server Action handles mode persistence + atomic redirect to mode home
+      await switchAdminMode(mode)
+    } catch (err) {
+      console.error("Failed to switch mode:", err)
       setPending(null)
     }
   }
