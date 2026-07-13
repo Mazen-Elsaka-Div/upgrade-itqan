@@ -148,21 +148,23 @@ const getAcademyRoleConfig = (t: any, role: AcademyRole): { sections: NavSection
     academy_student: {
       sections: [
         {
+          title: t.main || 'الرئيسية',
           items: [
             { href: '/academy/student', label: t.academy?.dashboard || 'لوحة التحكم', icon: LayoutDashboard },
             { href: '/academy/student/calendar', label: t.academy?.calendar || 'التقويم', icon: Calendar },
+            { href: '/academy/student/path', label: t.academy?.learningPath || 'المسار التعليمي', icon: Route },
+          ]
+        },
+        {
+          title: t.academyAdmin?.sidebarEducationalProcess || 'الدراسة',
+          items: [
             { href: '/academy/student/courses', label: t.academy?.myCourses || 'دوراتي', icon: BookOpen },
             { href: '/academy/student/courses/browse', label: t.academy?.browseCourses || 'تصفح الدورات', icon: GraduationCap },
             { href: '/academy/student/courses/archive', label: t.academy?.archive || 'الأرشيف', icon: Archive },
             { href: '/academy/student/enrollment-requests', label: t.academy?.enrollmentRequests || 'طلبات الانضمام', icon: UserPlus },
             { href: '/academy/student/tasks', label: t.academy?.tasks || 'المهام', icon: ClipboardList },
-            { href: '/academy/student/sessions', label: t.academy?.liveSessions || 'الجلسات الحية والتسجيلات', icon: Video },
+            { href: '/academy/student/sessions', label: t.academy?.liveSessions || 'الجلسات الحية', icon: Video },
             { href: '/academy/student/halaqat', label: t.academy?.halaqat || 'حلقاتي', icon: GraduationCap },
-            { href: '/academy/student/path', label: t.academy?.learningPath || 'المسار التعليمي', icon: Route },
-            { href: '/academy/student/chat', label: t.academy?.chat || 'الرسائل', icon: MessageSquare },
-            { href: '/academy/fiqh', label: t.academy?.fiqhLibrary || 'المكتبة الفقهية', icon: Library },
-            { href: '/academy/library', label: t.academy?.booksLibrary || 'مكتبة الكتب', icon: BookOpen },
-            { href: '/community/academy/forum', label: t.academy?.forum || 'المنتدى والمقالات', icon: MessageSquare },
           ]
         },
         {
@@ -173,6 +175,15 @@ const getAcademyRoleConfig = (t: any, role: AcademyRole): { sections: NavSection
             { href: '/academy/student/leaderboard', label: t.academy?.leaderboard || 'لوحة المتصدرين', icon: Trophy },
             { href: '/academy/student/badges', label: t.academy?.badges || 'الشارات', icon: Award },
             { href: '/academy/student/certificates', label: t.academy?.certificates || 'الشهادات', icon: GraduationCap },
+          ]
+        },
+        {
+          title: t.academyAdmin?.sidebarCommunity || 'المجتمع والمكتبة',
+          items: [
+            { href: '/academy/student/chat', label: t.academy?.chat || 'الرسائل', icon: MessageSquare },
+            { href: '/community/academy/forum', label: t.academy?.forum || 'المنتدى والمقالات', icon: MessageSquare },
+            { href: '/academy/fiqh', label: t.academy?.fiqhLibrary || 'المكتبة الفقهية', icon: Library },
+            { href: '/academy/library', label: t.academy?.booksLibrary || 'مكتبة الكتب', icon: BookOpen },
           ]
         },
         {
@@ -191,18 +202,29 @@ const getAcademyRoleConfig = (t: any, role: AcademyRole): { sections: NavSection
     teacher: {
       sections: [
         {
+          title: t.main || 'الرئيسية',
           items: [
             { href: '/academy/teacher', label: t.academy?.dashboard || 'لوحة التحكم', icon: LayoutDashboard },
             { href: '/academy/teacher/calendar', label: t.academy?.calendar || 'التقويم', icon: Calendar },
+          ]
+        },
+        {
+          title: t.academyAdmin?.sidebarEducationalProcess || 'التدريس',
+          items: [
             { href: '/academy/teacher/courses', label: t.academy?.myCourses || 'دوراتي', icon: BookOpen },
             { href: '/academy/teacher/enrollment-requests', label: t.academy?.enrollmentRequests || 'طلبات الانضمام', icon: Bell },
             { href: '/academy/teacher/sessions', label: t.academy?.liveSessions || 'الجلسات والبث المباشر', icon: Video },
             { href: '/academy/teacher/tasks', label: t.academy?.tasks || 'المهام', icon: ClipboardList },
-            { href: '/academy/teacher/competitions', label: t.academyAdmin?.sidebarCompetitionJudging || t.academy?.competitions || 'Competition Judging', icon: Trophy },
             { href: '/academy/teacher/students', label: t.academy?.myStudents || 'طلابي', icon: Users },
-            { href: '/academy/teacher/certificates', label: t.academy?.certificatesCenter || 'اعتماد الشهادات', icon: Award },
-            { href: '/academy/teacher/paths', label: t.academy?.learningPaths || 'المسارات التعليمية', icon: Route },
             { href: '/academy/teacher/halaqat', label: t.academy?.halaqat || 'الحلقات', icon: GraduationCap },
+            { href: '/academy/teacher/paths', label: t.academy?.learningPaths || 'المسارات التعليمية', icon: Route },
+            { href: '/academy/teacher/certificates', label: t.academy?.certificatesCenter || 'اعتماد الشهادات', icon: Award },
+            { href: '/academy/teacher/competitions', label: t.academyAdmin?.sidebarCompetitionJudging || 'تحكيم المسابقات', icon: Trophy },
+          ]
+        },
+        {
+          title: t.academyAdmin?.sidebarCommunity || 'المجتمع والمكتبة',
+          items: [
             { href: '/academy/teacher/chat', label: t.academy?.chat || 'الرسائل', icon: MessageSquare },
             { href: '/community/academy/forum', label: t.academy?.forum || 'المنتدى والمقالات', icon: FileText },
             { href: '/academy/fiqh', label: t.academy?.fiqhLibrary || 'المكتبة الفقهية', icon: Library },
