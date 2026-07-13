@@ -1,39 +1,31 @@
-import { getSession, isAnyAdmin, getAcademyRole } from "@/lib/auth"
+"use client"
+
+import useSWR from "swr"
 import HeaderNavClient from "./homepage-header-client"
 
-export default async function HomepageHeader() {
-  const session = await getSession()
+type AuthStatus = {
+  authenticated: boolean
+  user?: { role: string; name: string }
+  dashboardLink?: string
+  dashboardText?: string
+}
 
-  // Determine where to route the user if they're logged in
-  let dashboardLink: string | null = null
-  let dashboardText: string | null = null
+const fetcher = (url: string) =>
+  fetch(url, { cache: "no-store" }).then((r) => (r.ok ? r.json() : { authenticated: false }))
 
-  if (session) {
-    if (isAnyAdmin(session)) {
-      // Admins go to /admin
-      dashboardLink = "/admin"
-      dashboardText = "لوحة التحكم"
-    } else {
-      // Check for academy role
-      const academyRole = getAcademyRole(session)
-      if (academyRole) {
-        // Academy users go to /academy
-        dashboardLink = "/academy"
-        dashboardText = "الأكاديمية"
-      } else {
-        // Regular users go to their profile/dashboard
-        dashboardLink = "/dashboard"
-        dashboardText = "حسابي"
-      }
-    }
-  }
+export default function HomepageHeader() {
+  const { data } = useSWR<AuthStatus>("/api/auth/status", fetcher, {
+    revalidateOnFocus: false,
+  })
+
+  const isLoggedIn = !!data?.authenticated
 
   return (
-    <HeaderNavClient 
-      isLoggedIn={!!session}
-      dashboardLink={dashboardLink}
-      dashboardText={dashboardText}
-      userName={session?.name}
+    <HeaderNavClient
+      isLoggedIn={isLoggedIn}
+      dashboardLink={isLoggedIn ? (data?.dashboardLink ?? "/dashboard") : null}
+      dashboardText={isLoggedIn ? (data?.dashboardText ?? "حسابي") : null}
+      userName={data?.user?.name}
     />
   )
 }
