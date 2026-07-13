@@ -271,7 +271,7 @@ const getSuperConfig = (t: any): ShellConfig => ({
       ],
     },
   ],
-  label: 'المدير العام', name: 'المدير العام', sublabel: 'ال��دير العام',
+  label: 'المدير العام', name: 'المدير العام', sublabel: 'ال����دير العام',
 })
 
 // ── Maqraa mode ────────────────────────���─────────────────────────────���────��─
@@ -635,8 +635,8 @@ export function DashboardShell({ role, children, headerTitle, adminMode }: { rol
                       'flex items-center gap-3 rounded-xl transition-all text-sm group relative',
                       collapsed ? 'lg:justify-center lg:px-0 lg:py-3 px-4 py-3' : 'px-4 py-3',
                       active
-                        ? 'bg-primary/10 text-primary font-bold shadow-sm'
-                        : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                        ? 'bg-primary text-primary-foreground font-bold shadow-md'
+                        : 'text-muted-foreground hover:bg-primary/10 hover:text-primary'
                     )}
                   >
                     <item.icon className={cn("w-5 h-5 shrink-0 transition-transform duration-200", active && "scale-110")} />
@@ -645,7 +645,7 @@ export function DashboardShell({ role, children, headerTitle, adminMode }: { rol
                     {collapsed && collapsedDot != null && (
                       <span className="hidden lg:flex absolute -top-1 -left-1 bg-destructive text-destructive-foreground text-[9px] leading-none px-1 py-0.5 rounded-full min-w-[16px] h-[16px] items-center justify-center font-bold">{collapsedDot}</span>
                     )}
-                    {active && <div className={cn('absolute right-0 w-1 h-6 bg-primary rounded-l-full', collapsed && 'lg:hidden')} />}
+                    {active && <div className={cn('absolute right-0 w-1 h-6 bg-primary-foreground rounded-l-full', collapsed && 'lg:hidden')} />}
                   </Link>
                 )
                 if (collapsed) {

@@ -116,6 +116,34 @@ export function isAnyAdmin(session: JWTPayload | null): boolean {
   return isSuperAdmin(session) || isMaqraaAdmin(session) || isAcademyAdmin(session)
 }
 
+// Resolve the correct "home" landing page for a logged-in user based on their
+// role and platform access flags. This MUST stay in sync with the
+// `getRedirectPath` logic used on the login page so the homepage header button
+// never points at a non-existent route (e.g. the bare `/academy`, which has no
+// page and 404s). Approval-status routing is handled by middleware, not here.
+export function getRoleHomePath(session: JWTPayload | null): string {
+  if (!session) return "/login"
+  const role = session.role
+  if (role === "admin" || role === "super_admin") return "/admin"
+  if (role === "maqraa_admin") return "/admin"
+  if (role === "academy_admin") return "/academy/admin"
+  if (role === "student_supervisor" || role === "reciter_supervisor") return "/admin"
+  if (role === "fiqh_supervisor") return "/academy/fiqh-supervisor"
+  if (role === "content_supervisor") return "/academy/content-supervisor"
+  if (role === "supervisor") return "/academy/supervisor"
+  if (role === "quality_supervisor") return "/admin"
+  if (role === "reader") return "/reader"
+  if (role === "teacher") return "/academy/teacher"
+  if (role === "parent") return "/academy/parent"
+  // Student: route based on platform access flags.
+  const hasAcademy = session.has_academy_access !== false
+  const hasQuran = session.has_quran_access !== false
+  if (hasAcademy && !hasQuran) return "/academy/student"
+  if (!hasAcademy && hasQuran) return "/student"
+  // Both available → default to academy (the primary platform).
+  return "/academy/student"
+}
+
 // Get the user's primary academy role for routing
 export function getAcademyRole(session: JWTPayload | null): string | null {
   if (!session) return null
