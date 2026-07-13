@@ -29,6 +29,15 @@ import { AdminOnboardingTour } from '@/components/admin/admin-onboarding-tour'
 type NavItem = { href: string; label: string; icon: React.ElementType; badge?: number | string | null }
 type NavSection = { title?: string; items: NavItem[] }
 
+/**
+ * Wrap regular dashboard pages with this to get consistent padding.
+ * Pages that need a full-bleed sticky header (like admin/homepage) should
+ * NOT use this wrapper — they manage their own layout instead.
+ */
+export function DashboardPageWrapper({ children, className }: { children: React.ReactNode; className?: string }) {
+  return <div className={cn('p-6 lg:p-8', className)}>{children}</div>
+}
+
 const getRoleConfig = (t: any): Record<'student' | 'reader' | 'admin' | 'student_supervisor' | 'reciter_supervisor', { sections: NavSection[], label: string, name: string, sublabel: string }> => ({
   student: {
     sections: [
@@ -271,10 +280,10 @@ const getSuperConfig = (t: any): ShellConfig => ({
       ],
     },
   ],
-  label: 'المدير العام', name: 'المدير العام', sublabel: 'ال����دير العام',
+  label: 'المدير العام', name: 'المدير العام', sublabel: 'ال������دير العام',
 })
 
-// ── Maqraa mode ────────────────────────���─────────────────────────────���────��─
+// ── Maqraa mode ────────────────────────���─────────────────────────────���─���──��─
 // The classic admin sidebar, minus every platform-wide / general item that now
 // lives exclusively in the Super Admin (super mode) sidebar — so nothing is
 // duplicated across modes. Site identity (homepage/seo), security, backup,

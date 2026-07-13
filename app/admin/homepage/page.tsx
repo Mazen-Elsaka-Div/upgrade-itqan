@@ -103,25 +103,26 @@ export default function AdminHomepagePage() {
 
   return (
     <div dir={isAr ? 'rtl' : 'ltr'}>
-      {/* Header - Fixed flush at the top of the scroll area (cancels the main padding) */}
-      <div className="sticky top-0 z-20 -mt-6 lg:-mt-8 -mx-6 lg:-mx-8 bg-background/95 backdrop-blur-md border-b border-border">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 py-3 px-6 lg:px-8 max-w-5xl mx-auto">
-        <div className="flex items-center gap-3">
-          <Home className="w-8 h-8 text-[#1B5E3B]" />
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">{tr('إدارة الصفحة الرئيسية', 'Homepage Management')}</h1>
-            <p className="text-muted-foreground text-sm">{tr('تحكَّم في كل نص ولون وقسم في الصفحة الرئيسية', 'Control every text, color and section of the homepage')}</p>
+      {/* Sticky header — negative margin exactly cancels the <main> p-6 lg:p-8 padding
+          so the bar sticks flush to the very top of the scroll viewport */}
+      <div className="sticky top-[-1.5rem] lg:top-[-2rem] z-20 -mt-6 lg:-mt-8 -mx-6 lg:-mx-8 bg-background/95 backdrop-blur-md border-b border-border">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 py-3 px-6 lg:px-8">
+          <div className="flex items-center gap-3">
+            <Home className="w-8 h-8 text-[#1B5E3B]" />
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">{tr('إدارة الصفحة الرئيسية', 'Homepage Management')}</h1>
+              <p className="text-muted-foreground text-sm">{tr('تحكَّم في كل نص ولون وقسم في الصفحة الرئيسية', 'Control every text, color and section of the homepage')}</p>
+            </div>
           </div>
-        </div>
-        <Button onClick={handleSave} disabled={saving} className="bg-[#1B5E3B] hover:bg-[#1B5E3B]/90 text-white gap-2 shrink-0">
-          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : saved ? <CheckCircle className="w-4 h-4" /> : <Save className="w-4 h-4" />}
-          {saved ? tr('تم الحفظ', 'Saved') : tr('حفظ التغييرات', 'Save changes')}
-        </Button>
+          <Button onClick={handleSave} disabled={saving} className="bg-[#1B5E3B] hover:bg-[#1B5E3B]/90 text-white gap-2 shrink-0">
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : saved ? <CheckCircle className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+            {saved ? tr('تم الحفظ', 'Saved') : tr('حفظ التغييرات', 'Save changes')}
+          </Button>
         </div>
       </div>
 
       {/* Main content */}
-      <div className="p-4 sm:p-6 max-w-5xl mx-auto space-y-6">
+      <div className="p-4 sm:p-6 max-w-5xl mx-auto w-full space-y-6">
         {error && (
         <div className="bg-red-50 dark:bg-red-500/10 border border-red-300 dark:border-red-500/20 rounded-xl p-4 flex items-start gap-3">
           <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-500 mt-0.5 shrink-0" />
