@@ -514,20 +514,6 @@ export function AcademyDashboardShell({
           </button>
         </div>
 
-        {/* Academy Badge — only for non-admin roles */}
-        {!(showModeSwitcher && libraryRole === 'admin') && (
-        <div className={cn('border-b border-border', collapsed ? 'lg:px-2 lg:py-2 px-4 py-3' : 'px-4 py-3')}>
-          <div className={cn(
-            'rounded-lg bg-academy/10 text-academy',
-            collapsed ? 'lg:flex lg:items-center lg:justify-center lg:p-2 flex items-center gap-2 px-3 py-2' : 'flex items-center gap-2 px-3 py-2'
-          )}>
-            <GraduationCap className="w-5 h-5 shrink-0" />
-            <span className={cn('font-semibold text-sm', collapsed && 'lg:hidden')}>{t.academy?.title || 'الأكاديمية'}</span>
-            <Sparkles className={cn('w-4 h-4 mr-auto', collapsed && 'lg:hidden')} />
-          </div>
-        </div>
-        )}
-
         {/* Navigation */}
         <nav className={cn('flex-1 overflow-y-auto overflow-x-hidden py-6 space-y-1', collapsed ? 'lg:px-2 px-4' : 'px-4')}>
           {finalConfig.sections.map((section, si) => (
@@ -558,8 +544,8 @@ export function AcademyDashboardShell({
                       'flex items-center gap-3 rounded-xl transition-all text-sm group relative',
                       collapsed ? 'lg:justify-center lg:px-0 lg:py-3 px-4 py-3' : 'px-4 py-3',
                       active
-                        ? 'bg-academy/10 text-academy font-bold shadow-sm'
-                        : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                        ? 'bg-academy text-white font-bold shadow-md'
+                        : 'text-muted-foreground hover:bg-muted hover:text-academy'
                     )}
                   >
                     <item.icon className={cn(
@@ -581,7 +567,7 @@ export function AcademyDashboardShell({
                       <span className="hidden lg:flex absolute -top-1 -left-1 bg-destructive text-destructive-foreground text-[9px] leading-none px-1 py-0.5 rounded-full min-w-[16px] h-[16px] items-center justify-center font-bold">{collapsedDot}</span>
                     )}
                     {active && (
-                      <div className={cn('absolute right-0 w-1 h-6 bg-academy rounded-l-full', collapsed && 'lg:hidden')} />
+                      <div className={cn('absolute right-0 w-1 h-6 bg-white rounded-l-full', collapsed && 'lg:hidden')} />
                     )}
                   </Link>
                 )

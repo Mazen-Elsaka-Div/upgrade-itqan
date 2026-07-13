@@ -103,9 +103,9 @@ export default function AdminHomepagePage() {
 
   return (
     <div dir={isAr ? 'rtl' : 'ltr'}>
-      {/* Header - Fixed at top */}
-      <div className="sticky top-0 z-20 bg-background/80 backdrop-blur-sm border-b border-border">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 py-3 px-4 sm:px-6 max-w-5xl mx-auto">
+      {/* Header - Fixed flush at the top of the scroll area (cancels the main padding) */}
+      <div className="sticky top-0 z-20 -mt-6 lg:-mt-8 -mx-6 lg:-mx-8 bg-background/95 backdrop-blur-md border-b border-border">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 py-3 px-6 lg:px-8 max-w-5xl mx-auto">
         <div className="flex items-center gap-3">
           <Home className="w-8 h-8 text-[#1B5E3B]" />
           <div>
@@ -495,7 +495,7 @@ export default function AdminHomepagePage() {
               <div className="flex items-center justify-between gap-4 p-4 bg-muted/30 rounded-lg border border-border">
                 <div>
                   <p className="font-medium text-foreground text-sm">{tr('صفحة صيانة كاملة', 'Full maintenance page')}</p>
-                  <p className="text-xs text-muted-foreground">{tr('يُخفي الصفحة بالكامل ويعرض الرسالة فقط.', 'Hides the whole page and shows only the message.')}</p>
+                  <p className="text-xs text-muted-foreground">{tr('يُخفي ا��صفحة بالكامل ويعرض الرسالة فقط.', 'Hides the whole page and shows only the message.')}</p>
                 </div>
                 <Switch checked={asBool(settings.maintenance_full_page, false)} onCheckedChange={v => set('maintenance_full_page', v)} />
               </div>
