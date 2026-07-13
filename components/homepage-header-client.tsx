@@ -46,7 +46,7 @@ export default function HeaderNavClient({
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="sticky top-4 z-50 px-4 sm:px-6 lg:px-8"
+      className="sticky top-0 z-50 px-4 sm:px-6 lg:px-8 pt-3 pb-1 bg-hp-parchment dark:bg-hp-dark"
     >
       <div className="max-w-[1000px] lg:max-w-[1400px] w-full mx-auto bg-hp-cream/95 dark:bg-hp-dark/95 backdrop-blur-md border border-hp-ink/10 dark:border-hp-cream/10 shadow-xl rounded-full h-16 px-4 sm:px-5 lg:px-6 flex items-center justify-between gap-4">
         {/* Logo */}
