@@ -120,27 +120,23 @@ export function useSystemSettings() {
 
     setSaving(true)
     try {
-      const updates = Object.entries(pendingChanges).map(
-        ([key, value]) => ({
-          setting_key: key,
-          setting_value: value,
-          setting_type: key.split("_").slice(0, 2).join("_"), // Extract type from key
-        })
-      )
+      const res = await fetch("/api/system/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ settings: pendingChanges }),
+      })
 
-      for (const update of updates) {
-        const res = await fetch("/api/system/settings", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(update),
-        })
-
-        if (!res.ok) {
-          throw new Error(`Failed to save ${update.setting_key}`)
-        }
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.error || "Failed to save settings")
       }
 
-      toast.success(t.common?.saved || "Settings saved successfully")
+      const result = await res.json()
+      if (result.warning) {
+        toast.warning(result.warning)
+      } else {
+        toast.success(t.common?.saved || "Settings saved successfully")
+      }
       setPendingChanges({})
       mutate("/api/system/settings")
     } catch (error: any) {

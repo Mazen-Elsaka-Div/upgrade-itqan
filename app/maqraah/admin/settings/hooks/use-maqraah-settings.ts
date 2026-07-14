@@ -56,12 +56,15 @@ export function useMaqraahSettings() {
 
   const hasUnsavedChanges = Object.keys(pendingChanges).length > 0
 
+  // Accepts either (updates: Partial<MaqraahSettings>) or (key: string, value: any)
+  // to stay compatible with both old-style object-spread components and new-style single-key calls
   const updateSettings = useCallback(
-    (key: string, value: any) => {
-      setPendingChanges((prev) => ({
-        ...prev,
-        [key]: value,
-      }))
+    (updatesOrKey: Partial<MaqraahSettings> | string, value?: any) => {
+      if (typeof updatesOrKey === "string") {
+        setPendingChanges((prev) => ({ ...prev, [updatesOrKey]: value }))
+      } else {
+        setPendingChanges((prev) => ({ ...prev, ...updatesOrKey }))
+      }
     },
     []
   )
@@ -74,27 +77,23 @@ export function useMaqraahSettings() {
 
     setSaving(true)
     try {
-      const updates = Object.entries(pendingChanges).map(
-        ([key, value]) => ({
-          setting_key: key,
-          setting_value: value,
-          setting_type: key.split("_").slice(0, 2).join("_"),
-        })
-      )
+      const res = await fetch("/api/maqraah/admin/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ settings: pendingChanges }),
+      })
 
-      for (const update of updates) {
-        const res = await fetch("/api/maqraah/admin/settings", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(update),
-        })
-
-        if (!res.ok) {
-          throw new Error(`Failed to save ${update.setting_key}`)
-        }
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.error || "Failed to save settings")
       }
 
-      toast.success(t.common?.saved || "Settings saved successfully")
+      const result = await res.json()
+      if (result.warning) {
+        toast.warning(result.warning)
+      } else {
+        toast.success(t.common?.saved || "Settings saved successfully")
+      }
       setPendingChanges({})
       mutate("/api/maqraah/admin/settings")
     } catch (error: any) {
