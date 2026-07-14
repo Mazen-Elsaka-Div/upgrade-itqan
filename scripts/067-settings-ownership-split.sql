@@ -1,281 +1,132 @@
--- ==========================================
--- MIGRATION 067: Settings Ownership Split
--- ============================ ============
--- Separates SYSTEM (super admin) settings from PLATFORM-SPECIFIC (academy/maqraah) settings
--- Eliminates duplicate keys and consolidates SMTP configuration
--- Run AFTER: 066-* (if exists)
--- Run BEFORE: Any backend code that uses new keys
--- ==========================================
+-- ============================================================================
+-- 067 — Settings Ownership Split (Non-Breaking)
+-- ============================================================================
+-- Goal: enforce clean ownership of settings across the 3 platforms WITHOUT
+-- renaming any setting_key (so every getSetting(key) consumer keeps working).
+--
+-- Ownership model:
+--   * SYSTEM  (Super Admin)   → setting_type LIKE 'system_%'
+--       site-wide only: identity, email/SMTP, security, notifications,
+--       maintenance (with scope), SEO, storage.
+--   * ACADEMY (Academy Admin) → setting_key LIKE 'academy_%' (unchanged)
+--   * MAQRAAH (Maqraah Admin) → setting_key LIKE 'maqraah_%' (unchanged)
+--
+-- We ONLY change setting_type (ownership label), delete the duplicated
+-- security/maintenance rows in the academy/maqraah namespaces, and introduce a
+-- single system maintenance set that carries a SCOPE. No key renames.
+-- getSetting() reads rows by setting_key, so changing setting_type is safe.
+-- ============================================================================
 
--- ============================================
--- STEP 1: BACKUP CURRENT STATE (FOR SAFETY)
--- ============================================
--- Create a backup table before any modifications
-CREATE TABLE IF NOT EXISTS system_settings_backup_067 AS
-SELECT * FROM system_settings;
+BEGIN;
 
--- Add a migration marker
-INSERT INTO system_settings (setting_key, setting_value, setting_type, description, updated_at)
-VALUES (
-  'migration_067_executed_at',
-  NOW()::text,
-  'system_migration',
-  'Timestamp of migration 067 execution for audit trail',
-  NOW()
-)
-ON CONFLICT (setting_key) DO UPDATE SET
-  setting_value = NOW()::text,
-  updated_at = NOW();
+-- 0) Safety backup (idempotent) -----------------------------------------------
+DROP TABLE IF EXISTS system_settings_backup_067;
+CREATE TABLE system_settings_backup_067 AS TABLE system_settings;
 
--- ============================================
--- STEP 2: IDENTIFY CURRENT KEYS (SANITY CHECK)
--- ============================================
--- Count keys by category before migration
--- academy_* = SHOULD BE MOVED TO system_*
--- maqraah_* = STAYS IN maqraah_*
--- (queries below for reference, not executed)
-
--- SELECT setting_key, COUNT(*) FROM system_settings
--- WHERE setting_type IN ('academy_general', 'academy_security', 'academy_maintenance')
--- GROUP BY setting_key;
-
--- ============================================
--- STEP 3: CONSOLIDATE SYSTEM SETTINGS
--- ============================================
--- These are SITE-WIDE settings managed by Super Admin
--- They are GENERAL settings, NOT academy or maqraah specific
-
--- 3.1: GENERAL / SITE INFO → system_general_*
-UPDATE system_settings 
-SET 
-  setting_key = CASE 
-    WHEN setting_key = 'site_name' THEN 'system_general_site_name'
-    WHEN setting_key = 'site_tagline' THEN 'system_general_site_tagline'
-    WHEN setting_key = 'site_contact_email' THEN 'system_general_contact_email'
-    WHEN setting_key = 'site_contact_phone' THEN 'system_general_contact_phone'
-    WHEN setting_key = 'site_timezone' THEN 'system_general_timezone'
-    WHEN setting_key = 'site_default_language' THEN 'system_general_language'
-    WHEN setting_key = 'site_info' THEN 'system_general_site_info'
-    WHEN setting_key = 'site_social_links' THEN 'system_general_social_links'
-    ELSE setting_key
-  END,
-  setting_type = CASE
-    WHEN setting_key IN ('site_name', 'site_tagline', 'site_contact_email', 'site_contact_phone', 'site_timezone', 'site_default_language', 'site_info', 'site_social_links')
-    THEN 'system_general'
-    ELSE setting_type
-  END
-WHERE setting_key IN ('site_name', 'site_tagline', 'site_contact_email', 'site_contact_phone', 'site_timezone', 'site_default_language', 'site_info', 'site_social_links');
-
--- 3.2: MAINTENANCE → system_maintenance_*
-UPDATE system_settings
-SET
-  setting_key = CASE
-    WHEN setting_key = 'site_maintenance_enabled' THEN 'system_maintenance_enabled'
-    WHEN setting_key = 'site_maintenance_message' THEN 'system_maintenance_message'
-    WHEN setting_key = 'maintenance_mode' THEN 'system_maintenance_enabled'
-    WHEN setting_key = 'maintenance_message' THEN 'system_maintenance_message'
-    ELSE setting_key
-  END,
-  setting_type = CASE
-    WHEN setting_key IN ('site_maintenance_enabled', 'site_maintenance_message', 'maintenance_mode', 'maintenance_message')
-    THEN 'system_maintenance'
-    ELSE setting_type
-  END
-WHERE setting_key IN ('site_maintenance_enabled', 'site_maintenance_message', 'maintenance_mode', 'maintenance_message');
-
--- 3.3: SECURITY → system_security_*
-UPDATE system_settings
-SET
-  setting_key = CASE
-    WHEN setting_key = 'activity_logging' THEN 'system_security_activity_logging'
-    WHEN setting_key = 'limit_login_attempts' THEN 'system_security_limit_login_attempts'
-    WHEN setting_key = 'security_settings' THEN 'system_security_settings'
-    ELSE setting_key
-  END,
-  setting_type = CASE
-    WHEN setting_key IN ('activity_logging', 'limit_login_attempts', 'security_settings')
-    THEN 'system_security'
-    ELSE setting_type
-  END
-WHERE setting_key IN ('activity_logging', 'limit_login_attempts', 'security_settings');
-
--- 3.4: BRANDING → system_branding_*
-UPDATE system_settings
-SET
-  setting_key = CASE
-    WHEN setting_key = 'branding' THEN 'system_branding_assets'
-    ELSE setting_key
-  END,
-  setting_type = CASE
-    WHEN setting_key = 'branding' THEN 'system_branding'
-    ELSE setting_type
-  END
-WHERE setting_key = 'branding';
-
--- 3.5: CONTACT INFO → system_contact_*
-UPDATE system_settings
-SET
-  setting_key = CASE
-    WHEN setting_key = 'contact_info' THEN 'system_contact_info'
-    ELSE setting_key
-  END,
-  setting_type = CASE
-    WHEN setting_key = 'contact_info' THEN 'system_contact'
-    ELSE setting_type
-  END
-WHERE setting_key = 'contact_info';
-
--- ============================================
--- STEP 4: CONSOLIDATE SMTP (SINGLE SOURCE)
--- ============================================
--- SMTP is shared across all platforms, managed by Super Admin only
--- Keep only ONE version: system_email_smtp_config
-
-DELETE FROM system_settings
-WHERE setting_key IN ('smtp_user', 'smtp_pass', 'smtp_host', 'smtp_port', 'smtp_tls')
-AND setting_type = 'email';
-
--- Consolidate the main SMTP config
-UPDATE system_settings
-SET
-  setting_key = 'system_email_smtp_config',
-  setting_type = 'system_email'
-WHERE setting_key = 'smtp_config' AND setting_type = 'email';
-
--- ============================================
--- STEP 5: REMOVE ACADEMY-SPECIFIC DUPLICATES
--- ============================================
--- The Academy shares system-wide settings (general, security, maintenance, email)
--- Do NOT delete academy_* keys yet — we'll keep them for reference during gradual rollout
--- Just mark them as deprecated and point to system_* equivalents
-
-UPDATE system_settings
-SET description = 'DEPRECATED: Use system_* equivalent. Kept for backward compatibility only.'
-WHERE setting_type IN ('academy_general', 'academy_security', 'academy_maintenance')
-AND setting_key IN (
-  'academy_general_name',
-  'academy_general_logo',
-  'academy_general_favicon',
-  'academy_general_description',
-  'academy_general_contact_email',
-  'academy_general_whatsapp',
-  'academy_general_timezone',
-  'academy_general_language',
-  'academy_general_direction',
-  'academy_security_session_timeout',
-  'academy_security_max_login_attempts',
-  'academy_security_lock_duration',
-  'academy_security_password_policy',
-  'academy_security_admin_2fa',
-  'academy_security_admin_ip_whitelist',
-  'academy_security_activity_logs_enabled',
-  'academy_security_api_rate_limit',
-  'academy_security_daily_upload_limit_mb',
-  'academy_maintenance_enabled',
-  'academy_maintenance_message',
-  'academy_maintenance_allowed_ips'
-);
-
--- ============================================
--- STEP 6: KEEP ACADEMY-SPECIFIC SETTINGS
--- ============================================
--- These are features of the Academy module and must stay
--- (courses, registration, sessions, gamification, forum, notifications about academy)
-
--- No changes needed — they are correctly namespaced as academy_*
-
--- ============================================
--- STEP 7: KEEP MAQRAAH-SPECIFIC SETTINGS
--- ============================================
--- These are features of the Maqraah module
--- (halaqat, readers, recitations, paths, points, competitions, notifications about maqraah)
-
--- No changes needed — they are correctly namespaced as maqraah_*
-
--- ============================================
--- STEP 8: HOMEPAGE SETTINGS → system_homepage_*
--- ============================================
-UPDATE system_settings
-SET
-  setting_type = 'system_homepage'
-WHERE setting_type = 'homepage';
-
--- ============================================
--- STEP 9: REMOVE DUPLICATE/OBSOLETE KEYS
--- ============================================
--- These are old, unused keys that don't fit the new scheme
-
-DELETE FROM system_settings
+-- 1) SYSTEM: identity / general site config -----------------------------------
+UPDATE system_settings SET setting_type = 'system_general'
 WHERE setting_key IN (
-  'platform_name',
-  'surah_name',
-  'app_url', -- moved to system_general
-  'default_session_duration',
-  'max_daily_sessions_per_reader',
-  'max_sessions_per_reader_daily',
-  'max_file_size_mb',
-  'reader_assignment_strategy',
-  'reader_attachment_required',
-  'reader_certificate_field_visible',
-  'reader_certificate_required',
-  'reader_experience_field_visible',
-  'recording_max_seconds',
-  'resend_email_on_result_change',
-  'resend_email_on_result_update',
-  'session_duration_minutes',
-  'show_certificate_section',
-  'show_qualification_field',
-  'show_years_of_experience',
-  'certificate_data_required',
-  'certificate_mandatory_for_mastered',
-  'certificate_pdf_required',
-  'certificate_section_enabled',
-  'global_ceremony_date',
-  'booking_settings'
+  'platform_name','site_name','site_tagline','site_info','site_default_language',
+  'site_timezone','app_url','branding','contact_info','social_links',
+  'site_social_links','site_contact_email','site_contact_phone','theme_config'
 );
 
--- ============================================
--- STEP 10: ADD NEW SYSTEM SETTINGS
--- ============================================
--- If these don't exist, add them
+-- 2) SYSTEM: email / SMTP ------------------------------------------------------
+UPDATE system_settings SET setting_type = 'system_email'
+WHERE setting_key IN (
+  'smtp_config','smtp_host','smtp_port','smtp_user','smtp_pass','smtp_tls'
+);
 
-INSERT INTO system_settings (setting_key, setting_value, setting_type, description, updated_at)
-VALUES (
-  'system_general_app_url',
-  NULL,
-  'system_general',
-  'Application base URL for links and redirects',
-  NOW()
-)
-ON CONFLICT (setting_key) DO NOTHING;
+-- 3) SYSTEM: SEO ---------------------------------------------------------------
+UPDATE system_settings SET setting_type = 'system_seo'
+WHERE setting_key LIKE 'seo_%';
 
-INSERT INTO system_settings (setting_key, setting_value, setting_type, description, updated_at)
-VALUES (
-  'system_security_activity_logging_enabled',
-  true,
-  'system_security',
-  'Enable audit trail logging for admin actions',
-  NOW()
-)
-ON CONFLICT (setting_key) DO NOTHING;
+-- 4) SYSTEM: security / privacy ------------------------------------------------
+UPDATE system_settings SET setting_type = 'system_security'
+WHERE setting_key IN (
+  'security_settings','activity_logging','limit_login_attempts','two_factor_auth'
+);
 
--- ============================================
--- STEP 11: VERIFY MIGRATION
--- ============================================
--- Count final keys by type
--- SELECT setting_type, COUNT(*) as count FROM system_settings GROUP BY setting_type ORDER BY count DESC;
+-- 5) SYSTEM: notifications -----------------------------------------------------
+UPDATE system_settings SET setting_type = 'system_notifications'
+WHERE setting_key IN (
+  'notification_settings','resend_email_on_result_change','resend_email_on_result_update'
+);
 
--- Show all system_* keys (should be comprehensive now)
--- SELECT setting_key, setting_type FROM system_settings WHERE setting_type LIKE 'system_%' ORDER BY setting_key;
+-- 6) SYSTEM: storage -----------------------------------------------------------
+UPDATE system_settings SET setting_type = 'system_storage'
+WHERE setting_key IN (
+  'storage_config','storage_provider','cloud_api_key','cloud_name','max_file_size_mb'
+);
 
--- ============================================
--- MIGRATION COMPLETE
--- ============================================
--- Next steps:
--- 1. Update API routes to use system_* keys
--- 2. Update lib/settings.ts to use system_* keys
--- 3. Update hooks to use system_* keys
--- 4. Create new Maqraah admin settings page
--- 5. Update dashboard navigation
--- 6. Test with all 3 admin roles
--- 7. Optional: Delete deprecated academy_general/security/maintenance keys after verification
+-- 7) Reclassify legacy operational keys out of the super-admin surface ---------
+--    (reader/session/certificate/etc. — consumed by app code via getSetting,
+--     NOT site-wide identity). Neutral 'platform_legacy' type keeps them working
+--     while removing them from the System settings UI.
+UPDATE system_settings SET setting_type = 'platform_legacy'
+WHERE setting_key IN (
+  'booking_settings','certificate_data_required','certificate_mandatory_for_mastered',
+  'certificate_pdf_required','certificate_section_enabled','default_session_duration',
+  'global_ceremony_date','max_daily_sessions_per_reader','max_sessions_per_reader_daily',
+  'reader_assignment_strategy','reader_attachment_required','reader_certificate_field_visible',
+  'reader_certificate_required','reader_experience_field_visible','recording_max_seconds',
+  'session_duration_minutes','show_certificate_section','show_qualification_field',
+  'show_years_of_experience','surah_name','workflow_statuses'
+);
+
+-- 8) SYSTEM maintenance — single source of truth, WITH scope ------------------
+--    Migrate ON/OFF + message from the old maqraah/site values; default scope 'site'.
+INSERT INTO system_settings (setting_key, setting_value, setting_type, updated_at)
+VALUES
+  (
+    'maintenance_enabled',
+    COALESCE(
+      (SELECT setting_value FROM system_settings WHERE setting_key = 'maqraah_maintenance_mode'),
+      (SELECT setting_value FROM system_settings WHERE setting_key = 'site_maintenance_enabled'),
+      'false'::jsonb
+    ),
+    'system_maintenance',
+    NOW()
+  ),
+  (
+    'maintenance_message',
+    COALESCE(
+      (SELECT setting_value FROM system_settings WHERE setting_key = 'maqraah_maintenance_message'),
+      (SELECT setting_value FROM system_settings WHERE setting_key = 'site_maintenance_message'),
+      '"المنصة تحت الصيانة حالياً، نعود قريباً بإذن الله."'::jsonb
+    ),
+    'system_maintenance',
+    NOW()
+  ),
+  (
+    'maintenance_scope',
+    '"site"'::jsonb,   -- one of: site | academy | maqraah
+    'system_maintenance',
+    NOW()
+  )
+ON CONFLICT (setting_key) DO UPDATE
+  SET setting_type = EXCLUDED.setting_type,
+      updated_at = NOW();
+
+-- 9) DELETE duplicated / superseded rows --------------------------------------
+--    Security & maintenance must live ONLY under system ownership.
+DELETE FROM system_settings WHERE setting_key LIKE 'academy_security_%';
+DELETE FROM system_settings WHERE setting_key LIKE 'academy_maintenance_%';
+DELETE FROM system_settings WHERE setting_key LIKE 'maqraah_security_%';
+DELETE FROM system_settings WHERE setting_key LIKE 'maqraah_maintenance_%';
+DELETE FROM system_settings WHERE setting_key IN (
+  'site_maintenance_enabled','site_maintenance_message'
+);
+
+COMMIT;
+
+-- ============================================================================
+-- Verification (run after commit):
+--   SELECT setting_type, COUNT(*) FROM system_settings GROUP BY setting_type ORDER BY 1;
+--   SELECT setting_key FROM system_settings WHERE setting_type LIKE 'system_%' ORDER BY 1;
+-- Rollback (if needed):
+--   BEGIN;
+--   DELETE FROM system_settings;
+--   INSERT INTO system_settings SELECT * FROM system_settings_backup_067;
+--   COMMIT;
+-- ============================================================================
