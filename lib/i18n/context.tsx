@@ -30,14 +30,15 @@ const en_typed: TranslationSchema = en
  * Any key missing in the target locale falls back to the Arabic value
  * instead of rendering blank. Arrays and primitives are replaced wholesale.
  */
-function deepMerge<T>(base: T, override: Partial<T>): T {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function deepMerge(base: any, override: any): any {
   if (Array.isArray(base) || typeof base !== 'object' || base === null) {
-    return (override ?? base) as T
+    return override ?? base
   }
-  const result: any = Array.isArray(base) ? [...(base as any)] : { ...base }
-  for (const key of Object.keys(base as any)) {
-    const b = (base as any)[key]
-    const o = (override as any)?.[key]
+  const result: any = { ...base }
+  for (const key of Object.keys(base)) {
+    const b = base[key]
+    const o = override?.[key]
     if (b && typeof b === 'object' && !Array.isArray(b)) {
       result[key] = deepMerge(b, o ?? {})
     } else {
@@ -50,7 +51,7 @@ function deepMerge<T>(base: T, override: Partial<T>): T {
 // Precompute merged tables once (module scope) so every locale is fully populated.
 const translations: Record<Locale, TranslationSchema> = {
   ar,
-  en: deepMerge(ar, en_typed),
+  en: deepMerge(ar, en_typed) as TranslationSchema,
 }
 
 const LOCALE_STORAGE_KEY = 'itqan-locale'
