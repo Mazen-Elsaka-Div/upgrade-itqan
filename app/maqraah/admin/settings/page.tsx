@@ -37,49 +37,49 @@ import {
 const getTabs = (a: any) => [
   {
     id: "general",
-    label: a.setTabGeneral || "General",
+    label: a.setTabGeneral || "عام",
     icon: Globe,
     prefix: "maqraah_general_",
   },
   {
     id: "readers",
-    label: a.setTabReaders || "Readers",
+    label: a.setTabReaders || "المقرئون والطلاب",
     icon: Users,
     prefix: "maqraah_readers_",
   },
   {
     id: "halaqat",
-    label: a.setTabHalaqat || "Halaqat",
+    label: a.setTabHalaqat || "الحلقات والجلسات",
     icon: BookOpen,
     prefix: "maqraah_halaqat_",
   },
   {
     id: "recitations",
-    label: a.setTabRecitations || "Recitations",
+    label: a.setTabRecitations || "التلاوات والتقييم",
     icon: Mic,
     prefix: "maqraah_recitations_",
   },
   {
     id: "paths",
-    label: a.setTabPaths || "Paths",
+    label: a.setTabPaths || "مسارات الحفظ والتجويد",
     icon: Route,
     prefix: "maqraah_paths_",
   },
   {
     id: "gamification",
-    label: a.setTabGamification || "Gamification",
+    label: a.setTabGamification || "النقاط والمستويات",
     icon: Trophy,
     prefix: "maqraah_points_",
   },
   {
     id: "competitions",
-    label: a.setTabCompetitions || "Competitions",
+    label: a.setTabCompetitions || "المسابقات والشهادات",
     icon: Award,
     prefix: "maqraah_competitions_",
   },
   {
     id: "notifications",
-    label: a.setTabNotifications || "Notifications",
+    label: a.setTabNotifications || "الإشعارات والبريد",
     icon: Bell,
     prefix: "maqraah_notifications_",
   },
@@ -210,7 +210,7 @@ export default function MaqraahAdminSettingsPage() {
           <div className="flex items-center gap-3">
             <Settings className="h-6 w-6 text-primary" />
             <h1 className="text-2xl font-bold">
-              {a.maqraahSettingsTitle || "Maqraah Settings"}
+              {a.maqraahSettingsTitle || "إعدادات المقرأة"}
             </h1>
           </div>
           {hasUnsavedChanges && (
@@ -243,7 +243,7 @@ export default function MaqraahAdminSettingsPage() {
       <Alert className="m-4 md:m-6 border-blue-200 bg-blue-50">
         <AlertDescription className="text-blue-700">
           {a.maqraahSettingsHint ||
-            "Configure settings specific to the Maqraah module. These settings do not affect the Academy."}
+            "إعدادات خاصة بالمقرأة فقط. لا تؤثر هذه الإعدادات على الأكاديمية أو باقي الموقع."}
         </AlertDescription>
       </Alert>
 
