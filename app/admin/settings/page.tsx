@@ -15,7 +15,6 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { useSystemSettings } from "./hooks/use-system-settings"
@@ -100,17 +99,17 @@ export default function SystemSettingsPage() {
   const activeTabMeta = TABS.find((t) => t.id === activeTab)
 
   return (
-    <div className="flex h-full flex-col bg-background -mx-6 lg:-mx-8 -mt-6 lg:-mt-8">
+    <div className="flex flex-col gap-6">
 
       {/* ─── Header ─────────────────────────────────── */}
-      <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-background/95 px-6 py-3 backdrop-blur">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card px-4 py-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
             <Settings className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <h1 className="text-base font-bold leading-none">إعدادات النظام</h1>
-            <p className="mt-0.5 text-xs text-muted-foreground">
+            <h1 className="text-lg font-bold leading-none">إعدادات النظام</h1>
+            <p className="mt-1 text-xs text-muted-foreground">
               {activeTabMeta?.description}
             </p>
           </div>
@@ -145,44 +144,42 @@ export default function SystemSettingsPage() {
         )}
       </div>
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)]">
 
         {/* ─── Desktop Sidebar ─────────────────────── */}
         {!isMobile && (
-          <aside className="w-56 shrink-0 border-l bg-muted/30">
-            <ScrollArea className="h-full">
-              <nav className="space-y-0.5 p-3">
-                {TABS.map((tab) => {
-                  const Icon = tab.icon
-                  return (
-                    <button
-                      key={tab.id}
-                      type="button"
-                      onClick={() => setActiveTab(tab.id)}
-                      className={cn(
-                        "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                        activeTab === tab.id
-                          ? "bg-primary text-primary-foreground"
-                          : "text-muted-foreground hover:bg-accent hover:text-foreground"
-                      )}
-                    >
-                      <Icon className="h-4 w-4 shrink-0" />
-                      {tab.label}
-                    </button>
-                  )
-                })}
-              </nav>
-            </ScrollArea>
+          <aside className="lg:sticky lg:top-6 lg:self-start">
+            <nav className="space-y-1 rounded-xl border bg-card p-2">
+              {TABS.map((tab) => {
+                const Icon = tab.icon
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveTab(tab.id)}
+                    className={cn(
+                      "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                      activeTab === tab.id
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                    )}
+                  >
+                    <Icon className="h-4 w-4 shrink-0" />
+                    {tab.label}
+                  </button>
+                )
+              })}
+            </nav>
           </aside>
         )}
 
         {/* ─── Mobile Selector ─────────────────────── */}
         {isMobile && (
-          <div className="w-full border-b px-4 py-2">
+          <div className="w-full">
             <select
               value={activeTab}
               onChange={(e) => setActiveTab(e.target.value as TabId)}
-              className="w-full rounded-lg border bg-background px-3 py-2 text-sm"
+              className="w-full rounded-lg border bg-card px-3 py-2.5 text-sm font-medium"
             >
               {TABS.map((tab) => (
                 <option key={tab.id} value={tab.id}>
@@ -194,11 +191,9 @@ export default function SystemSettingsPage() {
         )}
 
         {/* ─── Content ─────────────────────────────── */}
-        <ScrollArea className="flex-1">
-          <div className="max-w-3xl p-6">
-            {renderContent()}
-          </div>
-        </ScrollArea>
+        <div className="min-w-0">
+          {renderContent()}
+        </div>
       </div>
     </div>
   )
