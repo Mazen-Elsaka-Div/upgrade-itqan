@@ -7,4 +7,4 @@ export { PathsSettings } from "./paths-settings"
 export { GamificationSettings } from "./gamification-settings"
 export { CompetitionsSettings } from "./competitions-settings"
 export { NotificationsSettings } from "./notifications-settings"
-export { SecuritySettings } from "./security-settings"
+// Security and Maintenance are managed by Super Admin → /admin/settings
