@@ -8,7 +8,19 @@ export type Locale = 'ar' | 'en'
 
 // The Arabic locale is the single source of truth for the shape of translations.
 // Every other locale must match this shape — TypeScript enforces it below.
-export type TranslationSchema = typeof ar
+//
+// Two legacy namespaces (`addedTranslations_2026`, `extracted_2026_v2`) use raw
+// Arabic strings as keys and are accessed dynamically via `(t as any)[...]`.
+// Their keys legitimately differ between locales, so we loosen them to a string
+// map instead of forcing key-for-key parity — everything else stays strictly typed.
+type RawSchema = typeof ar
+export type TranslationSchema = Omit<RawSchema, 'addedTranslations_2026' | 'extracted_2026_v2'> & {
+  addedTranslations_2026: Record<string, string>
+  extracted_2026_v2: Record<string, any>
+}
+
+// Backward-compatible alias: existing code imports `Translations`.
+export type Translations = TranslationSchema
 
 // New locales are typed against the AR schema, so a missing/renamed key is a build error.
 const en_typed: TranslationSchema = en
