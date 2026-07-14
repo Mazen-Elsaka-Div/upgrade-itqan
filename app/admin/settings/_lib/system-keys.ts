@@ -45,14 +45,17 @@ export const SYSTEM_KEY_TYPES: Record<string, string> = {
   maintenance_message: "system_maintenance",
 
   // SEO
-  seo_site_title: "system_seo",
-  seo_site_description: "system_seo",
+  seo_title: "system_seo",
+  seo_description: "system_seo",
   seo_keywords: "system_seo",
   seo_og_image: "system_seo",
   seo_robots: "system_seo",
   seo_canonical_base: "system_seo",
   seo_google_verification: "system_seo",
   seo_twitter_site: "system_seo",
+  // legacy aliases kept for backward compat
+  seo_site_title: "system_seo",
+  seo_site_description: "system_seo",
 }
 
 export function isSystemKey(key: string): boolean {

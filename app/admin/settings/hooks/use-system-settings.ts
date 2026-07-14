@@ -101,13 +101,16 @@ export function useSystemSettings() {
   ) || {}
 
   const hasUnsavedChanges = Object.keys(pendingChanges).length > 0
+  const pendingCount      = Object.keys(pendingChanges).length
 
+  // Accepts (updates: Record<string,any>) or (key: string, value: any)
   const updateSettings = useCallback(
-    (key: string, value: any) => {
-      setPendingChanges((prev) => ({
-        ...prev,
-        [key]: value,
-      }))
+    (updatesOrKey: Record<string, any> | string, value?: any) => {
+      if (typeof updatesOrKey === "string") {
+        setPendingChanges((prev) => ({ ...prev, [updatesOrKey]: value }))
+      } else {
+        setPendingChanges((prev) => ({ ...prev, ...updatesOrKey }))
+      }
     },
     []
   )
@@ -159,6 +162,7 @@ export function useSystemSettings() {
     error,
     saving,
     hasUnsavedChanges,
+    pendingCount,
     updateSettings,
     saveChanges,
     discardChanges,

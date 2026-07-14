@@ -11,7 +11,6 @@ import {
   Trophy,
   Award,
   Bell,
-  Shield,
   Save,
   X,
   Loader2,
@@ -33,7 +32,6 @@ import {
   GamificationSettings,
   CompetitionsSettings,
   NotificationsSettings,
-  SecuritySettings,
 } from "./_components"
 
 const getTabs = (a: any) => [
@@ -84,12 +82,6 @@ const getTabs = (a: any) => [
     label: a.setTabNotifications || "Notifications",
     icon: Bell,
     prefix: "maqraah_notifications_",
-  },
-  {
-    id: "security",
-    label: a.setTabSecurity || "Security",
-    icon: Shield,
-    prefix: "maqraah_security_",
   },
 ]
 
@@ -188,13 +180,6 @@ export default function MaqraahAdminSettingsPage() {
       case "notifications":
         return (
           <NotificationsSettings
-            settings={settings}
-            onUpdate={updateSettings}
-          />
-        )
-      case "security":
-        return (
-          <SecuritySettings
             settings={settings}
             onUpdate={updateSettings}
           />

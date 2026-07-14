@@ -1,8 +1,8 @@
-// System Settings Components (Super Admin Only)
-export { GeneralSettings } from "./general-settings"
-export { MaintenanceSettings } from "./maintenance-settings"
-export { SecuritySettings } from "./security-settings"
+// System Settings Components — Super Admin Only
+// هذه المكونات تقرأ وتكتب المفاتيح الموجودة في DB مباشرةً (بدون إعادة تسمية)
+export { IdentitySettings } from "./identity-settings"
 export { EmailSettings } from "./email-settings"
-export { BrandingSettings } from "./branding-settings"
-export { ContactSettings } from "./contact-settings"
-export { HomepageSettings } from "./homepage-settings"
+export { SecuritySettings } from "./security-settings"
+export { NotificationsSettings } from "./notifications-settings"
+export { MaintenanceSettings } from "./maintenance-settings"
+export { SeoSettings } from "./seo-settings"
