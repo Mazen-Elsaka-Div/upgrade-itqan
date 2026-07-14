@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
-import { requireRole } from "@/lib/auth"
+import { getSession, requireRole } from "@/lib/auth"
+import { query } from "@/lib/db"
+import { clearSettingCache } from "@/lib/settings"
 
 /**
  * Maqraah Settings API (Maqraah Admin Only)
@@ -12,109 +13,110 @@ import { requireRole } from "@/lib/auth"
  * Does NOT include general/security/maintenance (those are system-wide)
  */
 
-export async function GET(request: NextRequest) {
+// Validate setting key belongs to maqraah namespace
+function validateMaqraahKey(key: string): boolean {
+  const maqraahPrefixes = [
+    "maqraah_general_",
+    "maqraah_readers_",
+    "maqraah_halaqat_",
+    "maqraah_recitations_",
+    "maqraah_paths_",
+    "maqraah_points_",
+    "maqraah_competitions_",
+    "maqraah_notifications_",
+  ]
+  return maqraahPrefixes.some((prefix) => key.startsWith(prefix))
+}
+
+export async function GET() {
+  const session = await getSession()
+  if (!session || !requireRole(session, ["maqraa_admin"])) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+
   try {
-    // Maqraah Admin role check (NOT academy_admin or super_admin)
-    const user = await requireRole("maqraa_admin")
+    const settings = await query(
+      `SELECT setting_key, setting_value, setting_type, updated_at, u.name AS modified_by
+       FROM system_settings s
+       LEFT JOIN users u ON u.id = s.updated_by
+       WHERE s.setting_key LIKE 'maqraah_%'
+       ORDER BY s.setting_type, s.setting_key`
+    )
 
-    const client = await createClient()
-
-    // Fetch ONLY maqraah_* settings (prefixed with 'maqraah_')
-    const { data: settings, error } = await client
-      .from("system_settings")
-      .select("*")
-      .like("setting_key", "maqraah_%")
-      .order("setting_type", { ascending: true })
-      .order("setting_key", { ascending: true })
-
-    if (error) {
-      console.error("[API] maqraah/admin/settings GET error:", error)
-      return NextResponse.json(
-        { error: "Failed to fetch maqraah settings" },
-        { status: 500 }
-      )
-    }
-
-    // Group by type for convenience
     const grouped = settings.reduce(
-      (acc, setting) => {
-        const type = setting.setting_type
+      (acc: Record<string, any>, row: any) => {
+        const type = row.setting_type
         if (!acc[type]) acc[type] = []
-        acc[type].push(setting)
+        acc[type].push(row)
         return acc
       },
-      {} as Record<string, typeof settings>
+      {}
     )
 
     return NextResponse.json({ settings, grouped })
-  } catch (error: any) {
+  } catch (error) {
     console.error("[API] maqraah/admin/settings GET error:", error)
     return NextResponse.json(
-      { error: error.message || "Unauthorized" },
-      { status: error.status || 403 }
+      { error: "Failed to fetch maqraah settings" },
+      { status: 500 }
     )
   }
 }
 
-export async function PUT(request: NextRequest) {
+export async function PUT(req: NextRequest) {
+  const session = await getSession()
+  if (!session || !requireRole(session, ["maqraa_admin"])) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+
   try {
-    // Maqraah Admin role check
-    const user = await requireRole("maqraa_admin")
+    const body = await req.json()
+    const settings = body?.settings
 
-    const body = await request.json()
-    const { setting_key, setting_value, setting_type, description } = body
-
-    // Validation: key must start with maqraah_
-    if (!setting_key?.startsWith("maqraah_")) {
-      return NextResponse.json(
-        { error: "Invalid setting key. Must start with 'maqraah_'" },
-        { status: 400 }
-      )
+    if (!settings || typeof settings !== "object") {
+      return NextResponse.json({ error: "Invalid data" }, { status: 400 })
     }
 
-    // Validation: type must start with maqraah_
-    if (!setting_type?.startsWith("maqraah_")) {
-      return NextResponse.json(
-        { error: "Invalid setting type. Must start with 'maqraah_'" },
-        { status: 400 }
+    const rejectedKeys: string[] = []
+
+    for (const [key, value] of Object.entries(settings)) {
+      // Only allow maqraah_* keys
+      if (!validateMaqraahKey(key)) {
+        rejectedKeys.push(key)
+        continue
+      }
+
+      // Extract setting type from key (e.g., maqraah_halaqat_xxx → maqraah_halaqat)
+      const typeParts = key.split("_").slice(0, 2)
+      const settingType = typeParts.join("_")
+
+      await query(
+        `INSERT INTO system_settings (setting_key, setting_value, setting_type, updated_by, updated_at)
+         VALUES ($1, $2::jsonb, $3, $4, NOW())
+         ON CONFLICT (setting_key) DO UPDATE
+            SET setting_value = EXCLUDED.setting_value,
+                setting_type = EXCLUDED.setting_type,
+                updated_by = EXCLUDED.updated_by,
+                updated_at = NOW()`,
+        [key, JSON.stringify(value), settingType, session.sub]
       )
+      clearSettingCache(key)
     }
 
-    const client = await createClient()
-
-    const { data, error } = await client
-      .from("system_settings")
-      .upsert(
-        {
-          setting_key,
-          setting_value,
-          setting_type,
-          description: description || null,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "setting_key" }
-      )
-      .select()
-      .single()
-
-    if (error) {
-      console.error("[API] maqraah/admin/settings PUT error:", error)
-      return NextResponse.json(
-        { error: "Failed to update maqraah setting" },
-        { status: 500 }
-      )
+    if (rejectedKeys.length > 0) {
+      return NextResponse.json({
+        success: true,
+        warning: "Some keys were rejected (not maqraah_*)",
+        rejectedKeys,
+      })
     }
 
-    console.log(
-      `[API] Maqraah admin ${user.id} updated setting: ${setting_key}`
-    )
-
-    return NextResponse.json({ success: true, setting: data })
-  } catch (error: any) {
+    return NextResponse.json({ success: true })
+  } catch (error) {
     console.error("[API] maqraah/admin/settings PUT error:", error)
     return NextResponse.json(
-      { error: error.message || "Unauthorized" },
-      { status: error.status || 403 }
+      { error: "Failed to save settings" },
+      { status: 500 }
     )
   }
 }
