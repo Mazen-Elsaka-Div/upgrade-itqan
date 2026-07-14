@@ -364,6 +364,14 @@ const getMaqraaConfig = (t: any): ShellConfig => {
   const sections = admin.sections
     .map((s) => ({ ...s, items: s.items.filter((i) => !MAQRAA_EXCLUDED_HREFS.includes(i.href)) }))
     .filter((s) => s.items.length > 0)
+  // Maqraa-specific settings live under /maqraah/admin/settings (specialised
+  // settings only — global/system settings belong to the Super Admin).
+  sections.push({
+    title: t.locale === 'ar' ? 'إعدادات المقرأة' : 'Maqraa Settings',
+    items: [
+      { href: '/maqraah/admin/settings', label: t.locale === 'ar' ? 'إعدادات المقرأة' : 'Maqraa Settings', icon: Settings },
+    ],
+  })
   return { sections, label: 'مدير المقرأة', name: 'مدير المقرأة', sublabel: 'مدير المقرأة' }
 }
 
