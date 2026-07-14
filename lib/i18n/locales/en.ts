@@ -159,6 +159,7 @@ export const en = {
     studentLevel: 'Student - Level 3',
     certifiedReader: 'Certified Reader',
     generalSupervisor: 'General Supervisor',
+    superAdmin: 'Super Admin',
     account: 'Account',
     statsAndReports: 'Stats & Reports',
     advancedTools: 'Advanced Tools',
@@ -1759,24 +1760,6 @@ export const en = {
 
   // Reader
   reader: {
-    enrollmentRequests_dup_6095_dup_6095: {
-      title: "Enrollment Requests",
-      subtitle: "Review and accept student requests to join paths that require approval",
-      filterAll: "All",
-      filterTajweed: "Tajweed Paths",
-      filterMemorization: "Memorization Paths",
-      fetchError: "Could not fetch requests",
-      actionSuccessApprove: "Student accepted to path",
-      actionSuccessReject: "Request rejected",
-      actionError: "Failed to execute action",
-      generalError: "An error occurred",
-      pathTypeTajweed: "Tajweed Path",
-      pathTypeMemorization: "Memorization Path",
-      approveBtn: "Approve",
-      rejectBtn: "Reject",
-      noPendingRequests: "No pending requests",
-      noPendingRequestsDesc: "When a student requests to join one of your paths requiring approval, it will show up here."
-    },
     competitions: {
       title: "Judge Competitions",
       subtitle: "Evaluate student submissions in competitions and assign final scores.",
@@ -2567,6 +2550,38 @@ export const en = {
     sidebarSupervisorTasks: 'My Tasks & Pending',
     sidebarActivityLog: 'My Activity Log',
     sidebarCompleteCertData: 'Complete Certificate Data',
+    sidebarSiteIdentity: 'Site Identity',
+    sidebarGovernance: 'Governance & Permissions',
+    sidebarForumManagement: 'Forum Management',
+    sidebarPlatformSettings: 'Platform Settings',
+    sidebarSupervision: 'Supervision & Monitoring',
+    sidebarPlatformOverview: 'Platform Overview',
+    sidebarHomepage: 'Homepage',
+    sidebarSEO: 'SEO & Metadata',
+    sidebarThemeEditor: 'Design & Colors',
+    sidebarBranding: 'Visual Identity',
+    sidebarContentPages: 'Static Content Pages',
+    sidebarRoleManagement: 'Role Management',
+    sidebarAuditLog: 'Unified Audit Log',
+    library: {
+      title: 'Book Library',
+      subtitle: 'Browse books available in multiple languages',
+      searchPlaceholder: 'Search by title or author...',
+      allCategories: 'All categories',
+      allLanguages: 'All languages',
+      noResults: 'No matching books',
+      pages: 'pages',
+      author: 'Author',
+      category: 'Category',
+      publishDate: 'Publish date',
+      languages: 'Available languages',
+      filterResults: 'Filter results:',
+      noResultsDesc: 'We did not find any books matching your search criteria. Try changing your search query or categories.',
+      clearFilters: 'Clear filters',
+      noCover: 'No cover',
+      readNow: 'Read now',
+      loading: 'Loading library...',
+    },
 
     // Student Sidebar
     sidebarSubmitTask: 'Submit Recitation',
@@ -2835,7 +2850,7 @@ export const en = {
     fsqLatestQuestionsDesc: 'Recently received questions that need your attention',
     fsqViewInbox: 'View Inbox',
     fsqNoQuestionsYet: 'No questions yet',
-    fsqNoQuestionsDesc_dup_2678_dup_2678: 'The questions inbox is empty. Looks like you answered everything!',
+
     fsqAnonymous: 'Anonymous',
     fsqAnsweredLabel: 'Answered',
     fsqPendingLabel: 'Awaiting answer',
@@ -2894,7 +2909,7 @@ export const en = {
 
     // Supervisor Fiqh
     svfFiqhQuestions: 'Fiqh Questions',
-    svfFiqhDesc_dup_2737_dup_2737: 'Manage fiqh questions and assignments',
+
     svfUnassigned: 'Unassigned',
     svfAssigned: 'Assigned',
     svfNoQuestions: 'No questions found',
@@ -3075,7 +3090,7 @@ export const en = {
     // Reader Schedule
     rdsSchedule: 'Schedule',
     rdsScheduleDesc: 'View and manage your session schedule',
-    rdsNoSessions_dup_2918_dup_2918: 'No scheduled sessions',
+
     rdsUpcoming: 'Upcoming',
     rdsPast: 'Past',
 
@@ -3087,7 +3102,7 @@ export const en = {
     // Reader Sessions
     rdsSessionsPage: 'Sessions',
     rdsSessionsDesc: 'View your sessions and recordings',
-    rdsNoSessions_dup_2930_dup_2930: 'No sessions found',
+
 
     // Auth Register Student
     authRegStudent: 'Student Registration',
@@ -6109,6 +6124,7 @@ export const en = {
       "connectionError": "A server connection error occurred"
   },
   termsPage: {
+      "title": "Terms of Use",
       "sec1Title": "1. Acceptance of Terms",
       "sec1Text": "By using the Itqan platform, you agree to be bound by these terms of use and all applicable laws and regulations.",
       "sec2Title": "2. Services Provided",
@@ -6121,6 +6137,17 @@ export const en = {
       "sec5Text": "We reserve the right to amend these terms at any time. Users will be notified of any material changes via email or through the platform."
   },
   privacyPage: {
+      "title": "Privacy Policy",
+      "sec1Title": "1. Information Collection",
+      "sec1Text": "We collect the information you provide to us directly upon registering on the platform, such as name, email, and gender. We also collect the voice recordings you upload for evaluation purposes.",
+      "sec2Title": "2. Use of Information",
+      "sec2Text": "We use the information to improve our services, facilitate communication between the student and the reciter, personalize your educational experience, and issue certificates.",
+      "sec3Title": "3. Data Protection",
+      "sec3Text": "We take strict security measures to protect your data from unauthorized access, alteration, disclosure, or destruction.",
+      "sec4Title": "4. Sharing Information",
+      "sec4Text": "We do not sell or rent your personal information to third parties. Your data is only shared with certified reciters and supervisors for the purpose of providing the educational service.",
+      "sec5Title": "5. Contact Us",
+      "sec5Text": "If you have any questions about the privacy policy, you can contact us through the \"Contact Us\" form available on the platform."
   },
   fiqhSupervisor: {
     inboxTitle: "Fiqh Questions Inbox",
@@ -6369,7 +6396,7 @@ export const en = {
       "السؤال": "Question",
       "اكتب سؤالك بوضوح. كلما كانت التفاصيل أكثر، كانت الإجابة أدق.": "Write clearly. The more details, the better the answer.",
       "إرسال مجهول الهوية": "Submit anonymously",
-      "جارٍ الإرسال...": "Sending...",
+      "جارٍ ال��رسال...": "Sending...",
       "إرسال السؤال": "Submit Question",
       "كل اللغات": "All Languages",
       "ابحث بعنوان الكتاب، المؤلف...": "Search by book title, author...",
@@ -6501,7 +6528,7 @@ export const en = {
       "تم إرسال كود جديد!": "New code sent!",
       "تحقق من بريدك الإلكتروني": "Check your email",
       "جاري التأكيد...": "Confirming...",
-      "تأكيد الحساب": "Confirm Account",
+      "تأكيد الح��اب": "Confirm Account",
       "إعادة إرسال الكود": "Resend Code",
       "هل أدخلت بريداً خاطئاً؟": "Did you enter the wrong email?",
       "العودة للتسجيل": "Back to Registration",

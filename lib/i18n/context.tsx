@@ -1,20 +1,87 @@
 "use client"
 
-import { createContext, useContext, useState, useCallback, type ReactNode } from 'react'
+import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react'
 import { ar } from './locales/ar'
 import { en } from './locales/en'
 
 export type Locale = 'ar' | 'en'
-export type Translations = {
-  [key: string]: any
+
+// The Arabic locale is the single source of truth for the shape of translations.
+// Every other locale must match this shape — TypeScript enforces it below.
+export type TranslationSchema = typeof ar
+
+// New locales are typed against the AR schema, so a missing/renamed key is a build error.
+const en_typed: TranslationSchema = en
+
+/**
+ * Deep-merge a locale on top of the Arabic base.
+ * Any key missing in the target locale falls back to the Arabic value
+ * instead of rendering blank. Arrays and primitives are replaced wholesale.
+ */
+function deepMerge<T>(base: T, override: Partial<T>): T {
+  if (Array.isArray(base) || typeof base !== 'object' || base === null) {
+    return (override ?? base) as T
+  }
+  const result: any = Array.isArray(base) ? [...(base as any)] : { ...base }
+  for (const key of Object.keys(base as any)) {
+    const b = (base as any)[key]
+    const o = (override as any)?.[key]
+    if (b && typeof b === 'object' && !Array.isArray(b)) {
+      result[key] = deepMerge(b, o ?? {})
+    } else {
+      result[key] = o !== undefined ? o : b
+    }
+  }
+  return result
 }
 
-const translations: Record<Locale, Translations> = { ar: ar as Translations, en: en as Translations }
+// Precompute merged tables once (module scope) so every locale is fully populated.
+const translations: Record<Locale, TranslationSchema> = {
+  ar,
+  en: deepMerge(ar, en_typed),
+}
+
+const LOCALE_STORAGE_KEY = 'itqan-locale'
+const LOCALE_COOKIE_KEY = 'locale'
+
+function isLocale(v: unknown): v is Locale {
+  return v === 'ar' || v === 'en'
+}
+
+function readStoredLocale(): Locale | null {
+  if (typeof document === 'undefined') return null
+  try {
+    const fromStorage = window.localStorage.getItem(LOCALE_STORAGE_KEY)
+    if (isLocale(fromStorage)) return fromStorage
+    const match = document.cookie.match(/(?:^|;\s*)locale=(ar|en)/)
+    if (match && isLocale(match[1])) return match[1]
+  } catch {
+    // ignore storage/cookie access errors (private mode, SSR, etc.)
+  }
+  return null
+}
+
+function persistLocale(locale: Locale) {
+  if (typeof document === 'undefined') return
+  try {
+    window.localStorage.setItem(LOCALE_STORAGE_KEY, locale)
+    // 1 year cookie so the server/middleware can read the preference too
+    document.cookie = `${LOCALE_COOKIE_KEY}=${locale}; path=/; max-age=31536000; samesite=lax`
+  } catch {
+    // ignore
+  }
+}
+
+function applyDocumentLocale(locale: Locale) {
+  if (typeof document === 'undefined') return
+  document.documentElement.lang = locale
+  document.documentElement.dir = locale === 'ar' ? 'rtl' : 'ltr'
+}
 
 interface I18nContextType {
   locale: Locale
   dir: 'rtl' | 'ltr'
-  t: Translations
+  t: TranslationSchema
   setLocale: (locale: Locale) => void
   toggleLocale: () => void
 }
@@ -22,17 +89,32 @@ interface I18nContextType {
 const I18nContext = createContext<I18nContextType | undefined>(undefined)
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
+  // Start from 'ar' to match the server-rendered <html lang="ar">, then
+  // reconcile with the stored preference after mount to avoid hydration mismatch.
   const [locale, setLocaleState] = useState<Locale>('ar')
+
+  useEffect(() => {
+    const stored = readStoredLocale()
+    if (stored && stored !== 'ar') {
+      setLocaleState(stored)
+      applyDocumentLocale(stored)
+    }
+  }, [])
 
   const setLocale = useCallback((newLocale: Locale) => {
     setLocaleState(newLocale)
-    document.documentElement.lang = newLocale
-    document.documentElement.dir = newLocale === 'ar' ? 'rtl' : 'ltr'
+    applyDocumentLocale(newLocale)
+    persistLocale(newLocale)
   }, [])
 
   const toggleLocale = useCallback(() => {
-    setLocale(locale === 'ar' ? 'en' : 'ar')
-  }, [locale, setLocale])
+    setLocaleState((prev) => {
+      const next = prev === 'ar' ? 'en' : 'ar'
+      applyDocumentLocale(next)
+      persistLocale(next)
+      return next
+    })
+  }, [])
 
   return (
     <I18nContext.Provider
