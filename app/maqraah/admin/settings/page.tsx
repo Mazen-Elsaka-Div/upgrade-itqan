@@ -1,18 +1,20 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import {
   Settings,
   Globe,
-  UserPlus,
-  Video,
-  VideoIcon,
+  Users,
+  BookOpen,
+  Mic,
+  Route,
   Trophy,
+  Award,
   Bell,
-  MessageSquare,
+  Shield,
   Save,
+  X,
   Loader2,
-  AlertCircle,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -21,65 +23,79 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { useI18n } from "@/lib/i18n/context"
-import { useAcademySettings } from "./hooks/use-academy-settings"
+import { useMaqraahSettings } from "./hooks/use-maqraah-settings"
 import {
   GeneralSettings,
-  RegistrationSettings,
-  CoursesContentSettings,
-  LiveSessionsSettings,
+  ReadersSettings,
+  HalaqatSettings,
+  RecitationsSettings,
+  PathsSettings,
   GamificationSettings,
-  NotificationsEmailSettings,
-  ForumFiqhSettings,
+  CompetitionsSettings,
+  NotificationsSettings,
+  SecuritySettings,
 } from "./_components"
 
 const getTabs = (a: any) => [
   {
     id: "general",
-    label: a.settingsGeneral || "General",
+    label: a.setTabGeneral || "General",
     icon: Globe,
-    prefix: "academy_general_",
+    prefix: "maqraah_general_",
   },
   {
-    id: "registration",
-    label: a.settingsRegistration || "Registration",
-    icon: UserPlus,
-    prefix: "academy_registration_",
+    id: "readers",
+    label: a.setTabReaders || "Readers",
+    icon: Users,
+    prefix: "maqraah_readers_",
   },
   {
-    id: "courses",
-    label: a.settingsCourses || "Courses & Content",
-    icon: Video,
-    prefix: "academy_courses_",
+    id: "halaqat",
+    label: a.setTabHalaqat || "Halaqat",
+    icon: BookOpen,
+    prefix: "maqraah_halaqat_",
   },
   {
-    id: "sessions",
-    label: a.settingsLiveSessions || "Live Sessions",
-    icon: VideoIcon,
-    prefix: "academy_sessions_",
+    id: "recitations",
+    label: a.setTabRecitations || "Recitations",
+    icon: Mic,
+    prefix: "maqraah_recitations_",
+  },
+  {
+    id: "paths",
+    label: a.setTabPaths || "Paths",
+    icon: Route,
+    prefix: "maqraah_paths_",
   },
   {
     id: "gamification",
-    label: a.settingsGamification || "Gamification",
+    label: a.setTabGamification || "Gamification",
     icon: Trophy,
-    prefix: "academy_gamification_",
+    prefix: "maqraah_points_",
+  },
+  {
+    id: "competitions",
+    label: a.setTabCompetitions || "Competitions",
+    icon: Award,
+    prefix: "maqraah_competitions_",
   },
   {
     id: "notifications",
-    label: a.settingsNotifications || "Notifications & Email",
+    label: a.setTabNotifications || "Notifications",
     icon: Bell,
-    prefix: "academy_notifications_",
+    prefix: "maqraah_notifications_",
   },
   {
-    id: "forum",
-    label: a.settingsForum || "Forum & Fiqh",
-    icon: MessageSquare,
-    prefix: "academy_forum_",
+    id: "security",
+    label: a.setTabSecurity || "Security",
+    icon: Shield,
+    prefix: "maqraah_security_",
   },
 ]
 
-export default function AcademyAdminSettingsPage() {
+export default function MaqraahAdminSettingsPage() {
   const { t, locale } = useI18n()
-  const a = t.academyAdmin || {}
+  const a = t.admin || {}
   const tabs = getTabs(a)
 
   const {
@@ -91,7 +107,7 @@ export default function AcademyAdminSettingsPage() {
     updateSettings,
     saveChanges,
     discardChanges,
-  } = useAcademySettings()
+  } = useMaqraahSettings()
 
   const [activeTab, setActiveTab] = useState("general")
   const [isMobile, setIsMobile] = useState(false)
@@ -127,23 +143,30 @@ export default function AcademyAdminSettingsPage() {
             onUpdate={updateSettings}
           />
         )
-      case "registration":
+      case "readers":
         return (
-          <RegistrationSettings
+          <ReadersSettings
             settings={settings}
             onUpdate={updateSettings}
           />
         )
-      case "courses":
+      case "halaqat":
         return (
-          <CoursesContentSettings
+          <HalaqatSettings
             settings={settings}
             onUpdate={updateSettings}
           />
         )
-      case "sessions":
+      case "recitations":
         return (
-          <LiveSessionsSettings
+          <RecitationsSettings
+            settings={settings}
+            onUpdate={updateSettings}
+          />
+        )
+      case "paths":
+        return (
+          <PathsSettings
             settings={settings}
             onUpdate={updateSettings}
           />
@@ -155,16 +178,23 @@ export default function AcademyAdminSettingsPage() {
             onUpdate={updateSettings}
           />
         )
-      case "notifications":
+      case "competitions":
         return (
-          <NotificationsEmailSettings
+          <CompetitionsSettings
             settings={settings}
             onUpdate={updateSettings}
           />
         )
-      case "forum":
+      case "notifications":
         return (
-          <ForumFiqhSettings
+          <NotificationsSettings
+            settings={settings}
+            onUpdate={updateSettings}
+          />
+        )
+      case "security":
+        return (
+          <SecuritySettings
             settings={settings}
             onUpdate={updateSettings}
           />
@@ -195,7 +225,7 @@ export default function AcademyAdminSettingsPage() {
           <div className="flex items-center gap-3">
             <Settings className="h-6 w-6 text-primary" />
             <h1 className="text-2xl font-bold">
-              {a.settingsTitle || "Academy Settings"}
+              {a.maqraahSettingsTitle || "Maqraah Settings"}
             </h1>
           </div>
           {hasUnsavedChanges && (
@@ -226,10 +256,9 @@ export default function AcademyAdminSettingsPage() {
 
       {/* Info Alert */}
       <Alert className="m-4 md:m-6 border-blue-200 bg-blue-50">
-        <AlertCircle className="h-4 w-4 text-blue-600" />
         <AlertDescription className="text-blue-700">
-          {a.settingsHint ||
-            "These settings configure features specific to the Academy module. General site settings are managed by the Super Admin."}
+          {a.maqraahSettingsHint ||
+            "Configure settings specific to the Maqraah module. These settings do not affect the Academy."}
         </AlertDescription>
       </Alert>
 

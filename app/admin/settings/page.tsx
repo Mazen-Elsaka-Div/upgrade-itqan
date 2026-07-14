@@ -4,19 +4,14 @@ import { useState, useEffect, useCallback } from "react"
 import {
   Settings,
   Globe,
-  Users,
-  BookOpen,
-  Mic,
-  Route,
-  Trophy,
-  Award,
-  Bell,
   Shield,
   Wrench,
+  Mail,
+  Palette,
+  Phone,
   Save,
-  X,
   Loader2,
-  Search,
+  AlertCircle,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -28,55 +23,83 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { useI18n } from "@/lib/i18n/context"
-import { useMaqraahSettings } from "./hooks/use-maqraah-settings"
+import { useSystemSettings } from "./hooks/use-system-settings"
 import {
-  SystemSettings,
-  ReadersSettings,
-  HalaqatSettings,
-  RecitationsSettings,
-  PathsSettings,
-  GamificationSettings,
-  CompetitionsSettings,
-  NotificationsSettings,
-  SecuritySettings,
+  GeneralSettings,
   MaintenanceSettings,
+  SecuritySettings,
+  EmailSettings,
+  BrandingSettings,
+  ContactSettings,
+  HomepageSettings,
 } from "./_components"
 
 const getTabs = (a: any) => [
-  { id: "system", label: a.setTabSystem, icon: Globe, prefix: "maqraah_general_", keywords: ["name", "logo", "link", "description", "language", "timezone", "account", "contact", "email", "اسم", "شعار", "رابط", "وصف", "لغة", "توقيت", "حساب", "تواصل", "بريد"] },
-  { id: "readers", label: a.setTabReaders, icon: Users, prefix: "maqraah_readers_", keywords: ["reader", "application", "approval", "ijazah", "assignment", "مقرئ", "طلب", "موافقة", "إجازة", "توزيع", "تقديم"] },
-  { id: "halaqat", label: a.setTabHalaqat, icon: BookOpen, prefix: "maqraah_halaqat_", keywords: ["halaqa", "session", "reminder", "recording", "attendance", "video", "حلقة", "جلسة", "تذكير", "تسجيل", "حضور", "فيديو"] },
-  { id: "recitations", label: a.setTabRecitations, icon: Mic, prefix: "maqraah_recitations_", keywords: ["recitation", "evaluation", "audio", "riwayah", "tajweed", "score", "تلاوة", "تقييم", "صوت", "رواية", "تجويد", "درجة"] },
-  { id: "paths", label: a.setTabPaths, icon: Route, prefix: "maqraah_paths_", keywords: ["memorization", "tajweed", "path", "wird", "target", "stage", "حفظ", "تجويد", "مسار", "ورد", "هدف", "مرحلة"] },
-  { id: "gamification", label: a.setTabGamification, icon: Trophy, prefix: "maqraah_points_", keywords: ["points", "level", "badge", "streak", "leaderboard", "نقاط", "مستوى", "شارة"] },
-  { id: "competitions", label: a.setTabCompetitions, icon: Award, prefix: "maqraah_competitions_", keywords: ["competition", "certificate", "signature", "template", "issue", "مسابقة", "شهادة", "توقيع", "قالب", "إصدار"] },
-  { id: "notifications", label: a.setTabNotifications, icon: Bell, prefix: "maqraah_notifications_", keywords: ["notification", "email", "smtp", "reminder", "report", "إشعار", "بريد", "إيميل", "تذكير", "تقرير"] },
-  { id: "security", label: a.setTabSecurity, icon: Shield, prefix: "maqraah_security_", keywords: ["security", "password", "2fa", "ip", "session", "rate limit", "أمان", "كلمة سر", "جلسة"] },
-  { id: "maintenance", label: a.setTabMaintenance, icon: Wrench, prefix: "maqraah_maintenance_", keywords: ["maintenance", "cache", "backup", "storage", "صيانة", "نسخة احتياطية", "تخزين"] },
+  {
+    id: "general",
+    label: a.setTabGeneral || "General",
+    icon: Globe,
+    prefix: "system_general_",
+  },
+  {
+    id: "maintenance",
+    label: a.setTabMaintenance || "Maintenance",
+    icon: Wrench,
+    prefix: "system_maintenance_",
+  },
+  {
+    id: "security",
+    label: a.setTabSecurity || "Security",
+    icon: Shield,
+    prefix: "system_security_",
+  },
+  {
+    id: "email",
+    label: a.setTabEmail || "Email",
+    icon: Mail,
+    prefix: "system_email_",
+  },
+  {
+    id: "branding",
+    label: a.setTabBranding || "Branding",
+    icon: Palette,
+    prefix: "system_branding_",
+  },
+  {
+    id: "contact",
+    label: a.setTabContact || "Contact",
+    icon: Phone,
+    prefix: "system_contact_",
+  },
+  {
+    id: "homepage",
+    label: a.setTabHomepage || "Homepage",
+    icon: Settings,
+    prefix: "system_homepage_",
+  },
 ]
 
-export default function MaqraahAdminSettingsPage() {
+export default function SystemAdminSettingsPage() {
   const { t, locale } = useI18n()
-  const a = t.admin
+  const a = t.admin || {}
   const tabs = getTabs(a)
+
   const {
     settings,
     metadata,
     isLoading,
     saving,
     hasUnsavedChanges,
-    unsavedCount,
     updateSettings,
     saveChanges,
     discardChanges,
-    resetSection,
-    testSmtp,
-  } = useMaqraahSettings()
+  } = useSystemSettings()
 
-  const [activeTab, setActiveTab] = useState("system")
-  const [searchQuery, setSearchQuery] = useState("")
+  const [activeTab, setActiveTab] = useState("general")
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
@@ -100,93 +123,14 @@ export default function MaqraahAdminSettingsPage() {
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [hasUnsavedChanges, saveChanges, discardChanges])
 
-  const filteredTabs = tabs.filter(
-    (tab) =>
-      tab.label.includes(searchQuery) ||
-      tab.keywords.some((kw) => kw.includes(searchQuery))
-  )
-
-  const handleResetSection = useCallback(
-    (prefix: string) => {
-      resetSection(prefix)
-    },
-    [resetSection]
-  )
-
   const renderTabContent = () => {
     switch (activeTab) {
-      case "system":
+      case "general":
         return (
-          <SystemSettings
+          <GeneralSettings
             settings={settings}
             metadata={metadata}
             onUpdate={updateSettings}
-            onReset={() => handleResetSection("maqraah_general_")}
-          />
-        )
-      case "readers":
-        return (
-          <ReadersSettings
-            settings={settings}
-            onUpdate={updateSettings}
-            onReset={() => handleResetSection("maqraah_readers_")}
-          />
-        )
-      case "halaqat":
-        return (
-          <HalaqatSettings
-            settings={settings}
-            onUpdate={updateSettings}
-            onReset={() => handleResetSection("maqraah_halaqat_")}
-          />
-        )
-      case "recitations":
-        return (
-          <RecitationsSettings
-            settings={settings}
-            onUpdate={updateSettings}
-            onReset={() => handleResetSection("maqraah_recitations_")}
-          />
-        )
-      case "paths":
-        return (
-          <PathsSettings
-            settings={settings}
-            onUpdate={updateSettings}
-            onReset={() => handleResetSection("maqraah_paths_")}
-          />
-        )
-      case "gamification":
-        return (
-          <GamificationSettings
-            settings={settings}
-            onUpdate={updateSettings}
-            onReset={() => handleResetSection("maqraah_points_")}
-          />
-        )
-      case "competitions":
-        return (
-          <CompetitionsSettings
-            settings={settings}
-            onUpdate={updateSettings}
-            onReset={() => handleResetSection("maqraah_competitions_")}
-          />
-        )
-      case "notifications":
-        return (
-          <NotificationsSettings
-            settings={settings}
-            onUpdate={updateSettings}
-            onReset={() => handleResetSection("maqraah_notifications_")}
-            onTestSmtp={testSmtp}
-          />
-        )
-      case "security":
-        return (
-          <SecuritySettings
-            settings={settings}
-            onUpdate={updateSettings}
-            onReset={() => handleResetSection("maqraah_security_")}
           />
         )
       case "maintenance":
@@ -194,8 +138,23 @@ export default function MaqraahAdminSettingsPage() {
           <MaintenanceSettings
             settings={settings}
             onUpdate={updateSettings}
-            onReset={() => handleResetSection("maqraah_maintenance_")}
           />
+        )
+      case "security":
+        return (
+          <SecuritySettings settings={settings} onUpdate={updateSettings} />
+        )
+      case "email":
+        return <EmailSettings settings={settings} onUpdate={updateSettings} />
+      case "branding":
+        return (
+          <BrandingSettings settings={settings} onUpdate={updateSettings} />
+        )
+      case "contact":
+        return <ContactSettings settings={settings} onUpdate={updateSettings} />
+      case "homepage":
+        return (
+          <HomepageSettings settings={settings} onUpdate={updateSettings} />
         )
       default:
         return null
@@ -204,138 +163,119 @@ export default function MaqraahAdminSettingsPage() {
 
   if (isLoading) {
     return (
-      <div className="p-6 space-y-6" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
-        <div className="flex items-center justify-between">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-10 w-32" />
-        </div>
-        <div className="flex gap-6">
-          <div className="w-64 space-y-2">
-            {Array.from({ length: 10 }).map((_, i) => (
-              <Skeleton key={i} className="h-12 w-full" />
-            ))}
-          </div>
-          <div className="flex-1 space-y-4">
-            <Skeleton className="h-48 w-full" />
-            <Skeleton className="h-48 w-full" />
-          </div>
+      <div className="space-y-4 p-4 md:p-6">
+        <Skeleton className="h-10 w-48" />
+        <div className="space-y-2">
+          <Skeleton className="h-20 w-full" />
+          <Skeleton className="h-20 w-full" />
+          <Skeleton className="h-20 w-full" />
         </div>
       </div>
     )
   }
 
   return (
-    <div className="bg-background -mx-6 lg:-mx-8 -mt-6 lg:-mt-8" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
-      {/* Sticky Header */}
-      <div className="sticky -top-6 lg:-top-8 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
-        <div className="flex items-center justify-between px-6 lg:px-8 py-4">
+    <div className="flex h-screen flex-col bg-background">
+      {/* Header */}
+      <div className="border-b p-4 md:p-6">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-xl">
-              <Settings className="w-6 h-6 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-foreground">{a.setTabSystem}</h1>
-              <p className="text-xs text-muted-foreground">
-                {tabs.find((t) => t.id === activeTab)?.label}
-              </p>
-            </div>
+            <Settings className="h-6 w-6 text-primary" />
+            <h1 className="text-2xl font-bold">
+              {a.systemSettingsTitle || "System Settings"}
+            </h1>
           </div>
-
-          <div className="flex items-center gap-3">
-            {hasUnsavedChanges && (
-              <span className="text-sm text-muted-foreground bg-muted px-3 py-1 rounded-full">
-                {unsavedCount} {a.setUnsavedChanges}
+          {hasUnsavedChanges && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-amber-600">
+                {a.unsavedChanges || "Unsaved changes"}
               </span>
-            )}
-            <Button
-              variant="outline"
-              onClick={discardChanges}
-              disabled={!hasUnsavedChanges || saving}
-              className="gap-2"
-            >
-              <X className="w-4 h-4" />
-              {a.setCancel}
-            </Button>
-            <Button onClick={saveChanges} disabled={!hasUnsavedChanges || saving} className="gap-2">
-              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-              {a.setSaveChanges}
-            </Button>
-          </div>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={discardChanges}
+                disabled={saving}
+              >
+                {a.discard || "Discard"}
+              </Button>
+              <Button
+                size="sm"
+                onClick={saveChanges}
+                disabled={saving}
+              >
+                {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {a.save || "Save"}
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 
-      <div className="flex">
-        {/* Sidebar - Desktop */}
-        {!isMobile && (
-          <aside className={cn("w-64 min-h-[calc(100vh-73px)] bg-muted/30", locale === 'ar' ? 'border-l border-border' : 'border-r border-border')}>
-            <div className="p-4 sticky top-[73px]">
-              <div className="relative mb-4">
-                <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={a.setSearchPlaceholder}
-                  className="pr-10 h-10"
-                />
-              </div>
+      {/* Info Alert */}
+      <Alert className="m-4 md:m-6 border-blue-200 bg-blue-50">
+        <AlertCircle className="h-4 w-4 text-blue-600" />
+        <AlertDescription className="text-blue-700">
+          {a.systemSettingsHint ||
+            "These settings apply to the entire platform. Changes affect all modules."}
+        </AlertDescription>
+      </Alert>
 
-              <ScrollArea className="h-[calc(100vh-180px)]">
-                <nav className="space-y-1">
-                  {filteredTabs.map((tab) => {
-                    const Icon = tab.icon
-                    return (
-                      <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id)}
-                        className={cn(
-                          "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-right",
-                          activeTab === tab.id
-                            ? "bg-primary text-primary-foreground"
-                            : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                        )}
-                      >
-                        <Icon className="w-4 h-4 shrink-0" />
-                        {tab.label}
-                      </button>
-                    )
-                  })}
-                </nav>
-              </ScrollArea>
-            </div>
-          </aside>
-        )}
-
-        {/* Main Content */}
-        <main className="flex-1 p-6">
-          {isMobile ? (
-            <Accordion
-              type="single"
-              collapsible
-              value={activeTab}
-              onValueChange={(v) => v && setActiveTab(v)}
-              className="space-y-4"
-            >
+      {/* Main Content */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar Tabs */}
+        <div
+          className={cn(
+            "border-r bg-muted/50 p-4",
+            isMobile ? "hidden" : "w-48"
+          )}
+        >
+          <ScrollArea className="h-full">
+            <div className="space-y-2 pr-4">
               {tabs.map((tab) => {
                 const Icon = tab.icon
                 return (
-                  <AccordionItem key={tab.id} value={tab.id} className="border rounded-xl overflow-hidden">
-                    <AccordionTrigger className="px-4 py-3 hover:no-underline">
-                      <div className="flex items-center gap-3">
-                        <Icon className="w-5 h-5 text-primary" />
-                        <span className="font-medium">{tab.label}</span>
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent className="px-4 pb-4">
-                      {activeTab === tab.id && renderTabContent()}
-                    </AccordionContent>
-                  </AccordionItem>
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={cn(
+                      "flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors",
+                      activeTab === tab.id
+                        ? "bg-primary text-primary-foreground"
+                        : "hover:bg-accent text-foreground"
+                    )}
+                  >
+                    <Icon className="h-4 w-4 flex-shrink-0" />
+                    <span className="truncate">{tab.label}</span>
+                  </button>
                 )
               })}
-            </Accordion>
-          ) : (
-            <div className="max-w-4xl">{renderTabContent()}</div>
-          )}
-        </main>
+            </div>
+          </ScrollArea>
+        </div>
+
+        {/* Mobile Tab Selector */}
+        {isMobile && (
+          <div className="border-b p-2">
+            <select
+              value={activeTab}
+              onChange={(e) => setActiveTab(e.target.value)}
+              className="w-full rounded-lg border bg-background p-2 text-sm"
+            >
+              {tabs.map((tab) => (
+                <option key={tab.id} value={tab.id}>
+                  {tab.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {/* Content Area */}
+        <ScrollArea className="flex-1">
+          <div className="p-4 md:p-6">
+            {renderTabContent()}
+          </div>
+        </ScrollArea>
       </div>
     </div>
   )

@@ -3,34 +3,33 @@ import { createClient } from "@/lib/supabase/server"
 import { requireRole } from "@/lib/auth"
 
 /**
- * Academy Settings API (Academy Admin Only)
- *
- * GET: Retrieve all academy_* settings (courses, registration, sessions, gamification, forum, notifications, etc.)
- * PUT: Update academy_* settings
- *
- * NEVER returns system_* or maqraah_* keys
- * Does NOT include general/security/maintenance (those are system-wide)
+ * System Settings API (Super Admin Only)
+ * 
+ * GET: Retrieve all system_* settings (general, maintenance, security, email, branding, contact, homepage)
+ * PUT: Update system_* settings
+ * 
+ * NEVER returns academy_* or maqraah_* keys
  */
 
 export async function GET(request: NextRequest) {
   try {
-    // Academy Admin role check (NOT maqraa_admin or super_admin)
-    const user = await requireRole("academy_admin")
+    // Super Admin role check
+    const user = await requireRole("super_admin")
 
     const client = await createClient()
 
-    // Fetch ONLY academy_* settings (prefixed with 'academy_')
+    // Fetch ONLY system_* settings (prefixed with 'system_')
     const { data: settings, error } = await client
       .from("system_settings")
       .select("*")
-      .like("setting_key", "academy_%")
+      .like("setting_key", "system_%")
       .order("setting_type", { ascending: true })
       .order("setting_key", { ascending: true })
 
     if (error) {
-      console.error("[API] academy/admin/settings GET error:", error)
+      console.error("[API] system/settings GET error:", error)
       return NextResponse.json(
-        { error: "Failed to fetch academy settings" },
+        { error: "Failed to fetch system settings" },
         { status: 500 }
       )
     }
@@ -48,7 +47,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ settings, grouped })
   } catch (error: any) {
-    console.error("[API] academy/admin/settings GET error:", error)
+    console.error("[API] system/settings GET error:", error)
     return NextResponse.json(
       { error: error.message || "Unauthorized" },
       { status: error.status || 403 }
@@ -58,24 +57,24 @@ export async function GET(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    // Academy Admin role check
-    const user = await requireRole("academy_admin")
+    // Super Admin role check
+    const user = await requireRole("super_admin")
 
     const body = await request.json()
     const { setting_key, setting_value, setting_type, description } = body
 
-    // Validation: key must start with academy_
-    if (!setting_key?.startsWith("academy_")) {
+    // Validation: key must start with system_
+    if (!setting_key?.startsWith("system_")) {
       return NextResponse.json(
-        { error: "Invalid setting key. Must start with 'academy_'" },
+        { error: "Invalid setting key. Must start with 'system_'" },
         { status: 400 }
       )
     }
 
-    // Validation: type must start with academy_
-    if (!setting_type?.startsWith("academy_")) {
+    // Validation: type must start with system_
+    if (!setting_type?.startsWith("system_")) {
       return NextResponse.json(
-        { error: "Invalid setting type. Must start with 'academy_'" },
+        { error: "Invalid setting type. Must start with 'system_'" },
         { status: 400 }
       )
     }
@@ -98,20 +97,20 @@ export async function PUT(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error("[API] academy/admin/settings PUT error:", error)
+      console.error("[API] system/settings PUT error:", error)
       return NextResponse.json(
-        { error: "Failed to update academy setting" },
+        { error: "Failed to update system setting" },
         { status: 500 }
       )
     }
 
     console.log(
-      `[API] Academy admin ${user.id} updated setting: ${setting_key}`
+      `[API] Super admin ${user.id} updated system setting: ${setting_key}`
     )
 
     return NextResponse.json({ success: true, setting: data })
   } catch (error: any) {
-    console.error("[API] academy/admin/settings PUT error:", error)
+    console.error("[API] system/settings PUT error:", error)
     return NextResponse.json(
       { error: error.message || "Unauthorized" },
       { status: error.status || 403 }
