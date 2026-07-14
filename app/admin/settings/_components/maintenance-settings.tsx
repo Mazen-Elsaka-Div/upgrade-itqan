@@ -1,144 +1,141 @@
 "use client"
 
-import { useState } from "react"
-import useSWR from "swr"
-import { Wrench, Trash2, Download, Loader2, HardDrive, CheckCircle, XCircle } from "lucide-react"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { toast } from "sonner"
+import { Wrench, Globe, BookOpen, BookMarked } from "lucide-react"
 import { SectionCard, ToggleRow } from "./section-card"
-import type { MaqraahSettings } from "../hooks/use-maqraah-settings"
-import { useI18n } from "@/lib/i18n/context"
+import { cn } from "@/lib/utils"
+
+type MaintenanceScope = "site" | "academy" | "maqraah"
+
+const SCOPE_OPTIONS: {
+  value: MaintenanceScope
+  label: string
+  description: string
+  icon: React.ElementType
+  badgeClass: string
+}[] = [
+  {
+    value: "site",
+    label: "الموقع كله",
+    description: "تعطيل جميع المنصات (المقرأة + الأكاديمية + الرئيسية)",
+    icon: Globe,
+    badgeClass: "bg-destructive/10 text-destructive border-destructive/20",
+  },
+  {
+    value: "academy",
+    label: "الأكاديمية فقط",
+    description: "يستمر عمل المقرأة — تُوقَف الأكاديمية وحدها",
+    icon: BookOpen,
+    badgeClass: "bg-amber-100 text-amber-700 border-amber-200",
+  },
+  {
+    value: "maqraah",
+    label: "المقرأة فقط",
+    description: "يستمر عمل الأكاديمية — تُوقَف المقرأة وحدها",
+    icon: BookMarked,
+    badgeClass: "bg-blue-100 text-blue-700 border-blue-200",
+  },
+]
 
 interface Props {
-  settings: MaqraahSettings
-  onUpdate: (updates: Partial<MaqraahSettings>) => void
-  onReset: () => void
+  settings: Record<string, any>
+  onUpdate: (updates: Record<string, any>) => void
 }
 
-const providerLabels: Record<string, string> = {
-  s3: "Amazon S3",
-  cloudinary: "Cloudinary",
-}
-
-const fetcher = (url: string) => fetch(url).then((r) => r.json())
-
-export function MaintenanceSettings({ settings, onUpdate, onReset }: Props) {
-  const { t } = useI18n()
-  const a = t.admin
-  const [clearingCache, setClearingCache] = useState(false)
-  const [backingUp, setBackingUp] = useState(false)
-
-  const { data: storageStatus, isLoading: storageLoading } = useSWR<{ providers: Record<string, boolean> }>(
-    "/api/admin/settings/storage-status",
-    fetcher,
-    { revalidateOnFocus: false, dedupingInterval: 60000 }
-  )
-
-  const allowedIps = settings.maqraah_maintenance_allowed_ips || []
-
-  const updateAllowedIps = (text: string) => {
-    const ips = text.split(/[\n,]/).map((ip) => ip.trim()).filter(Boolean)
-    onUpdate({ maqraah_maintenance_allowed_ips: ips })
-  }
-
-  const handleClearCache = async () => {
-    setClearingCache(true)
-    try {
-      const res = await fetch("/api/admin/settings/clear-cache", { method: "POST" })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || a.msetCacheClearedFailed)
-      toast.success(data.message || a.msetCacheClearedSuccess)
-    } catch (err: any) {
-      toast.error(err.message || a.msetCacheClearedFailed)
-    } finally {
-      setClearingCache(false)
-    }
-  }
-
-  const handleBackup = async () => {
-    setBackingUp(true)
-    try {
-      const res = await fetch("/api/admin/settings/backup")
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        throw new Error(err.error || a.msetBackupFailed)
-      }
-      const blob = await res.blob()
-      const url = URL.createObjectURL(blob)
-      const link = document.createElement("a")
-      link.href = url
-      link.download = `maqraah-settings-backup-${new Date().toISOString().split("T")[0]}.json`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      URL.revokeObjectURL(url)
-      toast.success(a.msetBackupSuccess)
-    } catch (err: any) {
-      toast.error(err.message || a.msetBackupFailed)
-    } finally {
-      setBackingUp(false)
-    }
-  }
+export function MaintenanceSettings({ settings, onUpdate }: Props) {
+  const enabled = settings.maintenance_enabled === true || settings.maintenance_enabled === "true"
+  const scope: MaintenanceScope = settings.maintenance_scope ?? "site"
 
   return (
     <div className="space-y-6">
-      <SectionCard icon={Wrench} title={a.msetMaintenanceMode} description={a.msetMaintenanceModeDesc} onReset={onReset}>
-        <ToggleRow label={a.msetEnableMaintenance} description={a.msetEnableMaintenanceDesc} checked={settings.maqraah_maintenance_mode ?? false} onChange={(v) => onUpdate({ maqraah_maintenance_mode: v })} destructive />
-        <div className="space-y-2">
-          <Label className="text-sm">{a.msetMaintenanceMessage}</Label>
-          <Textarea rows={2} value={settings.maqraah_maintenance_message || ""} onChange={(e) => onUpdate({ maqraah_maintenance_message: e.target.value })} placeholder={a.msetMaintenanceMessagePlaceholder} />
-        </div>
-        <div className="space-y-2">
-          <Label className="text-sm">{a.msetAllowedIps}</Label>
-          <Textarea dir="ltr" rows={3} value={allowedIps.join("\n")} onChange={(e) => updateAllowedIps(e.target.value)} placeholder="192.168.1.1&#10;10.0.0.5" />
-        </div>
+      <SectionCard
+        icon={Wrench}
+        title="وضع الصيانة"
+        description="عند التفعيل تظهر صفحة الصيانة للزوار حسب النطاق المحدد"
+      >
+        <ToggleRow
+          label="تفعيل وضع الصيانة"
+          description={
+            enabled
+              ? `الحالة: مفعّل على ${SCOPE_OPTIONS.find((s) => s.value === scope)?.label ?? scope}`
+              : "الموقع يعمل بشكل طبيعي"
+          }
+          checked={enabled}
+          onChange={(v) => onUpdate({ maintenance_enabled: v })}
+          destructive
+        />
       </SectionCard>
 
-      <SectionCard icon={HardDrive} title={a.msetStorageProviders} description={a.msetStorageProvidersDesc}>
-        <div className="space-y-3">
-          {Object.entries(providerLabels).map(([id, name]) => {
-            const connected = storageStatus?.providers?.[id] ?? false
+      {/* Scope selector — always visible so admin can prepare before enabling */}
+      <SectionCard
+        icon={Globe}
+        title="نطاق الصيانة"
+        description="اختر أي جزء من الموقع سيتأثر بوضع الصيانة"
+      >
+        <div className="grid gap-3 md:grid-cols-3">
+          {SCOPE_OPTIONS.map((option) => {
+            const Icon = option.icon
+            const isSelected = scope === option.value
             return (
-              <div key={id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                <span className="font-medium text-sm">{name}</span>
-                {storageLoading ? (
-                  <Badge variant="secondary"><Loader2 className="w-3 h-3 ml-1 animate-spin" />{a.msetChecking}</Badge>
-                ) : connected ? (
-                  <Badge variant="default" className="bg-success text-success-foreground"><CheckCircle className="w-3 h-3 ml-1" />{a.msetConnected}</Badge>
-                ) : (
-                  <Badge variant="secondary"><XCircle className="w-3 h-3 ml-1" />{a.msetNotConfigured}</Badge>
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => onUpdate({ maintenance_scope: option.value })}
+                className={cn(
+                  "flex flex-col gap-2 rounded-xl border-2 p-4 text-right transition-all",
+                  isSelected
+                    ? "border-primary bg-primary/5 shadow-sm"
+                    : "border-border hover:border-primary/40 hover:bg-muted/50"
                 )}
-              </div>
+              >
+                <div className="flex items-center justify-between">
+                  <Icon
+                    className={cn(
+                      "h-5 w-5",
+                      isSelected ? "text-primary" : "text-muted-foreground"
+                    )}
+                  />
+                  {isSelected && (
+                    <Badge
+                      variant="outline"
+                      className={cn("text-xs font-medium", option.badgeClass)}
+                    >
+                      محدد
+                    </Badge>
+                  )}
+                </div>
+                <p
+                  className={cn(
+                    "font-semibold text-sm",
+                    isSelected ? "text-foreground" : "text-muted-foreground"
+                  )}
+                >
+                  {option.label}
+                </p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  {option.description}
+                </p>
+              </button>
             )
           })}
         </div>
       </SectionCard>
 
-      <SectionCard icon={Wrench} title={a.msetSystemActions} description={a.msetSystemActionsDesc}>
-        <div className="grid gap-3 md:grid-cols-2">
-          <div className="flex items-center justify-between p-4 bg-muted/50 rounded-xl">
-            <div className="space-y-0.5">
-              <Label className="font-medium flex items-center gap-2"><Trash2 className="w-4 h-4" />{a.msetClearCache}</Label>
-              <p className="text-xs text-muted-foreground">{a.msetClearCacheDesc}</p>
-            </div>
-            <Button variant="outline" onClick={handleClearCache} disabled={clearingCache}>
-              {clearingCache ? <Loader2 className="w-4 h-4 animate-spin ml-2" /> : <Trash2 className="w-4 h-4 ml-2" />}
-              {a.msetClear}
-            </Button>
-          </div>
-          <div className="flex items-center justify-between p-4 bg-muted/50 rounded-xl">
-            <div className="space-y-0.5">
-              <Label className="font-medium flex items-center gap-2"><Download className="w-4 h-4" />{a.msetBackup}</Label>
-              <p className="text-xs text-muted-foreground">{a.msetBackupDesc}</p>
-            </div>
-            <Button variant="outline" onClick={handleBackup} disabled={backingUp}>
-              {backingUp ? <Loader2 className="w-4 h-4 animate-spin ml-2" /> : <Download className="w-4 h-4 ml-2" />}
-              {a.msetDownload}
-            </Button>
-          </div>
+      <SectionCard
+        icon={Wrench}
+        title="رسالة الصيانة"
+        description="النص الذي يراه الزائر عند فتح الصفحة أثناء الصيانة"
+      >
+        <div className="space-y-1.5">
+          <Label className="text-sm">الرسالة</Label>
+          <Textarea
+            rows={3}
+            value={settings.maintenance_message ?? "المنصة تحت الصيانة حالياً، نعود قريباً بإذن الله."}
+            onChange={(e) => onUpdate({ maintenance_message: e.target.value })}
+            placeholder="المنصة تحت الصيانة حالياً، نعود قريباً بإذن الله."
+          />
         </div>
       </SectionCard>
     </div>

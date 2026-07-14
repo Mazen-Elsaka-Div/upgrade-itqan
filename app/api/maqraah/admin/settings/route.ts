@@ -4,32 +4,33 @@ import { query } from "@/lib/db"
 import { clearSettingCache } from "@/lib/settings"
 
 /**
- * Academy Settings API (Academy Admin Only)
+ * Maqraah Settings API (Maqraah Admin Only)
  *
- * GET: Retrieve all academy_* settings (courses, registration, sessions, gamification, forum, notifications, etc.)
- * PUT: Update academy_* settings
+ * GET: Retrieve all maqraah_* settings (halaqat, readers, recitations, paths, points, competitions, notifications, etc.)
+ * PUT: Update maqraah_* settings
  *
- * NEVER returns system_* or maqraah_* keys
+ * NEVER returns system_* or academy_* keys
  * Does NOT include general/security/maintenance (those are system-wide)
  */
 
-// Validate setting key belongs to academy namespace
-function validateAcademyKey(key: string): boolean {
-  const academyPrefixes = [
-    "academy_general_",
-    "academy_registration_",
-    "academy_courses_",
-    "academy_sessions_",
-    "academy_gamification_",
-    "academy_notifications_",
-    "academy_forum_",
+// Validate setting key belongs to maqraah namespace
+function validateMaqraahKey(key: string): boolean {
+  const maqraahPrefixes = [
+    "maqraah_general_",
+    "maqraah_readers_",
+    "maqraah_halaqat_",
+    "maqraah_recitations_",
+    "maqraah_paths_",
+    "maqraah_points_",
+    "maqraah_competitions_",
+    "maqraah_notifications_",
   ]
-  return academyPrefixes.some((prefix) => key.startsWith(prefix))
+  return maqraahPrefixes.some((prefix) => key.startsWith(prefix))
 }
 
 export async function GET() {
   const session = await getSession()
-  if (!session || !requireRole(session, ["academy_admin"])) {
+  if (!session || !requireRole(session, ["maqraa_admin"])) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
@@ -38,7 +39,7 @@ export async function GET() {
       `SELECT setting_key, setting_value, setting_type, updated_at, u.name AS modified_by
        FROM system_settings s
        LEFT JOIN users u ON u.id = s.updated_by
-       WHERE s.setting_key LIKE 'academy_%'
+       WHERE s.setting_key LIKE 'maqraah_%'
        ORDER BY s.setting_type, s.setting_key`
     )
 
@@ -54,9 +55,9 @@ export async function GET() {
 
     return NextResponse.json({ settings, grouped })
   } catch (error) {
-    console.error("[API] academy/admin/settings GET error:", error)
+    console.error("[API] maqraah/admin/settings GET error:", error)
     return NextResponse.json(
-      { error: "Failed to fetch academy settings" },
+      { error: "Failed to fetch maqraah settings" },
       { status: 500 }
     )
   }
@@ -64,7 +65,7 @@ export async function GET() {
 
 export async function PUT(req: NextRequest) {
   const session = await getSession()
-  if (!session || !requireRole(session, ["academy_admin"])) {
+  if (!session || !requireRole(session, ["maqraa_admin"])) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
@@ -79,13 +80,13 @@ export async function PUT(req: NextRequest) {
     const rejectedKeys: string[] = []
 
     for (const [key, value] of Object.entries(settings)) {
-      // Only allow academy_* keys
-      if (!validateAcademyKey(key)) {
+      // Only allow maqraah_* keys
+      if (!validateMaqraahKey(key)) {
         rejectedKeys.push(key)
         continue
       }
 
-      // Extract setting type from key (e.g., academy_courses_xxx → academy_courses)
+      // Extract setting type from key (e.g., maqraah_halaqat_xxx → maqraah_halaqat)
       const typeParts = key.split("_").slice(0, 2)
       const settingType = typeParts.join("_")
 
@@ -105,14 +106,14 @@ export async function PUT(req: NextRequest) {
     if (rejectedKeys.length > 0) {
       return NextResponse.json({
         success: true,
-        warning: "Some keys were rejected (not academy_*)",
+        warning: "Some keys were rejected (not maqraah_*)",
         rejectedKeys,
       })
     }
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error("[API] academy/admin/settings PUT error:", error)
+    console.error("[API] maqraah/admin/settings PUT error:", error)
     return NextResponse.json(
       { error: "Failed to save settings" },
       { status: 500 }
