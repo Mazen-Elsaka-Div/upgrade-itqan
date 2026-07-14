@@ -355,9 +355,12 @@ const MAQRAA_EXCLUDED_HREFS = [
   '/admin/users',
   '/admin/settings',
   '/admin/email-templates',
-  // Academy-only content — the fiqh library lives under /academy and belongs to
-  // the Academy sidebar, so it must not leak into the Maqraa sidebar.
+  // Academy-only content — these live under /academy and must not leak into
+  // the Maqraa sidebar.
   '/academy/fiqh',
+  '/academy/admin/competitions',
+  '/academy/admin/leaderboard',
+  '/academy/admin/badges',
 ]
 const getMaqraaConfig = (t: any): ShellConfig => {
   const admin = getRoleConfig(t).admin
