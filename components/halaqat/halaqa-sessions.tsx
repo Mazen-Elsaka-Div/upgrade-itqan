@@ -287,6 +287,8 @@ function SessionForm({
   onClose: () => void
   onSaved: () => void
 }) {
+  const { t } = useI18n()
+  const th = (t as any).halaqat as Record<string, string> | undefined
   const [title, setTitle] = useState(session?.title || '')
   const [scheduledAt, setScheduledAt] = useState(
     session?.scheduled_at ? new Date(session.scheduled_at).toISOString().slice(0, 16) : ''

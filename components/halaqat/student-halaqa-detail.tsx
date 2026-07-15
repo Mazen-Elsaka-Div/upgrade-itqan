@@ -120,6 +120,7 @@ export function StudentHalaqaDetail({
   basePath: string
 }) {
   const { t } = useI18n();
+  const th = (t as any).halaqat as Record<string, string> | undefined
 
   const [halaqa, setHalaqa] = useState<Halaqa | null>(null)
   const [classmates, setClassmates] = useState<Classmate[]>([])

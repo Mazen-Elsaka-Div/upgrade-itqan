@@ -186,8 +186,8 @@ export function VideoSettingsPage({ platform, sessionsBasePath }: Props) {
   }
 
   const platformLabel = platform === 'academy'
-    ? (isAr ? 'الأكاديمية' : 'Academy')
-    : (isAr ? 'المقرأة' : 'Maqraah')
+    ? (vs?.academy ?? 'Academy')
+    : (vs?.maqraah ?? 'Maqraah')
   const accent = platform === 'academy' ? 'indigo' : 'emerald'
   const accentBg = accent === 'indigo' ? 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/30' : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
   const accentBtn = accent === 'indigo' ? 'bg-indigo-500 hover:bg-indigo-600' : 'bg-emerald-500 hover:bg-emerald-600'
@@ -199,7 +199,7 @@ export function VideoSettingsPage({ platform, sessionsBasePath }: Props) {
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
             <div className={`inline-flex items-center gap-2 text-xs font-bold px-2.5 py-1 rounded-full border ${accentBg} mb-3`}>
-              <Radio className="w-3 h-3" /> {isAr ? 'منصة ' : 'Platform: '}{platformLabel}
+              <Radio className="w-3 h-3" /> {vs?.platform ?? 'Platform'}: {platformLabel}
             </div>
             <h1 className="text-2xl font-bold mb-1">{vs?.pageTitle ?? 'Stream & Video Settings'}</h1>
             <p className="text-sm text-muted-foreground max-w-2xl">
@@ -671,12 +671,13 @@ function SessionLogTab({
   sessionsBasePath: string
 }) {
   const { t } = useI18n()
+  const vs = (t as any).videoSettings as Record<string, string> | undefined
 
   if (sessions.length === 0) {
     return (
       <div className="rounded-2xl border border-border bg-card p-10 text-center">
         <Film className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-        <p className="text-sm text-muted-foreground">{"لا توجد جلسات بعد."}</p>
+        <p className="text-sm text-muted-foreground">{vs?.noSessionsYet ?? 'No sessions yet.'}</p>
       </div>
     )
   }
@@ -692,15 +693,15 @@ function SessionLogTab({
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 mb-1 flex-wrap">
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border">
-                  {KIND_LABEL[s.kind] || s.kind}
+                  {getKindLabel(s.kind, vs)}
                 </span>
                 {!s.ended_at && !s.recording_url && (
                   <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-700 dark:text-rose-300 border border-rose-500/30">
-                    <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" /> {"مباشر"}</span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" /> {vs?.liveBadge ?? 'Live'}</span>
                 )}
                 {s.recording_url && (
                   <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-500/30">
-                    <Circle className="w-2 h-2 fill-current" /> {"تسجيل متاح"}</span>
+                    <Circle className="w-2 h-2 fill-current" /> {vs?.recordingAvailable ?? 'Recording available'}</span>
                 )}
                 {s.avg_rating != null && (
                   <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/30">
@@ -708,16 +709,16 @@ function SessionLogTab({
                   </span>
                 )}
               </div>
-              <p className="font-bold truncate">{s.title || `${KIND_LABEL[s.kind] || s.kind}`}</p>
+              <p className="font-bold truncate">{s.title || getKindLabel(s.kind, vs)}</p>
               <p className="text-xs text-muted-foreground mt-0.5">
-                {new Date(s.started_at).toLocaleString('ar-EG')}
-                {s.started_by_name && ` · بدأها ${s.started_by_name}`}
+                {new Date(s.started_at).toLocaleString()}
+                {s.started_by_name && ` · ${vs?.startedBy ?? 'Started by'} ${s.started_by_name}`}
               </p>
             </div>
             <div className="grid grid-cols-3 gap-3 text-center shrink-0">
-              <SessionStat label={"مدة"} value={s.duration_seconds ? `${Math.round(s.duration_seconds / 60)} د` : '—'} />
-              <SessionStat label={"ذروة"} value={s.peak_participants} icon={<Users className="w-3 h-3" />} />
-              <SessionStat label={"مشاركون"} value={s.participants_count} />
+              <SessionStat label={vs?.duration ?? 'Duration'} value={s.duration_seconds ? `${Math.round(s.duration_seconds / 60)}m` : '—'} />
+              <SessionStat label={vs?.peak ?? 'Peak'} value={s.peak_participants} icon={<Users className="w-3 h-3" />} />
+              <SessionStat label={vs?.participants ?? 'Participants'} value={s.participants_count} />
             </div>
           </div>
         </Link>
