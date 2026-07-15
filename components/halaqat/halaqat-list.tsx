@@ -617,41 +617,43 @@ function HalaqaFormModal({
             <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 rounded-xl">
               <Shield className="w-5 h-5" />
             </div>
-            {editItem ? 'تعديل الحلقة' : 'إضافة حلقة جديدة'}
+            {editItem ? (th?.editHalaqa ?? 'Edit Halaqa') : (th?.addNewHalaqa ?? 'Add New Halaqa')}
           </h3>
           <button onClick={onClose} className="p-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 rounded-full transition-colors shrink-0">
             <X className="w-5 h-5" />
           </button>
         </div>
         <form onSubmit={onSubmit} className="p-6 sm:p-8 space-y-5 overflow-y-auto scrollbar-thin scrollbar-thumb-border">
-          <Field label={'اسم الحلقة'} required>
+          <Field label={th?.formFieldName ?? 'Halaqa Name'} required>
             <input
               required
               type="text"
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              placeholder={platform === 'maqraa' ? 'حلقة تجويد الجزء الأول' : 'حلقة الصحابة لتحفيظ القرآن'}
+              placeholder={platform === 'maqraa'
+                ? (th?.formNamePlaceholderMaqraa ?? 'e.g. Tajweed Part 1')
+                : (th?.formNamePlaceholderAcademy ?? 'e.g. Al-Sahaba Memorization Circle')}
               className="input"
             />
           </Field>
-          <Field label={'الوصف'}>
+          <Field label={th?.formFieldDesc ?? 'Description'}>
             <textarea
               rows={2}
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
-              placeholder={"تفاصيل عن أهداف الحلقة، الجمهور المستهدف، طبيعة المحتوى…"}
+              placeholder={th?.formDescPlaceholder ?? 'Details about goals, target audience, content…'}
               className="input resize-none"
             />
           </Field>
 
           {isAdmin && teachers.length > 0 && (
-            <Field label={'المدرس'}>
+            <Field label={th?.formFieldTeacher ?? 'Teacher'}>
               <select
                 value={form.teacher_id}
                 onChange={(e) => setForm({ ...form, teacher_id: e.target.value })}
                 className="input"
               >
-                <option value="">{"اختر مدرساً"}</option>
+                <option value="">{th?.formSelectTeacher ?? 'Select a teacher'}</option>
                 {teachers.map((t) => (
                   <option key={t.id} value={t.id}>
                     {t.name}
@@ -662,18 +664,18 @@ function HalaqaFormModal({
           )}
 
           <div className="grid grid-cols-2 gap-3">
-            <Field label={'الجنس'}>
+            <Field label={th?.formFieldGender ?? 'Gender'}>
               <select
                 value={form.gender}
                 onChange={(e) => setForm({ ...form, gender: e.target.value })}
                 className="input"
               >
-                <option value="both">{'مختلط'}</option>
-                <option value="male">{'ذكور فقط'}</option>
-                <option value="female">{'إناث فقط'}</option>
+                <option value="both">{th?.genderBoth ?? 'Mixed'}</option>
+                <option value="male">{th?.genderMale ?? 'Male only'}</option>
+                <option value="female">{th?.genderFemale ?? 'Female only'}</option>
               </select>
             </Field>
-            <Field label={"الحد الأقصى للطلاب"}>
+            <Field label={th?.formFieldMaxStudents ?? 'Max Students'}>
               <input
                 type="number"
                 min={1}
@@ -686,7 +688,7 @@ function HalaqaFormModal({
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-bold text-foreground block mb-2">{"رؤية الحلقة"}</label>
+            <label className="text-sm font-bold text-foreground block mb-2">{th?.formFieldScope ?? 'Visibility'}</label>
             <div className="flex flex-col sm:flex-row gap-3">
               <label className="flex items-center gap-2 p-3 border border-border rounded-lg bg-background cursor-pointer hover:border-blue-500/50 flex-1 transition-colors">
                 <input 
@@ -698,8 +700,8 @@ function HalaqaFormModal({
                   className="w-4 h-4 text-blue-600 focus:ring-blue-500"
                 />
                 <div>
-                  <p className="font-bold text-sm">{"حلقة عامة"}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{"متاحة لجميع الطلاب"}</p>
+                  <p className="font-bold text-sm">{th?.scopePublic ?? 'Public Halaqa'}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{th?.scopePublicDesc ?? 'Available to all students'}</p>
                 </div>
               </label>
               <label className="flex items-center gap-2 p-3 border border-border rounded-lg bg-background cursor-pointer hover:border-emerald-500/50 flex-1 transition-colors">
@@ -712,8 +714,8 @@ function HalaqaFormModal({
                   className="w-4 h-4 text-emerald-600 focus:ring-emerald-500"
                 />
                 <div>
-                  <p className="font-bold text-sm text-emerald-700 dark:text-emerald-400">{"مخصصة لمسار"}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{"لطلاب المسارات فقط"}</p>
+                  <p className="font-bold text-sm text-emerald-700 dark:text-emerald-400">{th?.scopePathOnly ?? 'Path Specific'}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{th?.scopePathOnlyDesc ?? 'For path students only'}</p>
                 </div>
               </label>
             </div>
@@ -721,7 +723,7 @@ function HalaqaFormModal({
 
           {form.scope === 'path_only' && platform === 'maqraa' && (
             <div className="space-y-3 p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5">
-              <Field label={"اربط الحلقة بمسار"}>
+              <Field label={th?.formLinkPath ?? 'Link Halaqa to a Path'}>
                 <select
                   value={form.path_type && form.path_id ? `${form.path_type}:${form.path_id}` : ''}
                   onChange={(e) => {
@@ -735,8 +737,8 @@ function HalaqaFormModal({
                   }}
                   className="input"
                 >
-                  <option value="">{'— اختر مساراً —'}</option>
-                  <optgroup label={"مسارات التجويد"}>
+                  <option value="">{th?.formSelectPath ?? '— Select a path —'}</option>
+                  <optgroup label={th?.pathsTajweed ?? 'Tajweed Paths'}>
                     {paths
                       .filter((p) => p.type === 'tajweed')
                       .map((p) => (
@@ -745,7 +747,7 @@ function HalaqaFormModal({
                         </option>
                       ))}
                   </optgroup>
-                  <optgroup label={"مسارات التحفيظ"}>
+                  <optgroup label={th?.pathsMemorization ?? 'Memorization Paths'}>
                     {paths
                       .filter((p) => p.type === 'memorization')
                       .map((p) => (
@@ -765,9 +767,9 @@ function HalaqaFormModal({
                     className="w-4 h-4 mt-0.5 text-emerald-600 focus:ring-emerald-500 rounded"
                   />
                   <span>
-                    <span className="font-bold text-sm block">{"تسجيل طلاب المسار تلقائياً"}</span>
+                    <span className="font-bold text-sm block">{th?.autoEnroll ?? 'Auto-enroll path students'}</span>
                     <span className="text-xs text-muted-foreground">
-                      {"سيتم إضافة جميع طلاب المسار النشطين إلى الحلقة عند الإنشاء"}</span>
+                      {th?.autoEnrollDesc ?? 'All active path students will be added to the halaqa on creation'}</span>
                   </span>
                 </label>
               )}
@@ -775,7 +777,7 @@ function HalaqaFormModal({
           )}
 
           <div className="grid grid-cols-2 gap-3">
-            <Field label={"موعد البدء (اختياري)"}>
+            <Field label={th?.formFieldSchedule ?? 'Start Date (optional)'}>
               <input
                 type="datetime-local"
                 value={form.scheduled_at}
@@ -783,7 +785,7 @@ function HalaqaFormModal({
                 className="input"
               />
             </Field>
-            <Field label={"مدة الجلسة بالدقائق"}>
+            <Field label={th?.formFieldDuration ?? 'Session Duration (minutes)'}>
               <input
                 type="number"
                 min={5}
@@ -795,7 +797,7 @@ function HalaqaFormModal({
             </Field>
           </div>
 
-          <Field label={"رابط بديل خارجي (اختياري)"}>
+          <Field label={th?.formFieldMeetingLink ?? 'External Meeting Link (optional)'}>
             <input
               type="url"
               value={form.meeting_link}
@@ -804,7 +806,7 @@ function HalaqaFormModal({
               className="input"
             />
             <p className="text-[11px] text-muted-foreground mt-1">
-              {"يستخدم البث الافتراضي LiveKit المدمج — اترك الحقل فارغاً في الغالب."}</p>
+              {th?.meetingLinkHint ?? 'Default streaming uses built-in LiveKit — leave empty in most cases.'}</p>
           </Field>
 
           <div className="flex gap-4 pt-4 border-t border-border/50 mt-4">
@@ -813,14 +815,14 @@ function HalaqaFormModal({
               onClick={onClose}
               className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-bold transition-colors"
             >
-              {"إلغاء"}</button>
+              {th?.cancel ?? 'Cancel'}</button>
             <button
               type="submit"
               disabled={saving}
               className="flex-[2] py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-60 disabled:shadow-none"
             >
               {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Plus className="w-5 h-5" />}
-              {editItem ? 'حفظ التعديلات' : 'إنشاء الحلقة'}
+              {editItem ? (th?.saveEdits ?? 'Save Changes') : (th?.createHalaqa ?? 'Create Halaqa')}
             </button>
           </div>
         </form>
