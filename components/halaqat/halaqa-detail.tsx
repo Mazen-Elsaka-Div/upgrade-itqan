@@ -365,7 +365,7 @@ export function HalaqaDetail({
 
           {students.length === 0 ? (
             <div className="bg-card border border-dashed border-border rounded-2xl p-10 text-center text-muted-foreground">
-              {th?.noStudents ?? 'No students have joined this halaqa yet'}</div>
+              {th?.noStudentsYet ?? 'No students have joined this halaqa yet'}</div>
           ) : (
             <div className="grid gap-3">
               {students.map((s) => (
@@ -423,7 +423,7 @@ export function HalaqaDetail({
         >
           <div className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col">
             <div className="flex items-center justify-between p-5 border-b border-border">
-              <h3 className="font-bold text-lg">{"إضافة طلاب للحلقة"}</h3>
+              <h3 className="font-bold text-lg">{th?.addStudentsTitle ?? 'Add Students to Halaqa'}</h3>
               <button onClick={() => setShowAdd(false)} className="p-2 hover:bg-muted rounded-lg">
                 <X className="w-5 h-5" />
               </button>
@@ -435,7 +435,7 @@ export function HalaqaDetail({
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   type="search"
-                  placeholder={"ابحث بالاسم أو البريد…"}
+                  placeholder={th?.searchPlaceholder ?? 'Search by name or email…'}
                   className="w-full pr-10 pl-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
                 />
               </div>
@@ -443,7 +443,7 @@ export function HalaqaDetail({
             <div className="flex-1 overflow-y-auto p-4 space-y-2">
               {filteredAvailable.length === 0 ? (
                 <p className="text-center text-muted-foreground py-8 text-sm">
-                  {"لا يوجد طلاب مطابقون"}</p>
+                  {th?.noMatchingStudents ?? 'No matching students'}</p>
               ) : (
                 filteredAvailable.map((s) => (
                   <button

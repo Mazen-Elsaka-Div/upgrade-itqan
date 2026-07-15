@@ -81,7 +81,7 @@ export function VideoSessionDetail({ sessionId, backHref }: Props) {
       try {
         const res = await fetch(`/api/video/sessions/${sessionId}`)
         const json = await res.json()
-        if (!res.ok) throw new Error(json.error || vsd?.loadFailed ?? 'Failed to load session')
+        if (!res.ok) throw new Error(json.error || (vsd?.loadFailed ?? 'Failed to load session'))
         if (!cancelled) setInfo(json)
       } catch (e) {
         if (!cancelled) setError(e instanceof Error ? e.message : vsd?.genericError ?? 'An error occurred')
