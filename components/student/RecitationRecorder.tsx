@@ -25,6 +25,8 @@ function AyahReferencePanel({
   pageFrom: number
   pageTo: number
 }) {
+  const { t: _t } = useI18n()
+  const rr = (_t as any).recitationRecorder as Record<string, string> | undefined
   const [ayahs, setAyahs] = useState<AyahData[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(false)

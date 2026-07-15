@@ -289,7 +289,7 @@ export function CertificateTemplateEditor({
             <Badge variant="secondary">{template.name}</Badge>
           </DialogTitle>
           <DialogDescription>
-            {"اختر الحقل من القائمة ثم اسحبه إلى مكانه المناسب على التيمبلت. اضغط معاينة لرؤية النتيجة."}
+            {te?.editorDesc ?? 'Select a field from the list then drag it to its position on the template. Press preview to see the result.'}
           </DialogDescription>
         </DialogHeader>
 
@@ -298,11 +298,11 @@ export function CertificateTemplateEditor({
           <aside className="md:w-72 flex-shrink-0 flex flex-col gap-3 overflow-hidden">
             <div className="rounded-lg border bg-card p-3 space-y-2">
               <Label className="text-xs uppercase tracking-wide opacity-70">
-                {"أضف حقل"}
+                {te?.addField ?? 'Add Field'}
               </Label>
               <Select onValueChange={(v) => addField(v)}>
                 <SelectTrigger>
-                  <SelectValue placeholder={"اختر حقل…"} />
+                  <SelectValue placeholder={te?.selectField ?? 'Select field…'} />
                 </SelectTrigger>
                 <SelectContent>
                   {unplaced.map((f) => (
@@ -312,7 +312,7 @@ export function CertificateTemplateEditor({
                   ))}
                   {unplaced.length === 0 && (
                     <div className="px-3 py-2 text-xs text-muted-foreground">
-                      {"كل الحقول مضافة"}
+                      {te?.allFieldsAdded ?? 'All fields added'}
                     </div>
                   )}
                 </SelectContent>
@@ -321,12 +321,12 @@ export function CertificateTemplateEditor({
 
             <ScrollArea className="flex-1 rounded-lg border bg-card p-3">
               <Label className="text-xs uppercase tracking-wide opacity-70">
-                {"الحقول الموضوعة"}
+                {te?.placedFields ?? 'Placed Fields'}
               </Label>
               <div className="mt-2 space-y-1">
                 {placedKeys.length === 0 && (
                   <p className="text-xs text-muted-foreground">
-                    {"لا توجد حقول بعد"}
+                    {te?.noFieldsYet ?? 'No fields yet'}
                   </p>
                 )}
                 {placedKeys.map((k) => {
@@ -358,15 +358,15 @@ export function CertificateTemplateEditor({
             {activeDef && activePos && (
               <div className="rounded-lg border bg-card p-3 space-y-3 text-sm">
                 <p className="font-bold">
-                  {"خصائص: "}
+                  {te?.properties ?? 'Properties:'}{' '}
                   <span className="text-primary">{lbl(activeDef)}</span>
                 </p>
 
                 <div className="space-y-1">
                   <Label className="text-xs">
                     {IMAGE_FIELDS.has(activeDef.key)
-                      ? "حجم الصورة (% من العرض)"
-                      : "حجم الخط (% من أقصر ضلع)"}{" "}
+                      ? (te?.imageSize ?? 'Image size (% of width)')
+                      : (te?.fontSize ?? 'Font size (% of shorter side)')}{" "}
                     — {activePos.font_size?.toFixed(1) ?? "—"}
                   </Label>
                   <Slider
@@ -384,7 +384,7 @@ export function CertificateTemplateEditor({
                   <>
                     <div className="grid grid-cols-2 gap-2">
                       <div className="space-y-1">
-                        <Label className="text-xs">{"محاذاة"}</Label>
+                        <Label className="text-xs">{te?.align ?? 'Align'}</Label>
                         <Select
                           value={activePos.align || activeDef.default_align || "center"}
                           onValueChange={(v) =>
@@ -395,14 +395,14 @@ export function CertificateTemplateEditor({
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="left">{"يسار"}</SelectItem>
-                            <SelectItem value="center">{"وسط"}</SelectItem>
-                            <SelectItem value="right">{"يمين"}</SelectItem>
+                            <SelectItem value="left">{te?.alignLeft ?? 'Left'}</SelectItem>
+                            <SelectItem value="center">{te?.alignCenter ?? 'Center'}</SelectItem>
+                            <SelectItem value="right">{te?.alignRight ?? 'Right'}</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
                       <div className="space-y-1">
-                        <Label className="text-xs">{"السمك"}</Label>
+                        <Label className="text-xs">{te?.weight ?? 'Weight'}</Label>
                         <Select
                           value={activePos.weight || activeDef.default_weight || "normal"}
                           onValueChange={(v) =>
@@ -413,15 +413,15 @@ export function CertificateTemplateEditor({
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="normal">{"عادي"}</SelectItem>
-                            <SelectItem value="bold">{"عريض"}</SelectItem>
+                            <SelectItem value="normal">{te?.weightNormal ?? 'Normal'}</SelectItem>
+                            <SelectItem value="bold">{te?.weightBold ?? 'Bold'}</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
                     </div>
 
                     <div className="space-y-1">
-                      <Label className="text-xs">{"اللون"}</Label>
+                      <Label className="text-xs">{te?.color ?? 'Color'}</Label>
                       <Input
                         type="color"
                         value={activePos.color || activeDef.default_color || "#000000"}
@@ -433,7 +433,7 @@ export function CertificateTemplateEditor({
 
                     <div className="space-y-1">
                       <Label className="text-xs">
-                        {"أقصى ��رض (٪)"} —{" "}
+                        {te?.maxWidth ?? 'Max width (%)'} —{" "}
                         {Math.round((activePos.max_width ?? 0.7) * 100)}%
                       </Label>
                       <Slider
@@ -451,7 +451,7 @@ export function CertificateTemplateEditor({
 
                 <div className="space-y-1">
                   <Label className="text-xs">
-                    {"دوران (درجة)"} —{" "}
+                    {te?.rotation ?? 'Rotation (deg)'} —{" "}
                     {activePos.rotate || 0}°
                   </Label>
                   <Slider
@@ -482,7 +482,7 @@ export function CertificateTemplateEditor({
             <div className="flex items-center justify-between px-3 py-2 border-b bg-background/60">
               <div className="text-xs text-muted-foreground">
                 {isAr
-                  ? `${placedKeys.length} حقل موضوع · اسحب أي علامة لتحريكها`
+                  ? (te?.fieldsPlacedAr ?? `${placedKeys.length} fields placed · drag any pin to move`).replace('{n}', String(placedKeys.length))
                   : `${placedKeys.length} fields placed · drag any pin to move`}
               </div>
               <div className="flex gap-2">
@@ -497,7 +497,7 @@ export function CertificateTemplateEditor({
                   ) : (
                     <Eye className="w-4 h-4" />
                   )}
-                  {"معاينة"}
+                  {te?.preview ?? 'Preview'}
                 </Button>
                 <Button size="sm" onClick={save} disabled={saving}>
                   {saving ? (
@@ -505,7 +505,7 @@ export function CertificateTemplateEditor({
                   ) : (
                     <Save className="w-4 h-4" />
                   )}
-                  {"حفظ"}
+                  {te?.save ?? 'Save'}
                 </Button>
               </div>
             </div>
