@@ -8939,4 +8939,15 @@ export const ar = {
     verses: 'آية',
     noGoal: 'لا يوجد هدف محدد',
   },
+  adhkarWidget: {
+    morningAdhkar: 'أذكار الصباح',
+    eveningAdhkar: 'أذكار المساء',
+    completed: 'مكتمل',
+    morning: 'الصباح',
+    evening: 'المساء',
+    doneAllMorning: 'أتممت أذكار الصباح، تقبّل الله',
+    doneAllEvening: 'أتممت أذكار المساء، تقبّل الله',
+    reset: 'إعادة',
+    hint: 'انقر على الذِّكر لاحتساب التكرار — يُعاد التعيين كل يوم',
+  },
 }

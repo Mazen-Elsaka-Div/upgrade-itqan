@@ -8875,4 +8875,15 @@ export const en = {
     verses: 'verses',
     noGoal: 'No goal set',
   },
+  adhkarWidget: {
+    morningAdhkar: 'Morning Adhkar',
+    eveningAdhkar: 'Evening Adhkar',
+    completed: 'completed',
+    morning: 'Morning',
+    evening: 'Evening',
+    doneAllMorning: 'You completed Morning Adhkar, may Allah accept',
+    doneAllEvening: 'You completed Evening Adhkar, may Allah accept',
+    reset: 'Reset',
+    hint: 'Tap a dhikr to count it — resets daily',
+  },
 }
