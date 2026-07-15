@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
 import { CheckCircle, Clock, XCircle, BookOpen, UserCheck, Loader2, Mail, Lock, User, ChevronDown, Eye, EyeOff } from 'lucide-react'
+import { useI18n } from '@/lib/i18n/context'
 
 interface InvitationInfo {
   email: string
@@ -18,15 +19,6 @@ interface InvitationInfo {
   status: string
 }
 
-const ROLE_LABELS: Record<string, string> = {
-  academy_student: 'طالب في الأكاديمية',
-  student: 'طالب',
-  teacher: 'معلم',
-  parent: 'ولي أمر',
-  fiqh_supervisor: 'مشرف أسئلة الفقه',
-  content_supervisor: 'مشرف المحتوى',
-}
-
 export default function InvitationPage({
   params,
 }: {
@@ -34,6 +26,20 @@ export default function InvitationPage({
 }) {
   const router = useRouter()
   const { inviteCode } = use(params)
+  const { t } = useI18n()
+  const inv = (t as any).invite as Record<string, string> | undefined
+
+  function getRoleLabel(role: string) {
+    const map: Record<string, string> = {
+      academy_student: inv?.roleAcademyStudent ?? 'Academy Student',
+      student: inv?.roleStudent ?? 'Student',
+      teacher: inv?.roleTeacher ?? 'Teacher',
+      parent: inv?.roleParent ?? 'Parent',
+      fiqh_supervisor: inv?.roleFiqh ?? 'Fiqh Supervisor',
+      content_supervisor: inv?.roleContent ?? 'Content Supervisor',
+    }
+    return map[role] ?? role
+  }
   
   const [invitation, setInvitation] = useState<InvitationInfo | null>(null)
   const [status, setStatus] = useState<'loading' | 'ready-new' | 'ready-logged' | 'invalid' | 'expired' | 'accepted'>('loading')
@@ -200,8 +206,8 @@ export default function InvitationPage({
     )
   }
 
-  const inv = invitation!
-  const isExpired = inv.expires_at && new Date(inv.expires_at) < new Date()
+  const invite = invitation!
+  const isExpired = invite.expires_at && new Date(invite.expires_at) < new Date()
 
   return (
     <div className="min-h-screen bg-muted/30 flex items-center justify-center p-4 py-12" dir="rtl">
@@ -217,16 +223,16 @@ export default function InvitationPage({
           <div className="text-center space-y-1">
             <h2 className="text-xl font-bold text-foreground">أهلاً بك 👋</h2>
             <p className="text-sm text-muted-foreground">
-              لقد تلقيت دعوة من <strong>{inv.inviter_name || 'الأدمن'}</strong> للانضمام بدور <strong>{ROLE_LABELS[inv.role_to_assign] || inv.role_to_assign}</strong>.
+              لقد تلقيت دعوة من <strong>{invite.inviter_name || 'الأدمن'}</strong> للانضمام بدور <strong>{ROLE_LABELS[invite.role_to_assign] || invite.role_to_assign}</strong>.
             </p>
           </div>
 
-          {inv.plan_title && (
+          {invite.plan_title && (
             <div className="flex items-center gap-3 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl px-4 py-3">
               <BookOpen className="w-6 h-6 text-emerald-600 shrink-0" />
               <div>
                 <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400">الخطة التعليمية المرفقة</p>
-                <p className="font-bold text-foreground text-sm">{inv.plan_title}</p>
+                <p className="font-bold text-foreground text-sm">{invite.plan_title}</p>
               </div>
             </div>
           )}
@@ -246,7 +252,7 @@ export default function InvitationPage({
                   <Mail className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
                   <Input 
                     type="email" 
-                    value={inv.email} 
+                    value={invite.email} 
                     disabled 
                     dir="ltr"
                     className="pr-10 h-12 rounded-2xl bg-muted/50 border-border/50 text-muted-foreground" 
