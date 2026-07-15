@@ -118,7 +118,7 @@ export function HalaqaSessions({ halaqaId, canManage }: { halaqaId: string; canM
   }, [load])
 
   async function deleteSession(id: string) {
-    if (!confirm(حذف هذه الجلسة وكل تقييماتها؟)) return
+    if (!confirm('حذف هذه الجلسة وكل تقييماتها؟')) return
     const r = await fetch(`/api/halaqat/${halaqaId}/sessions/${id}`, { method: 'DELETE' })
     if (r.ok) load()
   }
