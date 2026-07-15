@@ -511,7 +511,7 @@ function HalaqaCard({
           </span>
           {(h as any).scope === 'path_only' && (
             <span className="shrink-0 text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-full font-black border bg-indigo-50 text-indigo-700 border-indigo-200/50 dark:bg-indigo-900/30 dark:text-indigo-400">
-              {'مسار فقط'}
+              {th?.pathOnly ?? 'Path Only'}
             </span>
           )}
         </div>
@@ -522,7 +522,7 @@ function HalaqaCard({
 
         <div className="flex flex-wrap items-center gap-2 mb-6">
           <span className={`px-2.5 py-1 rounded-md font-bold text-[11px] border ${themeBadge}`}>
-            {GENDER_LABELS[h.gender] || 'مختلط'}
+            {GENDER_LABELS[h.gender] || (th?.genderMixed ?? 'Mixed')}
           </span>
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md font-bold text-[11px] bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
             <Users className="w-3.5 h-3.5" /> {h.current_students}/{h.max_students}
@@ -541,7 +541,7 @@ function HalaqaCard({
           className="flex-1 inline-flex items-center justify-center gap-2 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold transition-all shadow-sm hover:shadow-md"
         >
           <ChevronLeft className="w-4 h-4 rotate-180" />
-          {role === 'student' ? 'فتح الحلقة' : 'إدارة الحلقة'}
+          {role === 'student' ? (th?.openHalaqa ?? 'Open Halaqa') : (th?.manageHalaqa ?? 'Manage Halaqa')}
         </Link>
         <Link
           href={`${basePath}/${h.id}/live`}
@@ -550,7 +550,7 @@ function HalaqaCard({
               ? 'bg-red-500 hover:bg-red-600 text-white hover:shadow-red-500/20'
               : 'bg-emerald-600 hover:bg-emerald-700 text-white hover:shadow-emerald-500/20'
           }`}
-          title={h.is_live ? 'انضم للبث المباشر' : 'دخول الغرفة'}
+          title={h.is_live ? (th?.joinLiveTitle ?? 'Join Live Broadcast') : (th?.enterRoomTitle ?? 'Enter Room')}
         >
           <Video className="w-4 h-4" />
         </Link>
@@ -558,7 +558,7 @@ function HalaqaCard({
           <button
             onClick={() => onEdit(h)}
             className="inline-flex items-center justify-center py-2.5 px-3 rounded-xl text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 transition-colors"
-            title={'تعديل'}
+            title={th?.edit ?? 'Edit'}
           >
             <Edit2 className="w-4 h-4" />
           </button>
@@ -568,7 +568,7 @@ function HalaqaCard({
             onClick={() => onDelete(h.id)}
             disabled={deleting}
             className="inline-flex items-center justify-center py-2.5 px-3 rounded-xl text-sm bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-900/20 dark:hover:bg-rose-900/40 transition-colors disabled:opacity-50"
-            title={'حذف'}
+            title={th?.delete ?? 'Delete'}
           >
             {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
           </button>
@@ -601,6 +601,8 @@ function HalaqaFormModal({
   onClose: () => void
   onSubmit: (e: React.FormEvent) => void
 }) {
+  const { t } = useI18n()
+  const th = (t as any).halaqat as Record<string, string> | undefined
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
