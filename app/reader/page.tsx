@@ -212,13 +212,14 @@ export default function ReaderDashboard() {
     return diffMin <= 15
   }
 
+  const rd = (t as any).readerDashboard as Record<string, string> | undefined
   const quickLinks = [
-    { href: '/reader/recitations', label: "التلاوات", icon: Mic, color: 'text-primary', bg: 'bg-primary/10' },
-    { href: '/reader/sessions', label: "الجلسات", icon: Video, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-    { href: '/reader/halaqat', label: "الحلقات", icon: Users, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-    { href: '/reader/schedule', label: "المواعيد", icon: CalendarDays, color: 'text-violet-500', bg: 'bg-violet-500/10' },
-    { href: '/reader/chat', label: "الرسائل", icon: MessagesSquare, color: 'text-amber-500', bg: 'bg-amber-500/10' },
-    { href: '/reader/competitions', label: "المسابقات", icon: Trophy, color: 'text-rose-500', bg: 'bg-rose-500/10' },
+    { href: '/reader/recitations', label: rd?.recitations ?? 'Recitations', icon: Mic, color: 'text-primary', bg: 'bg-primary/10' },
+    { href: '/reader/sessions', label: rd?.sessions ?? 'Sessions', icon: Video, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+    { href: '/reader/halaqat', label: rd?.halaqat ?? 'Halaqat', icon: Users, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+    { href: '/reader/schedule', label: rd?.schedule ?? 'Schedule', icon: CalendarDays, color: 'text-violet-500', bg: 'bg-violet-500/10' },
+    { href: '/reader/chat', label: rd?.messages ?? 'Messages', icon: MessagesSquare, color: 'text-amber-500', bg: 'bg-amber-500/10' },
+    { href: '/reader/competitions', label: rd?.competitions ?? 'Competitions', icon: Trophy, color: 'text-rose-500', bg: 'bg-rose-500/10' },
   ]
 
   return (
@@ -284,7 +285,7 @@ export default function ReaderDashboard() {
             {updatingActivity && (
               <div className="flex items-center gap-2 text-[10px] font-bold text-primary animate-pulse">
                 <Loader2 className="w-3 h-3 animate-spin" />
-                <span>{"جاري التحديث..."}</span>
+                <span>{rd?.updating ?? 'Updating...'}</span>
               </div>
             )}
           </div>
@@ -346,7 +347,7 @@ export default function ReaderDashboard() {
               href: '/reader/chat',
               icon: MessageSquare,
               count: summary.unreadMessages,
-              label: "رسائل غير مقروءة",
+              label: rd?.unreadMessages ?? 'Unread messages',
               color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20',
             },
             {
@@ -354,7 +355,7 @@ export default function ReaderDashboard() {
               href: '/reader/competitions',
               icon: Trophy,
               count: summary.pendingCompetitionEvals,
-              label: "مشاركات تنتظر تقييمك",
+              label: rd?.pendingEvals ?? 'Submissions awaiting your review',
               color: 'text-rose-600 dark:text-rose-400', bg: 'bg-rose-500/10', border: 'border-rose-500/20',
             },
             {
@@ -362,7 +363,7 @@ export default function ReaderDashboard() {
               href: '/reader/notifications',
               icon: Bell,
               count: summary.unreadNotifications,
-              label: "إشعارات جديدة",
+              label: rd?.newNotifications ?? 'New notifications',
               color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20',
             },
           ].filter(a => a.show).map((a) => (
@@ -400,12 +401,12 @@ export default function ReaderDashboard() {
                     <Video className="w-5 h-5" />
                   </div>
                   <span className="text-[11px] font-black uppercase tracking-widest text-primary">
-                    {"جلستك القادمة"}
+                    {rd?.upcomingSession ?? 'Your Next Session'}
                   </span>
                 </div>
-                <p className="text-lg font-black text-foreground">{nextSession.student_name || ("طالب")}</p>
+                <p className="text-lg font-black text-foreground">{nextSession.student_name || (rd?.student ?? 'Student')}</p>
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-sm text-muted-foreground font-medium">
-                  <span className="flex items-center gap-1.5"><Calendar className="w-4 h-4" />{nextSession.is_today ? ("اليوم") : fmtDay(nextSession.slot_start)}</span>
+                  <span className="flex items-center gap-1.5"><Calendar className="w-4 h-4" />{nextSession.is_today ? (rd?.today ?? 'Today') : fmtDay(nextSession.slot_start)}</span>
                   <span className="flex items-center gap-1.5"><Clock className="w-4 h-4" />{fmtTime(nextSession.slot_start)}</span>
                 </div>
                 <div className="mt-auto pt-6">
@@ -417,14 +418,14 @@ export default function ReaderDashboard() {
                       className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl bg-primary text-primary-foreground font-black text-sm hover:opacity-90 transition-opacity"
                     >
                       <Video className="w-4 h-4" />
-                      {"دخول الجلسة المباشرة"}
+                      {rd?.joinLiveSession ?? 'Join Live Session'}
                     </a>
                   ) : (
                     <Link
                       href="/reader/sessions"
                       className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl bg-muted text-foreground font-black text-sm hover:bg-muted/70 transition-colors"
                     >
-                      {"تفاصيل الجلسة"}
+                      {rd?.sessionDetails ?? 'Session Details'}
                     </Link>
                   )}
                 </div>
@@ -437,10 +438,10 @@ export default function ReaderDashboard() {
             <div className="flex items-center justify-between px-6 py-4 border-b border-border/60">
               <h3 className="text-sm font-black uppercase tracking-widest text-foreground flex items-center gap-2">
                 <CalendarCheck className="w-4 h-4 text-primary" />
-                {"الجلسات القادمة"}
+                {rd?.upcomingSessions ?? 'Upcoming Sessions'}
               </h3>
               <Link href="/reader/sessions" className="text-xs font-bold text-primary hover:underline flex items-center gap-1">
-                {"الكل"}
+                {rd?.viewAll ?? 'All'}
                 <ChevronLeft className={cn("w-3.5 h-3.5", !isAr && "rotate-180")} />
               </Link>
             </div>
@@ -454,9 +455,9 @@ export default function ReaderDashboard() {
                     <Video className="w-5 h-5" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="font-bold text-foreground truncate">{s.student_name || ("طالب")}</p>
+                    <p className="font-bold text-foreground truncate">{s.student_name || (rd?.student ?? 'Student')}</p>
                     <p className="text-xs text-muted-foreground font-medium">
-                      {s.is_today ? ("اليوم") : fmtDay(s.slot_start)} · {fmtTime(s.slot_start)}
+                      {s.is_today ? (rd?.today ?? 'Today') : fmtDay(s.slot_start)} · {fmtTime(s.slot_start)}
                     </p>
                   </div>
                   {s.meeting_link && isJoinable(s.slot_start) ? (
@@ -466,14 +467,14 @@ export default function ReaderDashboard() {
                       rel="noopener noreferrer"
                       className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-black hover:opacity-90 transition-opacity shrink-0"
                     >
-                      {"دخول"}
+                      {rd?.join ?? 'Join'}
                     </a>
                   ) : (
                     <span className={cn(
                       "px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shrink-0",
                       s.is_today ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"
                     )}>
-                      {s.is_today ? ("اليوم") : ("قادمة")}
+                      {s.is_today ? (rd?.today ?? 'Today') : (rd?.upcoming ?? 'Upcoming')}
                     </span>
                   )}
                 </div>
@@ -487,7 +488,7 @@ export default function ReaderDashboard() {
       <div className="space-y-4">
         <h3 className="text-sm font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
           <Target className="w-4 h-4 text-primary" />
-          {"وصول سريع"}
+          {rd?.quickAccess ?? 'Quick Access'}
         </h3>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           {quickLinks.map((link) => (
@@ -546,10 +547,10 @@ export default function ReaderDashboard() {
             </div>
             <div>
               <h3 className="text-xl font-black text-foreground tracking-tight">
-                {"تقرير تقدم الطلاب"}
+                {rd?.studentProgress ?? 'Student Progress Report'}
               </h3>
               <p className="text-sm text-muted-foreground font-medium">
-                {"أيام الانتظام، آيات الأسبوع، والمقارنة مع هدف الحفظ."}
+                {rd?.studentProgressDesc ?? 'Attendance days, weekly verses, and comparison with memorization goal.'}
               </p>
             </div>
           </div>
@@ -582,7 +583,7 @@ export default function ReaderDashboard() {
             </div>
           ) : studentProgress.length === 0 ? (
             <div className="p-10 text-center text-muted-foreground font-medium">
-              {"لا توجد بيانات تقدم للطلاب بعد"}
+              {rd?.noStudentProgress ?? 'No student progress data yet'}
             </div>
           ) : (
             <div className="divide-y divide-border/60">
@@ -594,8 +595,8 @@ export default function ReaderDashboard() {
                   ? Math.min(100, Math.round((completedVerses / targetVerses) * 100))
                   : 0
                 const goalLabel = targetVerses > 0
-                  ? `${formatArabicNumber(completedVerses)} / ${formatArabicNumber(targetVerses)} ${"آية"}`
-                  : ("لا يوجد هدف محدد")
+                  ? `${formatArabicNumber(completedVerses)} / ${formatArabicNumber(targetVerses)} ${rd?.verses ?? 'verses'}`
+                    : (rd?.noGoal ?? 'No goal set')
 
                 return (
                   <div key={student.student_id} className="p-5 md:p-6 space-y-4 hover:bg-muted/20 transition-colors">
