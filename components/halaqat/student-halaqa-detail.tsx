@@ -106,10 +106,10 @@ function fmtDate(value: string | null, withTime = false): string {
 function fmtDuration(seconds: number | null): string {
   if (!seconds || seconds <= 0) return '—'
   const m = Math.round(seconds / 60)
-  if (m < 60) return `${m} دقيقة`
+  if (m < 60) return `${m}m`
   const h = Math.floor(m / 60)
   const rem = m % 60
-  return rem ? `${h} س ${rem} د` : `${h} ساعة`
+  return rem ? `${h}h ${rem}m` : `${h}h`
 }
 
 export function StudentHalaqaDetail({
@@ -173,9 +173,9 @@ export function StudentHalaqaDetail({
     return (
       <div className="text-center py-16">
         <ShieldAlert className="w-12 h-12 text-rose-500 mx-auto mb-3" />
-        <p className="text-muted-foreground">{"لم يتم العثور على الحلقة أو لست منضماً إليها"}</p>
+        <p className="text-muted-foreground">{th?.notFoundOrNotEnrolled ?? 'Halaqa not found or you are not enrolled'}</p>
         <Link href={basePath} className="inline-block mt-4 text-indigo-600 hover:underline">
-          {"العودة للحلقات"}</Link>
+          {th?.backToHalaqat ?? 'Back to Halaqat'}</Link>
       </div>
     )
   }
@@ -193,7 +193,7 @@ export function StudentHalaqaDetail({
             <Link
               href={basePath}
               className="shrink-0 p-2 -m-2 hover:bg-white/15 rounded-lg transition-colors"
-              aria-label={"رجوع"}
+              aria-label={th?.back ?? 'Back'}
             >
               <ArrowRight className="w-5 h-5" />
             </Link>
@@ -202,7 +202,7 @@ export function StudentHalaqaDetail({
                 {halaqa.name}
                 {halaqa.is_live && (
                   <span className="inline-flex items-center gap-1 text-xs font-bold bg-red-500 text-white px-2 py-0.5 rounded-full">
-                    <Radio className="w-3 h-3 animate-pulse" /> {"مباشر الآن"}</span>
+                    <Radio className="w-3 h-3 animate-pulse" /> {th?.liveNowBadge ?? th?.statusLive ?? 'Live'}</span>
                 )}
               </h1>
               <div className="flex flex-wrap items-center gap-2 mt-2 text-xs text-white/90">
@@ -215,11 +215,11 @@ export function StudentHalaqaDetail({
                   <Users className="w-3 h-3" /> {halaqa.current_students}/{halaqa.max_students}
                 </span>
                 <span className="inline-flex items-center gap-1 bg-white/15 px-2 py-0.5 rounded-full">
-                  {GENDER_LABELS[halaqa.gender] || "مختلط"}
+                  {GENDER_LABELS[halaqa.gender] || (th?.mixed ?? 'Mixed')}
                 </span>
                 {halaqa.duration_minutes && (
                   <span className="inline-flex items-center gap-1 bg-white/15 px-2 py-0.5 rounded-full">
-                    <Clock className="w-3 h-3" /> {halaqa.duration_minutes} {"دقيقة"}</span>
+                    <Clock className="w-3 h-3" /> {halaqa.duration_minutes} {th?.minute ?? 'min'}</span>
                 )}
               </div>
             </div>
@@ -233,7 +233,7 @@ export function StudentHalaqaDetail({
             }`}
           >
             <Video className="w-4 h-4" />
-            {halaqa.is_live ? "انضم للبث الآن" : "دخول الغرفة"}
+            {halaqa.is_live ? (th?.joinLiveNow ?? 'Join Live Now') : (th?.enterRoom ?? 'Enter Room')}
           </Link>
         </div>
         {halaqa.description && (
@@ -245,13 +245,13 @@ export function StudentHalaqaDetail({
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatCard
           icon={<TrendingUp className="w-4 h-4" />}
-          label={"نسبة حضوري"}
+          label={th?.myAttendanceRate ?? th?.attendanceRate ?? 'Attendance Rate'}
           value={`${stats?.attendance_rate ?? 0}%`}
           accent="text-indigo-600 dark:text-indigo-400"
         />
         <StatCard
           icon={<CheckCircle2 className="w-4 h-4" />}
-          label={"مرات الحضور"}
+          label={th?.timesPresent ?? th?.attendance ?? 'Times Present'}
           value={stats?.present ?? 0}
           accent="text-emerald-600 dark:text-emerald-400"
         />

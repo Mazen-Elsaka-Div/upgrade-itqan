@@ -69,8 +69,8 @@ const VERDICT_LABELS_STATIC: Record<string, { ar: string; en: string }> = {
   repeat: { ar: 'إعادة', en: 'Repeat' },
 }
 
-function fmtDate(iso: string | null) {
-  if (!iso) return 'غير محدد'
+function fmtDate(iso: string | null, unspecifiedLabel = 'N/A') {
+  if (!iso) return unspecifiedLabel
   return new Intl.DateTimeFormat('ar', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(iso))
 }
 
@@ -301,7 +301,7 @@ function SessionForm({
 
   async function save() {
     if (!title.trim()) {
-      alert('عنوان الجلسة مطلوب')
+      alert(th?.fieldTitleRequired ?? th?.titleRequired ?? 'Session title is required')
       return
     }
     setSaving(true)
@@ -329,7 +329,7 @@ function SessionForm({
     if (r.ok) onSaved()
     else {
       const err = await r.json().catch(() => ({}))
-      alert(err.error || 'تعذر حفظ الجلسة')
+      alert(err.error || th?.sessionSaveFail || th?.saveFailed || 'Failed to save session')
     }
   }
 
@@ -340,22 +340,22 @@ function SessionForm({
     >
       <div className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col">
         <div className="flex items-center justify-between p-5 border-b border-border">
-          <h3 className="font-bold text-lg">{session ? 'تعديل الجلسة' : 'جلسة جديدة'}</h3>
+          <h3 className="font-bold text-lg">{session ? (th?.formEditTitle ?? th?.editSession ?? 'Edit Session') : (th?.formNewTitle ?? th?.newSession ?? 'New Session')}</h3>
           <button onClick={onClose} className="p-2 hover:bg-muted rounded-lg">
             <X className="w-5 h-5" />
           </button>
         </div>
         <div className="flex-1 overflow-y-auto p-5 space-y-4">
-          <Field label={'عنوان الجلسة'}>
+          <Field label={th?.fieldTitle ?? 'Session Title'}>
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
-              placeholder={'مثال: الجلسة الأسبوعية - سورة البقرة'}
+              placeholder={th?.fieldTitlePlaceholder ?? 'e.g. Weekly session - Al-Baqarah'}
             />
           </Field>
           <div className="grid grid-cols-2 gap-3">
-            <Field label={'الموعد'}>
+            <Field label={th?.fieldDate ?? th?.scheduledAt ?? 'Scheduled At'}>
               <input
                 type="datetime-local"
                 value={scheduledAt}
@@ -363,7 +363,7 @@ function SessionForm({
                 className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
               />
             </Field>
-            <Field label={'المدة (دقيقة)'}>
+            <Field label={th?.fieldDuration ?? th?.durationMinutes ?? 'Duration (min)'}>
               <input
                 type="number"
                 min={5}
@@ -380,7 +380,7 @@ function SessionForm({
               onChange={(e) => setSurahNumber(e.target.value ? Number(e.target.value) : '')}
               className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
             >
-              <option value="">{'— بدون —'}</option>
+              <option value="">{th?.fieldNoSurah ?? '— None —'}</option>
               {SURAHS.map((s) => (
                 <option key={s.number} value={s.number}>
                   {s.number}. {s.name}
@@ -389,7 +389,7 @@ function SessionForm({
             </select>
           </Field>
           <div className="grid grid-cols-2 gap-3">
-            <Field label={'من آية'}>
+            <Field label={th?.fieldFromAyah ?? th?.ayahFrom ?? 'From Ayah'}>
               <input
                 type="number"
                 min={1}
@@ -398,7 +398,7 @@ function SessionForm({
                 className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
               />
             </Field>
-            <Field label={'إلى آية'}>
+            <Field label={th?.fieldToAyah ?? th?.ayahTo ?? 'To Ayah'}>
               <input
                 type="number"
                 min={1}
@@ -408,15 +408,15 @@ function SessionForm({
               />
             </Field>
           </div>
-          <Field label={'ملاحظة الورد'}>
+          <Field label={th?.fieldWirdNote ?? th?.wirdFollowUp ?? 'Wird Note'}>
             <input
               value={wirdNote}
               onChange={(e) => setWirdNote(e.target.value)}
               className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
-              placeholder={'مثال: حفظ + مراجعة الوجه السابق'}
+              placeholder={th?.fieldWirdPlaceholder ?? 'e.g. Memorization + previous page review'}
             />
           </Field>
-          <Field label={'أجندة / تفاصيل'}>
+          <Field label={th?.fieldAgenda ?? 'Agenda / Details'}>
             <textarea
               value={agenda}
               onChange={(e) => setAgenda(e.target.value)}
@@ -427,7 +427,7 @@ function SessionForm({
         </div>
         <div className="p-5 border-t border-border flex justify-end gap-2">
           <button onClick={onClose} className="px-4 py-2 rounded-lg font-bold text-muted-foreground hover:bg-muted">
-            {'إلغاء'}
+            {th?.cancelBtn ?? th?.cancel ?? 'Cancel'}
           </button>
           <button
             onClick={save}
@@ -435,7 +435,7 @@ function SessionForm({
             className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold disabled:opacity-50"
           >
             {saving && <Loader2 className="w-4 h-4 animate-spin" />}
-            {'حفظ'}
+            {th?.saveBtn ?? th?.save ?? 'Save'}
           </button>
         </div>
       </div>

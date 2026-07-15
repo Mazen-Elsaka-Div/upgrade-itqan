@@ -109,8 +109,8 @@ function fmtDuration(seconds: number | null) {
   const m = Math.floor(seconds / 60)
   const h = Math.floor(m / 60)
   const rem = m % 60
-  if (h > 0) return `${h}س ${rem}د`
-  return `${m}د`
+  if (h > 0) return `${h}h ${rem}m`
+  return `${m}m`
 }
 
 function fmtDateTime(s: string) {
@@ -134,7 +134,7 @@ function Stars({ value }: { value: number | null }) {
     return <span className="text-xs text-muted-foreground">{ts?.noRating ?? 'لا يوجد تقييم'}</span>
   }
   return (
-    <div className="flex items-center gap-0.5" aria-label={`متوسط التقييم ${value}`}>
+    <div className="flex items-center gap-0.5" aria-label={`${ts?.ratingGeneral ?? 'Rating'} ${value}`}>
       {[1, 2, 3, 4, 5].map((n) => (
         <Star
           key={n}
@@ -773,7 +773,7 @@ interface RatingSummary {
 function MiniStars({ value }: { value: number | null }) {
   if (value === null || value === undefined) return <span className="text-xs text-muted-foreground">—</span>
   return (
-    <span className="inline-flex items-center gap-0.5" aria-label={`${value} من 5`}>
+            <span className="inline-flex items-center gap-0.5" aria-label={`${value} / 5`}>
       {[1, 2, 3, 4, 5].map((n) => (
         <Star
           key={n}
@@ -1093,7 +1093,7 @@ function RecordingCard({ r, onDelete }: { r: RecordingRow; onDelete: (id: string
           <DialogHeader>
             <DialogTitle>{ts?.deleteRecording ?? 'حذف التسجيل'}</DialogTitle>
             <DialogDescription>
-              {'سيتم حذف هذا التسجيل نهائياً من التخزين ولن يمكن استرجاعه. هل أنت متأكد؟'}
+              {ts?.deleteRecordingConfirm ?? 'This recording will be permanently deleted from storage and cannot be recovered. Are you sure?'}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-2">
@@ -1259,11 +1259,11 @@ function SessionDialog({
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!courseId || !title) {
-      toast.error('يرجى اختيار الدورة وإدخال عنوان الجلسة')
+      toast.error(ts?.errorCourseTitle ?? 'Please select a course and enter a session title')
       return
     }
     if (!isInstant && (!date || !time)) {
-      toast.error('يرجى تحديد تاريخ ووقت الجلسة')
+      toast.error(ts?.errorDateTime ?? 'Please set a date and time for the session')
       return
     }
 
@@ -1303,10 +1303,10 @@ function SessionDialog({
 
       if (isInstant) {
         const newId = data?.data?.id
-        toast.success('تم إنشاء البث، جاري فتح الغرفة...')
+        toast.success(ts?.sessionStarted ?? 'Broadcast created, opening room...')
         if (newId) onStartedNow(newId)
       } else {
-        toast.success(editing ? 'تم تعديل الجلسة' : 'تمت جدولة الجلسة')
+        toast.success(editing ? (ts?.editSuccess ?? 'Session updated') : (ts?.scheduleSuccess ?? 'Session scheduled'))
       }
     } catch {
       toast.error(ts?.connectionError ?? 'فشل الاتصال بالخادم')
@@ -1324,8 +1324,8 @@ function SessionDialog({
           </DialogTitle>
           <DialogDescription>
             {editing
-              ? 'حدّث تفاصيل الجلسة المجدولة.'
-              : 'ابدأ بثاً فورياً يفتح غرفة مباشرة الآن، أو جدول جلسة لوقت لاحق.'}
+              ? (ts?.dialogEditDesc ?? 'Update the details of this scheduled session.')
+              : (ts?.dialogNewDesc ?? 'Start an instant broadcast or schedule a session for later.')}
           </DialogDescription>
         </DialogHeader>
 
@@ -1341,7 +1341,7 @@ function SessionDialog({
                 }`}
               >
                 <Zap className="w-4 h-4" />
-                ابدأ الآن
+                {ts?.startNow ?? 'Start Now'}
               </button>
               <button
                 type="button"
@@ -1351,7 +1351,7 @@ function SessionDialog({
                 }`}
               >
                 <CalendarClock className="w-4 h-4" />
-                جدولة لاحقاً
+                {ts?.scheduleLater ?? 'Schedule Later'}
               </button>
             </div>
           )}
@@ -1368,7 +1368,7 @@ function SessionDialog({
               required
             >
               <option value="" disabled>
-                {courses.length === 0 ? 'لا توجد دورات متاحة' : (ts?.selectCourse ?? 'اختر الدورة...')}
+                {courses.length === 0 ? (ts?.noCourses ?? 'No courses available') : (ts?.selectCourse ?? 'Select course...')}
               </option>
               {courses.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -1396,13 +1396,13 @@ function SessionDialog({
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="date">
-                  التاريخ<span className="text-destructive">*</span>
+                  {ts?.dateLabel ?? 'Date'}<span className="text-destructive">*</span>
                 </Label>
                 <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="h-11" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="time">
-                  الوقت<span className="text-destructive">*</span>
+                  {ts?.timeLabel ?? 'Time'}<span className="text-destructive">*</span>
                 </Label>
                 <Input id="time" type="time" value={time} onChange={(e) => setTime(e.target.value)} className="h-11" />
               </div>
@@ -1437,13 +1437,13 @@ function SessionDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="desc">محاور الجلسة (اختياري)</Label>
+            <Label htmlFor="desc">{ts?.descLabel ?? 'Session Topics (optional)'}</Label>
             <Input
               id="desc"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="h-11"
-              placeholder="نبذة عمّا سيتم تغطيته"
+              placeholder={ts?.descPlaceholder ?? 'Brief overview of what will be covered'}
             />
           </div>
 
@@ -1453,8 +1453,8 @@ function SessionDialog({
               <div className="flex items-start gap-2">
                 <Megaphone className="w-4 h-4 text-primary mt-0.5" />
                 <div>
-                  <div className="text-sm font-bold">إشعار الطلاب</div>
-                  <p className="text-xs text-muted-foreground">تنبيه جميع المسجلين في الدورة بهذه الجلسة</p>
+                  <div className="text-sm font-bold">{ts?.notifyStudents ?? 'Notify Students'}</div>
+                  <p className="text-xs text-muted-foreground">{ts?.notifyStudentsDesc ?? 'Alert all enrolled students about this session'}</p>
                 </div>
               </div>
               <Switch checked={announce} onCheckedChange={setAnnounce} />
@@ -1466,7 +1466,7 @@ function SessionDialog({
                   <Globe2 className="w-4 h-4 text-emerald-600 mt-0.5" />
                   <div>
                     <div className="text-sm font-bold">{ts?.isPublic ?? 'جلسة عامة'}</div>
-                    <p className="text-xs text-muted-foreground">إنشاء رابط للدخول كضيف بدون تسجيل</p>
+                    <p className="text-xs text-muted-foreground">{ts?.guestLinkDesc ?? 'Create a guest link for joining without registration'}</p>
                   </div>
                 </div>
                 <Switch checked={isPublic} onCheckedChange={setIsPublic} />
@@ -1475,7 +1475,7 @@ function SessionDialog({
                 <Input
                   value={seriesTitle}
                   onChange={(e) => setSeriesTitle(e.target.value)}
-                  placeholder="اسم السلسلة / التصنيف (اختياري)"
+                  placeholder={ts?.seriesPlaceholder ?? 'Series name / category (optional)'}
                   className="h-10 text-sm"
                 />
               )}
@@ -1484,7 +1484,7 @@ function SessionDialog({
             <div className="flex items-start gap-2 p-4 bg-muted/30">
               <Video className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" />
               <p className="text-xs text-muted-foreground">
-                يتم تسجيل الجلسة تلقائياً وحفظها في &quot;التسجيلات&quot; عند تفعيل خاصية التسجيل من إعدادات الأكاديمية.
+                {ts?.recordingNote ?? 'Sessions are automatically recorded when recording is enabled in the academy settings.'}
               </p>
             </div>
           </div>
@@ -1506,8 +1506,8 @@ function SessionDialog({
                 : editing
                   ? (ts?.saveChanges ?? 'حفظ التعديلات')
                   : isInstant
-                    ? 'ابدأ البث الآن'
-                    : 'جدولة الجلسة'}
+                    ? (ts?.startBroadcast ?? 'Start Broadcast')
+                    : (ts?.scheduleSession ?? 'Schedule Session')}
             </Button>
           </DialogFooter>
         </form>
