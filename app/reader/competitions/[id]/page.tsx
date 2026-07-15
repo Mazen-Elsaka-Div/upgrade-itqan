@@ -3,7 +3,6 @@
 // Lightweight i18n fallback shim: `t.addedTranslations_2026?.[key]` always
 // resolves to undefined, so every call falls back to the inline Arabic literal.
 // Mirrors the pattern used by the sibling student competition pages.
-const t: any = new Proxy({}, { get: () => new Proxy({}, { get: () => undefined }) })
 
 import { useState, useEffect, use } from 'react'
 import Link from 'next/link'

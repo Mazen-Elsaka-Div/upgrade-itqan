@@ -1,7 +1,4 @@
 "use client"
-
-const t: any = new Proxy({}, { get: () => new Proxy({}, { get: () => undefined }) });
-const a: any = new Proxy({}, { get: () => new Proxy({}, { get: () => undefined }) });
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import Link from 'next/link'
 import { useI18n } from '@/lib/i18n/context'

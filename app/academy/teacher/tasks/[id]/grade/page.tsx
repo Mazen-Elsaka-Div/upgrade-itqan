@@ -1,6 +1,4 @@
 "use client"
-
-const t: any = new Proxy({}, { get: () => new Proxy({}, { get: () => undefined }) });
 import { useState, useEffect } from "react"
 import { useParams } from "next/navigation"
 import Link from "next/link"

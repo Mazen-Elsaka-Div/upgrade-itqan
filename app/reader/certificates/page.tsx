@@ -1,6 +1,4 @@
 "use client";
-
-const t: any = new Proxy({}, { get: () => new Proxy({}, { get: () => undefined }) });
 import React, { useState } from "react";
 import useSWR from "swr";
 import { toast } from "sonner";

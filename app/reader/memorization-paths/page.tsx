@@ -1,6 +1,4 @@
 "use client"
-
-const t: any = new Proxy({}, { get: () => new Proxy({}, { get: () => undefined }) });
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { PageLoadingSkeleton } from '@/components/ui/page-loading-skeleton'
