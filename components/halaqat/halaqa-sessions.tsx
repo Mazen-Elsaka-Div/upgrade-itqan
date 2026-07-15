@@ -84,13 +84,6 @@ export function HalaqaSessions({ halaqaId, canManage }: { halaqaId: string; canM
     ended: { label: th?.statusEnded ?? 'منتهية', cls: STATUS_LABELS_STATIC.ended.cls },
     cancelled: { label: th?.statusCancelled ?? 'ملغاة', cls: STATUS_LABELS_STATIC.cancelled.cls },
   }
-  const VERDICT_LABELS: Record<string, string> = {
-    excellent: th?.verdictExcellent ?? 'ممتاز',
-    passed: th?.verdictPassed ?? 'اجتاز',
-    needs_work: th?.verdictNeedsWork ?? 'يحتاج مراجعة',
-    repeat: th?.verdictRepeat ?? 'إعادة',
-  }
-  void VERDICT_LABELS
 
   const [sessions, setSessions] = useState<SessionRow[]>([])
   const [loading, setLoading] = useState(true)
@@ -118,7 +111,7 @@ export function HalaqaSessions({ halaqaId, canManage }: { halaqaId: string; canM
   }, [load])
 
   async function deleteSession(id: string) {
-    if (!confirm('حذف هذه الجلسة وكل تقييماتها؟')) return
+    if (!confirm(th?.deleteSessionConfirm ?? 'حذف هذه الجلسة وكل تقييماتها؟')) return
     const r = await fetch(`/api/halaqat/${halaqaId}/sessions/${id}`, { method: 'DELETE' })
     if (r.ok) load()
   }
@@ -144,7 +137,7 @@ export function HalaqaSessions({ halaqaId, canManage }: { halaqaId: string; canM
     <div className="space-y-4">
       {canManage && (
         <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">{sessions.length} {جلسة}</p>
+          <p className="text-sm text-muted-foreground">{sessions.length} {th?.sessions ?? 'جلسة'}</p>
           <button
             onClick={() => {
               setEditing(null)
@@ -152,13 +145,15 @@ export function HalaqaSessions({ halaqaId, canManage }: { halaqaId: string; canM
             }}
             className="inline-flex items-center gap-2 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-bold transition-colors"
           >
-            <Plus className="w-4 h-4" /> {جلسة جديدة}</button>
+            <Plus className="w-4 h-4" /> {th?.newSession ?? 'جلسة جديدة'}
+          </button>
         </div>
       )}
 
       {sessions.length === 0 ? (
         <div className="bg-card border border-dashed border-border rounded-2xl p-10 text-center text-muted-foreground">
-          {لا توجد جلسات مجدولة بعد}</div>
+          {th?.noSessions ?? 'لا توجد جلسات مجدولة بعد'}
+        </div>
       ) : (
         <div className="grid gap-3">
           {sessions.map((s) => {
@@ -182,9 +177,11 @@ export function HalaqaSessions({ halaqaId, canManage }: { halaqaId: string; canM
                         </span>
                       )}
                       <span className="inline-flex items-center gap-1">
-                        <Users className="w-3.5 h-3.5" /> {s.present_count} {حضور}</span>
+                        <Users className="w-3.5 h-3.5" /> {s.present_count} {th?.attendance ?? 'حضور'}
+                      </span>
                       <span className="inline-flex items-center gap-1">
-                        <ClipboardCheck className="w-3.5 h-3.5" /> {s.evaluation_count} {تقييم}</span>
+                        <ClipboardCheck className="w-3.5 h-3.5" /> {s.evaluation_count} {th?.evaluation ?? 'تقييم'}
+                      </span>
                     </div>
                     {s.wird_note && <p className="text-xs text-muted-foreground mt-2">{s.wird_note}</p>}
                   </div>
@@ -197,7 +194,9 @@ export function HalaqaSessions({ halaqaId, canManage }: { halaqaId: string; canM
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold"
                     >
                       <ClipboardCheck className="w-3.5 h-3.5" />
-                      {myEvalSession === s.id ? إخفاء تقييمي : تقييمي وورد المتابعة}
+                      {myEvalSession === s.id
+                        ? (th?.hideEval ?? 'إخفاء تقييمي')
+                        : (th?.showEval ?? 'تقييمي وورد المتابعة')}
                     </button>
                   )}
                   {canManage && (
@@ -206,20 +205,23 @@ export function HalaqaSessions({ halaqaId, canManage }: { halaqaId: string; canM
                         onClick={() => setRosterSession(s)}
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold"
                       >
-                        <ClipboardCheck className="w-3.5 h-3.5" /> {التقييم والحضور}</button>
+                        <ClipboardCheck className="w-3.5 h-3.5" /> {th?.attendanceEval ?? 'التقييم والحضور'}
+                      </button>
                       {s.status === 'scheduled' && (
                         <button
                           onClick={() => setStatus(s.id, 'live')}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg text-xs font-bold"
                         >
-                          <Radio className="w-3.5 h-3.5" /> {بدء}</button>
+                          <Radio className="w-3.5 h-3.5" /> {th?.startSession ?? 'بدء'}
+                        </button>
                       )}
                       {s.status === 'live' && (
                         <button
                           onClick={() => setStatus(s.id, 'ended')}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-foreground text-background rounded-lg text-xs font-bold"
                         >
-                          <CheckCircle2 className="w-3.5 h-3.5" /> {إنهاء}</button>
+                          <CheckCircle2 className="w-3.5 h-3.5" /> {th?.endSession ?? 'إنهاء'}
+                        </button>
                       )}
                       <button
                         onClick={() => {
@@ -228,12 +230,14 @@ export function HalaqaSessions({ halaqaId, canManage }: { halaqaId: string; canM
                         }}
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-secondary hover:bg-secondary/70 rounded-lg text-xs font-bold"
                       >
-                        <Pencil className="w-3.5 h-3.5" /> {تعديل}</button>
+                        <Pencil className="w-3.5 h-3.5" /> {th?.editSession ?? 'تعديل'}
+                      </button>
                       <button
                         onClick={() => deleteSession(s.id)}
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg text-xs font-bold"
                       >
-                        <Trash2 className="w-3.5 h-3.5" /> {حذف}</button>
+                        <Trash2 className="w-3.5 h-3.5" /> {th?.deleteSession ?? 'حذف'}
+                      </button>
                     </>
                   )}
                 </div>
@@ -297,7 +301,7 @@ function SessionForm({
 
   async function save() {
     if (!title.trim()) {
-      alert(عنوان الجلسة مطلوب)
+      alert('عنوان الجلسة مطلوب')
       return
     }
     setSaving(true)
@@ -325,7 +329,7 @@ function SessionForm({
     if (r.ok) onSaved()
     else {
       const err = await r.json().catch(() => ({}))
-      alert(err.error || تعذر حفظ الجلسة)
+      alert(err.error || 'تعذر حفظ الجلسة')
     }
   }
 
@@ -336,22 +340,22 @@ function SessionForm({
     >
       <div className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col">
         <div className="flex items-center justify-between p-5 border-b border-border">
-          <h3 className="font-bold text-lg">{session ? تعديل الجلسة : جلسة جديدة}</h3>
+          <h3 className="font-bold text-lg">{session ? 'تعديل الجلسة' : 'جلسة جديدة'}</h3>
           <button onClick={onClose} className="p-2 hover:bg-muted rounded-lg">
             <X className="w-5 h-5" />
           </button>
         </div>
         <div className="flex-1 overflow-y-auto p-5 space-y-4">
-          <Field label={عنوان الجلسة}>
+          <Field label={'عنوان الجلسة'}>
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
-              placeholder={مثال: الجلسة الأسبوعية - سورة البقرة}
+              placeholder={'مثال: الجلسة الأسبوعية - سورة البقرة'}
             />
           </Field>
           <div className="grid grid-cols-2 gap-3">
-            <Field label={الموعد}>
+            <Field label={'الموعد'}>
               <input
                 type="datetime-local"
                 value={scheduledAt}
@@ -359,7 +363,7 @@ function SessionForm({
                 className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
               />
             </Field>
-            <Field label={المدة (دقيقة)}>
+            <Field label={'المدة (دقيقة)'}>
               <input
                 type="number"
                 min={5}
@@ -370,13 +374,13 @@ function SessionForm({
               />
             </Field>
           </div>
-          <Field label={الورد (السورة)}>
+          <Field label={'الورد (السورة)'}>
             <select
               value={surahNumber}
               onChange={(e) => setSurahNumber(e.target.value ? Number(e.target.value) : '')}
               className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
             >
-              <option value="">{— بدون —}</option>
+              <option value="">{'— بدون —'}</option>
               {SURAHS.map((s) => (
                 <option key={s.number} value={s.number}>
                   {s.number}. {s.name}
@@ -385,7 +389,7 @@ function SessionForm({
             </select>
           </Field>
           <div className="grid grid-cols-2 gap-3">
-            <Field label={من آية}>
+            <Field label={'من آية'}>
               <input
                 type="number"
                 min={1}
@@ -394,7 +398,7 @@ function SessionForm({
                 className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
               />
             </Field>
-            <Field label={إلى آية}>
+            <Field label={'إلى آية'}>
               <input
                 type="number"
                 min={1}
@@ -404,15 +408,15 @@ function SessionForm({
               />
             </Field>
           </div>
-          <Field label={ملاحظة الورد}>
+          <Field label={'ملاحظة الورد'}>
             <input
               value={wirdNote}
               onChange={(e) => setWirdNote(e.target.value)}
               className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
-              placeholder={مثال: حفظ + مراجعة الوجه السابق}
+              placeholder={'مثال: حفظ + مراجعة الوجه السابق'}
             />
           </Field>
-          <Field label={أجندة / تفاصيل}>
+          <Field label={'أجندة / تفاصيل'}>
             <textarea
               value={agenda}
               onChange={(e) => setAgenda(e.target.value)}
@@ -423,14 +427,16 @@ function SessionForm({
         </div>
         <div className="p-5 border-t border-border flex justify-end gap-2">
           <button onClick={onClose} className="px-4 py-2 rounded-lg font-bold text-muted-foreground hover:bg-muted">
-            {إلغاء}</button>
+            {'إلغاء'}
+          </button>
           <button
             onClick={save}
             disabled={saving}
             className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold disabled:opacity-50"
           >
             {saving && <Loader2 className="w-4 h-4 animate-spin" />}
-            {حفظ}</button>
+            {'حفظ'}
+          </button>
         </div>
       </div>
     </div>
@@ -446,6 +452,16 @@ function RosterModal({
   session: SessionRow
   onClose: () => void
 }) {
+  const { t } = useI18n()
+  const th = (t as any).halaqat as Record<string, string> | undefined
+
+  const verdictLabels: Record<string, string> = {
+    excellent: th?.verdictExcellent ?? VERDICT_LABELS_STATIC.excellent.ar,
+    passed: th?.verdictPassed ?? VERDICT_LABELS_STATIC.passed.ar,
+    needs_work: th?.verdictNeedsWork ?? VERDICT_LABELS_STATIC.needs_work.ar,
+    repeat: th?.verdictRepeat ?? VERDICT_LABELS_STATIC.repeat.ar,
+  }
+
   const [roster, setRoster] = useState<RosterRow[]>([])
   const [loading, setLoading] = useState(true)
   const [activeStudent, setActiveStudent] = useState<string | null>(null)
@@ -480,7 +496,7 @@ function RosterModal({
       <div className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
         <div className="flex items-center justify-between p-5 border-b border-border">
           <div>
-            <h3 className="font-bold text-lg">{التقييم والحضور}</h3>
+            <h3 className="font-bold text-lg">{th?.attendanceEval ?? 'التقييم والحضور'}</h3>
             <p className="text-xs text-muted-foreground mt-0.5">{session.title}</p>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-muted rounded-lg">
@@ -493,7 +509,9 @@ function RosterModal({
               <Loader2 className="w-6 h-6 animate-spin text-emerald-500" />
             </div>
           ) : roster.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8 text-sm">{لا يوجد طلاب في الحلقة}</p>
+            <p className="text-center text-muted-foreground py-8 text-sm">
+              {th?.noStudents ?? 'لا يوجد طلاب في الحلقة'}
+            </p>
           ) : (
             roster.map((r) => (
               <div key={r.student_id} className="bg-secondary/30 border border-border rounded-xl overflow-hidden">
@@ -520,7 +538,13 @@ function RosterModal({
                               : 'bg-background text-muted-foreground hover:bg-secondary'
                           }`}
                         >
-                          {st === 'present' ? حاضر : st === 'absent' ? غائب : st === 'late' ? متأخر : بعذر}
+                          {st === 'present'
+                            ? (th?.attendPresent ?? 'حاضر')
+                            : st === 'absent'
+                              ? (th?.attendAbsent ?? 'غائب')
+                              : st === 'late'
+                                ? (th?.attendLate ?? 'متأخر')
+                                : (th?.attendExcused ?? 'بعذر')}
                         </button>
                       ))}
                     </div>
@@ -528,14 +552,16 @@ function RosterModal({
                   <div className="flex items-center gap-2 shrink-0">
                     {r.verdict && (
                       <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400">
-                        {VERDICT_LABELS[r.verdict]}
+                        {verdictLabels[r.verdict] ?? r.verdict}
                       </span>
                     )}
                     <button
                       onClick={() => setActiveStudent(activeStudent === r.student_id ? null : r.student_id)}
                       className="text-xs font-bold text-emerald-600 hover:underline"
                     >
-                      {r.verdict || r.notes ? تعديل التقييم : تقييم}
+                      {r.verdict || r.notes
+                        ? (th?.editEval ?? 'تعديل التقييم')
+                        : (th?.evaluation ?? 'تقييم')}
                     </button>
                   </div>
                 </div>
@@ -570,6 +596,16 @@ function EvaluationForm({
   row: RosterRow
   onSaved: () => void
 }) {
+  const { t } = useI18n()
+  const th = (t as any).halaqat as Record<string, string> | undefined
+
+  const verdictLabels: Record<string, string> = {
+    excellent: th?.verdictExcellent ?? VERDICT_LABELS_STATIC.excellent.ar,
+    passed: th?.verdictPassed ?? VERDICT_LABELS_STATIC.passed.ar,
+    needs_work: th?.verdictNeedsWork ?? VERDICT_LABELS_STATIC.needs_work.ar,
+    repeat: th?.verdictRepeat ?? VERDICT_LABELS_STATIC.repeat.ar,
+  }
+
   const [mem, setMem] = useState<number | ''>(row.memorization_score ?? '')
   const [taj, setTaj] = useState<number | ''>(row.tajweed_score ?? '')
   const [flu, setFlu] = useState<number | ''>(row.fluency_score ?? '')
@@ -608,14 +644,14 @@ function EvaluationForm({
   return (
     <div className="border-t border-border bg-background/60 p-3 space-y-3">
       <div className="grid grid-cols-3 gap-2">
-        <ScoreInput label={الحفظ} value={mem} onChange={setMem} />
-        <ScoreInput label={التجويد} value={taj} onChange={setTaj} />
-        <ScoreInput label={الطلاقة} value={flu} onChange={setFlu} />
+        <ScoreInput label={th?.scoreMemorization ?? 'الحفظ'} value={mem} onChange={(v) => setMem(v)} />
+        <ScoreInput label={th?.scoreTajweed ?? 'التجويد'} value={taj} onChange={(v) => setTaj(v)} />
+        <ScoreInput label={th?.scoreFluency ?? 'الطلاقة'} value={flu} onChange={(v) => setFlu(v)} />
       </div>
       <div>
-        <label className="text-xs font-bold text-muted-foreground">{التقدير}</label>
+        <label className="text-xs font-bold text-muted-foreground">{th?.verdict ?? 'التقدير'}</label>
         <div className="flex flex-wrap gap-1.5 mt-1">
-          {Object.entries(VERDICT_LABELS).map(([k, v]) => (
+          {(Object.entries(verdictLabels) as [string, string][]).map(([k, v]) => (
             <button
               key={k}
               onClick={() => setVerdict(verdict === k ? '' : k)}
@@ -629,7 +665,7 @@ function EvaluationForm({
         </div>
       </div>
       <div>
-        <label className="text-xs font-bold text-muted-foreground">{ملاحظات}</label>
+        <label className="text-xs font-bold text-muted-foreground">{th?.notes ?? 'ملاحظات'}</label>
         <textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
@@ -639,13 +675,13 @@ function EvaluationForm({
       </div>
       <div className="grid grid-cols-3 gap-2">
         <div className="col-span-3 sm:col-span-1">
-          <label className="text-xs font-bold text-muted-foreground">{الورد القادم}</label>
+          <label className="text-xs font-bold text-muted-foreground">{th?.nextWird ?? 'الورد القادم'}</label>
           <select
             value={nextSurah}
             onChange={(e) => setNextSurah(e.target.value ? Number(e.target.value) : '')}
             className="w-full mt-1 px-2 py-2 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
           >
-            <option value="">{— سورة —}</option>
+            <option value="">{'— سورة —'}</option>
             {SURAHS.map((s) => (
               <option key={s.number} value={s.number}>
                 {s.name}
@@ -654,7 +690,7 @@ function EvaluationForm({
           </select>
         </div>
         <div>
-          <label className="text-xs font-bold text-muted-foreground">{من}</label>
+          <label className="text-xs font-bold text-muted-foreground">{th?.ayahFrom ?? 'من'}</label>
           <input
             type="number"
             min={1}
@@ -664,7 +700,7 @@ function EvaluationForm({
           />
         </div>
         <div>
-          <label className="text-xs font-bold text-muted-foreground">{إلى}</label>
+          <label className="text-xs font-bold text-muted-foreground">{th?.ayahTo ?? 'إلى'}</label>
           <input
             type="number"
             min={1}
@@ -681,7 +717,9 @@ function EvaluationForm({
           className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-bold disabled:opacity-50"
         >
           {saving && <Loader2 className="w-4 h-4 animate-spin" />}
-          {حفظ التقييم}</button>
+          {th?.saveEvaluation ?? 'حفظ التقييم'}
+
+        </button>
       </div>
     </div>
   )
@@ -721,6 +759,16 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 function StudentSessionDetail({ halaqaId, sessionId }: { halaqaId: string; sessionId: string }) {
+  const { t } = useI18n()
+  const th = (t as any).halaqat as Record<string, string> | undefined
+
+  const verdictLabels: Record<string, string> = {
+    excellent: th?.verdictExcellent ?? VERDICT_LABELS_STATIC.excellent.ar,
+    passed: th?.verdictPassed ?? VERDICT_LABELS_STATIC.passed.ar,
+    needs_work: th?.verdictNeedsWork ?? VERDICT_LABELS_STATIC.needs_work.ar,
+    repeat: th?.verdictRepeat ?? VERDICT_LABELS_STATIC.repeat.ar,
+  }
+
   const [row, setRow] = useState<RosterRow | null>(null)
   const [loading, setLoading] = useState(true)
   const [empty, setEmpty] = useState(false)
@@ -758,7 +806,9 @@ function StudentSessionDetail({ halaqaId, sessionId }: { halaqaId: string; sessi
   if (empty || !row) {
     return (
       <div className="border-t border-border bg-background/60 p-4 text-center text-xs text-muted-foreground">
-        {لم يتم تسجيل تقييم لهذه الجلسة بعد}</div>
+        {th?.noEvalYet ?? 'لم يتم تسجيل تقييم لهذه الجلسة بعد'}
+
+      </div>
     )
   }
 
@@ -773,7 +823,7 @@ function StudentSessionDetail({ halaqaId, sessionId }: { halaqaId: string; sessi
   return (
     <div className="border-t border-border bg-background/60 p-4 space-y-3">
       <div className="flex items-center gap-2 text-xs">
-        <span className="text-muted-foreground">{الحضور:}</span>
+        <span className="text-muted-foreground">{th?.attendance ?? 'الحضور:'}</span>
         <span
           className={`font-bold px-2 py-0.5 rounded-full ${
             row.attendance_status === 'present'
@@ -784,33 +834,33 @@ function StudentSessionDetail({ halaqaId, sessionId }: { halaqaId: string; sessi
           }`}
         >
           {row.attendance_status === 'present'
-            ? حاضر
+            ? (th?.attendPresent ?? 'حاضر')
             : row.attendance_status === 'absent'
-              ? غائب
+              ? (th?.attendAbsent ?? 'غائب')
               : row.attendance_status === 'late'
-                ? متأخر
+                ? (th?.attendLate ?? 'متأخر')
                 : row.attendance_status === 'excused'
-                  ? بعذر
-                  : غير مسجل}
+                  ? (th?.attendExcused ?? 'بعذر')
+                  : (th?.attendUnregistered ?? 'غير مسجل')}
         </span>
         {row.verdict && (
           <span className="font-bold px-2 py-0.5 rounded-full bg-emerald-600 text-white">
-            {VERDICT_LABELS[row.verdict]}
+            {verdictLabels[row.verdict] ?? row.verdict}
           </span>
         )}
       </div>
 
       {hasEval && (
         <div className="grid grid-cols-3 gap-2">
-          <ScorePill label={الحفظ} value={row.memorization_score} />
-          <ScorePill label={التجويد} value={row.tajweed_score} />
-          <ScorePill label={الطلاقة} value={row.fluency_score} />
+          <ScorePill label={th?.scoreMemorization ?? 'الحفظ'} value={row.memorization_score} />
+          <ScorePill label={th?.scoreTajweed ?? 'التجويد'} value={row.tajweed_score} />
+          <ScorePill label={th?.scoreFluency ?? 'الطلاقة'} value={row.fluency_score} />
         </div>
       )}
 
       {row.notes && (
         <div className="text-xs">
-          <span className="font-bold text-muted-foreground">{ملاحظات المعلم:}</span>
+          <span className="font-bold text-muted-foreground">{th?.teacherNotes ?? 'ملاحظات المعلم:'} </span>
           <span className="text-foreground">{row.notes}</span>
         </div>
       )}
@@ -818,7 +868,8 @@ function StudentSessionDetail({ halaqaId, sessionId }: { halaqaId: string; sessi
       {hasNextWird && (
         <div className="rounded-lg bg-emerald-50 dark:bg-emerald-900/15 border border-emerald-100 dark:border-emerald-900/30 p-3">
           <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400 mb-1 flex items-center gap-1">
-            <BookOpen className="w-3.5 h-3.5" /> {ورد المتابعة}</p>
+            <BookOpen className="w-3.5 h-3.5" /> {th?.wirdFollowUp ?? 'ورد المتابعة'}
+          </p>
           {row.next_surah_name && (
             <p className="text-sm font-bold">
               {row.next_surah_name}
