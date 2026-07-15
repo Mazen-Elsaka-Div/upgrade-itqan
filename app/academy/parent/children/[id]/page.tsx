@@ -240,8 +240,9 @@ export default function ChildDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = use(params)
-  const { locale } = useI18n()
+  const { locale, t } = useI18n()
   const isAr = locale === 'ar'
+  const pc = (t as any).parentChild as Record<string, string> | undefined
 
   const [detail, setDetail] = useState<ChildDetail | null>(null)
   const [loading, setLoading] = useState(true)
@@ -277,12 +278,12 @@ export default function ChildDetailPage({
       })
       if (res.ok) {
         setDetail((prev) => (prev ? { ...prev, link: { ...prev.link, relation } } : prev))
-        toast.success("تم تحديث صلة القرابة")
+        toast.success(pc?.relationUpdated ?? 'Relation updated')
       } else {
-        toast.error("تعذر التحديث")
+        toast.error(pc?.updateFail ?? 'Failed to update')
       }
     } catch {
-      toast.error("حدث خطأ")
+      toast.error(pc?.genericError ?? 'An error occurred')
     } finally {
       setSavingRelation(false)
     }
@@ -294,7 +295,7 @@ export default function ChildDetailPage({
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-10 h-10 animate-spin text-primary" />
           <p className="text-sm text-muted-foreground font-medium">
-            {"جاري التحميل..."}
+            {pc?.loading ?? 'Loading...'}
           </p>
         </div>
       </div>
@@ -307,7 +308,7 @@ export default function ChildDetailPage({
         <Card className="rounded-2xl">
           <CardContent className="p-12 text-center">
             <p className="text-muted-foreground">
-              {"الطالب غير موجود أو غير مربوط بحسابك."}
+              {pc?.studentNotFound ?? 'Student not found or not linked to your account.'}
             </p>
           </CardContent>
         </Card>
@@ -338,10 +339,10 @@ export default function ChildDetailPage({
   const showQuran = hasQuran
 
   const accountTypeLabel = isMixed
-    ? "أكاديمية ومقرأة"
+    ? (pc?.typeBoth ?? 'Academy & Maqraa')
     : showQuran && !hasAcademy
-      ? "مقرأة"
-      : "أكاديمية"
+      ? (pc?.typeMaqraa ?? 'Maqraa')
+      : (pc?.typeAcademy ?? 'Academy')
 
   // Chart data with real weekday labels (offset 6 = oldest, 0 = today)
   const chartData = [...weekly_activity]
@@ -370,15 +371,15 @@ export default function ChildDetailPage({
   const ChevronIcon = isAr ? ChevronLeft : ChevronRight
 
   const tabs: Array<{ value: string; label: string }> = [
-    { value: 'overview', label: "نظرة" },
-    { value: 'courses', label: "الدورات" },
-    { value: 'tasks', label: "الواجبات والدرجات" },
-    { value: 'series', label: "السلاسل والمسارات" },
-    { value: 'schedule', label: "المواعيد" },
-    { value: 'certificates', label: "الشهادات" },
-    ...(showQuran ? [{ value: 'competitions', label: "المسابقات" }] : []),
-    ...(showQuran ? [{ value: 'recitations', label: "التلاوات" }] : []),
-    { value: 'badges', label: "الشارات" },
+    { value: 'overview', label: pc?.tabOverview ?? 'Overview' },
+    { value: 'courses', label: pc?.tabCourses ?? 'Courses' },
+    { value: 'tasks', label: pc?.tabTasks ?? 'Tasks & Grades' },
+    { value: 'series', label: pc?.tabSeries ?? 'Series & Paths' },
+    { value: 'schedule', label: pc?.tabSchedule ?? 'Schedule' },
+    { value: 'certificates', label: pc?.tabCertificates ?? 'Certificates' },
+    ...(showQuran ? [{ value: 'competitions', label: pc?.tabCompetitions ?? 'Competitions' }] : []),
+    ...(showQuran ? [{ value: 'recitations', label: pc?.tabRecitations ?? 'Recitations' }] : []),
+    { value: 'badges', label: pc?.tabBadges ?? 'Badges' },
   ]
 
   return (
@@ -389,7 +390,7 @@ export default function ChildDetailPage({
         className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors"
       >
         <ChevronIcon className="w-4 h-4" />
-        {"العودة لقائمة الأبناء"}
+        {pc?.backToChildren ?? 'Back to Children List'}
       </Link>
 
       {/* Hero Profile */}
@@ -426,7 +427,7 @@ export default function ChildDetailPage({
             <div className="flex items-center gap-2 mt-3">
               <Pencil className="w-3.5 h-3.5 text-muted-foreground" />
               <span className="text-xs text-muted-foreground">
-                {"صلة القرابة:"}
+                {pc?.relation ?? 'Relation:'}
               </span>
               <Select
                 value={link.relation}
@@ -447,7 +448,7 @@ export default function ChildDetailPage({
               {savingRelation && <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />}
             </div>
             <p className="text-xs text-muted-foreground mt-2">
-              {"ربط منذ"} {fmtDate(link.linked_at, isAr)}
+              {pc?.linkedSince ?? 'Linked since'} {fmtDate(link.linked_at, isAr)}
             </p>
           </div>
 
@@ -455,13 +456,13 @@ export default function ChildDetailPage({
             <Link href={`/academy/parent/messages?child_id=${id}`}>
               <Button variant="outline" size="sm" className="rounded-xl font-bold">
                 <MessageSquare className="w-4 h-4 me-1.5" />
-                {"مراسلة"}
+                {pc?.message ?? 'Message'}
               </Button>
             </Link>
             <Link href={`/academy/parent/children/${id}/restrictions`}>
               <Button variant="outline" size="sm" className="rounded-xl font-bold">
                 <Shield className="w-4 h-4 me-1.5" />
-                {"تقييد"}
+                {pc?.restrict ?? 'Restrict'}
               </Button>
             </Link>
           </div>
@@ -474,9 +475,9 @@ export default function ChildDetailPage({
           <StatCard
             icon={<BookOpen className="w-5 h-5 text-emerald-500" />}
             tint="bg-emerald-500/10"
-            label={"الدورات"}
+            label={pc?.statCourses ?? 'Courses'}
             value={progress.total_courses}
-            sub={`${progress.active_courses} ${"نشط"} · ${progress.completed_courses} ${"مكتمل"}`}
+            sub={`${progress.active_courses} ${pc?.active ?? 'active'} · ${progress.completed_courses} ${pc?.completed ?? 'completed'}`}
           />
         )}
         {showAcademy && (
@@ -487,7 +488,7 @@ export default function ChildDetailPage({
                   <TrendingUp className="w-5 h-5 text-blue-500" />
                 </div>
                 <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                  {"التقدم"}
+                  {pc?.progress ?? 'Progress'}
                 </span>
               </div>
               <div className="text-3xl font-black text-foreground">{progress.avg_progress}%</div>
@@ -499,17 +500,17 @@ export default function ChildDetailPage({
           <StatCard
             icon={<BarChart3 className="w-5 h-5 text-violet-500" />}
             tint="bg-violet-500/10"
-            label={"تلاوات"}
+            label={pc?.recitations ?? 'Recitations'}
             value={progress.total_recitations_30d}
-            sub={"آخر ٣٠ يوم"}
+            sub={pc?.last30Days ?? 'Last 30 days'}
           />
         )}
         <StatCard
           icon={<Award className="w-5 h-5 text-amber-500" />}
           tint="bg-amber-500/10"
-          label={"الشهادات"}
+          label={pc?.certificates ?? 'Certificates'}
           value={issuedCerts.length}
-          sub={"شهادة صادرة"}
+          sub={pc?.certIssued ?? 'issued'}
         />
       </div>
 
@@ -531,10 +532,10 @@ export default function ChildDetailPage({
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-bold text-foreground">
-                  {"نشاط الأسبوع"}
+                  {pc?.weeklyActivity ?? 'Weekly Activity'}
                 </h3>
                 <Badge variant="secondary" className="text-xs">
-                  {weeklyTotal} {"نشاط"}
+                  {weeklyTotal} {pc?.activities ?? 'activities'}
                 </Badge>
               </div>
               {hasWeeklyActivity ? (
@@ -569,7 +570,7 @@ export default function ChildDetailPage({
                         dataKey="count"
                         fill="hsl(var(--primary))"
                         radius={[6, 6, 0, 0]}
-                        name={"النشاط"}
+                        name={pc?.activity ?? 'Activity'}
                       />
                     </BarChart>
                   </ResponsiveContainer>
@@ -577,7 +578,7 @@ export default function ChildDetailPage({
               ) : (
                 <div className="h-64 flex flex-col items-center justify-center text-muted-foreground text-sm gap-2">
                   <BarChart3 className="w-8 h-8 text-muted-foreground/30" />
-                  {"لا يوجد نشاط هذا الأسبوع"}
+                  {pc?.noActivityThisWeek ?? 'No activity this week'}
                 </div>
               )}
             </CardContent>
@@ -587,11 +588,11 @@ export default function ChildDetailPage({
           <Card className="rounded-2xl border-border/50">
             <CardContent className="p-6">
               <h3 className="text-lg font-bold text-foreground mb-4">
-                {"أقرب المواعيد"}
+                {pc?.upcomingSessions ?? 'Upcoming Sessions'}
               </h3>
               {upcomingSchedule.length === 0 ? (
                 <p className="py-6 text-center text-sm text-muted-foreground">
-                  {"لا توجد مواعيد قادمة."}
+                  {pc?.noUpcoming ?? 'No upcoming sessions.'}
                 </p>
               ) : (
                 <div className="space-y-2">
@@ -609,12 +610,12 @@ export default function ChildDetailPage({
           <Card className="rounded-2xl border-border/50">
             <CardContent className="p-6">
               <h3 className="text-lg font-bold text-foreground mb-4">
-                {"الدورات المسجَّلة"}
+                {pc?.enrolledCourses ?? 'Enrolled Courses'}
               </h3>
               {enrollments.length === 0 ? (
                 <EmptyState
                   icon={<GraduationCap className="w-10 h-10 text-muted-foreground/30" />}
-                  text={"لا يوجد دورات مسجلة."}
+                  text={pc?.noCoursesEnrolled ?? 'No courses enrolled.'}
                 />
               ) : (
                 <div className="space-y-3">
@@ -642,10 +643,10 @@ export default function ChildDetailPage({
                         className="text-[10px] shrink-0"
                       >
                         {e.status === 'completed'
-                          ? "مكتمل"
+                          ? (pc?.completed ?? 'Completed')
                           : e.status === 'pending'
-                            ? "قيد الانتظار"
-                            : "نشط"}
+                            ? (pc?.pending ?? 'Pending')
+                            : (pc?.active ?? 'Active')}
                       </Badge>
                     </div>
                   ))}
@@ -676,16 +677,16 @@ export default function ChildDetailPage({
                 <StatCard
                   icon={<ClipboardList className="w-5 h-5 text-blue-500" />}
                   tint="bg-blue-500/10"
-                  label={"الواجبات"}
+                  label={pc?.tasks ?? 'Tasks'}
                   value={task_grades.length}
-                  sub={"إجمالي"}
+                  sub={pc?.total ?? 'total'}
                 />
                 <StatCard
                   icon={<Award className="w-5 h-5 text-emerald-500" />}
                   tint="bg-emerald-500/10"
-                  label={"مُصححة"}
+                  label={pc?.graded ?? 'Graded'}
                   value={graded.length}
-                  sub={"تم تقييمها"}
+                  sub={pc?.evaluated ?? 'evaluated'}
                 />
                 <Card className="rounded-2xl border-border/50">
                   <CardContent className="p-5">
@@ -694,7 +695,7 @@ export default function ChildDetailPage({
                         <TrendingUp className="w-5 h-5 text-amber-500" />
                       </div>
                       <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                        {"المعدل"}
+                        {pc?.average ?? 'Average'}
                       </span>
                     </div>
                     <div className="text-3xl font-black text-foreground">
@@ -710,12 +711,12 @@ export default function ChildDetailPage({
             <CardContent className="p-6">
               <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
                 <ClipboardList className="w-5 h-5 text-primary" />
-                {"الواجبات المُسلَّمة ودرجاتها"}
+                {pc?.tasksHeading ?? 'Submitted Tasks & Grades'}
               </h3>
               {task_grades.length === 0 ? (
                 <EmptyState
                   icon={<ClipboardList className="w-10 h-10 text-muted-foreground/30" />}
-                  text={"لا توجد واجبات مُسلَّمة بعد."}
+                  text={pc?.noTasksSubmitted ?? 'No tasks submitted yet.'}
                 />
               ) : (
                 <div className="space-y-3">
@@ -744,7 +745,7 @@ export default function ChildDetailPage({
                           </div>
                           <div className="flex-1 min-w-0">
                             <h4 className="font-bold text-sm text-foreground truncate">
-                              {t.task_title || ("واجب")}
+                              {t.task_title || (pc?.task ?? 'Task')}
                             </h4>
                             <p className="text-[11px] text-muted-foreground mt-0.5 truncate">
                               {t.course_title ? `${t.course_title} · ` : ''}
@@ -768,7 +769,7 @@ export default function ChildDetailPage({
                               </>
                             ) : (
                               <Badge variant="secondary" className="text-[10px]">
-                                {"بانتظار التصحيح"}
+                                {pc?.awaitingGrading ?? 'Awaiting grading'}
                               </Badge>
                             )}
                           </div>
@@ -777,7 +778,7 @@ export default function ChildDetailPage({
                           <div className="mt-3">
                             <p className="text-xs text-muted-foreground bg-muted/40 rounded-lg p-2.5 leading-relaxed">
                               <span className="font-bold text-foreground">
-                                {"ملاحظة المعلم: "}
+                                {pc?.teacherNote ?? 'Teacher note: '}
                               </span>
                               {t.feedback}
                             </p>
@@ -785,9 +786,9 @@ export default function ChildDetailPage({
                         )}
                         <p className="text-[10px] text-muted-foreground/60 mt-2">
                           {isGraded && t.graded_at
-                            ? `${"صُححت"} ${fmtDate(t.graded_at, isAr)}`
+                            ? `${pc?.gradedOn ?? 'Graded'} ${fmtDate(t.graded_at, isAr)}`
                             : t.submitted_at
-                              ? `${"سُلِّمت"} ${fmtDate(t.submitted_at, isAr)}`
+                              ? `${pc?.submittedOn ?? 'Submitted'} ${fmtDate(t.submitted_at, isAr)}`
                               : ''}
                         </p>
                       </div>
@@ -806,12 +807,12 @@ export default function ChildDetailPage({
             <CardContent className="p-6">
               <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
                 <GraduationCap className="w-5 h-5 text-primary" />
-                {"مسارات الحفظ والتجويد"}
+                {pc?.pathsHeading ?? 'Memorization & Tajweed Paths'}
               </h3>
               {paths.length === 0 ? (
                 <EmptyState
                   icon={<GraduationCap className="w-10 h-10 text-muted-foreground/30" />}
-                  text={"غير مشترك في أي مسار."}
+                  text={pc?.noPathsEnrolled ?? 'Not enrolled in any path.'}
                 />
               ) : (
                 <div className="grid sm:grid-cols-2 gap-3">
@@ -845,8 +846,8 @@ export default function ChildDetailPage({
                             </h4>
                             <p className="text-[11px] text-muted-foreground">
                               {p.type === 'memorization'
-                                ? "حفظ"
-                                : "تجويد"}
+                                ? (pc?.memorization ?? 'Memorization')
+                                : (pc?.tajweed ?? 'Tajweed')}
                               {p.level ? ` · ${p.level}` : ''}
                             </p>
                           </div>
@@ -870,12 +871,12 @@ export default function ChildDetailPage({
             <CardContent className="p-6">
               <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
                 <Layers className="w-5 h-5 text-primary" />
-                {"السلاسل التعليمية"}
+                {pc?.seriesHeading ?? 'Learning Series'}
               </h3>
               {series.length === 0 ? (
                 <EmptyState
                   icon={<Layers className="w-10 h-10 text-muted-foreground/30" />}
-                  text={"غير مشترك في أي سلسلة."}
+                  text={pc?.noSeriesEnrolled ?? 'Not enrolled in any series.'}
                 />
               ) : (
                 <div className="grid sm:grid-cols-2 gap-3">
@@ -891,7 +892,7 @@ export default function ChildDetailPage({
                         <h4 className="font-bold text-sm text-foreground truncate">{s.title}</h4>
                         <p className="text-[11px] text-muted-foreground">
                           {s.subject ? `${s.subject} · ` : ''}
-                          {s.item_count} {"عنصر"}
+                          {s.item_count} {pc?.items ?? 'items'}
                         </p>
                       </div>
                     </div>
@@ -907,12 +908,12 @@ export default function ChildDetailPage({
           <Card className="rounded-2xl border-border/50">
             <CardContent className="p-6">
               <h3 className="text-lg font-bold text-foreground mb-4">
-                {"المواعيد القادمة"}
+                {pc?.upcomingSchedule ?? 'Upcoming Sessions'}
               </h3>
               {upcomingSchedule.length === 0 ? (
                 <EmptyState
                   icon={<Calendar className="w-10 h-10 text-muted-foreground/30" />}
-                  text={"لا توجد مواعيد قادمة."}
+                  text={pc?.noUpcoming ?? 'No upcoming sessions.'}
                 />
               ) : (
                 <div className="space-y-2">
@@ -928,7 +929,7 @@ export default function ChildDetailPage({
             <Card className="rounded-2xl border-border/50">
               <CardContent className="p-6">
                 <h3 className="text-lg font-bold text-foreground mb-4">
-                  {"مواعيد سابقة"}
+                  {pc?.pastSchedule ?? 'Past Sessions'}
                 </h3>
                 <div className="space-y-2">
                   {pastSchedule.slice(0, 20).map((s) => (
@@ -945,12 +946,12 @@ export default function ChildDetailPage({
           <Card className="rounded-2xl border-border/50">
             <CardContent className="p-6">
               <h3 className="text-lg font-bold text-foreground mb-4">
-                {"الشهادات الصادرة"}
+                {pc?.issuedCerts ?? 'Issued Certificates'}
               </h3>
               {issuedCerts.length === 0 ? (
                 <EmptyState
                   icon={<Award className="w-10 h-10 text-muted-foreground/30" />}
-                  text={"لا توجد شهادات صادرة بعد."}
+                  text={pc?.noIssuedCerts ?? 'No issued certificates yet.'}
                 />
               ) : (
                 <div className="space-y-3">
@@ -964,7 +965,7 @@ export default function ChildDetailPage({
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4 className="font-bold text-sm text-foreground truncate">
-                          {c.source_label || ("شهادة")}
+                          {c.source_label || (pc?.certificate ?? 'Certificate')}
                         </h4>
                         <p className="text-[11px] text-muted-foreground mt-0.5">
                           {c.certificate_number ? `${c.certificate_number} · ` : ''}
@@ -980,7 +981,7 @@ export default function ChildDetailPage({
                         >
                           <a href={c.pdf_url} target="_blank" rel="noopener noreferrer">
                             <Download className="w-3.5 h-3.5 me-1" />
-                            {"تحميل"}
+                            {pc?.download ?? 'Download'}
                           </a>
                         </Button>
                       )}
@@ -995,7 +996,7 @@ export default function ChildDetailPage({
             <Card className="rounded-2xl border-border/50">
               <CardContent className="p-6">
                 <h3 className="text-lg font-bold text-foreground mb-4">
-                  {"قيد الإصدار"}
+                  {pc?.pendingCerts ?? 'Pending Issuance'}
                 </h3>
                 <div className="space-y-2">
                   {otherCerts.map((c) => {
@@ -1018,7 +1019,7 @@ export default function ChildDetailPage({
                             <Award className="w-4 h-4 text-muted-foreground" />
                           </div>
                           <span className="font-medium text-sm text-foreground truncate">
-                            {c.source_label || ("شهادة")}
+                            {c.source_label || (pc?.certificate ?? 'Certificate')}
                           </span>
                         </div>
                         <span className={`text-[11px] font-bold px-2 py-1 rounded-lg shrink-0 ${cls}`}>
@@ -1040,12 +1041,12 @@ export default function ChildDetailPage({
               <CardContent className="p-6">
                 <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
                   <Trophy className="w-5 h-5 text-amber-500" />
-                  {"المسابقات المُشارَك بها"}
+                  {pc?.competitionsHeading ?? 'Participated Competitions'}
                 </h3>
                 {competitions.length === 0 ? (
                   <EmptyState
                     icon={<Trophy className="w-10 h-10 text-muted-foreground/30" />}
-                    text={"لم يشارك في أي مسابقة بعد."}
+                    text={pc?.noCompetitions ?? 'Has not participated in any competition yet.'}
                   />
                 ) : (
                   <div className="space-y-3">
@@ -1080,12 +1081,12 @@ export default function ChildDetailPage({
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 flex-wrap">
                                 <h4 className="font-bold text-sm text-foreground truncate">
-                                  {c.competition_title || ("مسابقة")}
+                                  {c.competition_title || (pc?.competition ?? 'Competition')}
                                 </h4>
                                 {c.is_winner && (
                                   <Badge className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/20 text-[9px] gap-1">
                                     <Trophy className="w-2.5 h-2.5" />
-                                    {"الفائز"}
+                                    {pc?.winner ?? 'Winner'}
                                   </Badge>
                                 )}
                               </div>
@@ -1094,9 +1095,9 @@ export default function ChildDetailPage({
                                 {c.comp_status
                                   ? ` · ${
                                       c.comp_status === 'active'
-                                        ? "جارية"
+                                        ? (pc?.compActive ?? 'Active')
                                         : c.comp_status === 'completed' || c.comp_status === 'ended'
-                                          ? "منتهية"
+                                          ? (pc?.compEnded ?? 'Ended')
                                           : c.comp_status
                                     }`
                                   : ''}
@@ -1117,14 +1118,14 @@ export default function ChildDetailPage({
                                       {Number(c.score)}
                                       <span className="text-[10px] text-muted-foreground font-medium">
                                         {' '}
-                                        {"نقطة"}
+                                        {pc?.points ?? 'pts'}
                                       </span>
                                     </div>
                                   )}
                                 </>
                               ) : (
                                 <Badge variant="secondary" className="text-[10px]">
-                                  {"قيد التقييم"}
+                                  {pc?.pendingEval ?? 'Under evaluation'}
                                 </Badge>
                               )}
                             </div>
@@ -1132,7 +1133,7 @@ export default function ChildDetailPage({
                           {c.feedback && (
                             <p className="text-xs text-muted-foreground bg-muted/40 rounded-lg p-2.5 leading-relaxed mt-3">
                               <span className="font-bold text-foreground">
-                                {"ملاحظة المحكّم: "}
+                                {pc?.judgeNote ?? 'Judge note: '}
                               </span>
                               {c.feedback}
                             </p>
