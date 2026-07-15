@@ -14,9 +14,12 @@ export type Locale = 'ar' | 'en'
 // Their keys legitimately differ between locales, so we loosen them to a string
 // map instead of forcing key-for-key parity — everything else stays strictly typed.
 type RawSchema = typeof ar
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type TranslationSchema = Omit<RawSchema, 'addedTranslations_2026' | 'extracted_2026_v2'> & {
   addedTranslations_2026: Record<string, string>
   extracted_2026_v2: Record<string, any>
+  // Allow extra root-level keys that are added progressively to ar.ts
+  [key: string]: any
 }
 
 // Backward-compatible alias: existing code imports `Translations`.
