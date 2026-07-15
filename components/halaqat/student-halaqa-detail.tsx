@@ -84,11 +84,13 @@ interface Overview {
 
 type Tab = 'overview' | 'sessions' | 'attendance' | 'classmates'
 
-const ATTENDANCE_STYLES: Record<string, { label: string; cls: string; Icon: typeof CheckCircle2 }> = {
-  present: { label: 'حاضر', cls: 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/15', Icon: CheckCircle2 },
-  late: { label: 'متأخر', cls: 'text-amber-600 dark:text-amber-400 bg-amber-500/15', Icon: Clock },
-  excused: { label: 'بعذر', cls: 'text-sky-600 dark:text-sky-400 bg-sky-500/15', Icon: AlertCircle },
-  absent: { label: 'غائب', cls: 'text-rose-600 dark:text-rose-400 bg-rose-500/15', Icon: XCircle },
+function getAttendanceStyles(th: Record<string, string> | undefined): Record<string, { label: string; cls: string; Icon: typeof CheckCircle2 }> {
+  return {
+    present: { label: th?.attendPresent ?? 'Present', cls: 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/15', Icon: CheckCircle2 },
+    late: { label: th?.attendLate ?? 'Late', cls: 'text-amber-600 dark:text-amber-400 bg-amber-500/15', Icon: Clock },
+    excused: { label: th?.attendExcused ?? 'Excused', cls: 'text-sky-600 dark:text-sky-400 bg-sky-500/15', Icon: AlertCircle },
+    absent: { label: th?.attendAbsent ?? 'Absent', cls: 'text-rose-600 dark:text-rose-400 bg-rose-500/15', Icon: XCircle },
+  }
 }
 
 function fmtDate(value: string | null, withTime = false): string {
@@ -121,6 +123,7 @@ export function StudentHalaqaDetail({
 }) {
   const { t } = useI18n();
   const th = (t as any).halaqat as Record<string, string> | undefined
+  const attendanceStyles = getAttendanceStyles(th)
 
   const [halaqa, setHalaqa] = useState<Halaqa | null>(null)
   const [classmates, setClassmates] = useState<Classmate[]>([])
@@ -258,13 +261,13 @@ export function StudentHalaqaDetail({
         />
         <StatCard
           icon={<CalendarDays className="w-4 h-4" />}
-          label={"جلسات عُقدت"}
+          label={th?.sessionsHeld ?? 'Sessions Held'}
           value={stats?.total_sessions_held ?? 0}
           accent="text-sky-600 dark:text-sky-400"
         />
         <StatCard
           icon={<Users className="w-4 h-4" />}
-          label={"زملائي"}
+          label={th?.myClassmates ?? 'My Classmates'}
           value={activeClassmates.length}
           accent="text-violet-600 dark:text-violet-400"
         />
@@ -273,10 +276,10 @@ export function StudentHalaqaDetail({
       {/* Tabs */}
       <div className="flex border-b border-border overflow-x-auto">
         {([
-          { key: 'overview', label: "نظرة عامة", Icon: Sparkles },
-          { key: 'sessions', label: "الجلسات والتسجيلات", Icon: PlayCircle },
-          { key: 'attendance', label: "سجل حضوري", Icon: ClipboardList },
-          { key: 'classmates', label: `الزملاء (${activeClassmates.length})`, Icon: Users },
+          { key: 'overview', label: th?.tabOverview ?? 'Overview', Icon: Sparkles },
+          { key: 'sessions', label: th?.tabSessionsRecordings ?? 'Sessions & Recordings', Icon: PlayCircle },
+          { key: 'attendance', label: th?.tabMyAttendance ?? 'My Attendance', Icon: ClipboardList },
+          { key: 'classmates', label: `${th?.tabClassmates ?? 'Classmates'} (${activeClassmates.length})`, Icon: Users },
         ] as const).map(({ key, label, Icon }) => (
           <button
             key={key}
@@ -296,16 +299,16 @@ export function StudentHalaqaDetail({
       {/* Overview tab */}
       {tab === 'overview' && (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <InfoTile title={"حالة الحلقة"} value={halaqa.is_active ? "نشطة" : "متوقفة"} accent={halaqa.is_active ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground'} />
-          <InfoTile title={"المعلم"} value={halaqa.teacher_name || "غير محدد"} />
-          <InfoTile title={"الموعد القادم"} value={halaqa.scheduled_at ? scheduled : "سيُعلن لاحقاً"} />
-          <InfoTile title={"تاريخ انضمامي"} value={fmtDate(overview?.joined_at ?? null)} />
-          <InfoTile title={"مرات التأخير"} value={stats?.late ?? 0} accent="text-amber-600 dark:text-amber-400" />
-          <InfoTile title={"مرات الغياب"} value={stats?.absent ?? 0} accent="text-rose-600 dark:text-rose-400" />
+          <InfoTile title={th?.infoStatus ?? 'Status'} value={halaqa.is_active ? (th?.activeBadge ?? 'Active') : (th?.inactiveBadge ?? 'Inactive')} accent={halaqa.is_active ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground'} />
+          <InfoTile title={th?.infoTeacher ?? 'Teacher'} value={halaqa.teacher_name || (th?.unspecified ?? 'Unspecified')} />
+          <InfoTile title={th?.infoNextSchedule ?? 'Next Session'} value={halaqa.scheduled_at ? scheduled : (th?.toBeAnnounced ?? 'To be announced')} />
+          <InfoTile title={th?.infoJoinDate ?? 'My Join Date'} value={fmtDate(overview?.joined_at ?? null)} />
+          <InfoTile title={th?.timesLate ?? 'Times Late'} value={stats?.late ?? 0} accent="text-amber-600 dark:text-amber-400" />
+          <InfoTile title={th?.timesAbsent ?? 'Times Absent'} value={stats?.absent ?? 0} accent="text-rose-600 dark:text-rose-400" />
           {halaqa.meeting_link && (
             <InfoTile
-              title={"رابط بديل للقاء"}
-              value={<a className="text-indigo-600 dark:text-indigo-400 underline" href={halaqa.meeting_link} target="_blank" rel="noreferrer">{"فتح الرابط"}</a>}
+              title={th?.infoAltLink ?? 'External Meeting Link'}
+              value={<a className="text-indigo-600 dark:text-indigo-400 underline" href={halaqa.meeting_link} target="_blank" rel="noreferrer">{th?.openLink ?? 'Open Link'}</a>}
             />
           )}
         </div>
@@ -315,7 +318,7 @@ export function StudentHalaqaDetail({
       {tab === 'sessions' && (
         <div className="space-y-3">
           {!overview || overview.sessions.length === 0 ? (
-            <EmptyState icon={<PlayCircle className="w-8 h-8" />} text={"لم تُعقد أي جلسات بعد"} />
+            <EmptyState icon={<PlayCircle className="w-8 h-8" />} text={th?.noSessionsYet ?? 'No sessions held yet'} />
           ) : (
             overview.sessions.map((s) => {
               const live = !s.ended_at
@@ -328,8 +331,8 @@ export function StudentHalaqaDetail({
                   <div className="flex-1 min-w-0">
                     <p className="font-bold text-sm truncate">{fmtDate(s.started_at, true)}</p>
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground mt-0.5">
-                      <span>{live ? "جارية الآن" : `المدة: ${fmtDuration(s.duration_seconds)}`}</span>
-                      <span className="inline-flex items-center gap-1"><Users className="w-3 h-3" /> {s.total_participants} {"مشارك"}</span>
+                      <span>{live ? (th?.liveNowBadge ?? 'Live Now') : `${th?.duration ?? 'Duration'}: ${fmtDuration(s.duration_seconds)}`}</span>
+                      <span className="inline-flex items-center gap-1"><Users className="w-3 h-3" /> {s.total_participants} {th?.participants ?? 'participants'}</span>
                     </div>
                   </div>
                   {live ? (
@@ -337,7 +340,7 @@ export function StudentHalaqaDetail({
                       href={`${basePath}/${halaqaId}/live`}
                       className="inline-flex items-center gap-1.5 px-3 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-bold transition-colors"
                     >
-                      <Video className="w-4 h-4" /> {"انضم"}</Link>
+                      <Video className="w-4 h-4" /> {th?.joinLiveNow ?? 'Join'}</Link>
                   ) : hasRecording ? (
                     <a
                       href={s.recording_url!}
@@ -345,9 +348,9 @@ export function StudentHalaqaDetail({
                       rel="noreferrer"
                       className="inline-flex items-center gap-1.5 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-bold transition-colors"
                     >
-                      <PlayCircle className="w-4 h-4" /> {"التسجيل"}</a>
+                      <PlayCircle className="w-4 h-4" /> {th?.recording ?? 'Recording'}</a>
                   ) : (
-                    <span className="text-xs text-muted-foreground px-2">{"لا يوجد تسجيل"}</span>
+                    <span className="text-xs text-muted-foreground px-2">{th?.noRecording ?? 'No recording'}</span>
                   )}
                 </div>
               )
@@ -360,10 +363,10 @@ export function StudentHalaqaDetail({
       {tab === 'attendance' && (
         <div className="space-y-3">
           {!overview || overview.attendance.length === 0 ? (
-            <EmptyState icon={<ClipboardList className="w-8 h-8" />} text={"لا يوجد سجل حضور بعد"} />
+            <EmptyState icon={<ClipboardList className="w-8 h-8" />} text={th?.noAttendanceYet ?? 'No attendance records yet'} />
           ) : (
             overview.attendance.map((a) => {
-              const style = ATTENDANCE_STYLES[a.status] || ATTENDANCE_STYLES.present
+              const style = attendanceStyles[a.status] || attendanceStyles.present
               return (
                 <div key={a.id} className="flex items-center gap-3 bg-card border border-border rounded-xl p-3.5">
                   <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${style.cls}`}>
@@ -387,7 +390,7 @@ export function StudentHalaqaDetail({
       {tab === 'classmates' && (
         <div className="space-y-3">
           {activeClassmates.length === 0 ? (
-            <EmptyState icon={<Users className="w-8 h-8" />} text={"لا يوجد زملاء في الحلقة بعد"} />
+            <EmptyState icon={<Users className="w-8 h-8" />} text={th?.noClassmatesYet ?? 'No classmates in this halaqa yet'} />
           ) : (
             <div className="grid gap-3 sm:grid-cols-2">
               {activeClassmates.map((c) => (
