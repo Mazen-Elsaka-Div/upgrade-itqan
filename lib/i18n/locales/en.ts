@@ -9056,4 +9056,13 @@ export const en = {
   
     createNewHalaqa: 'Create new halaqa',
   },
+  adminHomepage: {
+    overview: 'Platform Overview',
+  },
+  adminPoints: {
+    studentPoints: 'Student Points',
+  },
+  adminBadges: {
+    achievementBadges: 'Achievement Badges',
+  },
 }

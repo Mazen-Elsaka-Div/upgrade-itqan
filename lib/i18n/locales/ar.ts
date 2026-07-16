@@ -9120,4 +9120,13 @@ export const ar = {
   
     createNewHalaqa: 'إنشاء حلقة جديدة',
   },
+  adminHomepage: {
+    overview: 'النظرة الشاملة',
+  },
+  adminPoints: {
+    studentPoints: 'نقاط الطلاب',
+  },
+  adminBadges: {
+    achievementBadges: 'شارات الإنجاز',
+  },
 }
