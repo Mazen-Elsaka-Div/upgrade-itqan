@@ -1169,6 +1169,15 @@ export const en = {
       },
     }
   },
+  addedTranslations_2026: {
+    // Teacher Courses & other strings
+    'حذف الدورة "${course.title}" نهائياً؟ لا يمكن التراجع عن هذا الاجراء.': 'Delete this course permanently? This action cannot be undone.',
+    'يوجد ${enrolledCount} طالب مسجل في الدورة. هل تود حذفها فعلاً؟ ستفقد السجلات التعليمية للطلاب.': 'There are enrolled students. Are you sure you want to delete the course?',
+    'لا يمكن حذف الدورة. هل تود المحاولة على أي حال؟': 'The course cannot be deleted at this time.',
+    'تعذر حذف الدورة.': 'Failed to delete course',
+    'tchCoursesLoading': 'Loading...',
+  },
+  extracted_2026_v2: {},
   app: {
     recHalaqa: 'Halaqa',
     recBooking: 'Private Session',
