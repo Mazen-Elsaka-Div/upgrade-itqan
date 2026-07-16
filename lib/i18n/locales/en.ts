@@ -9065,4 +9065,10 @@ export const en = {
   adminBadges: {
     achievementBadges: 'Achievement Badges',
   },
+  academyError: {
+    title: 'Failed to load page',
+    message: 'An unexpected error occurred while rendering this page. Try reloading, and if the problem persists, return to the dashboard.',
+    retry: 'Retry',
+    dashboard: 'Dashboard',
+  },
 }
