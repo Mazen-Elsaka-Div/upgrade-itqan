@@ -9071,4 +9071,8 @@ export const en = {
     retry: 'Retry',
     dashboard: 'Dashboard',
   },
+  academyStudentPath: {
+    completed: 'You have completed this path. You can review any stage below at any time.',
+    enrolled: 'You are enrolled in this path. Follow your progress in the stages shown below.',
+  },
 }
