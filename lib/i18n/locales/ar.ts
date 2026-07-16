@@ -7,6 +7,12 @@ export const ar = {
     menu: 'القائمة',
     maintenanceMessage: 'الموقع تحت الصيانة حاليًا، نعود قريبًا 🔧',
   },
+  nav: {
+    features: 'الميزات',
+    courses: 'الدورات',
+    testimonials: 'التقييمات',
+    contact: 'التواصل',
+  },
   verify: {
     title: 'تحقق من بريدك الإلكتروني',
     enterCodeDesc: 'أدخل الرمز المكون من 6 أرقام الذي أرسلناه للتو إلى بريدك:',
@@ -165,7 +171,7 @@ export const ar = {
     startBroadcast: 'بدء البث المباشر',
     tabOverview: 'نظرة عامة',
     tabStudents: 'الطلاب',
-    infoStatus: 'حالة ال����لقة',
+    infoStatus: 'حالة ال������لقة',
     infoCurrentStudents: 'عدد الطلاب الحالي',
     infoGender: 'الجنس المسموح',
     infoNextSchedule: 'الموعد القادم',
@@ -626,6 +632,7 @@ export const ar = {
 
   // Auth
   auth: {
+    goToAccount: 'الدخول للحساب',
     login: 'تسجيل الدخول',
     register: 'إنشاء حساب',
     loginTitle: 'مرحباً بعودتك',
@@ -949,9 +956,9 @@ export const ar = {
     noSessionsYet: 'لا توجد جلسات بعد',
     messagesTitle: 'الرسائل',
     chatSubtitle: 'التواصل مع مقرئك',
-    chatDescription: 'يمكنك هنا قراءة الرسائ�� والملاحظ��ت التي ي��سلها لك المقرئ بخصوص تلاوتك.',
+    chatDescription: 'يمكنك هنا قراءة الرسائ�� وال��لاحظ��ت التي ي��سلها لك المقرئ بخصوص تلاوتك.',
     chatAfterBookingSubtitle: 'التواصل مع مقرئك بعد حجز الجلسة',
-    noConversationsYet: 'لا توجد رسائل حال��اً.',
+    noConversationsYet: 'لا توجد رسائل ��ال��اً.',
     noMessagesDesc: 'ستظهر هنا ملاحظات المقرئ أو أي رسائل متعلقة بتلاوتك.',
     conversationsHeader: 'المحادثات',
     you: 'أنت',
@@ -1110,7 +1117,7 @@ export const ar = {
       registerBtn: 'سجّل في المسابقة',
       viewDetailsBtn: 'عرض التفاصيل',
       types: {
-        monthly: 'شهرية',
+        monthly: '��هرية',
         ramadan: 'رمضان',
         tajweed: 'تجويد',
         memorization: 'حفظ',

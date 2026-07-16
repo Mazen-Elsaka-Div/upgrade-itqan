@@ -7,6 +7,12 @@ export const en = {
     menu: 'Menu',
     maintenanceMessage: 'The site is currently under maintenance, we will be back soon 🔧',
   },
+  nav: {
+    features: 'Features',
+    courses: 'Courses',
+    testimonials: 'Testimonials',
+    contact: 'Contact',
+  },
   verify: {
     title: 'Verify your email',
     enterCodeDesc: 'Enter the 6-digit code we just sent to your email:',
@@ -625,6 +631,7 @@ export const en = {
 
   // Auth
   auth: {
+    goToAccount: 'Go to Account',
     login: 'Sign In',
     register: 'Create Account',
     loginTitle: 'Welcome Back',
