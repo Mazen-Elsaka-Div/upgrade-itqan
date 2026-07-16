@@ -9139,4 +9139,35 @@ export const ar = {
     completed: 'لقد أكملت هذا المسار. يمكنك مراجعة أي مرحلة من المراحل أدناه في أي وقت',
     enrolled: 'أنت مسجل في هذا المسار، تابع تقدمك في المراحل الموضحة أدناه',
   },
+  // Level 1 batch - Generic fallbacks
+  appGeneric: {
+    loading: 'جاري التحميل...',
+    error: 'حدث خطأ',
+    success: 'نجح',
+    cancel: 'إلغاء',
+    confirm: 'تأكيد',
+    save: 'حفظ',
+    delete: 'حذف',
+    edit: 'تعديل',
+    add: 'إضافة',
+    close: 'إغلاق',
+  },
+  academyGeneric: {
+    welcome: 'مرحباً',
+    course: 'دورة',
+    lesson: 'درس',
+    student: 'طالب',
+    teacher: 'معلم',
+    progress: 'التقدم',
+    completed: 'مكتمل',
+    pending: 'قيد الانتظار',
+  },
+  adminGeneric: {
+    users: 'المستخدمون',
+    settings: 'الإعدادات',
+    dashboard: 'لوحة التحكم',
+    reports: 'التقارير',
+    analytics: 'التحليلات',
+  },
+
 }

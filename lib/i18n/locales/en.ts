@@ -9075,4 +9075,35 @@ export const en = {
     completed: 'You have completed this path. You can review any stage below at any time.',
     enrolled: 'You are enrolled in this path. Follow your progress in the stages shown below.',
   },
+  // Level 1 batch - Generic fallbacks
+  appGeneric: {
+    loading: 'Loading...',
+    error: 'An error occurred',
+    success: 'Success',
+    cancel: 'Cancel',
+    confirm: 'Confirm',
+    save: 'Save',
+    delete: 'Delete',
+    edit: 'Edit',
+    add: 'Add',
+    close: 'Close',
+  },
+  academyGeneric: {
+    welcome: 'Welcome',
+    course: 'Course',
+    lesson: 'Lesson',
+    student: 'Student',
+    teacher: 'Teacher',
+    progress: 'Progress',
+    completed: 'Completed',
+    pending: 'Pending',
+  },
+  adminGeneric: {
+    users: 'Users',
+    settings: 'Settings',
+    dashboard: 'Dashboard',
+    reports: 'Reports',
+    analytics: 'Analytics',
+  },
+
 }
