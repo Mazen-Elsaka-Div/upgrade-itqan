@@ -36,7 +36,7 @@ function recitationTarget(stage: {
   page_from?: number | null
   page_to?: number | null
   tp?: Record<string, string>
-): string {
+} & any): string {
   const { tp } = stage
   const surah = SURAHS.find((s) => s.number === stage.surah_number)
   switch (stage.recitation_mode) {
