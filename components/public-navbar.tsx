@@ -17,6 +17,7 @@ export function PublicNavbar({ initialUser = null }: { initialUser?: { role: str
   const [user, setUser] = useState<{ role: string } | null>(initialUser)
   const [loading, setLoading] = useState(!initialUser)
   const { t } = useI18n()
+  const app = (t as any).app as Record<string, string> | undefined
   const { branding } = usePublicSettings()
 
   useEffect(() => {
