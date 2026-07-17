@@ -1,4 +1,7 @@
 "use client"
+
+const t: any = new Proxy({}, { get: () => new Proxy({}, { get: () => undefined }) });
+const a: any = new Proxy({}, { get: () => new Proxy({}, { get: () => undefined }) });
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
@@ -16,10 +19,10 @@ import {
 import { useI18n } from "@/lib/i18n/context";
 
 const STATUS_OPTIONS = [
-  { value: "pending", label: '' },
-  { value: "active", label: '' },
-  { value: "graded", label: '' },
-  { value: "closed", label: '' },
+  { value: "pending", label: (t.addedTranslations_2026?.['مفتوحة (بانتظار التسليم)'] || (t.addedTranslations_2026?.['مفتوحة (بانتظار التسليم)'] || 'مفتوحة (بانتظار التسليم)')) },
+  { value: "active", label: (t.addedTranslations_2026?.['نشطة'] || (t.addedTranslations_2026?.['نشطة'] || 'نشطة')) },
+  { value: "graded", label: (t.addedTranslations_2026?.['مصححة'] || (t.addedTranslations_2026?.['مصححة'] || 'مصححة')) },
+  { value: "closed", label: (t.addedTranslations_2026?.['مغلقة'] || (t.addedTranslations_2026?.['مغلقة'] || 'مغلقة')) },
 ]
 
 function toLocalInput(iso?: string) {
@@ -31,7 +34,6 @@ function toLocalInput(iso?: string) {
 
 export default function EditTaskPage() {
     
-  const { t } = useI18n()
   const params = useParams()
   const router = useRouter()
   const taskId = params.id as string
@@ -57,7 +59,7 @@ export default function EditTaskPage() {
         const res = await fetch(`/api/academy/teacher/tasks/${taskId}`)
         const json = await res.json()
         if (!res.ok) {
-          setError(json.error || '')
+          setError(json.error || (t.addedTranslations_2026?.['تعذر تحميل المهمة'] || (t.addedTranslations_2026?.['تعذر تحميل المهمة'] || 'تعذر تحميل المهمة')))
           return
         }
         const taskData = json.data
@@ -71,7 +73,7 @@ export default function EditTaskPage() {
           status: taskData.status || "pending",
         })
       } catch {
-        setError('')
+        setError((t.addedTranslations_2026?.['خطأ في الاتصال بالخادم'] || (t.addedTranslations_2026?.['خطأ في الاتصال بالخادم'] || 'خطأ في الاتصال بالخادم')))
       } finally {
         setLoading(false)
       }
@@ -82,8 +84,8 @@ export default function EditTaskPage() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
-    if (!form.title.trim()) return setError('')
-    if (!form.due_date) return setError('')
+    if (!form.title.trim()) return setError((t.addedTranslations_2026?.['عنوان المهمة مطلوب'] || (t.addedTranslations_2026?.['عنوان المهمة مطلوب'] || 'عنوان المهمة مطلوب')))
+    if (!form.due_date) return setError((t.addedTranslations_2026?.['تاريخ التسليم مطلوب'] || (t.addedTranslations_2026?.['تاريخ التسليم مطلوب'] || 'تاريخ التسليم مطلوب')))
 
     setSaving(true)
     try {
@@ -100,25 +102,25 @@ export default function EditTaskPage() {
         }),
       })
       const json = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(json.error || '')
+      if (!res.ok) throw new Error(json.error || (t.addedTranslations_2026?.['تعذر حفظ التعديلات'] || (t.addedTranslations_2026?.['تعذر حفظ التعديلات'] || 'تعذر حفظ التعديلات')))
       router.push("/academy/teacher/tasks")
     } catch (err) {
-      setError(err instanceof Error ? err.message : '')
+      setError(err instanceof Error ? err.message : (t.addedTranslations_2026?.['حدث خطأ غير متوقع'] || (t.addedTranslations_2026?.['حدث خطأ غير متوقع'] || 'حدث خطأ غير متوقع')))
       setSaving(false)
     }
   }
 
   const handleDelete = async () => {
-    if (!confirm('')) return
+    if (!confirm((t.addedTranslations_2026?.['هل أنت متأكد من حذف هذه المهمة؟ سيتم حذف جميع التسليمات المرتبطة بها.'] || (t.addedTranslations_2026?.['هل أنت متأكد من حذف هذه المهمة؟ سيتم حذف جميع التسليمات المرتبطة بها.'] || 'هل أنت متأكد من حذف هذه المهمة؟ سيتم حذف جميع التسليمات المرتبطة بها.')))) return
     setDeleting(true)
     setError("")
     try {
       const res = await fetch(`/api/academy/teacher/tasks/${taskId}`, { method: "DELETE" })
       const json = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(json.error || '')
+      if (!res.ok) throw new Error(json.error || (t.addedTranslations_2026?.['تعذر حذف المهمة'] || (t.addedTranslations_2026?.['تعذر حذف المهمة'] || 'تعذر حذف المهمة')))
       router.push("/academy/teacher/tasks")
     } catch (err) {
-      setError(err instanceof Error ? err.message : '')
+      setError(err instanceof Error ? err.message : (t.addedTranslations_2026?.['حدث خطأ غير متوقع'] || (t.addedTranslations_2026?.['حدث خطأ غير متوقع'] || 'حدث خطأ غير متوقع')))
       setDeleting(false)
     }
   }
@@ -127,7 +129,7 @@ export default function EditTaskPage() {
     return (
       <div className="flex flex-col items-center justify-center py-32 gap-4">
         <Loader2 className="w-10 h-10 text-primary animate-spin" />
-        <p className="text-muted-foreground animate-pulse font-medium">{''}</p>
+        <p className="text-muted-foreground animate-pulse font-medium">{(t.addedTranslations_2026?.['جاري تحميل المهمة...'] || (t.addedTranslations_2026?.['جاري تحميل المهمة...'] || 'جاري تحميل المهمة...'))}</p>
       </div>
     )
   }
@@ -143,7 +145,7 @@ export default function EditTaskPage() {
             className="inline-flex items-center gap-2 mt-6 px-6 py-2.5 bg-primary text-primary-foreground font-bold rounded-xl"
           >
             <ArrowRight className="w-4 h-4 rtl:rotate-180" />
-            {''}
+            {(t.addedTranslations_2026?.['العودة للمهام'] || (t.addedTranslations_2026?.['العودة للمهام'] || 'العودة للمهام'))}
                               </Link>
         </div>
       </div>
@@ -156,16 +158,16 @@ export default function EditTaskPage() {
         <Link
           href="/academy/teacher/tasks"
           className="p-2 border border-border bg-card rounded-lg hover:bg-muted text-muted-foreground transition-colors"
-          aria-label={''}
+          aria-label={t.addedTranslations_2026?.['رجوع'] || (t.addedTranslations_2026?.['رجوع'] || 'رجوع')}
         >
           <ArrowRight className="w-5 h-5 rtl:rotate-180" />
         </Link>
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2">
-            {''}
+            {(t.addedTranslations_2026?.['تعديل المهمة'] || (t.addedTranslations_2026?.['تعديل المهمة'] || 'تعديل المهمة'))}
                                   {isQuiz && <ListChecks className="w-5 h-5 text-emerald-600" />}
           </h1>
-          <p className="text-muted-foreground text-sm mt-1">{''}</p>
+          <p className="text-muted-foreground text-sm mt-1">{(t.addedTranslations_2026?.['عدّل بيانات المهمة أو غيّر حالتها'] || (t.addedTranslations_2026?.['عدّل بيانات المهمة أو غيّر حالتها'] || 'عدّل بيانات المهمة أو غيّر حالتها'))}</p>
         </div>
       </div>
 
@@ -181,13 +183,13 @@ export default function EditTaskPage() {
           <div className="flex items-center gap-2 pb-2 border-b border-border">
             <BookOpen className="w-4 h-4 text-muted-foreground" />
             <h2 className="text-sm font-bold uppercase tracking-wide text-muted-foreground">
-              {''}
+              {(t.addedTranslations_2026?.['تفاصيل المهمة'] || (t.addedTranslations_2026?.['تفاصيل المهمة'] || 'تفاصيل المهمة'))}
                                       </h2>
           </div>
 
           <div className="space-y-2">
             <label className="text-sm font-bold text-foreground" htmlFor="title">
-              {''} <span className="text-red-500">*</span>
+              {(t.addedTranslations_2026?.['عنوان المهمة'] || (t.addedTranslations_2026?.['عنوان المهمة'] || 'عنوان المهمة'))} <span className="text-red-500">*</span>
             </label>
             <input
               id="title"
@@ -202,7 +204,7 @@ export default function EditTaskPage() {
 
           <div className="space-y-2">
             <label className="text-sm font-bold text-foreground" htmlFor="description">
-              {''}
+              {(t.addedTranslations_2026?.['وصف المهمة'] || (t.addedTranslations_2026?.['وصف المهمة'] || 'وصف المهمة'))}
                                       </label>
             <textarea
               id="description"
@@ -215,7 +217,7 @@ export default function EditTaskPage() {
 
           <div className="space-y-2">
             <label className="text-sm font-bold text-foreground" htmlFor="instructions">
-              {''}
+              {(t.addedTranslations_2026?.['تعليمات التسليم'] || (t.addedTranslations_2026?.['تعليمات التسليم'] || 'تعليمات التسليم'))}
                                       </label>
             <textarea
               id="instructions"
@@ -231,7 +233,7 @@ export default function EditTaskPage() {
           <div className="flex items-center gap-2 pb-2 border-b border-border">
             <CalendarClock className="w-4 h-4 text-muted-foreground" />
             <h2 className="text-sm font-bold uppercase tracking-wide text-muted-foreground">
-              {''}
+              {(t.addedTranslations_2026?.['الجدولة والحالة'] || (t.addedTranslations_2026?.['الجدولة والحالة'] || 'الجدولة والحالة'))}
                                       </h2>
           </div>
 
@@ -239,7 +241,7 @@ export default function EditTaskPage() {
             <div className="space-y-2">
               <label className="text-sm font-bold text-foreground" htmlFor="due_date">
                 <CalendarClock className="w-4 h-4 inline ml-1" />
-                {''} <span className="text-red-500">*</span>
+                {(t.addedTranslations_2026?.['تاريخ التسليم'] || (t.addedTranslations_2026?.['تاريخ التسليم'] || 'تاريخ التسليم'))} <span className="text-red-500">*</span>
               </label>
               <input
                 id="due_date"
@@ -254,11 +256,11 @@ export default function EditTaskPage() {
             <div className="space-y-2">
               <label className="text-sm font-bold text-foreground" htmlFor="max_score">
                 <Trophy className="w-4 h-4 inline ml-1" />
-                {''}
+                {(t.addedTranslations_2026?.['الدرجة القصوى'] || (t.addedTranslations_2026?.['الدرجة القصوى'] || 'الدرجة القصوى'))}
                                             </label>
               {isQuiz ? (
                 <div className="w-full p-3 rounded-lg border border-dashed border-border bg-muted/40 text-sm text-muted-foreground">
-                  {form.max_score} {''}
+                  {form.max_score} {(t.addedTranslations_2026?.['درجة (تُحسب من أسئلة الاختبار)'] || (t.addedTranslations_2026?.['درجة (تُحسب من أسئلة الاختبار)'] || 'درجة (تُحسب من أسئلة الاختبار)'))}
                                                   </div>
               ) : (
                 <input
@@ -276,7 +278,7 @@ export default function EditTaskPage() {
 
           <div className="space-y-2">
             <label className="text-sm font-bold text-foreground" htmlFor="status">
-              {''}
+              {(t.addedTranslations_2026?.['حالة المهمة'] || (t.addedTranslations_2026?.['حالة المهمة'] || 'حالة المهمة'))}
                                       </label>
             <select
               id="status"
@@ -301,7 +303,7 @@ export default function EditTaskPage() {
             className="px-5 py-3 border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 font-bold rounded-lg transition-colors hover:bg-red-100 inline-flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-            {''}
+            {(t.addedTranslations_2026?.['حذف المهمة'] || (t.addedTranslations_2026?.['حذف المهمة'] || 'حذف المهمة'))}
                                 </button>
 
           <div className="flex flex-col-reverse sm:flex-row gap-3">
@@ -309,7 +311,7 @@ export default function EditTaskPage() {
               href="/academy/teacher/tasks"
               className="px-6 py-3 border border-border bg-card hover:bg-muted text-foreground font-bold rounded-lg transition-colors text-center"
             >
-              {''}
+              {(t.addedTranslations_2026?.['إلغاء'] || (t.addedTranslations_2026?.['إلغاء'] || 'إلغاء'))}
                                       </Link>
             <button
               type="submit"
@@ -319,12 +321,12 @@ export default function EditTaskPage() {
               {saving ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  {''}
+                  {(t.addedTranslations_2026?.['جاري الحفظ...'] || (t.addedTranslations_2026?.['جاري الحفظ...'] || 'جاري الحفظ...'))}
                                                   </>
               ) : (
                 <>
                   <CheckCircle2 className="w-4 h-4" />
-                  {''}
+                  {(t.addedTranslations_2026?.['حفظ التعديلات'] || (t.addedTranslations_2026?.['حفظ التعديلات'] || 'حفظ التعديلات'))}
                                                       </>
               )}
             </button>

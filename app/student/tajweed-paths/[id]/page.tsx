@@ -35,21 +35,19 @@ function recitationTarget(stage: {
   juz_number?: number | null
   page_from?: number | null
   page_to?: number | null
-  tp?: Record<string, string>
-): string {
-  const { tp } = stage
+}): string {
   const surah = SURAHS.find((s) => s.number === stage.surah_number)
   switch (stage.recitation_mode) {
     case "surah":
-      return surah ? `${tp?.surah ?? 'سورة'} ${surah.name} ${tp?.full ?? 'كاملة'}` : (tp?.fullSurah ?? 'سورة كاملة')
+      return surah ? `سورة ${surah.name} كاملة` : "سورة كاملة"
     case "ayah":
-      return surah ? `${tp?.surah ?? 'سورة'} ${surah.name} — ${tp?.ayahs ?? 'الآيات'} ${toAr(stage.ayah_from || 1)} ${tp?.to ?? 'إلى'} ${toAr(stage.ayah_to || 1)}` : (tp?.specificAyahs ?? 'آيات محددة')
+      return surah ? `سورة ${surah.name} — الآيات ${toAr(stage.ayah_from || 1)} إلى ${toAr(stage.ayah_to || 1)}` : "آيات محددة"
     case "juz":
       return juzName(stage.juz_number || 1)
     case "page":
-      return stage.page_from === stage.page_to ? `${tp?.page ?? 'صفحة'} ${toAr(stage.page_from || 1)}` : `${tp?.pages ?? 'الصفحات'} ${toAr(stage.page_from || 1)} ${tp?.to ?? 'إلى'} ${toAr(stage.page_to || 1)}`
+      return stage.page_from === stage.page_to ? `صفحة ${toAr(stage.page_from || 1)}` : `الصفحات ${toAr(stage.page_from || 1)} إلى ${toAr(stage.page_to || 1)}`
     default:
-      return tp?.recitation ?? 'تلاوة'
+      return "تلاوة"
   }
 }
 
@@ -57,8 +55,6 @@ function recitationTarget(stage: {
 type AyahData = { numberInSurah: number; text: string; surahNumber: number }
 
 function StageAyahText({ stage }: { stage: Stage }) {
-  const { t: _t } = useI18n()
-  const _tp = (_t as any).tajweedPaths as Record<string, string> | undefined
   const [ayahs, setAyahs] = useState<AyahData[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(false)
@@ -134,7 +130,7 @@ function StageAyahText({ stage }: { stage: Stage }) {
     )
   }
   if (error) {
-    return <p className="text-xs text-center text-muted-foreground py-4">{_tp?.textLoadError ?? 'تعذّر تحميل نص الآيات. تحقق من اتصالك بالإنترنت.'}</p>
+    return <p className="text-xs text-center text-muted-foreground py-4">تعذّر تحميل نص الآيات. تحقق من اتصالك بالإنترنت.</p>
   }
   if (ayahs.length === 0) return null
   return (
@@ -363,7 +359,7 @@ export default function StudentTajweedPathDetail() {
                     <Lock className="w-8 h-8 text-muted-foreground/50" />
                   </div>
                   <div>
-                    <h3 className="font-black text-lg mb-1">{tp.readyHeading ?? 'Ready to start?'}</h3>
+                    <h3 className="font-black text-lg mb-1">جاهز للبدء؟</h3>
                     <p className="text-sm text-muted-foreground">
                       {tp.detail.enrollPrompt}
                     </p>
@@ -396,7 +392,7 @@ export default function StudentTajweedPathDetail() {
                       </div>
                     </div>
                     <div className="mt-2 text-end text-sm font-black text-emerald-600 dark:text-emerald-400">
-                      {pct}% {tp.pctCompleted ?? 'completed'}
+                      {pct}% مكتمل
                     </div>
                   </div>
 
@@ -406,7 +402,7 @@ export default function StudentTajweedPathDetail() {
                         <Trophy className="h-5 w-5 text-emerald-50" />
                       </div>
                       <div>
-                        <div className="font-black">{tp.congrats ?? 'Congratulations!'}</div>
+                        <div className="font-black">مبارك الإتمام!</div>
                         <div className="text-xs text-emerald-100 font-medium mt-0.5">{tp.metadata.pathCompleteCelebration}</div>
                       </div>
                     </div>
@@ -421,7 +417,7 @@ export default function StudentTajweedPathDetail() {
       <div className="space-y-4">
         <h2 className="text-xl font-black flex items-center gap-2 mb-4">
           <GraduationCap className="w-5 h-5 text-emerald-600" />
-          {tp.pathContents ?? 'Path Contents'}
+          محتوى المسار
         </h2>
         
         {stages.map(stage => {
@@ -488,12 +484,12 @@ export default function StudentTajweedPathDetail() {
                     )}
                     {status === "pending_review" && (
                       <span className="bg-sky-100 dark:bg-sky-500/20 text-sky-700 dark:text-sky-400 px-2 py-0.5 rounded-md text-xs font-bold flex items-center gap-1 border border-sky-200 dark:border-sky-500/20">
-                        <Loader2 className="w-3 h-3" /> {tp.statuses?.pendingReview ?? 'Awaiting teacher review'}
+                        <Loader2 className="w-3 h-3" /> بانتظار مراجعة المُعلّم
                       </span>
                     )}
                     {status === "rejected" && (
                       <span className="bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400 px-2 py-0.5 rounded-md text-xs font-bold flex items-center gap-1 border border-red-200 dark:border-red-500/20">
-                        <Target className="w-3 h-3" /> {tp.statuses?.rejected ?? 'Re-submission required'}
+                        <Target className="w-3 h-3" /> يلزم إعادة التسليم
                       </span>
                     )}
                   </div>
@@ -530,9 +526,9 @@ export default function StudentTajweedPathDetail() {
                       <div className="bg-[#fbf6e6] dark:bg-card border border-amber-700/25 dark:border-border rounded-2xl p-5 shadow-sm">
                         <div className="flex items-center gap-2 mb-3 flex-wrap">
                           <Mic className="w-4 h-4 text-amber-700 dark:text-amber-500" />
-                          <span className="text-sm font-bold text-amber-900 dark:text-amber-200">{tp.recitationRequired ?? 'Required Recitation'}</span>
+                          <span className="text-sm font-bold text-amber-900 dark:text-amber-200">المطلوب تلاوته</span>
                           <span className="text-[11px] font-bold bg-amber-700/10 text-amber-700 dark:text-amber-400 px-2.5 py-0.5 rounded-full">
-                            {recitationTarget({ ...stage, tp })}
+                            {recitationTarget(stage)}
                           </span>
                         </div>
                         <StageAyahText stage={stage} />
@@ -597,14 +593,14 @@ export default function StudentTajweedPathDetail() {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
                               <span className="px-2 py-0.5 text-[10px] font-bold tracking-wider rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300 uppercase">
-                                {tp.halqaBadge ?? 'Practical Halaqa'}
+                                حلقة تطبيقية
                               </span>
                             </div>
                             <h4 className="text-base font-bold text-foreground truncate mb-1">
                               {stage.halaqa_name}
                             </h4>
                             <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed line-clamp-2">
-                              {tp.halqaDesc ?? 'Join this live halaqa to deepen your understanding and practice with certified reciters.'}
+                              انضم إلى هذه الحلقة المباشرة لتعزيز فهمك والتطبيق العملي مع نخبة من المقرئين المعتمدين.
                             </p>
                           </div>
                           <div className="w-full sm:w-auto shrink-0 mt-2 sm:mt-0">
@@ -612,7 +608,7 @@ export default function StudentTajweedPathDetail() {
                               href={`/student/halaqat/${stage.halaqa_id}`}
                               className="inline-flex items-center justify-center w-full sm:w-auto px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-emerald-600 to-teal-600 rounded-xl shadow-md hover:shadow-lg hover:from-emerald-500 hover:to-teal-500 transition-all duration-300 group/btn"
                             >
-                              {tp.joinHalaqa ?? 'Join Halaqa'}
+                              الانضمام للحلقة
                               <ArrowRight className="w-4 h-4 ml-0 mr-2 rtl:rotate-180 transform group-hover/btn:-translate-x-1 transition-transform" />
                             </Link>
                           </div>
@@ -632,7 +628,7 @@ export default function StudentTajweedPathDetail() {
 
                     {stage.progress?.status === "rejected" && stage.progress?.reviewer_feedback && (
                       <div className="rounded-2xl border border-red-200 bg-red-50/60 p-4 dark:border-red-900/40 dark:bg-red-950/20">
-                        <p className="font-bold text-sm text-red-700 dark:text-red-400 mb-1">{tp.teacherNotes ?? 'Teacher Notes'}</p>
+                        <p className="font-bold text-sm text-red-700 dark:text-red-400 mb-1">ملاحظات المُعلّم</p>
                         <p className="text-sm whitespace-pre-wrap text-red-900/90 dark:text-red-200/80">{stage.progress.reviewer_feedback}</p>
                       </div>
                     )}
@@ -641,7 +637,7 @@ export default function StudentTajweedPathDetail() {
                       {stage.progress?.status === "pending_review" ? (
                         <Button disabled variant="outline" className="gap-2 rounded-xl bg-background">
                           <Loader2 className="h-4 w-4" />
-                          {tp.statuses?.pendingReview ?? 'Awaiting teacher review'}
+                          بانتظار مراجعة المُعلّم
                         </Button>
                       ) : stage.progress?.status === "rejected" ? (
                         <Button
@@ -649,7 +645,7 @@ export default function StudentTajweedPathDetail() {
                           className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-lg shadow-emerald-600/20"
                         >
                           <CheckCircle2 className="h-5 w-5" />
-                          {tp.resubmit ?? 'Re-submit'}
+                          إعادة التسليم
                         </Button>
                       ) : !isCompleted ? (
                         <Button 
@@ -684,7 +680,7 @@ export default function StudentTajweedPathDetail() {
             <DialogTitle>{tp.detail.completeDialogTitle}: {completeDialog?.title}</DialogTitle>
             <DialogDescription>
               {(completeDialog?.require_audio || path.require_audio || completeDialog?.require_file)
-                ? (tp.submitPendingNote ?? 'The teacher will review your submission before confirming this stage.')
+                ? "سيراجع المُعلّم تسليمك قبل اعتماد اجتياز هذه المرحلة."
                 : tp.detail.optionalAudioDescription}
             </DialogDescription>
           </DialogHeader>
@@ -696,13 +692,13 @@ export default function StudentTajweedPathDetail() {
             )}
             {completeDialog?.task_instructions && (
               <div className="rounded-md border border-amber-200 bg-amber-50/60 p-3 text-sm dark:border-amber-900/40 dark:bg-amber-950/20">
-                <p className="font-bold text-amber-800 dark:text-amber-300 mb-1">{tp.taskRequired ?? 'Task requirements'}</p>
+                <p className="font-bold text-amber-800 dark:text-amber-300 mb-1">المطلوب في هذه المهمة</p>
                 <p className="whitespace-pre-wrap text-amber-900/90 dark:text-amber-200/80">{completeDialog.task_instructions}</p>
               </div>
             )}
             {completeDialog?.progress?.status === "rejected" && completeDialog?.progress?.reviewer_feedback && (
               <div className="rounded-md border border-red-200 bg-red-50/60 p-3 text-sm dark:border-red-900/40 dark:bg-red-950/20">
-                <p className="font-bold text-red-700 dark:text-red-400 mb-1">{tp.teacherNotesRejected ?? 'Teacher Notes (re-submission required)'}</p>
+                <p className="font-bold text-red-700 dark:text-red-400 mb-1">ملاحظات المُعلّم (يلزم إعادة التسليم)</p>
                 <p className="whitespace-pre-wrap text-red-900/90 dark:text-red-200/80">{completeDialog.progress.reviewer_feedback}</p>
               </div>
             )}
@@ -718,7 +714,7 @@ export default function StudentTajweedPathDetail() {
               <FileUploader
                 value={fileUrl}
                 onChange={setFileUrl}
-                label={tp.uploadFileLabel ?? 'Upload the required file for review'}
+                label="ارفع الملف المطلوب للمراجعة"
               />
             )}
           </div>
@@ -736,7 +732,7 @@ export default function StudentTajweedPathDetail() {
               {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
               <CheckCircle2 className="h-4 w-4" />
               {(completeDialog?.require_audio || path.require_audio || completeDialog?.require_file)
-                ? (tp.sendForReview ?? 'Send for Review')
+                ? "إرسال للمراجعة"
                 : tp.actions.pass}
             </Button>
           </DialogFooter>

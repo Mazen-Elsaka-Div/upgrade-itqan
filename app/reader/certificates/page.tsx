@@ -1,4 +1,6 @@
 "use client";
+
+const t: any = new Proxy({}, { get: () => new Proxy({}, { get: () => undefined }) });
 import React, { useState } from "react";
 import useSWR from "swr";
 import { toast } from "sonner";
@@ -22,7 +24,6 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function ReaderCertificatesPage() {
     
-  const { t } = useI18n()
   const { locale } = useI18n();
   const isAr = locale === "ar";
 
@@ -53,8 +54,8 @@ export default function ReaderCertificatesPage() {
         body: JSON.stringify({ action: "approve" }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error || (''));
-      toast.success('');
+      if (!res.ok) throw new Error(json.error || ((t.addedTranslations_2026?.['حدث خطأ أثناء الاعتماد'] || (t.addedTranslations_2026?.['حدث خطأ أثناء الاعتماد'] || 'حدث خطأ أثناء الاعتماد'))));
+      toast.success((t.addedTranslations_2026?.['تم اعتماد الشهادة وإصدارها بنجاح'] || (t.addedTranslations_2026?.['تم اعتماد الشهادة وإصدارها بنجاح'] || 'تم اعتماد الشهادة وإصدارها بنجاح')));
       mutate();
     } catch (err: any) {
       toast.error(err.message);
@@ -65,7 +66,7 @@ export default function ReaderCertificatesPage() {
 
   const handleReject = async (id: string) => {
     if (!rejectReason.trim()) {
-      toast.error('');
+      toast.error((t.addedTranslations_2026?.['يرجى إدخال سبب الرفض'] || (t.addedTranslations_2026?.['يرجى إدخال سبب الرفض'] || 'يرجى إدخال سبب الرفض')));
       return;
     }
     setIsProcessing(id);
@@ -76,8 +77,8 @@ export default function ReaderCertificatesPage() {
         body: JSON.stringify({ action: "reject", reason: rejectReason }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error || (''));
-      toast.success('');
+      if (!res.ok) throw new Error(json.error || ((t.addedTranslations_2026?.['حدث خطأ أثناء الرفض'] || (t.addedTranslations_2026?.['حدث خطأ أثناء الرفض'] || 'حدث خطأ أثناء الرفض'))));
+      toast.success((t.addedTranslations_2026?.['تم رفض طلب الشهادة'] || (t.addedTranslations_2026?.['تم رفض طلب الشهادة'] || 'تم رفض طلب الشهادة')));
       setRejectingId(null);
       setRejectReason("");
       mutate();
@@ -99,13 +100,13 @@ export default function ReaderCertificatesPage() {
           <div className="space-y-3">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-sm font-medium">
               <Award className="w-4 h-4" />
-              <span>{''}</span>
+              <span>{(t.addedTranslations_2026?.['مركز إصدار الشهادات'] || (t.addedTranslations_2026?.['مركز إصدار الشهادات'] || 'مركز إصدار الشهادات'))}</span>
             </div>
             <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-              {''}
+              {(t.addedTranslations_2026?.['اعتماد شهادات الطلاب'] || (t.addedTranslations_2026?.['اعتماد شهادات الطلاب'] || 'اعتماد شهادات الطلاب'))}
             </h1>
             <p className="text-slate-500 dark:text-slate-400 max-w-xl">
-              {''}
+              {(t.addedTranslations_2026?.['راجع واعتمد طلبات شهادات الإنجاز المقدمة من طلاب المسارات التي تشرف عليها في المقرأة.'] || (t.addedTranslations_2026?.['راجع واعتمد طلبات شهادات الإنجاز المقدمة من طلاب المسارات التي تشرف عليها في المقرأة.'] || 'راجع واعتمد طلبات شهادات الإنجاز المقدمة من طلاب المسارات التي تشرف عليها في المقرأة.'))}
             </p>
           </div>
 
@@ -115,7 +116,7 @@ export default function ReaderCertificatesPage() {
               {(data.counts?.submitted ?? 0) > 0 && (
                 <div className="flex items-center gap-2 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-amber-700 dark:text-amber-400 rounded-full px-4 py-2 text-sm font-semibold">
                   <Clock className="w-4 h-4" />
-                  <span>{data.counts.submitted} {''}</span>
+                  <span>{data.counts.submitted} {(t.addedTranslations_2026?.['بانتظار المراجعة'] || (t.addedTranslations_2026?.['بانتظار المراجعة'] || 'بانتظار المراجعة'))}</span>
                 </div>
               )}
               {((data.counts?.approved ?? 0) + (data.counts?.issued ?? 0)) >
@@ -124,7 +125,7 @@ export default function ReaderCertificatesPage() {
                   <CheckCircle2 className="w-4 h-4" />
                   <span>
                     {(data.counts?.approved ?? 0) + (data.counts?.issued ?? 0)}{" "}
-                    {''}
+                    {(t.addedTranslations_2026?.['معتمدة'] || (t.addedTranslations_2026?.['معتمدة'] || 'معتمدة'))}
                   </span>
                 </div>
               )}
@@ -137,20 +138,20 @@ export default function ReaderCertificatesPage() {
           <FilterTab
             active={filter === "all"}
             onClick={() => setFilter("all")}
-            label={''}
+            label={(t.addedTranslations_2026?.['الكل'] || (t.addedTranslations_2026?.['الكل'] || 'الكل'))}
             count={requests.length}
           />
           <FilterTab
             active={filter === "submitted"}
             onClick={() => setFilter("submitted")}
-            label={''}
+            label={(t.addedTranslations_2026?.['بانتظار الاعتماد'] || (t.addedTranslations_2026?.['بانتظار الاعتماد'] || 'بانتظار الاعتماد'))}
             count={data?.counts?.submitted || 0}
             color="text-amber-500"
           />
           <FilterTab
             active={filter === "approved"}
             onClick={() => setFilter("approved")}
-            label={''}
+            label={(t.addedTranslations_2026?.['تم الاعتماد'] || (t.addedTranslations_2026?.['تم الاعتماد'] || 'تم الاعتماد'))}
             count={
               (data?.counts?.approved || 0) + (data?.counts?.issued || 0)
             }
@@ -159,14 +160,14 @@ export default function ReaderCertificatesPage() {
           <FilterTab
             active={filter === "rejected"}
             onClick={() => setFilter("rejected")}
-            label={''}
+            label={(t.addedTranslations_2026?.['مرفوضة'] || (t.addedTranslations_2026?.['مرفوضة'] || 'مرفوضة'))}
             count={data?.counts?.rejected || 0}
             color="text-rose-500"
           />
           <FilterTab
             active={filter === "data_required"}
             onClick={() => setFilter("data_required")}
-            label={''}
+            label={(t.addedTranslations_2026?.['بانتظار بيانات الطالب'] || (t.addedTranslations_2026?.['بانتظار بيانات الطالب'] || 'بانتظار بيانات الطالب'))}
             count={data?.counts?.data_required || 0}
             color="text-slate-400"
           />
@@ -178,14 +179,14 @@ export default function ReaderCertificatesPage() {
         ) : error ? (
           <div className="text-center py-20 text-rose-500">
             <AlertCircle className="w-8 h-8 mx-auto mb-3 opacity-50" />
-            <p>{''}</p>
+            <p>{(t.addedTranslations_2026?.['حدث خطأ أثناء تحميل الطلبات'] || (t.addedTranslations_2026?.['حدث خطأ أثناء تحميل الطلبات'] || 'حدث خطأ أثناء تحميل الطلبات'))}</p>
           </div>
         ) : filteredRequests.length === 0 ? (
           <div className="flex flex-col items-center py-24 gap-4 text-slate-400">
             <BookOpen className="w-14 h-14 opacity-20" />
-            <p className="text-lg font-medium">{''}</p>
+            <p className="text-lg font-medium">{(t.addedTranslations_2026?.['لا توجد طلبات لعرضها حالياً'] || (t.addedTranslations_2026?.['لا توجد طلبات لعرضها حالياً'] || 'لا توجد طلبات لعرضها حالياً'))}</p>
             <p className="text-sm text-center max-w-sm">
-              {''}
+              {(t.addedTranslations_2026?.['سيظهر هنا طلب شهادة لكل طالب أتمّ أحد مسارات التجويد أو الحفظ التي تشرف عليها.'] || (t.addedTranslations_2026?.['سيظهر هنا طلب شهادة لكل طالب أتمّ أحد مسارات التجويد أو الحفظ التي تشرف عليها.'] || 'سيظهر هنا طلب شهادة لكل طالب أتمّ أحد مسارات التجويد أو الحفظ التي تشرف عليها.'))}
             </p>
           </div>
         ) : (
@@ -265,7 +266,7 @@ function RequestCard({
   onApprove: () => void;
   onReject: () => void;
 }) {
-  const { locale, t } = useI18n();
+  const { locale } = useI18n();
   const isAr = locale === "ar";
 
   const isPending = req.status === "submitted";
@@ -274,10 +275,10 @@ function RequestCard({
 
   const pathTypeLabel =
     req.source_table === "tajweed_paths"
-      ? ('')
+      ? ((t.addedTranslations_2026?.['مسار التجويد'] || (t.addedTranslations_2026?.['مسار التجويد'] || 'مسار التجويد')))
       : req.source_table === "memorization_paths"
-        ? ('')
-        : ('');
+        ? ((t.addedTranslations_2026?.['مسار الحفظ'] || (t.addedTranslations_2026?.['مسار الحفظ'] || 'مسار الحفظ')))
+        : ((t.addedTranslations_2026?.['مسار'] || (t.addedTranslations_2026?.['مسار'] || 'مسار')));
 
   return (
     <motion.div
@@ -321,7 +322,7 @@ function RequestCard({
           </div>
           <div>
             <p className="text-xs text-slate-500 mb-1">
-              {''}
+              {(t.addedTranslations_2026?.['بيانات الشهادة (الاسم)'] || (t.addedTranslations_2026?.['بيانات الشهادة (الاسم)'] || 'بيانات الشهادة (الاسم)'))}
             </p>
             <p className="font-medium text-sm text-slate-800 dark:text-slate-200">
               {req.data?.name || req.student_name}
@@ -329,7 +330,7 @@ function RequestCard({
           </div>
           {req.data?.grade && (
             <div>
-              <p className="text-xs text-slate-500 mb-1">{''}</p>
+              <p className="text-xs text-slate-500 mb-1">{(t.addedTranslations_2026?.['التقدير'] || (t.addedTranslations_2026?.['التقدير'] || 'التقدير'))}</p>
               <p className="font-medium text-sm text-slate-800 dark:text-slate-200">
                 {req.data.grade}
               </p>
@@ -337,7 +338,7 @@ function RequestCard({
           )}
           {isApproved && req.certificate_number && (
             <div>
-              <p className="text-xs text-slate-500 mb-1">{''}</p>
+              <p className="text-xs text-slate-500 mb-1">{(t.addedTranslations_2026?.['رقم الشهادة'] || (t.addedTranslations_2026?.['رقم الشهادة'] || 'رقم الشهادة'))}</p>
               <p
                 className="font-medium text-sm text-slate-800 dark:text-slate-200 font-mono text-left"
                 dir="ltr"
@@ -352,7 +353,7 @@ function RequestCard({
           <div className="bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 p-3 rounded-xl text-sm flex items-start gap-2">
             <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
             <p>
-              <strong>{''}</strong> {req.rejection_reason}
+              <strong>{(t.addedTranslations_2026?.['سبب الرفض:'] || (t.addedTranslations_2026?.['سبب الرفض:'] || 'سبب الرفض:'))}</strong> {req.rejection_reason}
             </p>
           </div>
         )}
@@ -365,7 +366,7 @@ function RequestCard({
             <div className="space-y-3">
               <input
                 type="text"
-                placeholder={''}
+                placeholder={(t.addedTranslations_2026?.['اكتب سبب الرفض...'] || (t.addedTranslations_2026?.['اكتب سبب الرفض...'] || 'اكتب سبب الرفض...'))}
                 value={rejectReason}
                 onChange={(e) => setRejectReason(e.target.value)}
                 className="w-full text-sm bg-white dark:bg-black border border-slate-200 dark:border-white/10 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-rose-500"
@@ -376,14 +377,14 @@ function RequestCard({
                   disabled={isProcessing}
                   className="flex-1 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold py-2 rounded-lg transition-colors disabled:opacity-50"
                 >
-                  {''}
+                  {(t.addedTranslations_2026?.['تأكيد الرفض'] || (t.addedTranslations_2026?.['تأكيد الرفض'] || 'تأكيد الرفض'))}
                 </button>
                 <button
                   onClick={() => setRejectingId(null)}
                   disabled={isProcessing}
                   className="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/20 text-slate-700 dark:text-slate-300 text-xs font-bold py-2 rounded-lg transition-colors"
                 >
-                  {''}
+                  {(t.addedTranslations_2026?.['إلغاء'] || (t.addedTranslations_2026?.['إلغاء'] || 'إلغاء'))}
                 </button>
               </div>
             </div>
@@ -399,7 +400,7 @@ function RequestCard({
                 ) : (
                   <CheckCircle2 className="w-5 h-5" />
                 )}
-                {''}
+                {(t.addedTranslations_2026?.['اعتماد وإصدار'] || (t.addedTranslations_2026?.['اعتماد وإصدار'] || 'اعتماد وإصدار'))}
               </button>
               <button
                 onClick={() => setRejectingId(req.id)}
@@ -407,7 +408,7 @@ function RequestCard({
                 className="w-full flex items-center justify-center gap-2 bg-white dark:bg-[#111] hover:bg-rose-50 dark:hover:bg-rose-500/10 text-rose-600 border border-rose-200 dark:border-rose-500/30 font-bold py-2.5 rounded-xl transition-colors shadow-sm disabled:opacity-50"
               >
                 <XCircle className="w-5 h-5" />
-                {''}
+                {(t.addedTranslations_2026?.['رفض الطلب'] || (t.addedTranslations_2026?.['رفض الطلب'] || 'رفض الطلب'))}
               </button>
             </>
           )}
@@ -424,7 +425,7 @@ function RequestCard({
             className="w-full flex items-center justify-center gap-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 dark:text-emerald-400 font-bold py-2.5 rounded-xl transition-colors shadow-sm"
           >
             <Download className="w-4 h-4" />
-            {''}
+            {(t.addedTranslations_2026?.['عرض الشهادة'] || (t.addedTranslations_2026?.['عرض الشهادة'] || 'عرض الشهادة'))}
           </a>
         </div>
       )}
@@ -433,10 +434,10 @@ function RequestCard({
 }
 
 function CertificatesSkeleton() {
-  const { locale, t } = useI18n();
+  const { locale } = useI18n();
   const isAr = locale === "ar";
   return (
-    <div className="grid gap-4" aria-busy="true" aria-label={''}>
+    <div className="grid gap-4" aria-busy="true" aria-label={(t.addedTranslations_2026?.['جاري التحميل'] || (t.addedTranslations_2026?.['جاري التحميل'] || 'جاري التحميل'))}>
       {/* Filter tabs skeleton */}
       <div className="flex gap-2 pb-4 border-b border-border">
         {[80, 130, 110, 90, 150].map((w, i) => (
@@ -497,26 +498,26 @@ function StatusBadge({ status }: { status: string }) {
     case "submitted":
       return (
         <span className="flex items-center gap-1 text-[10px] font-bold bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400 px-2 py-0.5 rounded-md">
-          <Clock className="w-3 h-3" /> {''}
+          <Clock className="w-3 h-3" /> {(t.addedTranslations_2026?.['قيد المراجعة'] || (t.addedTranslations_2026?.['قيد المراجعة'] || 'قيد المراجعة'))}
         </span>
       );
     case "approved":
     case "issued":
       return (
         <span className="flex items-center gap-1 text-[10px] font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 px-2 py-0.5 rounded-md">
-          <CheckCircle2 className="w-3 h-3" /> {''}
+          <CheckCircle2 className="w-3 h-3" /> {(t.addedTranslations_2026?.['معتمدة'] || (t.addedTranslations_2026?.['معتمدة'] || 'معتمدة'))}
         </span>
       );
     case "rejected":
       return (
         <span className="flex items-center gap-1 text-[10px] font-bold bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400 px-2 py-0.5 rounded-md">
-          <XCircle className="w-3 h-3" /> {''}
+          <XCircle className="w-3 h-3" /> {(t.addedTranslations_2026?.['مرفوضة'] || (t.addedTranslations_2026?.['مرفوضة'] || 'مرفوضة'))}
         </span>
       );
     case "data_required":
       return (
         <span className="flex items-center gap-1 text-[10px] font-bold bg-slate-100 text-slate-700 dark:bg-slate-500/20 dark:text-slate-400 px-2 py-0.5 rounded-md">
-          <FileText className="w-3 h-3" /> {''}
+          <FileText className="w-3 h-3" /> {(t.addedTranslations_2026?.['بانتظار بيانات الطالب'] || (t.addedTranslations_2026?.['بانتظار بيانات الطالب'] || 'بانتظار بيانات الطالب'))}
         </span>
       );
     default:

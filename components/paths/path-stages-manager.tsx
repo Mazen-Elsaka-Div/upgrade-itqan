@@ -6,7 +6,6 @@ import {
   Video, FileText, BookOpen, ChevronDown, ChevronUp, UploadCloud, Layers, Users
 } from 'lucide-react'
 import { toast } from 'sonner'
-import { useI18n } from '@/lib/i18n/context'
 
 interface Stage {
   id: string
@@ -55,10 +54,6 @@ const emptyStage: StageForm = {
 }
 
 export default function PathStagesManager({ pathId }: { pathId: string }) {
-  const { t } = useI18n()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const sm = (key: string): string => (t?.tajweedPaths as any)?.stageManager?.[key] ?? key
-
   const [stages, setStages] = useState<Stage[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -88,10 +83,10 @@ export default function PathStagesManager({ pathId }: { pathId: string }) {
         const json = await res.json()
         setStages(json.data || [])
       } else {
-        toast.error(sm('loadError'))
+        toast.error('تعذّر تحميل مراحل المسار')
       }
     } catch {
-      toast.error(sm('loadError2'))
+      toast.error('حدث خطأ أثناء تحميل المراحل')
     } finally {
       setLoading(false)
     }
@@ -135,12 +130,12 @@ export default function PathStagesManager({ pathId }: { pathId: string }) {
       const json = await res.json()
       if (res.ok && json.url) {
         setForm((prev) => ({ ...prev, pdf_url: json.url }))
-        toast.success(sm('uploadSuccess'))
+        toast.success('تم رفع الملف')
       } else {
-        toast.error(json.error || sm('uploadError'))
+        toast.error(json.error || 'فشل رفع الملف')
       }
     } catch {
-      toast.error(sm('uploadError2'))
+      toast.error('حدث خطأ أثناء رفع الملف')
     } finally {
       setUploadingPdf(false)
     }
@@ -160,12 +155,12 @@ export default function PathStagesManager({ pathId }: { pathId: string }) {
         body: JSON.stringify(form),
       })
       if (res.ok) {
-        toast.success(editId ? sm('updateSuccess') : sm('addSuccess'))
+        toast.success(editId ? 'تم تحديث المرحلة' : 'تمت إضافة المرحلة')
         setShowForm(false)
         fetchStages()
       } else {
         const json = await res.json().catch(() => ({}))
-        toast.error(json.error || sm('saveError'))
+        toast.error(json.error || 'تعذّر حفظ المرحلة')
       }
     } finally {
       setSaving(false)
@@ -173,15 +168,15 @@ export default function PathStagesManager({ pathId }: { pathId: string }) {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm(sm('confirmDelete'))) return
+    if (!confirm('هل أنت متأكد من حذف هذه المرحلة؟')) return
     setDeletingId(id)
     try {
       const res = await fetch(`/api/academy/teacher/paths/${pathId}/stages/${id}`, { method: 'DELETE' })
       if (res.ok) {
-        toast.success(sm('deleteSuccess'))
+        toast.success('تم حذف المرحلة')
         fetchStages()
       } else {
-        toast.error(sm('deleteError'))
+        toast.error('تعذّر حذف المرحلة')
       }
     } finally {
       setDeletingId(null)
@@ -205,12 +200,12 @@ export default function PathStagesManager({ pathId }: { pathId: string }) {
         <div className="flex items-center gap-3 text-sm text-muted-foreground">
           <span className="inline-flex items-center gap-1.5 font-medium">
             <Layers className="w-4 h-4 text-emerald-600" />
-            {stages.length} {sm('stageCount')}
+            {stages.length} مرحلة
           </span>
           {totalMinutes > 0 && (
             <span className="inline-flex items-center gap-1.5">
               <Clock className="w-4 h-4 text-amber-500" />
-              {totalMinutes} {sm('estimatedMinutes')}
+              {totalMinutes} دقيقة تقديرية
             </span>
           )}
         </div>
@@ -219,7 +214,7 @@ export default function PathStagesManager({ pathId }: { pathId: string }) {
           className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition-colors shadow-sm self-start sm:self-auto"
         >
           <Plus className="w-5 h-5" />
-          {sm('addStage')}
+          إضافة مرحلة
         </button>
       </div>
 
@@ -227,9 +222,9 @@ export default function PathStagesManager({ pathId }: { pathId: string }) {
       {stages.length === 0 ? (
         <div className="bg-muted/30 border border-dashed border-border rounded-2xl p-12 text-center">
           <BookOpen className="w-12 h-12 mx-auto mb-3 text-muted-foreground opacity-30" />
-          <p className="text-muted-foreground font-medium mb-4">{sm('noStages')}</p>
+          <p className="text-muted-foreground font-medium mb-4">لا توجد مراحل في هذا المسار بعد</p>
           <button onClick={openAdd} className="px-5 py-2 bg-emerald-600 text-white rounded-lg font-bold hover:bg-emerald-700 transition-colors text-sm">
-            {sm('addFirst')}
+            ابدأ بإضافة أول مرحلة
           </button>
         </div>
       ) : (
@@ -249,14 +244,14 @@ export default function PathStagesManager({ pathId }: { pathId: string }) {
                     <h4 className="font-bold text-sm text-foreground truncate">{s.title}</h4>
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-[11px] text-muted-foreground">
                       <span className="inline-flex items-center gap-1"><Clock className="w-3 h-3" /> {s.estimated_minutes} د</span>
-                      {s.stage_type === 'course' && <span className="inline-flex items-center gap-1 text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 px-1.5 py-0.5 rounded border border-emerald-100 dark:border-emerald-900/30"><BookOpen className="w-3 h-3" /> {sm('courseLabel')}: {s.course_title}</span>}
-                      {s.stage_type === 'halaqa' && <span className="inline-flex items-center gap-1 text-blue-600 bg-blue-50 dark:bg-blue-900/20 px-1.5 py-0.5 rounded border border-blue-100 dark:border-blue-900/30"><Users className="w-3 h-3" /> {sm('halaqaLabel')}: {s.halaqa_title}</span>}
-                      {s.stage_type === 'lesson' && <span className="inline-flex items-center gap-1 text-amber-600 bg-amber-50 dark:bg-amber-900/20 px-1.5 py-0.5 rounded border border-amber-100 dark:border-amber-900/30"><Video className="w-3 h-3" /> {sm('lessonLabel')}: {s.lesson_title}</span>}
-                      {s.video_url && <span className="inline-flex items-center gap-1 text-rose-500"><Video className="w-3 h-3" /> {sm('videoIndicator')}</span>}
-                      {s.pdf_url && <span className="inline-flex items-center gap-1 text-blue-500"><FileText className="w-3 h-3" /> {sm('fileIndicator')}</span>}
-                      {s.passage_text && <span className="inline-flex items-center gap-1 text-emerald-600"><BookOpen className="w-3 h-3" /> {sm('passageIndicator')}</span>}
-                      {s.require_audio && <span className="inline-flex items-center gap-1 text-sky-600 bg-sky-50 dark:bg-sky-900/20 px-1.5 py-0.5 rounded border border-sky-100 dark:border-sky-900/30">{sm('requireAudioBadge')}</span>}
-                      {s.require_file && <span className="inline-flex items-center gap-1 text-violet-600 bg-violet-50 dark:bg-violet-900/20 px-1.5 py-0.5 rounded border border-violet-100 dark:border-violet-900/30">{sm('requireFileBadge')}</span>}
+                      {s.stage_type === 'course' && <span className="inline-flex items-center gap-1 text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 px-1.5 py-0.5 rounded border border-emerald-100 dark:border-emerald-900/30"><BookOpen className="w-3 h-3" /> دورة: {s.course_title}</span>}
+                      {s.stage_type === 'halaqa' && <span className="inline-flex items-center gap-1 text-blue-600 bg-blue-50 dark:bg-blue-900/20 px-1.5 py-0.5 rounded border border-blue-100 dark:border-blue-900/30"><Users className="w-3 h-3" /> حلقة: {s.halaqa_title}</span>}
+                      {s.stage_type === 'lesson' && <span className="inline-flex items-center gap-1 text-amber-600 bg-amber-50 dark:bg-amber-900/20 px-1.5 py-0.5 rounded border border-amber-100 dark:border-amber-900/30"><Video className="w-3 h-3" /> درس: {s.lesson_title}</span>}
+                      {s.video_url && <span className="inline-flex items-center gap-1 text-rose-500"><Video className="w-3 h-3" /> فيديو</span>}
+                      {s.pdf_url && <span className="inline-flex items-center gap-1 text-blue-500"><FileText className="w-3 h-3" /> ملف</span>}
+                      {s.passage_text && <span className="inline-flex items-center gap-1 text-emerald-600"><BookOpen className="w-3 h-3" /> مقطع</span>}
+                      {s.require_audio && <span className="inline-flex items-center gap-1 text-sky-600 bg-sky-50 dark:bg-sky-900/20 px-1.5 py-0.5 rounded border border-sky-100 dark:border-sky-900/30">تسجيل صوتي (مراجعة)</span>}
+                      {s.require_file && <span className="inline-flex items-center gap-1 text-violet-600 bg-violet-50 dark:bg-violet-900/20 px-1.5 py-0.5 rounded border border-violet-100 dark:border-violet-900/30">رفع ملف (مراجعة)</span>}
                     </div>
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
@@ -264,19 +259,19 @@ export default function PathStagesManager({ pathId }: { pathId: string }) {
                       <button
                         onClick={() => setExpanded(isOpen ? null : s.id)}
                         className="p-2 text-muted-foreground hover:bg-muted rounded-lg transition-colors"
-                        title={sm('expandDetails')}
+                        title="عرض التفاصيل"
                       >
                         {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                       </button>
                     )}
-                    <button onClick={() => openEdit(s)} className="p-2 text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg transition-colors" title={sm('editStage')}>
+                    <button onClick={() => openEdit(s)} className="p-2 text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg transition-colors" title="تعديل">
                       <Edit2 className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handleDelete(s.id)}
                       disabled={deletingId === s.id}
                       className="p-2 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-lg transition-colors disabled:opacity-50"
-                      title={sm('deleteStage')}
+                      title="حذف"
                     >
                       {deletingId === s.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                     </button>
@@ -286,25 +281,25 @@ export default function PathStagesManager({ pathId }: { pathId: string }) {
                   <div className="px-4 pb-4 pt-0 border-t border-border/50 space-y-3 text-sm">
                     {s.description && (
                       <div className="pt-3">
-                        <p className="text-xs font-bold text-muted-foreground mb-1">{sm('descriptionLabel')}</p>
+                        <p className="text-xs font-bold text-muted-foreground mb-1">الوصف</p>
                         <p className="text-foreground leading-relaxed">{s.description}</p>
                       </div>
                     )}
                     {s.content && (
                       <div>
-                        <p className="text-xs font-bold text-muted-foreground mb-1">{sm('contentLabel')}</p>
+                        <p className="text-xs font-bold text-muted-foreground mb-1">المحتوى</p>
                         <p className="text-foreground leading-relaxed whitespace-pre-wrap">{s.content}</p>
                       </div>
                     )}
                     {s.passage_text && (
                       <div>
-                        <p className="text-xs font-bold text-muted-foreground mb-1">{sm('passageLabel')}</p>
+                        <p className="text-xs font-bold text-muted-foreground mb-1">المقطع المطلوب</p>
                         <p className="text-foreground leading-relaxed whitespace-pre-wrap">{s.passage_text}</p>
                       </div>
                     )}
                     {s.video_url && (
                       <a href={s.video_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-rose-600 hover:underline text-xs font-medium">
-                        <Video className="w-3.5 h-3.5" /> {sm('openVideo')}
+                        <Video className="w-3.5 h-3.5" /> فتح رابط الفيديو
                       </a>
                     )}
                   </div>
@@ -323,7 +318,7 @@ export default function PathStagesManager({ pathId }: { pathId: string }) {
         >
           <div className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between p-5 border-b border-border sticky top-0 bg-card z-10">
-              <h3 className="text-lg font-bold">{editId ? sm('editStageTitle') : sm('addStageTitle')}</h3>
+              <h3 className="text-lg font-bold">{editId ? 'تعديل المرحلة' : 'إضافة مرحلة جديدة'}</h3>
               <button onClick={() => setShowForm(false)} className="p-2 hover:bg-muted rounded-lg transition-colors">
                 <X className="w-5 h-5" />
               </button>
@@ -331,13 +326,13 @@ export default function PathStagesManager({ pathId }: { pathId: string }) {
             <form onSubmit={handleSubmit} className="p-5 space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="sm:col-span-2">
-                  <label className="text-sm font-bold block mb-2">{sm('stageTypeLabel')} <span className="text-rose-500">*</span></label>
+                  <label className="text-sm font-bold block mb-2">نوع المرحلة <span className="text-rose-500">*</span></label>
                   <div className="flex bg-muted/50 p-1 rounded-xl border border-border overflow-x-auto scrollbar-none">
                     {[
-                      { id: 'custom', label: sm('typeCustom') },
-                      { id: 'lesson', label: sm('typeLesson') },
-                      { id: 'course', label: sm('typeCourse') },
-                      { id: 'halaqa', label: sm('typeHalaqa') }
+                      { id: 'custom', label: 'درس' },
+                      { id: 'lesson', label: 'درس ضمن دورة' },
+                      { id: 'course', label: 'دورة كاملة' },
+                      { id: 'halaqa', label: 'حلقة تفاعلية' }
                     ].map(tab => (
                       <button
                         key={tab.id}
@@ -355,13 +350,13 @@ export default function PathStagesManager({ pathId }: { pathId: string }) {
                   </div>
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="text-sm font-bold block mb-1.5">{sm('stageTitleLabel')} <span className="text-rose-500">*</span></label>
+                  <label className="text-sm font-bold block mb-1.5">عنوان المرحلة <span className="text-rose-500">*</span></label>
                   <input
                     required
                     type="text"
                     value={form.title}
                     onChange={(e) => setForm({ ...form, title: e.target.value })}
-                    placeholder={form.stage_type === 'custom' ? sm('stageTitlePlaceholder') : sm('stageTypePlaceholder')}
+                    placeholder={form.stage_type === 'custom' ? "مثال: أحكام النون الساكنة" : "عنوان يظهر في المسار"}
                     className="w-full px-3 py-2.5 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
@@ -369,7 +364,7 @@ export default function PathStagesManager({ pathId }: { pathId: string }) {
 
               {form.stage_type === 'course' && (
                 <div className="bg-emerald-50/50 dark:bg-emerald-900/10 p-4 rounded-xl border border-emerald-100 dark:border-emerald-900/30">
-                  <label className="text-sm font-bold block mb-1.5 text-emerald-800 dark:text-emerald-300">{sm('selectCourse')} <span className="text-rose-500">*</span></label>
+                  <label className="text-sm font-bold block mb-1.5 text-emerald-800 dark:text-emerald-300">اختر الدورة <span className="text-rose-500">*</span></label>
                   <select
                     required
                     value={form.course_id}
@@ -379,17 +374,17 @@ export default function PathStagesManager({ pathId }: { pathId: string }) {
                     }}
                     className="w-full px-3 py-2.5 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   >
-                    <option value="">{sm('selectCoursePlaceholder')}</option>
+                    <option value="">— اختر الدورة —</option>
                     {entities.courses.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
                   </select>
                   <div className="mt-2 text-left">
-                    <a href="/academy/teacher/courses/new?scope=path_only" target="_blank" className="text-xs font-bold text-emerald-600 hover:text-emerald-700 underline underline-offset-2">{sm('createCustomCourse')}</a>
+                    <a href="/academy/teacher/courses/new?scope=path_only" target="_blank" className="text-xs font-bold text-emerald-600 hover:text-emerald-700 underline underline-offset-2">أو أنشئ دورة مخصصة لهذا المسار</a>
                   </div>
                 </div>
               )}
               {form.stage_type === 'halaqa' && (
                 <div className="bg-blue-50/50 dark:bg-blue-900/10 p-4 rounded-xl border border-blue-100 dark:border-blue-900/30">
-                  <label className="text-sm font-bold block mb-1.5 text-blue-800 dark:text-blue-300">{sm('selectHalaqa')} <span className="text-rose-500">*</span></label>
+                  <label className="text-sm font-bold block mb-1.5 text-blue-800 dark:text-blue-300">اختر الحلقة <span className="text-rose-500">*</span></label>
                   <select
                     required
                     value={form.halaqa_id}
@@ -399,29 +394,29 @@ export default function PathStagesManager({ pathId }: { pathId: string }) {
                     }}
                     className="w-full px-3 py-2.5 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   >
-                    <option value="">{sm('selectHalaqaPlaceholder')}</option>
+                    <option value="">— اختر الحلقة —</option>
                     {entities.halaqat.map(h => <option key={h.id} value={h.id}>{h.title}</option>)}
                   </select>
                   <div className="mt-2 text-left">
-                    <a href="/academy/teacher/halaqat?new=true&scope=path_only" target="_blank" className="text-xs font-bold text-blue-600 hover:text-blue-700 underline underline-offset-2">{sm('createCustomHalaqa')}</a>
+                    <a href="/academy/teacher/halaqat?new=true&scope=path_only" target="_blank" className="text-xs font-bold text-blue-600 hover:text-blue-700 underline underline-offset-2">أو أنشئ حلقة مخصصة لهذا المسار</a>
                   </div>
                 </div>
               )}
               {form.stage_type === 'lesson' && (
                 <div className="bg-amber-50/50 dark:bg-amber-900/10 p-4 rounded-xl border border-amber-100 dark:border-amber-900/30 space-y-4">
                   <div>
-                    <label className="text-sm font-bold block mb-1.5 text-amber-800 dark:text-amber-300">{sm('selectCourseFirst')} <span className="text-rose-500">*</span></label>
+                    <label className="text-sm font-bold block mb-1.5 text-amber-800 dark:text-amber-300">اختر الدورة أولاً <span className="text-rose-500">*</span></label>
                     <select
                       value={form.course_id}
                       onChange={(e) => setForm({ ...form, course_id: e.target.value, lesson_id: '' })}
                       className="w-full px-3 py-2.5 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     >
-                      <option value="">{sm('selectCoursePlaceholder')}</option>
+                      <option value="">— اختر الدورة —</option>
                       {entities.courses.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className="text-sm font-bold block mb-1.5 text-amber-800 dark:text-amber-300">{sm('selectLesson')} <span className="text-rose-500">*</span></label>
+                    <label className="text-sm font-bold block mb-1.5 text-amber-800 dark:text-amber-300">اختر الدرس <span className="text-rose-500">*</span></label>
                     <select
                       required
                       disabled={!form.course_id}
@@ -432,7 +427,7 @@ export default function PathStagesManager({ pathId }: { pathId: string }) {
                       }}
                       className="w-full px-3 py-2.5 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50"
                     >
-                      <option value="">{sm('selectLessonPlaceholder')}</option>
+                      <option value="">— اختر الدرس —</option>
                       {entities.lessons
                         .filter(l => l.course_id === form.course_id)
                         .map(l => <option key={l.id} value={l.id}>{l.title}</option>)}
@@ -443,37 +438,37 @@ export default function PathStagesManager({ pathId }: { pathId: string }) {
               {form.stage_type === 'custom' && (
                 <>
                   <div>
-                    <label className="text-sm font-bold block mb-1.5">{sm('shortDesc')}</label>
+                    <label className="text-sm font-bold block mb-1.5">وصف مختصر</label>
                     <textarea
                       rows={2}
                       value={form.description}
                       onChange={(e) => setForm({ ...form, description: e.target.value })}
-                      placeholder={sm('shortDescPlaceholder')}
+                      placeholder="نبذة قصيرة عن هذه المرحلة..."
                       className="w-full px-3 py-2.5 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-bold block mb-1.5">{sm('teachingContent')}</label>
+                    <label className="text-sm font-bold block mb-1.5">المحتوى التعليمي</label>
                     <textarea
                       rows={4}
                       value={form.content}
                       onChange={(e) => setForm({ ...form, content: e.target.value })}
-                      placeholder={sm('teachingContentPlaceholder')}
+                      placeholder="اشرح محتوى المرحلة، النقاط الأساسية، التعليمات للطالب..."
                       className="w-full px-3 py-2.5 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-bold block mb-1.5">{sm('passageSection')}</label>
+                    <label className="text-sm font-bold block mb-1.5">المقطع المطلوب تلاوته (اختياري)</label>
                     <textarea
                       rows={2}
                       value={form.passage_text}
                       onChange={(e) => setForm({ ...form, passage_text: e.target.value })}
-                      placeholder={sm('passagePlaceholder')}
+                      placeholder="الآيات أو النص المرجعي لهذه المرحلة..."
                       className="w-full px-3 py-2.5 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-bold block mb-1.5">{sm('videoLabel')}</label>
+                    <label className="text-sm font-bold block mb-1.5">رابط فيديو (اختياري)</label>
                     <input
                       type="url"
                       value={form.video_url}
@@ -483,7 +478,7 @@ export default function PathStagesManager({ pathId }: { pathId: string }) {
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-bold block mb-1.5">{sm('pdfLabel')}</label>
+                    <label className="text-sm font-bold block mb-1.5">ملف مرفق PDF (اختياري)</label>
                     <input
                       ref={pdfInputRef}
                       type="file"
@@ -497,10 +492,10 @@ export default function PathStagesManager({ pathId }: { pathId: string }) {
                     {form.pdf_url ? (
                       <div className="flex items-center justify-between gap-2 px-3 py-2.5 border border-emerald-500/30 bg-emerald-500/5 rounded-lg">
                         <a href={form.pdf_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-sm text-emerald-600 hover:underline truncate">
-                          <FileText className="w-4 h-4 shrink-0" /> {sm('pdfAttached')}
+                          <FileText className="w-4 h-4 shrink-0" /> تم إرفاق الملف
                         </a>
                         <button type="button" onClick={() => setForm({ ...form, pdf_url: '' })} className="text-xs text-rose-500 hover:underline shrink-0">
-                          {sm('removePdf')}
+                          إزالة
                         </button>
                       </div>
                     ) : (
@@ -511,7 +506,7 @@ export default function PathStagesManager({ pathId }: { pathId: string }) {
                         className="w-full flex items-center justify-center gap-2 px-3 py-2.5 border border-dashed border-border rounded-lg hover:bg-muted/50 transition-colors text-sm text-muted-foreground"
                       >
                         {uploadingPdf ? <Loader2 className="w-4 h-4 animate-spin" /> : <UploadCloud className="w-4 h-4" />}
-                        {uploadingPdf ? sm('uploading') : sm('uploadPdf')}
+                        {uploadingPdf ? 'جاري الرفع...' : 'رفع ملف PDF'}
                       </button>
                     )}
                   </div>
@@ -520,7 +515,7 @@ export default function PathStagesManager({ pathId }: { pathId: string }) {
               <div className="rounded-xl border border-border bg-muted/30 p-4 space-y-3">
                 <p className="text-sm font-bold flex items-center gap-1.5">
                   <UploadCloud className="w-4 h-4 text-emerald-600" />
-                  {sm('requirementsTitle')}
+                  متطلبات الاجتياز والمراجعة
                 </p>
                 <label className="flex items-start gap-3 cursor-pointer">
                   <input
@@ -530,8 +525,8 @@ export default function PathStagesManager({ pathId }: { pathId: string }) {
                     className="mt-1 w-4 h-4 accent-emerald-600"
                   />
                   <span className="text-sm">
-                    <span className="font-bold">{sm('requireAudioTitle')}</span>
-                    <span className="block text-xs text-muted-foreground">{sm('requireAudioDesc')}</span>
+                    <span className="font-bold">يتطلب تسجيلاً صوتياً</span>
+                    <span className="block text-xs text-muted-foreground">يرسل الطالب تلاوة صوتية وتراجعها أنت قبل اعتماد الاجتياز.</span>
                   </span>
                 </label>
                 <label className="flex items-start gap-3 cursor-pointer">
@@ -542,25 +537,25 @@ export default function PathStagesManager({ pathId }: { pathId: string }) {
                     className="mt-1 w-4 h-4 accent-emerald-600"
                   />
                   <span className="text-sm">
-                    <span className="font-bold">{sm('requireFileTitle')}</span>
-                    <span className="block text-xs text-muted-foreground">{sm('requireFileDesc')}</span>
+                    <span className="font-bold">يتطلب رفع ملف (مهمة تسليم)</span>
+                    <span className="block text-xs text-muted-foreground">يرفع الطالب ملفاً مطلوباً وتراجعه أنت قبل اعتماد الاجتياز.</span>
                   </span>
                 </label>
                 {(form.require_audio || form.require_file) && (
                   <div>
-                    <label className="text-xs font-bold block mb-1.5 text-muted-foreground">{sm('deliveryInstructions')}</label>
+                    <label className="text-xs font-bold block mb-1.5 text-muted-foreground">تعليمات التسليم للطالب (اختياري)</label>
                     <textarea
                       rows={2}
                       value={form.task_instructions}
                       onChange={(e) => setForm({ ...form, task_instructions: e.target.value })}
-                      placeholder={sm('deliveryPlaceholder')}
+                      placeholder="اشرح للطالب ما المطلوب تسليمه بالتحديد..."
                       className="w-full px-3 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none text-sm"
                     />
                   </div>
                 )}
               </div>
               <div>
-                <label className="text-sm font-bold block mb-1.5">{sm('durationLabel')}</label>
+                <label className="text-sm font-bold block mb-1.5">المدة التقديرية (دقائق)</label>
                 <input
                   type="number"
                   min={1}
@@ -571,7 +566,7 @@ export default function PathStagesManager({ pathId }: { pathId: string }) {
               </div>
               <div className="flex gap-3 pt-1">
                 <button type="button" onClick={() => setShowForm(false)} className="flex-1 py-2.5 border border-border rounded-lg font-bold hover:bg-muted transition-colors">
-                  {sm('cancelBtn')}
+                  إلغاء
                 </button>
                 <button
                   type="submit"
@@ -579,7 +574,7 @@ export default function PathStagesManager({ pathId }: { pathId: string }) {
                   className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
                 >
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-                  {editId ? sm('saveBtn') : sm('addBtn')}
+                  {editId ? 'حفظ التعديلات' : 'إضافة المرحلة'}
                 </button>
               </div>
             </form>

@@ -20,7 +20,6 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { ChevronRight, Flag, Trophy, XCircle, Loader2, CheckCircle2, Lock } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { useI18n } from "@/lib/i18n/context"
 
 export interface Stage {
   id: string
@@ -56,8 +55,6 @@ export function StageManager({
   basePath: string
   onChanged?: () => void
 }) {
-  const { t } = useI18n()
-  const sm = (t as any).stageManager as Record<string, string> | undefined
   const [stages, setStages] = useState<Stage[]>([])
   const [activeStage, setActiveStage] = useState<Stage | null>(null)
   const [preview, setPreview] = useState<{ ready: boolean; pending: number; topN: number; ranking: RankPreviewRow[] } | null>(null)
@@ -103,7 +100,7 @@ export function StageManager({
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
-        setError(data?.error || (sm?.genericError ?? 'An error occurred'))
+        setError(data?.error || "حدث خطأ")
         return
       }
       setConfirm(null)
@@ -111,7 +108,7 @@ export function StageManager({
       await load()
       onChanged?.()
     } catch {
-      setError(sm?.actionFail ?? 'Failed to perform the action')
+      setError("تعذّر تنفيذ العملية")
     } finally {
       setBusy(false)
     }
@@ -154,7 +151,7 @@ export function StageManager({
                 <span>{s.name}</span>
                 {s.advance_count != null && (
                   <Badge variant="secondary" className="text-[10px]">
-                    {sm?.advances ?? 'Advances'}{' '}
+                    {"يتأهّل "}
                     {s.advance_count}
                   </Badge>
                 )}
@@ -171,12 +168,12 @@ export function StageManager({
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-sm font-medium">
-                {sm?.currentStage ?? 'Current Stage:'}{' '}
+                {"المرحلة الحالية: "}
                 {activeStage.name}
               </p>
               <p className="text-xs text-muted-foreground">
-                {preview?.pending ? `${preview.pending} ${sm?.pendingReview ?? 'submissions awaiting review'}` : (sm?.allReviewed ?? 'All submissions reviewed')}
-                {cutoff ? ` · ${isFinal ? (sm?.winners ?? 'Winners') : (sm?.qualifiers ?? 'Qualifiers')}: ${cutoff}` : ""}
+                {preview?.pending ? `${preview.pending} مشاركة بانتظار التقييم` : "كل المشاركات مُقيّمة"}
+                {cutoff ? ` · ${isFinal ? "الفائزون" : "المتأهلون"}: ${cutoff}` : ""}
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -186,25 +183,25 @@ export function StageManager({
                 onClick={() => setConfirm(isFinal ? "finalize_now" : "advance")}
               >
                 {isFinal ? <Trophy className="ml-1.5 h-4 w-4" /> : <ChevronRight className="ml-1.5 h-4 w-4" />}
-                {isFinal ? (sm?.finalizeResults ?? 'Finalize Results') : (sm?.advanceQualifiers ?? 'Advance Qualifiers')}
+                {isFinal ? "اعتماد النتائج النهائية" : "ترحيل المتأهلين"}
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button size="sm" variant="outline" disabled={busy}>
-                    {sm?.endCompetition ?? 'End Competition'}
+                    {"إنهاء المسابقة"}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   {!isFinal && (
                     <DropdownMenuItem onClick={() => setConfirm("finalize_now")}>
                       <Trophy className="ml-2 h-4 w-4" />
-                      {sm?.finalizeNow ?? 'Finalize Current Results'}
+                      {"إنهاء واعتماد النتائج الحالية"}
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setConfirm("cancel")}>
                     <XCircle className="ml-2 h-4 w-4" />
-                    {sm?.cancelCompetition ?? 'Cancel Competition (no winner)'}
+                    {"إلغاء المسابقة (بدون فائز)"}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -227,7 +224,7 @@ export function StageManager({
                     <span>{r.student_name || "—"}</span>
                     {r.is_winner && (
                       <Badge variant="default" className="text-[10px]">
-                        {isFinal ? (sm?.winner ?? 'Winner') : (sm?.qualifier ?? 'Qualified')}
+                        {isFinal ? "فائز" : "متأهّل"}
                       </Badge>
                     )}
                   </span>
@@ -244,27 +241,23 @@ export function StageManager({
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {confirm === "advance" && (sm?.dialogTitleAdvance ?? 'Advance Qualifiers to Next Stage')}
-              {confirm === "finalize_now" && (sm?.dialogTitleFinalize ?? 'Finalize Current Results')}
-              {confirm === "cancel" && (sm?.dialogTitleCancel ?? 'Cancel Competition')}
+              {confirm === "advance" && "ترحيل المتأهلين للمرحلة التالية"}
+              {confirm === "finalize_now" && "إنهاء واعتماد النتائج الحالية"}
+              {confirm === "cancel" && "إلغاء المسابقة"}
             </DialogTitle>
             <DialogDescription className="space-y-2 pt-2">
               {confirm === "advance" && (
                 <span>
-                  {sm?.descAdvance
-                    ? sm.descAdvance.replace('{count}', String(cutoff || '')).replace('{stage}', activeStage?.name ?? '')
-                    : `The top ${cutoff || ''} students from «${activeStage?.name}» will advance to the next stage and the rest will be eliminated. All participants will be notified.`}
+                  {`سيتأهّل أعلى ${cutoff || ""} طالباً من «${activeStage?.name}» إلى المرحلة التالية، وسيُستبعد الباقون. سيتم إشعار الجميع.`}
                 </span>
               )}
               {confirm === "finalize_now" && (
                 <span>
-                  {sm?.descFinalize
-                    ? sm.descFinalize.replace('{stage}', activeStage?.name ?? '')
-                    : `The results of «${activeStage?.name}» will be finalized immediately. The highest scorer wins; points, certificates, and remaining stages will close.`}
+                  {`سيتم اعتماد نتائج «${activeStage?.name}» كنتيجة نهائية فوراً. الفائز هو صاحب أعلى درجة، وستُمنح النقاط والشهادات، وتُغلق باقي المراحل.`}
                 </span>
               )}
               {confirm === "cancel" && (
-                <span>{sm?.descCancel ?? 'The competition will end immediately with no winner, points, or certificates. All participants will be notified. This cannot be undone.'}</span>
+                <span>{"سيتم إنهاء المسابقة فوراً بدون فائز أو نقاط أو شهادات، مع إشعار كل المشاركين. لا يمكن التراجع."}</span>
               )}
             </DialogDescription>
             {tieAtCutoff && (confirm === "advance" || confirm === "finalize_now") && (
@@ -277,7 +270,7 @@ export function StageManager({
                   onChange={(e) => setAllowTie(e.target.checked)}
                 />
                 <label htmlFor="allowTie" className="font-medium cursor-pointer">
-                  {sm?.tieNotice ?? 'There is a tie exceeding the allowed count. Allow them to share the rank and exceed the seat limit?'}
+                  يوجد تعادل يتجاوز العدد المسموح. السماح لهم بمشاركة المركز وتخطي الحد الأقصى للمقاعد؟
                 </label>
               </div>
             )}
@@ -285,7 +278,7 @@ export function StageManager({
           {error && <p className="text-sm text-destructive">{error}</p>}
           <DialogFooter>
             <Button variant="outline" onClick={() => setConfirm(null)} disabled={busy}>
-              {sm?.back ?? 'Back'}
+              {"رجوع"}
             </Button>
             <Button
               variant={confirm === "cancel" ? "destructive" : "default"}
@@ -293,7 +286,7 @@ export function StageManager({
               disabled={busy}
             >
               {busy && <Loader2 className="ml-1.5 h-4 w-4 animate-spin" />}
-              {sm?.confirm ?? 'Confirm'}
+              {"تأكيد"}
             </Button>
           </DialogFooter>
         </DialogContent>

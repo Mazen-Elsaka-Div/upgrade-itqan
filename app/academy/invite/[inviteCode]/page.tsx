@@ -7,7 +7,6 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
 import { CheckCircle, Clock, XCircle, BookOpen, UserCheck, Loader2, Mail, Lock, User, ChevronDown, Eye, EyeOff } from 'lucide-react'
-import { useI18n } from '@/lib/i18n/context'
 
 interface InvitationInfo {
   email: string
@@ -19,6 +18,15 @@ interface InvitationInfo {
   status: string
 }
 
+const ROLE_LABELS: Record<string, string> = {
+  academy_student: 'طالب في الأكاديمية',
+  student: 'طالب',
+  teacher: 'معلم',
+  parent: 'ولي أمر',
+  fiqh_supervisor: 'مشرف أسئلة الفقه',
+  content_supervisor: 'مشرف المحتوى',
+}
+
 export default function InvitationPage({
   params,
 }: {
@@ -26,20 +34,6 @@ export default function InvitationPage({
 }) {
   const router = useRouter()
   const { inviteCode } = use(params)
-  const { t } = useI18n()
-  const inv = (t as any).invite as Record<string, string> | undefined
-
-  function getRoleLabel(role: string) {
-    const map: Record<string, string> = {
-      academy_student: inv?.roleAcademyStudent ?? 'Academy Student',
-      student: inv?.roleStudent ?? 'Student',
-      teacher: inv?.roleTeacher ?? 'Teacher',
-      parent: inv?.roleParent ?? 'Parent',
-      fiqh_supervisor: inv?.roleFiqh ?? 'Fiqh Supervisor',
-      content_supervisor: inv?.roleContent ?? 'Content Supervisor',
-    }
-    return map[role] ?? role
-  }
   
   const [invitation, setInvitation] = useState<InvitationInfo | null>(null)
   const [status, setStatus] = useState<'loading' | 'ready-new' | 'ready-logged' | 'invalid' | 'expired' | 'accepted'>('loading')
@@ -113,7 +107,7 @@ export default function InvitationPage({
       }
       setStatus('accepted')
     } catch {
-      setErrorMsg(inv?.genericError ?? 'An error occurred, please try again')
+      setErrorMsg('حدث خطأ، يرجى المحاولة مجدداً')
     } finally {
       setSubmitting(false)
     }
@@ -122,7 +116,7 @@ export default function InvitationPage({
   async function handleRegisterAndAccept(e: React.FormEvent) {
     e.preventDefault()
     if (!name || !password || password.length < 6) {
-      setErrorMsg(inv?.namePasswordRequired ?? 'Name and password (min 6 characters) are required')
+      setErrorMsg('الاسم وكلمة المرور (6 أحرف على الأقل) مطلوبان')
       return
     }
 
@@ -136,7 +130,7 @@ export default function InvitationPage({
       })
       const data = await res.json()
       if (!res.ok) {
-        setErrorMsg(data.error || (inv?.registerError ?? 'An error occurred during registration'))
+        setErrorMsg(data.error || 'حدث خطأ أثناء التسجيل')
         return
       }
       if (data.enrolledPlanId) {
@@ -144,7 +138,7 @@ export default function InvitationPage({
       }
       setStatus('accepted')
     } catch {
-      setErrorMsg(inv?.genericError ?? 'An error occurred, please try again')
+      setErrorMsg('حدث خطأ، يرجى المحاولة مجدداً')
     } finally {
       setSubmitting(false)
     }
@@ -163,18 +157,18 @@ export default function InvitationPage({
   if (status === 'invalid') {
     return (
       <Screen icon={<XCircle className="w-16 h-16 text-destructive" />}>
-        <h1 className="text-2xl font-black text-foreground">{inv?.invalidLink ?? 'Invalid Link'}</h1>
-        <p className="text-muted-foreground text-sm mt-2">{inv?.invalidDesc ?? 'This invitation does not exist or has been cancelled.'}</p>
-        <Button className="mt-6 rounded-2xl px-8" onClick={() => router.push('/')}>{inv?.backHome ?? 'Back to Home'}</Button>
+        <h1 className="text-2xl font-black text-foreground">رابط غير صالح</h1>
+        <p className="text-muted-foreground text-sm mt-2">هذه الدعوة غير موجودة أو تم إلغاؤها.</p>
+        <Button className="mt-6 rounded-2xl px-8" onClick={() => router.push('/')}>العودة للرئيسية</Button>
       </Screen>
     )
   }
   if (status === 'expired') {
     return (
       <Screen icon={<Clock className="w-16 h-16 text-amber-500" />}>
-        <h1 className="text-2xl font-black text-foreground">{inv?.expiredTitle ?? 'Invitation Expired'}</h1>
-        <p className="text-muted-foreground text-sm mt-2">{inv?.expiredDesc ?? 'This invitation has expired. Contact the admin for a new one.'}</p>
-        <Button className="mt-6 rounded-2xl px-8" variant="outline" onClick={() => router.push('/')}>{inv?.back ?? 'Back'}</Button>
+        <h1 className="text-2xl font-black text-foreground">انتهت صلاحية الدعوة</h1>
+        <p className="text-muted-foreground text-sm mt-2">انتهت صلاحية هذه الدعوة. تواصل مع الأدمن للحصول على دعوة جديدة.</p>
+        <Button className="mt-6 rounded-2xl px-8" variant="outline" onClick={() => router.push('/')}>العودة</Button>
       </Screen>
     )
   }
@@ -183,31 +177,31 @@ export default function InvitationPage({
   if (status === 'accepted') {
     return (
       <Screen icon={<CheckCircle className="w-16 h-16 text-emerald-500" />}>
-        <h1 className="text-2xl font-black text-foreground">{inv?.successTitle ?? 'Done!'}</h1>
+        <h1 className="text-2xl font-black text-foreground">تمت العملية بنجاح!</h1>
         {enrolledPlan ? (
           <p className="text-muted-foreground text-sm mt-2">
-            {inv?.enrolledIn ?? 'You have been enrolled in'} <strong className="text-foreground">{enrolledPlan.title}</strong>
+            تم تسجيلك في الخطة التعليمية <strong className="text-foreground">{enrolledPlan.title}</strong>
           </p>
         ) : (
-          <p className="text-muted-foreground text-sm mt-2">{inv?.welcomePlatform ?? 'Welcome to Itqan Education Platform.'}</p>
+          <p className="text-muted-foreground text-sm mt-2">مرحباً بك في منصة إتقان التعليمية.</p>
         )}
         <div className="flex flex-col gap-3 mt-6 w-full max-w-xs">
           {enrolledPlan && (
             <Button className="rounded-2xl h-12 text-base font-bold" onClick={() => router.push(`/academy/student/courses/${enrolledPlan.id}`)}>
               <BookOpen className="w-4 h-4 me-2" />
-              {inv?.startPlan ?? 'Start Learning Plan'}
+              ابدأ الخطة التعليمية
             </Button>
           )}
           <Button variant={enrolledPlan ? 'outline' : 'default'} className="rounded-2xl h-12" onClick={() => router.push('/academy/student')}>
-            {inv?.goToDashboard ?? 'Go to Dashboard'}
+            الذهاب للوحة التحكم
           </Button>
         </div>
       </Screen>
     )
   }
 
-  const invite = invitation!
-  const isExpired = invite.expires_at && new Date(invite.expires_at) < new Date()
+  const inv = invitation!
+  const isExpired = inv.expires_at && new Date(inv.expires_at) < new Date()
 
   return (
     <div className="min-h-screen bg-muted/30 flex items-center justify-center p-4 py-12" dir="rtl">
@@ -215,24 +209,24 @@ export default function InvitationPage({
         {/* Header band */}
         <div className="bg-gradient-to-br from-[#0B3D2E] to-[#1A6B50] px-8 py-8 text-center relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-          <p className="text-emerald-100/80 text-sm font-medium mb-2 relative z-10">{inv?.platformName ?? 'Itqan Education Platform'}</p>
-          <h1 className="text-white text-3xl font-black relative z-10">{inv?.inviteTitle ?? 'Join Invitation'}</h1>
+          <p className="text-emerald-100/80 text-sm font-medium mb-2 relative z-10">منصة إتقان التعليمية</p>
+          <h1 className="text-white text-3xl font-black relative z-10">دعوة للانضمام</h1>
         </div>
 
         <CardContent className="px-6 py-8 space-y-6">
           <div className="text-center space-y-1">
-            <h2 className="text-xl font-bold text-foreground">{inv?.welcome ?? 'Welcome!'}</h2>
+            <h2 className="text-xl font-bold text-foreground">أهلاً بك 👋</h2>
             <p className="text-sm text-muted-foreground">
-              {inv?.invitedBy ?? 'You received an invitation from'} <strong>{invite.inviter_name || (inv?.admin ?? 'Admin')}</strong> {inv?.toJoinAs ?? 'to join as'} <strong>{getRoleLabel(invite.role_to_assign)}</strong>.
+              لقد تلقيت دعوة من <strong>{inv.inviter_name || 'الأدمن'}</strong> للانضمام بدور <strong>{ROLE_LABELS[inv.role_to_assign] || inv.role_to_assign}</strong>.
             </p>
           </div>
 
-          {invite.plan_title && (
+          {inv.plan_title && (
             <div className="flex items-center gap-3 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl px-4 py-3">
               <BookOpen className="w-6 h-6 text-emerald-600 shrink-0" />
               <div>
-                <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400">{inv?.attachedPlan ?? 'Attached Educational Plan'}</p>
-                <p className="font-bold text-foreground text-sm">{invite.plan_title}</p>
+                <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400">الخطة التعليمية المرفقة</p>
+                <p className="font-bold text-foreground text-sm">{inv.plan_title}</p>
               </div>
             </div>
           )}
@@ -247,12 +241,12 @@ export default function InvitationPage({
           {status === 'ready-new' && (
             <form onSubmit={handleRegisterAndAccept} className="space-y-4">
               <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-muted-foreground">{inv?.email ?? 'Email'}</Label>
+                <Label className="text-xs font-bold text-muted-foreground">البريد الإلكتروني</Label>
                 <div className="relative">
                   <Mail className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
                   <Input 
                     type="email" 
-                    value={invite.email} 
+                    value={inv.email} 
                     disabled 
                     dir="ltr"
                     className="pr-10 h-12 rounded-2xl bg-muted/50 border-border/50 text-muted-foreground" 
@@ -261,13 +255,13 @@ export default function InvitationPage({
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-muted-foreground">{inv?.fullName ?? 'Full Name'} <span className="text-red-500">*</span></Label>
+                <Label className="text-xs font-bold text-muted-foreground">الاسم الكامل <span className="text-red-500">*</span></Label>
                 <div className="relative">
                   <User className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input 
                     value={name} 
                     onChange={e => setName(e.target.value)} 
-                    placeholder={inv?.namePlaceholder ?? 'Enter your full name'}
+                    placeholder="اكتب اسمك الثلاثي"
                     className="pr-10 h-12 rounded-2xl focus:ring-2 focus:ring-primary/20" 
                     required 
                   />
@@ -275,14 +269,14 @@ export default function InvitationPage({
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-muted-foreground">{inv?.password ?? 'Password'} <span className="text-red-500">*</span></Label>
+                <Label className="text-xs font-bold text-muted-foreground">كلمة المرور <span className="text-red-500">*</span></Label>
                 <div className="relative">
                   <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input 
                     type={showPw ? 'text' : 'password'} 
                     value={password} 
                     onChange={e => setPassword(e.target.value)} 
-                    placeholder={inv?.passwordPlaceholder ?? 'At least 6 characters'}
+                    placeholder="6 أحرف على الأقل"
                     dir="ltr"
                     className="pr-10 pl-10 h-12 rounded-2xl focus:ring-2 focus:ring-primary/20" 
                     required 
@@ -295,7 +289,7 @@ export default function InvitationPage({
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-muted-foreground">{inv?.gender ?? 'Gender (optional)'}</Label>
+                <Label className="text-xs font-bold text-muted-foreground">الجنس (اختياري)</Label>
                 <div className="relative">
                   <ChevronDown className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
                   <select 
@@ -303,9 +297,9 @@ export default function InvitationPage({
                     onChange={e => setGender(e.target.value)} 
                     className="w-full h-12 pr-4 pl-10 bg-background border border-border rounded-2xl focus:ring-2 focus:ring-primary/20 transition-colors text-sm text-foreground appearance-none"
                   >
-                    <option value="">{inv?.genderSelect ?? 'Select gender...'}</option>
-                    <option value="male">{inv?.male ?? 'Male'}</option>
-                    <option value="female">{inv?.female ?? 'Female'}</option>
+                    <option value="">تحديد الجنس...</option>
+                    <option value="male">ذكر</option>
+                    <option value="female">أنثى</option>
                   </select>
                 </div>
               </div>
@@ -316,8 +310,8 @@ export default function InvitationPage({
                 disabled={submitting || !!isExpired}
               >
                 {submitting
-                  ? <><Loader2 className="w-5 h-5 me-2 animate-spin" />{inv?.creatingAccount ?? 'Creating account...'}</>
-                  : (inv?.registerAndAccept ?? 'Create Account & Accept')}
+                  ? <><Loader2 className="w-5 h-5 me-2 animate-spin" />جاري إنشاء الحساب...</>
+                  : 'إنشاء الحساب وقبول الدعوة'}
               </Button>
             </form>
           )}
@@ -328,8 +322,8 @@ export default function InvitationPage({
               <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-2xl text-sm font-medium flex items-start gap-2">
                 <UserCheck className="w-5 h-5 shrink-0 mt-0.5 text-blue-600" />
                 <p>
-                  {inv?.loggedInNotice ?? 'You are currently signed in as'} ({sessionEmail}).{' '}
-                  {inv?.acceptWillAdd ?? 'Accepting will add the permissions of this invitation to your current account.'}
+                  أنت مسجل دخول حالياً بحساب ({sessionEmail}). 
+                  إذا قمت بالقبول، ستتم إضافة صلاحيات هذه الدعوة إلى حسابك الحالي.
                 </p>
               </div>
               <Button
@@ -338,8 +332,8 @@ export default function InvitationPage({
                 onClick={handleAcceptLoggedIn}
               >
                 {submitting
-                  ? <><Loader2 className="w-5 h-5 me-2 animate-spin" />{inv?.accepting ?? 'Accepting...'}</>
-                  : (inv?.continueAndAccept ?? 'Continue & Accept')}
+                  ? <><Loader2 className="w-5 h-5 me-2 animate-spin" />جاري القبول...</>
+                  : 'متابعة وقبول الدعوة'}
               </Button>
             </div>
           )}

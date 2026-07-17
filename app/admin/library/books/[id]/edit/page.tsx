@@ -35,7 +35,6 @@ import {
   OTHER_LANGUAGE_CODE,
   getLanguageDisplay,
 } from "@/lib/library/languages"
-import { useI18n } from "@/lib/i18n/context"
 
 interface BookFileRow {
   id: string
@@ -56,7 +55,6 @@ function formatBytes(bytes: number | null): string {
 }
 
 export default function EditBookPage() {
-  const { t } = useI18n()
   const params = useParams<{ id: string }>()
   const id = params?.id
 
@@ -104,7 +102,7 @@ export default function EditBookPage() {
         })
         setFiles(Array.isArray(data.files) ? data.files : [])
       } catch {
-        toast.error(t.admin.bookLoadError)
+        toast.error("تعذر تحميل الكتاب")
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -117,7 +115,7 @@ export default function EditBookPage() {
 
   const handleSave = async () => {
     if (!form.title.trim()) {
-      toast.error(t.admin.bookTitleRequired)
+      toast.error("العنوان مطلوب")
       return
     }
     setSaving(true)
@@ -141,10 +139,10 @@ export default function EditBookPage() {
         }),
       })
       const data = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(data.error || t.admin.bookSaveError)
-      toast.success(t.admin.bookSaveSuccess)
+      if (!res.ok) throw new Error(data.error || "تعذر الحفظ")
+      toast.success("تم حفظ التعديلات")
     } catch (e: any) {
-      toast.error(e?.message || t.admin.bookSaveError)
+      toast.error(e?.message || "تعذر الحفظ")
     } finally {
       setSaving(false)
     }
@@ -152,15 +150,15 @@ export default function EditBookPage() {
 
   const uploadLanguageFile = async (file: File) => {
     if (!newLanguage) {
-      toast.error(t.admin.bookSelectLangFirst2)
+      toast.error("اختر اللغة أولاً")
       return
     }
     if (newLanguage === OTHER_LANGUAGE_CODE && !newLanguageLabel.trim()) {
-      toast.error(t.admin.bookWriteLangName)
+      toast.error("اكتب اسم اللغة")
       return
     }
     if (file.type !== "application/pdf") {
-      toast.error(t.admin.bookMustBePdf)
+      toast.error("الملف يجب أن يكون PDF")
       return
     }
     setUploading(true)
@@ -176,7 +174,7 @@ export default function EditBookPage() {
       const upRes = await fetch("/api/upload-pdf", { method: "POST", body: fd })
       const upData = await upRes.json().catch(() => ({}))
       if (!upRes.ok) {
-        throw new Error(upData.error || t.admin.bookUploadError)
+        throw new Error(upData.error || "تعذر رفع الملف")
       }
       
       setUploadProgress(90)
@@ -194,10 +192,10 @@ export default function EditBookPage() {
         }),
       })
       const saveData = await saveRes.json().catch(() => ({}))
-      if (!saveRes.ok) throw new Error(saveData.error || t.admin.bookUploadError)
+      if (!saveRes.ok) throw new Error(saveData.error || "تعذر حفظ الملف")
       
       setUploadProgress(100)
-      toast.success(t.admin.bookUploadSuccess)
+      toast.success("تم رفع الملف")
       setNewLanguage("")
       setNewLanguageLabel("")
       setUploadModalOpen(false)
@@ -209,7 +207,7 @@ export default function EditBookPage() {
         setFiles(Array.isArray(data.files) ? data.files : [])
       }
     } catch (e: any) {
-      toast.error(e?.message || t.admin.bookUploadError)
+      toast.error(e?.message || "تعذر رفع الملف")
     } finally {
       clearInterval(progressInterval)
       setUploading(false)
@@ -218,7 +216,7 @@ export default function EditBookPage() {
   }
 
   const deleteFile = async (fileId: string) => {
-    if (!confirm(t.admin.bookConfirmDelete)) return
+    if (!confirm("هل أنت متأكد من حذف هذا الملف؟")) return
     setDeletingFileId(fileId)
     try {
       const res = await fetch(`/api/admin/library/books/${id}/files/${fileId}`, {
@@ -226,9 +224,9 @@ export default function EditBookPage() {
       })
       if (!res.ok) throw new Error()
       setFiles((prev) => prev.filter((f) => f.id !== fileId))
-      toast.success(t.admin.bookDeleteSuccess)
+      toast.success("تم حذف الملف")
     } catch {
-      toast.error(t.admin.bookDeleteError)
+      toast.error("تعذر حذف الملف")
     } finally {
       setDeletingFileId(null)
     }
@@ -249,19 +247,19 @@ export default function EditBookPage() {
           <Link href="/admin/library/books">
             <Button variant="ghost" size="sm" className="gap-1">
               <ArrowRight className="w-4 h-4 rotate-180" />
-              {t.admin.bookBack}
+              رجوع
             </Button>
           </Link>
           <h1 className="text-xl font-black flex items-center gap-2">
             <BookOpen className="w-5 h-5 text-primary" />
-            {t.admin.bookEditTitle}
+            تعديل الكتاب
           </h1>
         </div>
         <div className="flex items-center gap-2">
           <Link href={`/library/${id}`} target="_blank">
             <Button variant="outline" size="sm" className="gap-1">
               <ExternalLink className="w-4 h-4" />
-              {t.admin.bookPreview}
+              معاينة
             </Button>
           </Link>
           <Button onClick={handleSave} disabled={saving} className="gap-2 font-bold">
@@ -270,7 +268,7 @@ export default function EditBookPage() {
             ) : (
               <Save className="w-4 h-4" />
             )}
-            {saving ? t.admin.bookSaving : t.admin.bookSave}
+            حفظ
           </Button>
         </div>
       </div>
@@ -284,20 +282,20 @@ export default function EditBookPage() {
             <div>
               <h2 className="font-black text-lg flex items-center gap-2">
                 <Globe className="w-5 h-5 text-primary" />
-                {t.admin.bookFilesTitle}
+                نسخ الكتاب باللغات
               </h2>
               <p className="text-xs text-muted-foreground mt-1">
-                {t.admin.bookFilesDesc}
+                لكل لغة ملف PDF واحد. عند اختيار لغة موجودة بالفعل، سيتم استبدال ملفها.
               </p>
             </div>
-            <Badge variant="secondary">{files.length} {t.admin.bookFilesCount}</Badge>
+            <Badge variant="secondary">{files.length} لغة</Badge>
           </div>
 
           {/* Existing files */}
           <div className="space-y-2">
             {files.length === 0 ? (
               <div className="text-sm text-muted-foreground bg-muted/40 p-4 rounded-lg text-center">
-                {t.admin.bookNoFiles}
+                لا توجد ملفات بعد — أضف لغة من النموذج أسفل.
               </div>
             ) : (
               files.map((f) => (
@@ -324,7 +322,7 @@ export default function EditBookPage() {
                       className="text-primary text-xs hover:underline inline-flex items-center gap-1"
                     >
                       <ExternalLink className="w-3.5 h-3.5" />
-                      {t.admin.bookViewFile}
+                      عرض
                     </a>
                     <Button
                       size="sm"
@@ -338,7 +336,7 @@ export default function EditBookPage() {
                       ) : (
                         <Trash2 className="w-3.5 h-3.5" />
                       )}
-                      {t.admin.bookDeleteFile}
+                      حذف
                     </Button>
                   </div>
                 </div>
@@ -352,20 +350,20 @@ export default function EditBookPage() {
               <DialogTrigger asChild>
                 <Button className="gap-2 font-bold">
                   <Plus className="w-4 h-4" />
-                  {t.admin.bookAddLang}
+                  إضافة لغة جديدة
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-md" dir="rtl">
                 <DialogHeader>
                   <DialogTitle className="flex items-center gap-2">
                     <Upload className="w-5 h-5 text-primary" />
-                    {t.admin.bookUploadDialogTitle}
+                    رفع ملف لغة جديدة
                   </DialogTitle>
                 </DialogHeader>
 
                 <div className="space-y-4 py-4">
                   <div className="space-y-2">
-                    <Label htmlFor="bk-newlang">{t.admin.bookLangSelectLabel}</Label>
+                    <Label htmlFor="bk-newlang">اللغة</Label>
                     <select
                       id="bk-newlang"
                       value={newLanguage}
@@ -373,27 +371,27 @@ export default function EditBookPage() {
                       className="w-full border border-border bg-background rounded-md px-3 h-10 text-sm"
                       disabled={uploading}
                     >
-                      <option value="">{t.admin.bookLangSelectPlaceholder}</option>
+                      <option value="">اختر لغة...</option>
                       {BOOK_LANGUAGES.map((l) => (
                         <option key={l.code} value={l.code}>
                           {l.labelAr}
-                          {usedLanguageCodes.has(l.code) ? ` ${t.admin.bookLangReplaced}` : ""}
+                          {usedLanguageCodes.has(l.code) ? " (مستبدل)" : ""}
                         </option>
                       ))}
-                      <option value={OTHER_LANGUAGE_CODE}>{t.admin.bookOtherLang}</option>
+                      <option value={OTHER_LANGUAGE_CODE}>أخرى (نص حر)</option>
                     </select>
                   </div>
                   
                   {newLanguage === OTHER_LANGUAGE_CODE && (
                     <div className="space-y-2">
-                    <Label htmlFor="bk-langlabel">{t.admin.bookLangNameLabel}</Label>
-                    <Input
-                      id="bk-langlabel"
-                      value={newLanguageLabel}
-                      onChange={(e) => setNewLanguageLabel(e.target.value)}
-                      placeholder={t.admin.bookLangNameLabel}
-                      disabled={uploading}
-                    />
+                      <Label htmlFor="bk-langlabel">اسم اللغة</Label>
+                      <Input
+                        id="bk-langlabel"
+                        value={newLanguageLabel}
+                        onChange={(e) => setNewLanguageLabel(e.target.value)}
+                        placeholder="مثلاً: السواحلية"
+                        disabled={uploading}
+                      />
                     </div>
                   )}
 
@@ -401,7 +399,7 @@ export default function EditBookPage() {
                     <Label>ملف الـ PDF</Label>
                     {!newLanguage ? (
                         <div className="p-6 border-2 border-dashed border-border rounded-xl text-center text-muted-foreground bg-muted/20">
-                            {t.admin.bookSelectLangFirst}
+                            يرجى اختيار اللغة أولاً
                         </div>
                     ) : (
                         <label
@@ -426,9 +424,9 @@ export default function EditBookPage() {
                           )}
                           <div className="text-center">
                               <p className={`text-sm font-bold ${isDragging ? "text-primary" : ""}`}>
-                                {uploading ? t.admin.bookUploading : isDragging ? t.admin.bookDropActive : t.admin.bookDropLabel}
+                                {uploading ? "جاري الرفع..." : isDragging ? "أفلت الملف هنا" : "اضغط لاختيار ملف PDF أو اسحبه هنا"}
                               </p>
-                              <p className="text-xs text-muted-foreground mt-1">{t.admin.bookMaxSize}</p>
+                              <p className="text-xs text-muted-foreground mt-1">حد أقصى 8 ميجا</p>
                           </div>
                           <input
                             type="file"
@@ -448,7 +446,7 @@ export default function EditBookPage() {
                   {uploading && (
                     <div className="space-y-2 pt-2">
                         <div className="flex justify-between text-xs font-bold text-primary">
-                            <span>{t.admin.bookUploadingProgress}</span>
+                            <span>جاري الرفع والمعالجة...</span>
                             <span>{uploadProgress}%</span>
                         </div>
                         <Progress value={uploadProgress} className="h-2" />

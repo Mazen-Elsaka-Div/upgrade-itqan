@@ -261,7 +261,7 @@ export default function PublicLibraryPage() {
                         >
                           {lf.language === OTHER_LANGUAGE_CODE
                             ? lf.language_label || lib?.otherLanguage || ((t.addedTranslations_2026?.['أخرى'] || (t.addedTranslations_2026?.['أخرى'] || 'أخرى')))
-                            : getLanguageDisplay(lf.language, lf.language_label, t.locale as 'ar' | 'en')}
+                            : getLanguageDisplay(lf.language, lf.language_label, t.locale)}
                         </span>
                       ))}
                       {book.languages.length > 2 && (
