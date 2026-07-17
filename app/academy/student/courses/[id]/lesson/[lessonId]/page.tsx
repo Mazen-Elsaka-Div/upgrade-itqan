@@ -11,7 +11,6 @@ export default function LessonPage() {
   const params = useParams()
   const router = useRouter()
   const { t } = useI18n()
-  const academyStudent = (t as any).academyStudent as Record<string, string> | undefined
 
   const courseId = params.id as string
   const lessonId = params.lessonId as string

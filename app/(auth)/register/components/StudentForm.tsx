@@ -21,7 +21,6 @@ export function StudentForm({ initialRole, onBack }: StudentFormProps) {
   const [platform, setPlatform] = useState('both')
   const router = useRouter()
   const { t } = useI18n()
-  const app = (t as any).app as Record<string, string> | undefined
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()

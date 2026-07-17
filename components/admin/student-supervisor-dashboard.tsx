@@ -17,7 +17,6 @@ interface SupervisorDashboardData {
 
 export function StudentSupervisorDashboard({ name }: { name?: string }) {
   const { t } = useI18n()
-  const admin = (t as any).admin as Record<string, string> | undefined
   const isAr = t.locale === "ar"
   const [data, setData] = useState<SupervisorDashboardData | null>(null)
   const [loading, setLoading] = useState(true)

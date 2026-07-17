@@ -16,7 +16,6 @@ interface Course {
 
 export default function TeacherCoursesPage() {
   const { t } = useI18n()
-  const app = (t as any).app as Record<string, string> | undefined
   const a = t.admin
   const router = useRouter()
   const [session, setSession] = useState<any>(null)

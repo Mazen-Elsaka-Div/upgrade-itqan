@@ -13,7 +13,6 @@ interface Props {
 
 export function SecuritySettings({ settings, onUpdate }: Props) {
   const { t } = useI18n()
-  const admin = (t as any).admin as Record<string, string> | undefined
   const a = t.admin
 
   const sec = settings.security_settings ?? {}

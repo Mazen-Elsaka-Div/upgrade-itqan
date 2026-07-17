@@ -41,7 +41,6 @@ type Unit = {
 
 export default function AdminMemorizationPathDetailPage() {
   const { t } = useI18n()
-  const admin = (t as any).admin as Record<string, string> | undefined
   const params = useParams<{ id: string }>()
   const pathId = params.id
 

@@ -31,7 +31,6 @@ const LOGO_FIELDS: { key: keyof Branding; labelAr: string; labelEn: string; desc
 
 export function BrandingManager() {
   const { t } = useI18n();
-  const admin = (t as any).admin as Record<string, string> | undefined
   const isAr = t.locale === "ar";
   const router = useRouter()
   const [branding, setBranding] = useState<Branding>({ logoUrl: "", dashboardLogoUrl: "", faviconUrl: "" })

@@ -67,7 +67,6 @@ interface Enrollment {
 
 export default function StudentPathDetailPage() {
     const { t } = useI18n();
-  const asp = (t as any).academyStudentPath as Record<string, string> | undefined
   const params = useParams()
   const router = useRouter()
   const pathId = params.id as string
@@ -545,8 +544,8 @@ export default function StudentPathDetailPage() {
           <h1 className="text-2xl font-bold mt-2 text-foreground">{path.title}</h1>
           <p className="text-sm text-muted-foreground mt-1">
             {isPathCompleted
-              ? (asp?.completed ?? 'لقد أكملت هذا المسار. يمكنك مراجعة أي مرحلة من المراحل أدناه في أي وقت')
-              : (asp?.enrolled ?? 'أنت مسجل في هذا المسار، تابع تقدمك في المراحل الموضحة أدناه')}
+              ? (t.addedTranslations_2026?.['لقد أكملت هذا المسار. يمكنك مراجعة أي مرحلة من المراحل أدناه في أي وقت'] || 'لقد أكملت هذا المسار. يمكنك مراجعة أي مرحلة من المراحل أدناه في أي وقت')
+              : 'أنت مسجل في هذا المسار، تابع تقدمك في المراحل الموضحة أدناه'}
           </p>
         </div>
 

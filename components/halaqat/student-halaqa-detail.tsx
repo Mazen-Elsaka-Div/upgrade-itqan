@@ -122,7 +122,6 @@ export function StudentHalaqaDetail({
   basePath: string
 }) {
   const { t } = useI18n();
-  const student = (t as any).student as Record<string, string> | undefined
   const th = (t as any).halaqat as Record<string, string> | undefined
   const attendanceStyles = getAttendanceStyles(th)
 

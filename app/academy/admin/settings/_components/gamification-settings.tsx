@@ -17,7 +17,6 @@ interface GamificationSettingsProps {
 
 export function GamificationSettings({ settings, onUpdate, onReset }: GamificationSettingsProps) {
   const { t } = useI18n()
-  const academy = (t as any).academy as Record<string, string> | undefined
   const a = t.academyAdmin
 
   const pointsConfig = [

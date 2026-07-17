@@ -41,7 +41,6 @@ type TabKey = 'pending' | 'verified' | 'all'
 
 export default function SupervisorTeachersPage() {
     const { t } = useI18n();
-  const academy = (t as any).academy as Record<string, string> | undefined
   const { locale } = useI18n()
   const isAr = locale === 'ar'
 

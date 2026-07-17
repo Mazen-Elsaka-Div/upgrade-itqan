@@ -27,7 +27,6 @@ export function NotificationsEmailSettings({
   onTestSmtp,
 }: NotificationsEmailSettingsProps) {
   const { t } = useI18n()
-  const academy = (t as any).academy as Record<string, string> | undefined
   const a = t.academyAdmin
   const [testing, setTesting] = useState(false)
   const [smtpStatus, setSmtpStatus] = useState<"idle" | "success" | "error">("idle")

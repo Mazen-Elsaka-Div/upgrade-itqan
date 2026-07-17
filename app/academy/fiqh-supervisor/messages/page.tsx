@@ -27,7 +27,6 @@ interface Message {
 
 export default function FiqhSupervisorMessagesPage() {
   const { t } = useI18n();
-  const academy = (t as any).academy as Record<string, string> | undefined
 
   const { locale } = useI18n()
   const isAr = locale === 'ar'

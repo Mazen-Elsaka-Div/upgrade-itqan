@@ -60,7 +60,6 @@ interface Enrollment {
 
 export default function StudentPathStagePage() {
     const { t } = useI18n();
-  const academyStudent = (t as any).academyStudent as Record<string, string> | undefined
   const params = useParams()
   const router = useRouter()
   const pathId = params.id as string

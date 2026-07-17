@@ -16,9 +16,7 @@ export function PublicNavbar({ initialUser = null }: { initialUser?: { role: str
   const [mobileOpen, setMobileOpen] = useState(false)
   const [user, setUser] = useState<{ role: string } | null>(initialUser)
   const [loading, setLoading] = useState(!initialUser)
-  const { t, locale } = useI18n()
-  const app = (t as any).app as Record<string, string> | undefined
-  const auth = (t as any).auth as Record<string, string> | undefined
+  const { t } = useI18n()
   const { branding } = usePublicSettings()
 
   useEffect(() => {
@@ -92,7 +90,7 @@ export function PublicNavbar({ initialUser = null }: { initialUser?: { role: str
                 href={["admin", "student_supervisor", "reciter_supervisor"].includes(user.role) ? "/admin" : `/${user.role}`}
                 className="text-sm font-semibold px-5 py-2 rounded-full transition-all bg-primary text-white hover:bg-primary/90 shadow-sm flex items-center gap-2"
               >
-                {auth?.goToAccount || (locale === 'ar' ? 'الدخول للحساب' : 'Go to Account')}
+                {t.locale === 'ar' ? 'الدخول للحساب' : 'Go to Account'}
                 <ArrowLeft className="w-4 h-4 rtl:rotate-0 ltr:rotate-180" />
               </Link>
             ) : (
@@ -152,7 +150,7 @@ export function PublicNavbar({ initialUser = null }: { initialUser?: { role: str
                   onClick={() => setMobileOpen(false)}
                   className="text-center text-sm font-semibold py-2.5 rounded-full bg-primary text-white flex items-center justify-center gap-2"
                 >
-                  {auth?.goToAccount || (locale === 'ar' ? 'الدخول للحساب' : 'Go to Account')}
+                  {t.locale === 'ar' ? 'الدخول للحساب' : 'Go to Account'}
                   <ArrowLeft className="w-4 h-4 rtl:rotate-0 ltr:rotate-180" />
                 </Link>
               ) : (

@@ -116,7 +116,6 @@ export function HalaqatList({
   scope,
 }: Props) {
   const { t } = useI18n()
-  const app = (t as any).app as Record<string, string> | undefined
   const th = (t as any).halaqat
   const staticTheme = PLATFORM_THEME_STATIC[platform]
   const theme = {

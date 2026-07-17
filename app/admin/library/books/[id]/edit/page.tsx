@@ -57,7 +57,6 @@ function formatBytes(bytes: number | null): string {
 
 export default function EditBookPage() {
   const { t } = useI18n()
-  const admin = (t as any).admin as Record<string, string> | undefined
   const params = useParams<{ id: string }>()
   const id = params?.id
 

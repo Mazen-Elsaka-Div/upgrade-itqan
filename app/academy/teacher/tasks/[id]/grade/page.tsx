@@ -26,7 +26,6 @@ interface QuizQuestion {
 export default function GradeTaskPage() {
     
   const { t } = useI18n()
-  const academyTeacher = (t as any).academyTeacher as Record<string, string> | undefined
   const params = useParams()
   const taskId = params.id as string
 

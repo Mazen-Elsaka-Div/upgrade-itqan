@@ -42,7 +42,6 @@ const newQuestionId = () => `q_${Date.now()}_${_qid++}`
 
 export default function NewTaskPage() {
     const { t } = useI18n();
-  const academyTeacher = (t as any).academyTeacher as Record<string, string> | undefined
   const router = useRouter()
   const { locale } = useI18n()
   const isAr = locale === "ar"

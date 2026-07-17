@@ -21,7 +21,6 @@ interface AdminBookRow {
 
 export default function AdminLibraryBooksPage() {
   const { t } = useI18n()
-  const academy = (t as any).academy as Record<string, string> | undefined
   const a = t.academyAdmin
 
   const [books, setBooks] = useState<AdminBookRow[]>([])

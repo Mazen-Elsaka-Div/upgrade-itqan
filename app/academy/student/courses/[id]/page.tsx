@@ -21,7 +21,6 @@ export default function CourseDetailPage() {
   const params = useParams()
   const router = useRouter()
   const { t } = useI18n()
-  const academyStudent = (t as any).academyStudent as Record<string, string> | undefined
   const [data, setData] = useState<CourseDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [enrolling, setEnrolling] = useState(false)

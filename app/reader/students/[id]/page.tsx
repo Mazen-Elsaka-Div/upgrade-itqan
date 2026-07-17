@@ -78,7 +78,6 @@ const SESSION_STATUS: Record<string, { label: string; cls: string }> = {
 
 export default function ReaderStudentDetailPage() {
   const { t } = useI18n()
-  const reader = (t as any).reader as Record<string, string> | undefined
 
   const params = useParams()
   const router = useRouter()

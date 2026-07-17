@@ -9,7 +9,6 @@ import { usePublicSettings } from '@/lib/hooks/use-public-settings'
 
 export default function LandingPage() {
   const { t } = useI18n()
-  const app = (t as any).app as Record<string, string> | undefined
   const { branding, contactInfo } = usePublicSettings()
   const [masteredStudents, setMasteredStudents] = useState(0)
 

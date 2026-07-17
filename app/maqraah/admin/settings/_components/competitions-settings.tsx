@@ -16,7 +16,6 @@ interface Props {
 
 export function CompetitionsSettings({ settings, onUpdate, onReset }: Props) {
   const { t } = useI18n()
-  const admin = (t as any).admin as Record<string, string> | undefined
   const a = t.admin
 
   const levelOptions = [

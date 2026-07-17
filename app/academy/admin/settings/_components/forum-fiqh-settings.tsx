@@ -22,7 +22,6 @@ interface ForumFiqhSettingsProps {
 
 export function ForumFiqhSettings({ settings, onUpdate, onReset }: ForumFiqhSettingsProps) {
   const { t } = useI18n()
-  const academy = (t as any).academy as Record<string, string> | undefined
   const a = t.academyAdmin
   const { data: officersData } = useSWR<{
     officers: Array<{ user_id: string; name: string; is_active: boolean }>

@@ -18,7 +18,6 @@ type SitemapSection = {
 
 export default function SitemapPage() {
     const { t } = useI18n();
-  const app = (t as any).app as Record<string, string> | undefined
   const { locale } = useI18n()
   const isAr = locale === 'ar'
 

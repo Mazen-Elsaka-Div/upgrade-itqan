@@ -15,7 +15,6 @@ import Link from "next/link"
 
 export default function AdminRecitationDetailsPage({ params }: { params: Promise<{ id: string }> }) {
     const { t } = useI18n()
-  const admin = (t as any).admin as Record<string, string> | undefined
     const a = t.admin
     const router = useRouter()
     const isAr = t.locale === "ar"

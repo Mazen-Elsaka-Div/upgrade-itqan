@@ -50,7 +50,6 @@ function fmtDate(s: string) {
 
 export function ReaderRecordingsPanel() {
   const { t } = useI18n();
-  const reader = (t as any).reader as Record<string, string> | undefined
 
   const [data, setData] = useState<Recording[]>([])
   const [loading, setLoading] = useState(true)

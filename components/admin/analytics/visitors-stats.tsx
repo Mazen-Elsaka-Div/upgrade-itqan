@@ -26,7 +26,6 @@ const DeviceIcon = ({ type }: { type: string }) => {
 
 export function VisitorStats({ countryData, deviceData }: VisitorStatsProps) {
     const { t } = useI18n()
-  const admin = (t as any).admin as Record<string, string> | undefined
     const isAr = t.locale === 'ar'
 
     return (

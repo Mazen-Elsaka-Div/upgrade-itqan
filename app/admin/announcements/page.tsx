@@ -35,7 +35,6 @@ const EMPTY_FORM = {
 
 export default function AdminAnnouncementsPage() {
     const { t } = useI18n()
-  const admin = (t as any).admin as Record<string, string> | undefined
     const isAr = t.locale === 'ar'
     const AUDIENCE_OPTIONS = getAudienceOptions(t)
     const PRIORITY_OPTIONS = getPriorityOptions(t)

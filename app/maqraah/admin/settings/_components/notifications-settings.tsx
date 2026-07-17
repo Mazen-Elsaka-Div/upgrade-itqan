@@ -21,7 +21,6 @@ interface Props {
 
 export function NotificationsSettings({ settings, onUpdate, onReset, onTestSmtp }: Props) {
   const { t } = useI18n()
-  const admin = (t as any).admin as Record<string, string> | undefined
   const a = t.admin
   const [testing, setTesting] = useState(false)
   const [smtpStatus, setSmtpStatus] = useState<"idle" | "success" | "error">("idle")

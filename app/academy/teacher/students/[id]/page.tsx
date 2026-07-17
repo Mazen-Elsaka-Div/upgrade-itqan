@@ -67,7 +67,6 @@ interface Badge {
 
 export default function TeacherStudentProfilePage() {
     const { t } = useI18n();
-  const academyTeacher = (t as any).academyTeacher as Record<string, string> | undefined
   const params = useParams()
   const router = useRouter()
   const studentId = params.id as string
