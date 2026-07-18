@@ -19,6 +19,7 @@ export function DashboardSuper() {
   const { t } = useI18n()
   const isAr = t.locale === "ar"
   const ds = (t as any).dashboardSuper as Record<string, string> | undefined
+  const adminRoles = (t as any).adminRoles as Record<string, string> | undefined
 
   const [data, setData] = useState<PlatformOverview | null>(null)
   const [analytics, setAnalytics] = useState<any>(null)
@@ -271,7 +272,7 @@ export function DashboardSuper() {
                   <p className="text-lg font-bold text-foreground">
                     {row.count.toLocaleString(isAr ? "ar-EG" : "en-US")}
                   </p>
-                  <p className="text-xs text-muted-foreground mt-0.5 truncate">{row.role}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5 truncate">{adminRoles?.[row.role] ?? row.role}</p>
                   <div className="mt-2 h-1 bg-border rounded-full overflow-hidden">
                     <div className="h-full bg-primary rounded-full" style={{ width: `${pct}%` }} />
                   </div>
