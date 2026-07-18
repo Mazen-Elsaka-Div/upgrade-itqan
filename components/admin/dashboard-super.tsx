@@ -56,7 +56,7 @@ export function DashboardSuper() {
   if (error || !data) {
     return (
       <div className="flex flex-col items-center justify-center p-20 gap-4">
-        <div className="text-red-500 font-bold text-xl">{isAr ? "حدث خطأ أثناء تحميل النظرة الشاملة" : "An error occurred while loading overview"}</div>
+        <div className="text-red-500 font-bold text-xl">{ds?.errorLoadingOverview ?? 'An error occurred while loading overview'}</div>
         {error && <code className="bg-red-50 text-red-800 p-2 rounded text-sm">{error}</code>}
       </div>
     )
@@ -260,8 +260,8 @@ export function DashboardSuper() {
       {roleDistribution.length > 0 && (
         <section className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
           <div className="px-5 py-4 border-b border-border bg-muted/50">
-            <h3 className="font-bold text-foreground">توزيع الأدوار</h3>
-            <p className="text-sm text-muted-foreground mt-0.5">عدد المستخدمين لكل دور عبر المنصتين</p>
+            <h3 className="font-bold text-foreground">{ds?.roleDistributionTitle ?? 'Role Distribution'}</h3>
+            <p className="text-sm text-muted-foreground mt-0.5">{ds?.roleDistributionDesc ?? 'Number of users per role across both platforms'}</p>
           </div>
           <div className="p-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
             {roleDistribution.map((row) => {
